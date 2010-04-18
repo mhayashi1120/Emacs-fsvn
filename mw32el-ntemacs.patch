@@ -1,0 +1,69 @@
+Index: mw32script.el
+===================================================================
+Index: mw32mci.el
+===================================================================
+--- mw32mci.el	(revision 4261)
++++ mw32mci.el	(working copy)
+@@ -195,4 +195,4 @@
+       (mw32-mci-add-notify-callback device-id 'mw32-mci-notify-func arg))
+     ;; :volume and :device properties are ignored.
+     )
+-  t)
+\ No newline at end of file
++  t)
+Index: mw32misc.el
+===================================================================
+--- mw32misc.el	(revision 4261)
++++ mw32misc.el	(working copy)
+@@ -197,19 +197,19 @@
+ 	   t)
+       (get name 'ccl-program)))
+ 
++;; (w32-regist-font-encoder
++;;  'encode-unicode-font 'ccl-encode-unicode-font 2)
++;; (w32-regist-font-encoder
++;;  'encode-indian-glyph-font 'ccl-encode-indian-glyph-font 1)
++;; (w32-regist-font-encoder
++;;  'encode-koi8-font 'ccl-encode-koi8-font 1)
++;; (w32-regist-font-encoder
++;;  'encode-alternativnyj-font 'ccl-encode-alternativnyj-font 1)
++;; (w32-regist-font-encoder
++;;  'encode-big5-font 'ccl-encode-big5-font 2)
++;; (w32-regist-font-encoder
++;;  'encode-viscii-font 'ccl-encode-viscii-font 1)
+ (w32-regist-font-encoder
+- 'encode-unicode-font 'ccl-encode-unicode-font 2)
+-(w32-regist-font-encoder
+- 'encode-indian-glyph-font 'ccl-encode-indian-glyph-font 1)
+-(w32-regist-font-encoder
+- 'encode-koi8-font 'ccl-encode-koi8-font 1)
+-(w32-regist-font-encoder
+- 'encode-alternativnyj-font 'ccl-encode-alternativnyj-font 1)
+-(w32-regist-font-encoder
+- 'encode-big5-font 'ccl-encode-big5-font 2)
+-(w32-regist-font-encoder
+- 'encode-viscii-font 'ccl-encode-viscii-font 1)
+-(w32-regist-font-encoder
+  'encode-ethio-font 'ccl-encode-ethio-font 2)
+ 
+ (define-ccl-program
+@@ -1088,3 +1088,7 @@
+   "Restore the maximized frame FRAME.
+ If FRAME is omitted, the selected frame is used."
+   (w32-access-windows-intrinsic-facility 'WM-SYSCOMMAND 'SC-RESTORE nil frame))
++
++(defun w32-access-windows-intrinsic-facility (category category-dependent-args &optional optional-args frame)
++  ;; do nothing
++  )
+--- mw32script.el	(revision 4261)
++++ mw32script.el	(working copy)
+@@ -94,8 +94,7 @@
+   (let ((buf (generate-new-buffer mw32script-buffer-tmp))
+ 	limit args)
+     (unwind-protect
+-	(save-excursion
+-	  (set-buffer buf)
++	(with-current-buffer buf
+ 	  (set-buffer-multibyte nil)
+ 	  (condition-case nil
+ 	      (progn

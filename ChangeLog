@@ -1,0 +1,11 @@
+2010-04-17  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* FIX: fsvn-authenticate-repository not works. (Windows)
+
+	* FIX: Filename case problem. (Windows)
+
+2010-03-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* FIX: symlink problems.
+	* FIX: fsvn-log-sibling-open-this cannot accept interactive arg
+

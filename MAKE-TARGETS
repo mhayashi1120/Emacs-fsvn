@@ -1,0 +1,30 @@
+# -*- mode: makefile; -*-
+
+default: elc
+
+check:
+	$(EMACS) $(FLAGS) -f check-fsvn $(CONFIG)
+
+elc:
+	$(EMACS) $(FLAGS) -f compile-fsvn $(CONFIG)
+
+what-where:
+	$(EMACS) $(FLAGS) -f what-where-fsvn $(CONFIG)
+
+install: elc
+	$(EMACS) $(FLAGS) -f install-fsvn $(CONFIG)
+
+clean:
+	-$(RM) $(GOMI)
+
+release: tar
+	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.bz2 $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.gz
+	mv /tmp/fsvn-$(VERSION).tar.bz2 /tmp/fsvn-$(VERSION).tar.gz $(ARCHIVE_DIR_PREFIX)/
+
+tar:
+	rm -rf /tmp/fsvn-$(VERSION)
+	mkdir /tmp/fsvn-$(VERSION)
+	cp -p fsvn*.el mw32*.el mw32el-ntemacs.patch Makefile* MAKE-CFG* MAKE-TARGETS VERSION /tmp/fsvn-$(VERSION)
+	chmod 644 /tmp/fsvn-$(VERSION)/*
+	cd /tmp ; tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION)
+	cd /tmp ; tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
