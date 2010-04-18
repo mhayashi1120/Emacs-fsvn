@@ -1,0 +1,7 @@
+* Devide code TODO to this file.
+* Devide code BUG to BUG file.
+* Describe ChangeLog
+* Describe how to install to INSTALL file.
+* `fsvn-magic-directory-files' accept svn:externals
+* Draw symbolic link like dired buffer.
+* fsvn-flatten-command-args move to more critical point.
