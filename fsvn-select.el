@@ -114,6 +114,14 @@
 ;; * fsvn-select-file-mode internal function
 
 (defun fsvn-select-file-mode ()
+  "Major mode for selecting files in Subversion subcommand.
+
+Entry to this mode calls the value of `fsvn-select-file-mode-hook'.
+
+Keybindings:
+\\{fsvn-select-file-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-select-file-mode-map)
   (setq major-mode 'fsvn-select-file-mode)

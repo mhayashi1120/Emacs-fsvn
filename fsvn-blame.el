@@ -55,6 +55,14 @@
        ))
 
 (defun fsvn-blame-subwindow-mode ()
+  "Major mode for viewing Subversion log message that is related `fsvn-blame-minor-mode'.
+
+Entry to this mode calls the value of `fsvn-blame-subwindow-mode-hook'.
+
+Keybindings:
+\\{fsvn-blame-subwindow-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-blame-subwindow-mode-map)
   (setq major-mode 'fsvn-blame-subwindow-mode)
@@ -98,6 +106,11 @@
 
 ;;todo slow!!
 (defun fsvn-blame-minor-mode ()
+  "Minor mode for visualized Subversion annotate/blame/praise output.
+
+Keybindings: none
+
+"
   (interactive)
   (let ((cell (assq 'fsvn-blame-minor-mode minor-mode-alist)))
     (unless cell

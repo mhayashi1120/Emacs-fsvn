@@ -266,6 +266,14 @@ Effected `fsvn-browse-up-directory' or `fsvn-browse-file-this' to directory."
 ;; * fsvn-browse-mode internal function
 
 (defun fsvn-browse-mode ()
+  "Major mode for browsing Subversion working copy and repository.
+
+Entry to this mode calls the value of `fsvn-browse-mode-hook'.
+
+Keybindings:
+\\{fsvn-browse-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-browse-mode-map)
   (setq major-mode 'fsvn-browse-mode)

@@ -264,7 +264,7 @@
   :group 'tools
   :prefix "fsvn-")
 
-(defvar fsvn-version "0.9.1"
+(defvar fsvn-version "0.9.2"
   "Version of fsvn.")
 
 

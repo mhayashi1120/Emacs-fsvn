@@ -170,8 +170,9 @@ Otherwise set absolute path."
 (defun fsvn-set-version ()
   (with-temp-buffer
     (fsvn-deps-process-environment
+     ;;TODO 1.6.9 stderr "svn: warning: cannot set LC_CTYPE locale"
      ;; not depend on fsvn-call-process
-     (call-process fsvn-svn-command nil t nil "--version" "--quiet")
+     (call-process fsvn-svn-command nil (list (current-buffer) nil) nil "--version" "--quiet")
      (setq fsvn-svn-version (car (fsvn-text-buffer-line-as-list))))
     (when (fboundp 'version<=)
       (when (version<= fsvn-svn-version  "1.4")
@@ -190,10 +191,8 @@ Otherwise set absolute path."
 	 (make-directory cache-dir t))
        (setq subcache (fsvn-expand-file (concat prefix "-subcommand") cache-dir))
        (setq argcache (fsvn-expand-file (concat prefix "-arguments") cache-dir))
-       (unless (symbol-value subcommand-var)
-	 (set subcommand-var (fsvn-lisp-load subcache)))
-       (unless (symbol-value arguments-var)
-	 (set arguments-var (fsvn-lisp-load argcache)))
+       (set subcommand-var (fsvn-lisp-load subcache))
+       (set arguments-var (fsvn-lisp-load argcache))
        (when (or force (null (symbol-value subcommand-var)))
 	 (set subcommand-var (fsvn-subcommand-alist-build command))
 	 (set arguments-var
