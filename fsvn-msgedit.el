@@ -75,6 +75,14 @@
 ;; * fsvn-message-edit-mode internal function
 
 (defun fsvn-message-edit-mode ()
+  "Major mode for editing text in Subversion subcommand.
+
+Entry to this mode calls the value of `fsvn-message-edit-mode-hook'.
+
+Keybindings:
+\\{fsvn-message-edit-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-message-edit-mode-map)
   (setq major-mode 'fsvn-message-edit-mode)

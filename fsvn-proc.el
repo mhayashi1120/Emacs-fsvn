@@ -22,23 +22,20 @@
      (setenv "LC_MESSAGES" (or fsvn-process-environment-lang "C"))
      ,@form))
 
-(defun fsvn-process-coding-system (args)
+(defun fsvn-process-coding-system (flatten-args)
   (catch 'found
-    (when (and args (stringp (car args)))
-      (when (member (car args) '("diff" "blame"))
+    (when (and flatten-args (stringp (car flatten-args)))
+      (when (member (car flatten-args) '("diff" "blame"))
 	;; get guessed coding-system if arg file is local
-	(throw 'found (fsvn-guess-file-contents-coding-system (cdr args)))))
-    (mapc
-     (lambda (arg)
-       (when (string= arg "--xml")
-	 (throw 'found fsvn-svn-common-coding-system)))
-     (fsvn-flatten-command-args args))
+	(throw 'found (fsvn-guess-file-contents-coding-system (cdr flatten-args)))))
+    (when (member "--xml" flatten-args)
+      (throw 'found fsvn-svn-common-coding-system))
     nil))
 
 (defun fsvn-start-process (buffer &rest args)
   (fsvn-process-environment
-   (let ((coding-system-for-read (fsvn-process-coding-system args))
-	 (real-args (fsvn-flatten-command-args args)))
+   (let* ((real-args (fsvn-flatten-command-args args))
+	  (coding-system-for-read (fsvn-process-coding-system real-args)))
      (fsvn-debug real-args)
      (apply 'start-process "fsvn" buffer fsvn-svn-command real-args))))
 
@@ -58,8 +55,8 @@ This is synchronous call, so cannot handle password prompt. Append --non-interac
 explicitly in calling function.
 "
   (fsvn-process-environment
-   (let ((coding-system-for-read (fsvn-process-coding-system args))
-	 (real-args (fsvn-flatten-command-args args)))
+   (let* ((real-args (fsvn-flatten-command-args args))
+	  (coding-system-for-read (fsvn-process-coding-system real-args)))
      (when (and (bufferp buffer) (> (buffer-size buffer) 0))
        (with-current-buffer buffer
 	 (goto-char (point-max))))
@@ -215,11 +212,14 @@ Like `let' binding, varlist binded while executing BODY."
 (defun fsvn-build-command-string (subcommand &rest args)
   (let ((real-args (fsvn-flatten-command-args args)))
     (mapconcat
-     'identity
+     (lambda (x)
+       (if (string-match " " x)
+	   (concat "\"" x "\"")
+	 x))
      (append (list fsvn-svn-command subcommand) real-args)
      " ")))
 
-(defun fsvn-guess-file-contents-coding-system (args)
+(defun fsvn-guess-file-contents-coding-system (flatten-args)
   (let (ignore)
     (catch 'guessed
       (mapc
@@ -243,7 +243,7 @@ Like `let' binding, varlist binded while executing BODY."
 	   (let ((file (fsvn-magic-create-name arg)))
 	     (unless (file-directory-p file)
 	       (throw 'guessed (fsvn-file-guessed-coding-system file)))))))
-       (fsvn-flatten-command-args args))
+       flatten-args)
       default-buffer-file-coding-system)))
 
 

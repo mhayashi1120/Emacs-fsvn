@@ -55,6 +55,14 @@ Huge value makes Emacs slow down."
 ;; * fsvn-popup-result-mode internal function
 
 (defun fsvn-popup-result-mode ()
+  "Major mode for viewing Subversion command output.
+
+Entry to this mode calls the value of `fsvn-popup-result-mode-hook'.
+
+Keybindings:
+\\{fsvn-popup-result-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-popup-result-mode-map)
   (setq major-mode 'fsvn-popup-result-mode)

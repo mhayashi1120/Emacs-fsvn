@@ -84,6 +84,13 @@
 ;; * fsvn-proplist-mode internal function
 
 (defun fsvn-proplist-mode ()
+  "Major mode for browsing Subversion properties.
+
+Entry to this mode calls the value of `fsvn-proplist-mode-hook'.
+
+Keybindings:
+\\{fsvn-proplist-mode-map}
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-proplist-mode-map)
   (setq major-mode 'fsvn-proplist-mode)
@@ -427,6 +434,13 @@
 ;; * fsvn-propedit-mode internal function
 
 (defun fsvn-propedit-mode ()
+  "Major mode for browsing Subversion property its value.
+
+Entry to this mode calls the value of `fsvn-propedit-mode-hook'.
+
+Keybindings:
+\\{fsvn-propedit-mode-map}
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-propedit-mode-map)
   (setq major-mode 'fsvn-propedit-mode)

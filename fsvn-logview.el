@@ -123,6 +123,14 @@
 ;; * fsvn-log-view-mode internal function
 
 (defun fsvn-log-view-mode ()
+  "Major mode for browsing Subversion log.
+
+Entry to this mode calls the value of `fsvn-log-view-mode-hook'.
+
+Keybindings:
+\\{fsvn-log-view-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-log-view-mode-map)
   (setq major-mode 'fsvn-log-view-mode)
@@ -819,6 +827,14 @@ Otherwise diff at point revision with working copy file or directory.
 (defvar fsvn-log-sibling-logentry nil)
 
 (defun fsvn-log-sibling-mode ()
+  "Major mode for browsing Subversion log siblings.
+
+Entry to this mode calls the value of `fsvn-log-sibling-mode-hook'.
+
+Keybindings:
+\\{fsvn-log-sibling-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-log-sibling-mode-map)
   (setq major-mode 'fsvn-log-sibling-mode)
@@ -1045,6 +1061,14 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 ;; * fsvn-log-message-mode internal function
 
 (defun fsvn-log-message-mode ()
+  "Major mode for viewing and editing Subversion log message.
+
+Entry to this mode calls the value of `fsvn-log-message-mode-hook'.
+
+Keybindings:
+\\{fsvn-log-message-mode-map}
+
+"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-log-message-mode-map)
   (setq major-mode 'fsvn-log-message-mode)

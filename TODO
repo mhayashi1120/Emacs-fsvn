@@ -5,3 +5,8 @@
 * `fsvn-magic-directory-files' accept svn:externals
 * Draw symbolic link like dired buffer.
 * fsvn-flatten-command-args move to more critical point.
+* fsvn-url-encode-string more critical point.
+* case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
+* fsvn-svn-command -> fsvn-initialize-loading create fsvn-svn-command-internal
+* fsvn-read-subcommand-args accept quoted string
+  space containing filename to quoted string.
