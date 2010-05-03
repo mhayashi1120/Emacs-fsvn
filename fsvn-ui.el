@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'dired)
 (require 'fsvn-deps)
 
@@ -120,7 +125,7 @@ This is what the do-commands look for, and what the mark-commands store.")
   :group 'fsvn-faces
   :version "22.1")
 (defconst fsvn-link-face 'fsvn-link-face
-  "Face used for any link")
+  "Face used for any link.")
 
 
 
@@ -177,6 +182,34 @@ This is what the do-commands look for, and what the mark-commands store.")
     (set-window-buffer win buffer)
     (fsvn-save-window-only win
       (goto-char (point-min)))))
+
+
+
+(defconst fsvn-brief-message-buffer-name " *Fsvn Popup*")
+
+(defun fsvn-brief-message-show-popup ()
+  (let ((buf (get-buffer-create fsvn-brief-message-buffer-name)))
+    (dired-pop-to-buffer buf)))
+
+(defun fsvn-brief-message-clear-message ()
+  (with-current-buffer (get-buffer-create fsvn-brief-message-buffer-name)
+    (erase-buffer)))
+
+(defun fsvn-brief-message-set-message (message)
+  (with-current-buffer (get-buffer-create fsvn-brief-message-buffer-name)
+    (erase-buffer)
+    (insert message)))
+
+(defun fsvn-brief-message-add-message (message)
+  (with-current-buffer (get-buffer-create fsvn-brief-message-buffer-name)
+    (goto-char (point-max))
+    (insert message "\n")))
+
+(defun fsvn-brief-message-popup (message confirmer)
+  (save-window-excursion
+    (fsvn-brief-message-set-message message)
+    (fsvn-brief-message-show-popup)
+    (funcall confirmer)))
 
 
 

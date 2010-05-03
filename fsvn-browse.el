@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-mode)
 (require 'fsvn-logview)
 (require 'fsvn-propview)
@@ -143,108 +148,111 @@
        ))
 
 (defvar fsvn-browse-diff-map nil)
-(setq fsvn-browse-diff-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
-	(define-key map "=" 'fsvn-browse-diff-base)
-	(define-key map "l" 'fsvn-browse-diff-local)
-	(define-key map "e" 'fsvn-browse-ediff-base)
-	map))
+(unless fsvn-browse-diff-map
+  (setq fsvn-browse-diff-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
+	  (define-key map "=" 'fsvn-browse-diff-base)
+	  (define-key map "l" 'fsvn-browse-diff-local)
+	  (define-key map "e" 'fsvn-browse-ediff-base)
+	  map)))
 
 (defvar fsvn-browse-prefix-map nil)
-(setq fsvn-browse-prefix-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+(unless fsvn-browse-prefix-map
+  (setq fsvn-browse-prefix-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-	(define-key map "!" 'fsvn-command)
-	(define-key map "+" 'fsvn-browse-mkdir)
-	(define-key map "=" fsvn-browse-diff-map)
-	(define-key map "C" 'fsvn-browse-commit-path)
-	(define-key map "E" 'fsvn-browse-export-path)
-	(define-key map "I" 'fsvn-browse-info-path)
-	(define-key map "K" 'fsvn-browse-unlock-selected)
-	(define-key map "L" 'fsvn-browse-log-path)
-	(define-key map "P" 'fsvn-browse-propview-path)
-	(define-key map "S" 'fsvn-browse-switch-path)
-	(define-key map "T" 'fsvn-browse-remove-changelist-selected)
-	(define-key map "U" 'fsvn-browse-update-path)
-	(define-key map "\C-c" 'fsvn-browse-commit-path)
-;; 	(define-key map "\C-f" 'fsvn-browse-find-directory)
-	(define-key map "\C-p" 'fsvn-browse-propview-this)
-	(define-key map "\C-r" 'fsvn-browse-resolved-selected)
-	(define-key map "\C-vc" 'fsvn-browse-copy-this)
-	(define-key map "\C-vm" 'fsvn-browse-move-this)
-	(define-key map "\C-v\ec" 'fsvn-browse-cleanup-path)
-	(define-key map "\C-vr" 'fsvn-browse-revert-selected)
-	(define-key map "\C-vR" 'fsvn-browse-revert-path)
-	(define-key map "\C-va" 'fsvn-browse-add-selected)
-	(define-key map "\C-v\C-c" 'fsvn-browse-copy-selected)
-	(define-key map "\C-v\C-d" 'fsvn-browse-delete-selected)
-	(define-key map "\C-v\C-m" 'fsvn-browse-move-selected)
-	(define-key map "\C-bm" 'fsvn-browse-safe-move-this)
-	(define-key map "\C-bc" 'fsvn-browse-safe-copy-this)
-;; 	(define-key map "\C-b\C-m" 'fsvn-browse-safe-move-selected)
-;; 	(define-key map "\C-b\C-c" 'fsvn-browse-safe-copy-selected)
-	(define-key map "\ec" 'fsvn-global-cleanup-buffer)
-	(define-key map "\ei" 'fsvn-browse-add-prop-svn:ignore)
-	(define-key map "a" 'fsvn-browse-add-selected)
-	(define-key map "b" 'fsvn-browse-blame-this)
-	(define-key map "c" 'fsvn-browse-commit-selected)
-	(define-key map "d" 'fsvn-browse-delete-selected)
-	(define-key map "e" 'fsvn-browse-export-this)
-	(define-key map "h" 'fsvn-show-svn-help)
-	(define-key map "i" 'fsvn-browse-info-selected)
-	(define-key map "k" 'fsvn-browse-lock-selected)
-	(define-key map "l" 'fsvn-browse-log-this)
-	(define-key map "m" 'fsvn-browse-magic-head)
-	(define-key map "o" 'fsvn-browse-open-repository)
-	(define-key map "p" 'fsvn-browse-propview-this)
-	(define-key map "t" 'fsvn-browse-add-changelist-selected)
-	(define-key map "u" 'fsvn-browse-update-selected)
-	(define-key map "w" 'fsvn-dired-copy-repository-url)
-	(define-key map "\er" 'fsvn-browse-resolve-selected)
-	map))
+	  (define-key map "!" 'fsvn-command)
+	  (define-key map "+" 'fsvn-browse-mkdir)
+	  (define-key map "=" fsvn-browse-diff-map)
+	  (define-key map "C" 'fsvn-browse-commit-path)
+	  (define-key map "E" 'fsvn-browse-export-path)
+	  (define-key map "I" 'fsvn-browse-info-path)
+	  (define-key map "K" 'fsvn-browse-unlock-selected)
+	  (define-key map "L" 'fsvn-browse-log-path)
+	  (define-key map "P" 'fsvn-browse-propview-path)
+	  (define-key map "S" 'fsvn-browse-switch-path)
+	  (define-key map "T" 'fsvn-browse-remove-changelist-selected)
+	  (define-key map "U" 'fsvn-browse-update-path)
+	  (define-key map "\C-c" 'fsvn-browse-commit-path)
+	  ;; 	(define-key map "\C-f" 'fsvn-browse-find-directory)
+	  (define-key map "\C-p" 'fsvn-browse-propview-this)
+	  (define-key map "\C-r" 'fsvn-browse-resolved-selected)
+	  (define-key map "\C-vc" 'fsvn-browse-copy-this)
+	  (define-key map "\C-vm" 'fsvn-browse-move-this)
+	  (define-key map "\C-v\ec" 'fsvn-browse-cleanup-path)
+	  (define-key map "\C-vr" 'fsvn-browse-revert-selected)
+	  (define-key map "\C-vR" 'fsvn-browse-revert-path)
+	  (define-key map "\C-va" 'fsvn-browse-add-selected)
+	  (define-key map "\C-v\C-c" 'fsvn-browse-copy-selected)
+	  (define-key map "\C-v\C-d" 'fsvn-browse-delete-selected)
+	  (define-key map "\C-v\C-m" 'fsvn-browse-move-selected)
+	  (define-key map "\C-bm" 'fsvn-browse-safe-move-this)
+	  (define-key map "\C-bc" 'fsvn-browse-safe-copy-this)
+	  ;; 	(define-key map "\C-b\C-m" 'fsvn-browse-safe-move-selected)
+	  ;; 	(define-key map "\C-b\C-c" 'fsvn-browse-safe-copy-selected)
+	  (define-key map "\ec" 'fsvn-global-cleanup-buffer)
+	  (define-key map "\ei" 'fsvn-browse-add-prop-svn:ignore)
+	  (define-key map "a" 'fsvn-browse-add-selected)
+	  (define-key map "b" 'fsvn-browse-blame-this)
+	  (define-key map "c" 'fsvn-browse-commit-selected)
+	  (define-key map "d" 'fsvn-browse-delete-selected)
+	  (define-key map "e" 'fsvn-browse-export-this)
+	  (define-key map "h" 'fsvn-show-svn-help)
+	  (define-key map "i" 'fsvn-browse-info-selected)
+	  (define-key map "k" 'fsvn-browse-lock-selected)
+	  (define-key map "l" 'fsvn-browse-log-this)
+	  (define-key map "m" 'fsvn-browse-magic-head)
+	  (define-key map "o" 'fsvn-browse-open-repository)
+	  (define-key map "p" 'fsvn-browse-propview-this)
+	  (define-key map "t" 'fsvn-browse-add-changelist-selected)
+	  (define-key map "u" 'fsvn-browse-update-selected)
+	  (define-key map "w" 'fsvn-dired-copy-repository-url)
+	  (define-key map "\er" 'fsvn-browse-resolve-selected)
+	  map)))
 
 (defvar fsvn-browse-mode-map nil)
-(setq fsvn-browse-mode-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
-	(fsvn-readonly-mode-keymap map)
+(unless fsvn-browse-mode-map
+  (setq fsvn-browse-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
+	  (fsvn-readonly-mode-keymap map)
 
-	;; todo see dired-mode-map
-	(define-key map " " 'scroll-up)
-	(define-key map "%" (make-sparse-keymap))
-	(define-key map "%d" 'fsvn-browse-mark-delete-regexp)
-	(define-key map "%m" 'fsvn-browse-mark-file-regexp)
-	(define-key map "=" fsvn-browse-diff-map)
-	(define-key map "U" 'fsvn-browse-mark-all-unmark)
-	(define-key map "\C-c" fsvn-browse-prefix-map)
-	(define-key map "\C-m" 'fsvn-browse-file-this)
-	(define-key map "\C-n" 'fsvn-next-file)
-	(define-key map "\C-p" 'fsvn-previous-file)
-	(define-key map "\d" 'scroll-down)
-	(define-key map "^" 'fsvn-browse-up-directory)
-	(define-key map "d" 'fsvn-browse-mark-file-delete)
-	(define-key map "g" 'revert-buffer)
-	(define-key map "m" 'fsvn-browse-mark-file-mark)
-	(define-key map "n" 'fsvn-next-file)
-	(define-key map "p" 'fsvn-previous-file)
-	(define-key map "s" 'fsvn-browse-toggle-sort)
-	(define-key map "u" 'fsvn-browse-mark-file-unmark)
+	  ;; todo see dired-mode-map
+	  (define-key map " " 'scroll-up)
+	  (define-key map "%" (make-sparse-keymap))
+	  (define-key map "%d" 'fsvn-browse-mark-delete-regexp)
+	  (define-key map "%m" 'fsvn-browse-mark-file-regexp)
+	  (define-key map "=" fsvn-browse-diff-map)
+	  (define-key map "U" 'fsvn-browse-mark-all-unmark)
+	  (define-key map "\C-c" fsvn-browse-prefix-map)
+	  (define-key map "\C-m" 'fsvn-browse-file-this)
+	  (define-key map "\C-n" 'fsvn-next-file)
+	  (define-key map "\C-p" 'fsvn-previous-file)
+	  (define-key map "\d" 'scroll-down)
+	  (define-key map "^" 'fsvn-browse-up-directory)
+	  (define-key map "d" 'fsvn-browse-mark-file-delete)
+	  (define-key map "g" 'revert-buffer)
+	  (define-key map "m" 'fsvn-browse-mark-file-mark)
+	  (define-key map "n" 'fsvn-next-file)
+	  (define-key map "p" 'fsvn-previous-file)
+	  (define-key map "s" 'fsvn-browse-toggle-sort)
+	  (define-key map "u" 'fsvn-browse-mark-file-unmark)
 
-	(define-key map "+" 'fsvn-dired-create-directory)
-	(define-key map "B" 'fsvn-dired-do-byte-compile)
-	(define-key map "C" 'fsvn-dired-do-copy)
-	(define-key map "D" 'fsvn-dired-do-delete)
-	(define-key map "L" 'fsvn-dired-do-load)
-	(define-key map "R" 'fsvn-dired-do-rename)
-	(define-key map "W" 'fsvn-dired-copy-filename-fullpath)
-	(define-key map "Z" 'fsvn-dired-do-compress)
-	(define-key map "w" 'fsvn-dired-copy-filename-as-kill)
-	(define-key map "x" 'fsvn-dired-do-marked-delete)
-	(define-key map "y" 'fsvn-dired-show-file-type)
-	(define-key map "~" 'fsvn-dired-mark-delete-backup-files)
-	map))
+	  (define-key map "+" 'fsvn-dired-create-directory)
+	  (define-key map "B" 'fsvn-dired-do-byte-compile)
+	  (define-key map "C" 'fsvn-dired-do-copy)
+	  (define-key map "D" 'fsvn-dired-do-delete)
+	  (define-key map "L" 'fsvn-dired-do-load)
+	  (define-key map "R" 'fsvn-dired-do-rename)
+	  (define-key map "W" 'fsvn-dired-copy-filename-fullpath)
+	  (define-key map "Z" 'fsvn-dired-do-compress)
+	  (define-key map "w" 'fsvn-dired-copy-filename-as-kill)
+	  (define-key map "x" 'fsvn-dired-do-marked-delete)
+	  (define-key map "y" 'fsvn-dired-show-file-type)
+	  (define-key map "~" 'fsvn-dired-mark-delete-backup-files)
+	  map)))
 
 (defcustom fsvn-browse-mode-hook nil
   "*Run at the very end of `fsvn-browse-mode'."
@@ -252,7 +260,7 @@
   :type 'hook)
 
 (defcustom fsvn-browse-before-commit-hook nil
-  "*Run before prepared file-select-buffer. Called with a list argument as filenames."
+  "*Run before prepared file-select-buffer.  Called with a list argument as filenames."
   ;; TODO called one arg then type is not hook?
   :group 'fsvn
   :type 'hook)
@@ -271,9 +279,7 @@ Effected `fsvn-browse-up-directory' or `fsvn-browse-file-this' to directory."
 Entry to this mode calls the value of `fsvn-browse-mode-hook'.
 
 Keybindings:
-\\{fsvn-browse-mode-map}
-
-"
+\\{fsvn-browse-mode-map}"
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-browse-mode-map)
   (setq major-mode 'fsvn-browse-mode)
@@ -306,7 +312,7 @@ Keybindings:
     (byte-compile " *Byte-Compile*" "Byte-compile %s ")
     (delete " *Deletions*" "Delete %s ")
     )
-  "KEY BUF-NAME PROMPT")
+  "KEY BUF-NAME PROMPT.")
 
 (defun fsvn-browse-dired-confirm (objects op-symbol &optional confirmer)
   (let (file-list buf-name prompt message)
@@ -581,20 +587,20 @@ STATUS `t' means force to add entry."
      ,@form))
 
 (defmacro fsvn-browse-each-file (var path &rest form)
-  "Move point and execute form.
+  "Move point and execute FORM.
 VAR set `fsvn-current-filename'
 PATH is each executed path."
   `(save-excursion
-     (let (,var ret)
+     (let (,var RET)
        (when (fsvn-browse-goto-directory (or ,path (fsvn-browse-current-path)))
 	 (when (fsvn-browse-goto-first-file)
 	   (while (setq ,var (fsvn-current-filename))
-	     (setq ret (cons (progn ,@form) ret))
+	     (setq RET (cons (progn ,@form) RET))
 	     (fsvn-next-file))
-	   (nreverse ret))))))
+	   (nreverse RET))))))
 
 (defmacro fsvn-browse-mark-if (predicate msg)
-  `(let ((count 0))
+  `(let ((COUNT 0))
      (save-excursion
        (goto-char (point-min))
        (while (not (eobp))
@@ -602,9 +608,9 @@ PATH is each executed path."
 	   (fsvn-browse-put-mark-point fsvn-mark-mark-char))
 	 (forward-line 1)))
      (if ,msg (message "%s %s%s %s%s."
-		       count
+		       COUNT
 		       ,msg
-		       (dired-plural-s count)
+		       (dired-plural-s COUNT)
 		       (if (eq fsvn-mark-mark-char fsvn-space-char) "un" "")
 		       "marked"))))
 
@@ -981,11 +987,11 @@ PATH is each executed path."
   (generate-new-buffer (fsvn-file-name-nondirectory directory)))
 
 (defmacro fsvn-browse-subdir.setter (container key value)
-  `(let (cell)
-     (unless (setq cell (assq ,key (cdr (symbol-value ,container))))
-       (setq cell (cons ,key nil))
-       (nconc (symbol-value ,container) (list cell)))
-     (setcdr cell ,value)))
+  `(let (CELL)
+     (unless (setq CELL (assq ,key (cdr (symbol-value ,container))))
+       (setq CELL (cons ,key nil))
+       (nconc (symbol-value ,container) (list CELL)))
+     (setcdr CELL ,value)))
 
 (defmacro fsvn-browse-subdir.getter (container key)
   `(cdr (assq ,key (cdr (symbol-value ,container)))))
@@ -1114,16 +1120,21 @@ PATH is each executed path."
 	     (fsvn-browse-goto-file file))
 	(goto-char opoint))))
 
-(defmacro fsvn-browse-open-log-edit (&rest form)
-  `(let ((root fsvn-buffer-repos-root)
-	 (browse-buffer (current-buffer))
-	 (win-configure (current-window-configuration)))
+(defmacro fsvn-browse-open-message-edit (&rest form)
+  `(let ((ROOT fsvn-buffer-repos-root)
+	 (BROWSE-BUFFER (current-buffer))
+	 (WIN-CONFIGURE (current-window-configuration)))
      (with-current-buffer (fsvn-message-edit-get-buffer)
        (fsvn-message-edit-mode)
        ,@form
-       (setq fsvn-previous-window-configuration win-configure)
-       (setq fsvn-buffer-repos-root root)
+       (setq fsvn-previous-window-configuration WIN-CONFIGURE)
+       (setq fsvn-buffer-repos-root ROOT)
        (run-hooks 'fsvn-message-edit-mode-hook))))
+
+(defmacro fsvn-browse-quick-message-edit (&rest form)
+  `(fsvn-browse-open-message-edit
+    ,@form
+    (fsvn-browse-setup-log-edit-window)))
 
 (defun fsvn-browse-add-file-select (files args)
   (when (and (fsvn-select-file-prepared-buffer)
@@ -1188,7 +1199,7 @@ PATH is each executed path."
       (fsvn-select-file-draw-commit-applicant files)
       (fsvn-select-file-first-file)
       (run-hooks 'fsvn-select-file-mode-hook))
-    (fsvn-browse-open-log-edit
+    (fsvn-browse-open-message-edit
      (when (fsvn-config-tortoise-property-use root)
        (fsvn-tortoise-commit-initialize))
      (setq fsvn-message-edit-done 'fsvn-message-edit-commit)
@@ -1200,24 +1211,21 @@ PATH is each executed path."
     (fsvn-browse-setup-commit-window)))
 
 (defun fsvn-browse-delete-log-edit (files args)
-  (fsvn-browse-open-log-edit
+  (fsvn-browse-quick-message-edit
    (setq fsvn-message-edit-target-files files)
    (setq fsvn-message-edit-subcommand-args args)
-   (setq fsvn-message-edit-done 'fsvn-message-edit-delete))
-  (fsvn-browse-setup-log-edit-window))
+   (setq fsvn-message-edit-done 'fsvn-message-edit-delete)))
 
 (defun fsvn-browse-mkdir-log-edit (dir)
-  (fsvn-browse-open-log-edit
+  (fsvn-browse-quick-message-edit
    (setq fsvn-message-edit-subcommand-args (list dir))
-   (setq fsvn-message-edit-done 'fsvn-message-edit-mkdir))
-  (fsvn-browse-setup-log-edit-window))
+   (setq fsvn-message-edit-done 'fsvn-message-edit-mkdir)))
 
 ;;TODO no use?
 (defun fsvn-browse-lock-log-edit (files args)
-  (fsvn-browse-open-log-edit
-   (setq fsvn-message-edit-subcommand-args (fsvn-flatten-command-args (list files args)))
-   (setq fsvn-message-edit-done 'fsvn-message-edit-lock))
-  (fsvn-browse-setup-log-edit-window))
+  (fsvn-browse-quick-message-edit
+   (setq fsvn-message-edit-subcommand-args (list files args))
+   (setq fsvn-message-edit-done 'fsvn-message-edit-lock)))
 
 (defun fsvn-browse-setup-log-edit-window ()
   (delete-other-windows)
@@ -1557,6 +1565,37 @@ This means svn editing subcommand (delete, add, move...) work."
 		  src-files 'fsvn-browse-svn:externals-selected 'fsvn-read-versioned-directory))
       (list src-files dest)))))
 
+(defun fsvn-browse-cmd-read-merge-this-args ()
+  (fsvn-browse-cmd-wc-only
+   (let* ((file (fsvn-browse-cmd-this-file))
+	  (args (fsvn-browse-cmd-read-merge-args)))
+     (append file args))))
+
+(defun fsvn-browse-cmd-read-merge-args ()
+  (fsvn-browse-cmd-wc-only
+   (let (from to args)
+     (fsvn-brief-message-clear-message)
+     (setq from (fsvn-read-url-with-revision "URL1: "))
+     (save-window-excursion
+       (fsvn-brief-message-add-message (format "URL1: %s" from))
+       (fsvn-brief-message-show-popup)
+       (setq to (fsvn-read-url-with-revision "URL2: " from))
+       (fsvn-brief-message-add-message (format "URL2: %s" to))
+       (if current-prefix-arg
+	   (setq args (fsvn-read-svn-subcommand-args "merge" t fsvn-default-args-merge))
+	 fsvn-default-args-merge))
+     (list from to args))))
+
+(defun fsvn-browse-cmd-read-branch/tag-args (default-dirname)
+  (let ((repos-url (fsvn-browse-current-repository-url))
+	dest-url args)
+    (setq repos-url (fsvn-read-url-with-revision "URL: "  repos-url))
+    (when (string-match "^\\(.*\\)/trunk" repos-url)
+      (setq dest-url (concat (match-string 1 repos-url) "/" default-dirname "/")))
+    (setq dest-url (fsvn-completing-read-url "Branch/Tag URL: " dest-url t))
+    (setq args (fsvn-browse-cmd-copy/move-read-args "copy" 'fsvn-default-args-copy))
+    (list repos-url dest-url args)))
+
 ;; * fsvn-browse-mode interactive command
 
 (defun fsvn-browse-up-directory ()
@@ -1698,7 +1737,7 @@ This means svn editing subcommand (delete, add, move...) work."
   "Execute `mkdir' with `--parents'
 "
   (interactive (list (fsvn-read-mkdir-directory (fsvn-browse-current-directory-url))))
-  (if fsvn-browse-repos-p
+  (if (fsvn-url-repository-p directory)
       (fsvn-browse-mkdir-log-edit directory)
     (fsvn-call-process-with-popup "mkdir"
 				  (when (fsvn-svn-subcommand-accepted-argument "mkdir" "--parents") "--parents")
@@ -1946,6 +1985,29 @@ This is usefull for integrate other source management.
 	 (t
 	  (rename-file tmpfile dest-file t)))))))
 
+(defun fsvn-browse-create-branch (urlrev branch-url &optional args)
+  "Create branch executing `copy'.
+Optional ARGS (with prefix arg) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-branch/tag-args "branches"))
+  (fsvn-browse-copy-this-in-repository urlrev branch-url args))
+
+(defun fsvn-browse-create-tag (urlrev tag-url &optional args)
+  "Create tag executing `copy'.
+Optional ARGS (with prefix arg) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-branch/tag-args "tags"))
+  (fsvn-browse-copy-this-in-repository urlrev tag-url args))
+
+(defun fsvn-browse-copy-this-in-repository (from-url to-url &optional args)
+  "Execute `copy' for repository file corresponding local file.
+Optional ARGS (with prefix arg) means read svn subcommand arguments.
+"
+  (interactive)
+  (fsvn-browse-quick-message-edit
+   (setq fsvn-message-edit-subcommand-args (list from-url to-url args))
+   (setq fsvn-message-edit-done 'fsvn-message-edit-copy)))
+
 (defun fsvn-browse-revert-selected (files &optional args)
   "Execute `revert' for selected FILES.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
@@ -1971,6 +2033,28 @@ With \\[universal-argument] prefix, can read optional arguments.
        (fsvn-start-process-with-popup "revert" (fsvn-browse-current-directory-url) args)
        'fsvn-parse-result-cmd-revert)
     (message "(No svn Revert performed)")))
+
+(defun fsvn-browse-merge-this (file source1 source2 &optional args)
+  "Execute `merge' for point FILE between source1 and source2.
+Optional ARGS (with prefix arg) means read svn subcommand arguments.
+
+This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
+"
+  (interactive (fsvn-browse-cmd-read-merge-this-args))
+  (fsvn-start-process-with-popup "merge" source1 source2 args file))
+
+(defun fsvn-browse-merge-path (source1 source2 &optional args)
+  "Execute `merge' for current directory between source1 and source2.
+Optional ARGS (with prefix arg) means read svn subcommand arguments.
+
+This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
+"
+  (interactive (fsvn-browse-cmd-read-merge-args))
+  (fsvn-start-process-with-popup "merge" source1 source2 args))
+
+(let ((map fsvn-browse-prefix-map))
+  (define-key map "\C-mM" 'fsvn-browse-merge-path)
+  (define-key map "\C-mm" 'fsvn-browse-merge-this))
 
 (defun fsvn-browse-log-this (file-struct)
   "Execute `log' for current file."

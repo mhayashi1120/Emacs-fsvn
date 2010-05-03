@@ -7,6 +7,9 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
 
 
 (require 'fsvn-deps)
@@ -98,6 +101,11 @@
   :group 'fsvn
   :type '(list string))
 
+(defcustom fsvn-default-args-merge nil
+  "*Default args for `merge'"
+  :group 'fsvn
+  :type '(list string))
+
 
 
 (defconst fsvn-global-buffer-local-variables
@@ -117,11 +125,11 @@
 
 (defmacro fsvn-restore-window-buffer (&rest form)
   "Set window setting according to variable `fsvn-previous-window-configuration' after evaluate FORM."
-  `(let ((win-configure fsvn-previous-window-configuration))
+  `(let ((WIN-CONFIGURE fsvn-previous-window-configuration))
      ,@form
-     (when (and win-configure
-		(window-configuration-p win-configure))
-       (set-window-configuration win-configure))))
+     (when (and WIN-CONFIGURE
+		(window-configuration-p WIN-CONFIGURE))
+       (set-window-configuration WIN-CONFIGURE))))
 
 (defun fsvn-restore-previous-window-setting ()
   (interactive)
@@ -205,21 +213,21 @@ DISPLAYED-ONLY non-nil means never switch if BUFFER is not displayed."
 	)))))
 
 (defmacro fsvn-scroll-window-buffer (buffer-or-window scroller mover sig)
-  `(let ((origin-win (selected-window))
-	 (ret t)
-	 win)
-     (setq win
+  `(let ((ORIGIN-WIN (selected-window))
+	 (RET t)
+	 WIN)
+     (setq WIN
 	   (if (windowp buffer-or-window)
 	       buffer-or-window
 	     (get-buffer-window buffer-or-window)))
      (unwind-protect
 	 (progn
-	   (set-frame-selected-window (selected-frame) win)
+	   (set-frame-selected-window (selected-frame) WIN)
 	   (condition-case err
 	       ,scroller
-	     (,sig ,mover (setq ret nil))))
-       (set-frame-selected-window (selected-frame) origin-win))
-     ret))
+	     (,sig ,mover (setq RET nil))))
+       (set-frame-selected-window (selected-frame) ORIGIN-WIN))
+     RET))
 
 (defun fsvn-scroll-window-buffer-up (buffer-or-window &optional arg)
   (fsvn-scroll-window-buffer
@@ -273,23 +281,23 @@ Optional prefix ARG says how many lines to move; default is one line."
 (defmacro fsvn-save-browse-directory-excursion (dir &rest form)
   "Goto DIR and execute FORM with no point move.
 "
-  `(let ((prev-marker (point-marker))
-	 (buffer (fsvn-local-directory-buffer ,dir)))
-     (when buffer
+  `(let ((PREV-MARKER (point-marker))
+	 (BUFFER (fsvn-local-directory-buffer ,dir)))
+     (when BUFFER
        (unwind-protect
 	   (progn
-	     (set-buffer buffer)
+	     (set-buffer BUFFER)
 	     (save-excursion
 	       (when (fsvn-browse-goto-directory ,dir)
 		 (progn ,@form))))
-	 (set-buffer (marker-buffer prev-marker))
-	 (goto-char prev-marker)))))
+	 (set-buffer (marker-buffer PREV-MARKER))
+	 (goto-char PREV-MARKER)))))
 
 (defmacro fsvn-save-browse-file-excursion (file &rest form)
   "Goto FILE and execute FORM with no point move.
 "
-  `(let ((dir (fsvn-file-name-directory ,file)))
-     (fsvn-save-browse-directory-excursion dir
+  `(let ((DIR (fsvn-file-name-directory ,file)))
+     (fsvn-save-browse-directory-excursion DIR
        (save-excursion
 	 (when (fsvn-browse-goto-file ,file)
 	   (progn ,@form))))))
@@ -315,15 +323,15 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (defmacro fsvn-each-browse-buffer (&rest form)
   "Execute FORM in each `fsvn-browse-mode' buffer."
-  `(let (ret)
+  `(let (RET)
      (save-excursion
        (mapc
 	(lambda (b)
 	  (set-buffer b)
 	  (when (eq major-mode 'fsvn-browse-mode)
-	    (setq ret (cons (progn ,@form) ret))))
+	    (setq RET (cons (progn ,@form) RET))))
 	(buffer-list)))
-     (nreverse ret)))
+     (nreverse RET)))
 
 
 

@@ -7,6 +7,9 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
 
 
 (require 'fsvn-proc)
@@ -54,14 +57,15 @@ If executing problem occur in windows/cygwin then set this value."
 
 (defvar fsvn-svk-browse-map nil)
 
-(setq fsvn-svk-browse-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
-	(define-key map "\eI" 'fsvn-svk-browse-create)
-	(define-key map "S" 'fsvn-svk-browse-push)
-	(define-key map "L" 'fsvn-svk-browse-pull)
-	(define-key map "R" 'fsvn-svk-browse-resync)
-	map))
+(unless fsvn-svk-browse-map
+  (setq fsvn-svk-browse-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
+	  (define-key map "\eI" 'fsvn-svk-browse-create)
+	  (define-key map "S" 'fsvn-svk-browse-push)
+	  (define-key map "L" 'fsvn-svk-browse-pull)
+	  (define-key map "R" 'fsvn-svk-browse-resync)
+	  map)))
 
 (add-hook 'fsvn-browse-mode-hook
 	  (lambda () (define-key fsvn-browse-mode-map "\C-cv" fsvn-svk-browse-map)))

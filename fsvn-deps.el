@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'dired)
 (require 'fsvn-env)
 
@@ -375,7 +380,7 @@ Otherwise set absolute path."
    ((null rev)
     "HEAD")
    ((stringp rev)
-    rev)
+    (upcase rev))
    ((integerp rev)
     (number-to-string rev))
    (t

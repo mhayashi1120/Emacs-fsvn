@@ -7,8 +7,15 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-mode)
 (require 'fsvn-cmd)
+
+
 
 (defvar text-mode-map)
 
@@ -37,15 +44,16 @@ Huge value makes Emacs slow down."
 (defvar fsvn-popup-result-mode-map nil)
 (defvar fsvn-popup-result-update-parsed-end nil)
 
-(setq fsvn-popup-result-mode-map
-      (let ((map (make-sparse-keymap)))
-	(set-keymap-parent map text-mode-map)
+(unless fsvn-popup-result-mode-map
+  (setq fsvn-popup-result-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (set-keymap-parent map text-mode-map)
 
-	(define-key map "\C-c\C-c" 'fsvn-popup-result-kill-process)
-	(define-key map "\C-c\C-k" 'fsvn-popup-result-kill-process)
-	(define-key map "\C-c\C-p" 'fsvn-popup-result-send-password)
-	(define-key map "\C-m" 'fsvn-popup-result-send-string)
-	map))
+	  (define-key map "\C-c\C-c" 'fsvn-popup-result-kill-process)
+	  (define-key map "\C-c\C-k" 'fsvn-popup-result-kill-process)
+	  (define-key map "\C-c\C-p" 'fsvn-popup-result-send-password)
+	  (define-key map "\C-m" 'fsvn-popup-result-send-string)
+	  map)))
 
 (defcustom fsvn-popup-result-mode-hook nil
   "*Run at the very end of `fsvn-popup-result-mode'."
@@ -126,12 +134,12 @@ Keybindings:
 
 
 
-(defun fsvn-start-process-with-popup (command &rest args)
-  "COMMAND svn command.
-ARGS is svn command args."
+(defun fsvn-start-process-with-popup (subcommand &rest args)
+  "SUBCOMMAND svn command.
+ARGS is svn subcommand args."
   (let ((buffer (fsvn-popup-result-create-buffer))
 	proc)
-    (setq proc (fsvn-start-command-display command buffer args))
+    (setq proc (fsvn-start-command-display subcommand buffer args))
     (set-process-sentinel proc 'fsvn-process-sentinel-popup-buffer)
     (set-process-filter proc 'fsvn-process-filter-popup-buffer)
     (with-current-buffer buffer

@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-mode)
 
 
@@ -61,59 +66,63 @@
        ))
 
 (defvar fsvn-log-view-diff-mode-map nil)
-(setq fsvn-log-view-diff-mode-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+(unless fsvn-log-view-diff-mode-map
+  (setq fsvn-log-view-diff-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-	(define-key map "=" 'fsvn-log-view-diff-generic)
-	(define-key map "e" 'fsvn-log-view-ediff-generic)
-	(define-key map "w" 'fsvn-log-view-diff-with-wc)
+	  (define-key map "=" 'fsvn-log-view-diff-generic)
+	  (define-key map "e" 'fsvn-log-view-ediff-generic)
+	  (define-key map "w" 'fsvn-log-view-diff-with-wc)
 
-	map))
+	  map)))
 
 (defvar fsvn-log-view-mode-map nil)
-(setq fsvn-log-view-mode-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+(unless fsvn-log-view-mode-map
+  (setq fsvn-log-view-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-	(fsvn-readonly-mode-keymap map)
+	  (fsvn-readonly-mode-keymap map)
 
-	(define-key map " " 'fsvn-log-view-scroll-message-up)
-	(define-key map "%" (make-sparse-keymap))
-	(define-key map "%m" 'fsvn-log-view-mark-searched)
-	(define-key map "<" 'fsvn-log-view-next-log)
-	(define-key map "=" fsvn-log-view-diff-mode-map)
-	(define-key map ">" 'fsvn-log-view-previous-log)
-	(define-key map "L" 'fsvn-log-view-reload-with-change-limit)
-	(define-key map "N" 'fsvn-log-view-next-mark)
-	(define-key map "P" 'fsvn-log-view-previous-mark)
-	(define-key map "R" 'fsvn-log-view-reload-with-revision)
-	(define-key map "S" 'fsvn-log-view-save)
-	(define-key map "\C-c\C-k" 'fsvn-log-view-quit)
-	(define-key map "\C-c\C-o" 'fsvn-log-switch-to-message)
-	(define-key map "\C-c\C-q" 'fsvn-log-view-quit)
-	(define-key map "\C-m" 'fsvn-log-view-show-details)
-	(define-key map "\C-n" 'fsvn-log-view-next-line)
-	(define-key map "\C-p" 'fsvn-log-view-previous-line)
-	(define-key map "\d" 'fsvn-log-view-scroll-message-down)
-	(define-key map "m" 'fsvn-log-view-mark-put-mark)
-	(define-key map "n" 'fsvn-log-view-next-line)
-	(define-key map "p" 'fsvn-log-view-previous-line)
-	(define-key map "q" 'fsvn-log-view-quit)
-	(define-key map "s" 'fsvn-log-view-isearch-text)
-	(define-key map "u" 'fsvn-log-view-mark-unmark)
-	(define-key map "v" 'fsvn-log-view-toggle-details)
- 	(define-key map "g" 'revert-buffer)
+	  (define-key map " " 'fsvn-log-view-scroll-message-up)
+	  (define-key map "%" (make-sparse-keymap))
+	  (define-key map "%m" 'fsvn-log-view-mark-searched)
+	  (define-key map "<" 'fsvn-log-view-next-log)
+	  (define-key map "=" fsvn-log-view-diff-mode-map)
+	  (define-key map ">" 'fsvn-log-view-previous-log)
+	  (define-key map "L" 'fsvn-log-view-reload-with-change-limit)
+	  (define-key map "N" 'fsvn-log-view-next-mark)
+	  (define-key map "P" 'fsvn-log-view-previous-mark)
+	  (define-key map "R" 'fsvn-log-view-reload-with-revision)
+	  (define-key map "S" 'fsvn-log-view-save)
+	  (define-key map "\C-c\C-k" 'fsvn-log-view-quit)
+	  (define-key map "\C-c\C-o" 'fsvn-log-switch-to-message)
+	  (define-key map "\C-c\C-q" 'fsvn-log-view-quit)
+	  (define-key map "\C-m" 'fsvn-log-view-show-details)
+	  (define-key map "\C-n" 'fsvn-log-view-next-line)
+	  (define-key map "\C-p" 'fsvn-log-view-previous-line)
+	  (define-key map "\d" 'fsvn-log-view-scroll-message-down)
+	  (define-key map "m" 'fsvn-log-view-mark-put-mark)
+	  (define-key map "n" 'fsvn-log-view-next-line)
+	  (define-key map "p" 'fsvn-log-view-previous-line)
+	  (define-key map "q" 'fsvn-log-view-quit)
+	  (define-key map "s" 'fsvn-log-view-isearch-text)
+	  (define-key map "u" 'fsvn-log-view-mark-unmark)
+	  (define-key map "v" 'fsvn-log-view-toggle-details)
+	  (define-key map "w" 'fsvn-log-view-copy-urlrev)
+	  
+	  (define-key map "g" 'revert-buffer)
 
-	(define-key map "\C-c\C-r" 'fsvn-log-view-edit-revprop)
-	(define-key map "\C-co" 'fsvn-log-view-open-revision)
+	  (define-key map "\C-c\C-r" 'fsvn-log-view-edit-revprop)
+	  (define-key map "\C-co" 'fsvn-log-view-open-revision)
 
-	;;todo not implement
-	;; 	(define-key map "U" 'fsvn-log-view-mark-unmark-all)
-	;; 	(define-key map "\C-cr" 'fsvn-log-view-revert-to-revision)
-	;; 	(define-key map "\C-cp" 'fsvn-log-view-open-propview)
+	  ;;todo not implement
+	  ;; 	(define-key map "U" 'fsvn-log-view-mark-unmark-all)
+	  ;; 	(define-key map "\C-cr" 'fsvn-log-view-revert-to-revision)
+	  ;; 	(define-key map "\C-cp" 'fsvn-log-view-open-propview)
 
-	map))
+	  map)))
 
 (defcustom fsvn-log-view-mode-hook nil
   "*Run at the very end of `fsvn-log-view-mode'."
@@ -141,9 +150,9 @@ Keybindings:
 (defmacro fsvn-log-view-each-rev (entry &rest form)
   `(save-excursion
      (fsvn-log-view-goto-first-revision)
-     (let (rev)
-       (while (setq rev (fsvn-log-view-point-revision))
-	 (setq ,entry (fsvn-log-view-find-entry rev))
+     (let (REV)
+       (while (setq REV (fsvn-log-view-point-revision))
+	 (setq ,entry (fsvn-log-view-find-entry REV))
 	 ,@form
 	 (fsvn-log-view-next-line)))))
 
@@ -763,43 +772,50 @@ Otherwise diff at point revision with working copy file or directory.
   (fsvn-restore-window-buffer
    (kill-buffer (current-buffer))))
 
+(defun fsvn-log-view-copy-urlrev ()
+  (interactive)
+  (let ((urlrev (fsvn-log-view-point-urlrev)))
+    (kill-new urlrev)
+    (message urlrev)))
 
 
 (defconst fsvn-log-sibling-buffer-name "*Fsvn Sibling*")
 (defvar fsvn-log-sibling-paths nil)
 
 (defvar fsvn-log-sibling-diff-map nil)
-(setq fsvn-log-sibling-diff-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+(unless fsvn-log-sibling-diff-map
+  (setq fsvn-log-sibling-diff-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-	(define-key map "=" 'fsvn-log-sibling-diff-previous)
-	(define-key map "e" 'fsvn-log-sibling-ediff-previous)
+	  (define-key map "=" 'fsvn-log-sibling-diff-previous)
+	  (define-key map "e" 'fsvn-log-sibling-ediff-previous)
 
-	map))
+	  map)))
 
 (defvar fsvn-log-sibling-mode-map nil)
-(setq fsvn-log-sibling-mode-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+(unless fsvn-log-sibling-mode-map
+  (setq fsvn-log-sibling-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-	(fsvn-readonly-mode-keymap map)
+	  (fsvn-readonly-mode-keymap map)
 
-	(define-key map "=" fsvn-log-sibling-diff-map)
-	(define-key map "S" 'fsvn-log-sibling-save)
-	(define-key map "\C-c\C-d" 'fsvn-log-sibling-open-this-directory)
-	(define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
-	(define-key map "\C-c\C-l" 'fsvn-restore-default-window-display)
-	(define-key map "\C-c\C-o" 'fsvn-log-subwindow-switch-to-view)
-	(define-key map "\C-cl" 'fsvn-log-sibling-log-this)
-	(define-key map "\C-m" 'fsvn-log-sibling-open-this)
-	(define-key map "\C-n" 'fsvn-log-sibling-next-line)
-	(define-key map "\C-p" 'fsvn-log-sibling-previous-line)
-	(define-key map "C" 'fsvn-log-sibling-copy-this)
-	(define-key map "l" 'fsvn-log-sibling-log-this)
-	(define-key map "n" 'fsvn-log-sibling-next-line)
-	(define-key map "p" 'fsvn-log-sibling-previous-line)
-	map))
+	  (define-key map "=" fsvn-log-sibling-diff-map)
+	  (define-key map "S" 'fsvn-log-sibling-save)
+	  (define-key map "\C-c\C-d" 'fsvn-log-sibling-open-this-directory)
+	  (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
+	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-display)
+	  (define-key map "\C-c\C-o" 'fsvn-log-subwindow-switch-to-view)
+	  (define-key map "\C-cl" 'fsvn-log-sibling-log-this)
+	  (define-key map "\C-m" 'fsvn-log-sibling-open-this)
+	  (define-key map "\C-n" 'fsvn-log-sibling-next-line)
+	  (define-key map "\C-p" 'fsvn-log-sibling-previous-line)
+	  (define-key map "C" 'fsvn-log-sibling-copy-this)
+	  (define-key map "l" 'fsvn-log-sibling-log-this)
+	  (define-key map "n" 'fsvn-log-sibling-next-line)
+	  (define-key map "p" 'fsvn-log-sibling-previous-line)
+	  map)))
 
 (defcustom fsvn-log-sibling-mode-hook nil
   "*Run at the very end of `fsvn-log-sibling-mode'."
@@ -848,9 +864,9 @@ Keybindings:
      ,@form))
 
 (defmacro fsvn-log-sibling-diffable (&rest form)
-  `(let ((urlrev (fsvn-log-sibling-point-urlrev))
-	 (prev-urlrev (fsvn-log-sibling-point-prev-urlrev)))
-     (if (or (null urlrev) (null prev-urlrev))
+  `(let ((URLREV (fsvn-log-sibling-point-urlrev))
+	 (PREV-URLREV (fsvn-log-sibling-point-prev-urlrev)))
+     (if (or (null URLREV) (null PREV-URLREV))
 	 (message "This line has no previous version.")
        ,@form)))
 
@@ -979,18 +995,18 @@ Optional ARG means force to access repository by certainly correct url."
   (interactive (fsvn-log-view-cmd-diff-arg))
   (fsvn-log-sibling-diffable
    (let* (diff-args)
-     (setq diff-args (list (format "--new=%s" urlrev)
-			   (format "--old=%s" prev-urlrev)))
+     (setq diff-args (list (format "--new=%s" URLREV)
+			   (format "--old=%s" PREV-URLREV)))
      (fsvn-diff-call-process diff-args args))))
 
 (defun fsvn-log-sibling-ediff-previous ()
   "Ediff with previous version."
   (interactive)
   (fsvn-log-sibling-diffable
-   (let* ((file1 (fsvn-ediff-make-temp-file urlrev))
-	  (file2 (fsvn-ediff-make-temp-file prev-urlrev)))
-     (unless (and (fsvn-save-file urlrev file1 t)
-		  (fsvn-save-file prev-urlrev file2 t))
+   (let* ((file1 (fsvn-ediff-make-temp-file URLREV))
+	  (file2 (fsvn-ediff-make-temp-file PREV-URLREV)))
+     (unless (and (fsvn-save-file URLREV file1 t)
+		  (fsvn-save-file PREV-URLREV file2 t))
        (error "Error occur while saving remote file"))
      (fsvn-ediff-files file1 file2))))
 
@@ -1036,22 +1052,22 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
        ))
 
 (defvar fsvn-log-message-revision nil)
-(defvar fsvn-log-message-file-encoding fsvn-svn-common-coding-system)
 
 (defvar fsvn-log-message-mode-map nil)
-(setq fsvn-log-message-mode-map
-      (let ((map (make-sparse-keymap)))
-	(set-keymap-parent map text-mode-map)
+(unless fsvn-log-message-mode-map
+  (setq fsvn-log-message-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (set-keymap-parent map text-mode-map)
 
-	(define-key map "\C-cj" 'fsvn-log-message-browse-this)
- 	(define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
-	(define-key map "\C-c\C-l" 'fsvn-restore-default-window-display)
-	(define-key map "\C-c\C-o" 'fsvn-log-switch-to-sibling)
-	(define-key map "\C-c\C-c" 'fsvn-log-message-commit)
-	(define-key map "\C-c\C-e" 'fsvn-log-message-start-edit)
-	(define-key map "\C-c\C-q" 'fsvn-log-message-quit-edit)
+	  (define-key map "\C-cj" 'fsvn-log-message-browse-this)
+	  (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
+	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-display)
+	  (define-key map "\C-c\C-o" 'fsvn-log-switch-to-sibling)
+	  (define-key map "\C-c\C-c" 'fsvn-log-message-commit)
+	  (define-key map "\C-c\C-e" 'fsvn-log-message-start-edit)
+	  (define-key map "\C-c\C-q" 'fsvn-log-message-quit-edit)
 
-	map))
+	  map)))
 
 (defcustom fsvn-log-message-mode-hook nil
   "*Run at the very end of `fsvn-log-message-mode'."

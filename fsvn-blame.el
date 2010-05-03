@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 ;; TODO after-change-functions
 
 (require 'fsvn-mode)
@@ -23,11 +28,12 @@
 
 (defvar fsvn-blame-subwindow-mode-map nil)
 
-(setq fsvn-blame-subwindow-mode-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+(unless fsvn-blame-subwindow-mode-map
+  (setq fsvn-blame-subwindow-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-	map))
+	  map)))
 
 (defcustom fsvn-blame-subwindow-mode-hook nil
   "*Run at the very end of `fsvn-blame-subwindow-mode'."

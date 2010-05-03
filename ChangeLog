@@ -1,3 +1,25 @@
+2010-05-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* CHANGE fsvn-browse-open-log-edit -> fsvn-browse-open-message-edit
+	
+	* FIX: fsvn-browse-mkdir in repository.
+	
+	* CHANGE: fsvn-log-message-file-encoding -> fsvn-message-edit-file-encoding
+
+	* ADD: implements `merge'.
+
+	* ADD: fsvn-log-view-copy-urlrev
+
+	* FIX: fsvn-completing-read-revision
+
+2010-04-29  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* FIX: subversion 1.6.9 locale error.
+
+	* ADD: describe mode help.
+
+	* ADD: file select mode symlink support.
+
 2010-04-17  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* FIX: fsvn-authenticate-repository not works. (Windows)
@@ -7,5 +29,6 @@
 2010-03-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* FIX: symlink problems.
+
 	* FIX: fsvn-log-sibling-open-this cannot accept interactive arg
 

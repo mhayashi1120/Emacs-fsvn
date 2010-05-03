@@ -10,32 +10,37 @@
 ;; 
 
 ;;; Code:
+;;
+
+
 
 (require 'fsvn)
 
+
+
 (defmacro fsvn-test-equal (executed-form expected-value)
   "Assertion for EXECUTED-FORM and EXPECTED-VALUE is equal."
-  `(let ((ret ,executed-form))
-     (unless (equal ret ,expected-value)
-       (error "Assertion failed. Expected `%s' but `%s'" ,expected-value ret))
-     ret))
+  `(let ((RET ,executed-form))
+     (unless (equal RET ,expected-value)
+       (error "Assertion failed. Expected `%s' but `%s'" ,expected-value RET))
+     RET))
 
 (defmacro fsvn-test-nil (executed-form)
-  `(let ((ret ,executed-form))
-     (when ret
-       (error "Assertion failed. Expected nil but `%s'" ret))
-     ret))
+  `(let ((RET ,executed-form))
+     (when RET
+       (error "Assertion failed. Expected nil but `%s'" RET))
+     RET))
 
 (defmacro fsvn-test-non-nil (executed-form)
-  `(let ((ret ,executed-form))
-     (unless ret
+  `(let ((RET ,executed-form))
+     (unless RET
        (error "Assertion failed Expected non-nil but `nil'"))
-     ret))
+     RET))
 
 (defvar fsvn-test-async-proc nil)
 ;;FIXME or some utility?
 (defmacro fsvn-test-async (&rest form)
-  `(let (ret)
+  `(let (RET)
      (setq fsvn-test-async-proc nil)
      (mapc
       (lambda (exec-form)
@@ -56,26 +61,26 @@
 		  (funcall ',tmp-sentinel proc event)
 		  (when (eq (process-status proc) 'exit)
 		    (setq fsvn-test-async-proc nil))))))
-	  (setq ret tmp-ret)
+	  (setq RET tmp-ret)
 	  ;; wait until process exit.
 	  (while fsvn-test-async-proc
 	    (sit-for 0.5))))
       ',form)
-     ret))
+     RET))
 
 (defmacro fsvn-test-excursion (&rest form)
-  `(let ((prev-buffer-list (buffer-list))
-	 (prev-buffer (current-buffer))
-	 (prev-win-config (current-window-configuration)))
+  `(let ((PREV-BUFFER-LIST (buffer-list))
+	 (PREV-BUFFER (current-buffer))
+	 (PREV-WIN-CONFIG (current-window-configuration)))
      (unwind-protect 
 	 (progn ,@form)
        (mapc 
 	(lambda (b)
-	  (unless (memq b prev-buffer-list)
+	  (unless (memq b PREV-BUFFER-LIST)
 	    (kill-buffer b)))
 	(buffer-list))
-       (switch-to-buffer prev-buffer)
-       (set-window-configuration prev-win-config))))
+       (switch-to-buffer PREV-BUFFER)
+       (set-window-configuration PREV-WIN-CONFIG))))
 
 (defun fsvn-test-switch-file (wc1 wc2 file)
   (let ((r (relative-file-name file wc1)))

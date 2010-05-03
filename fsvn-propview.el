@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-mode)
 
 
@@ -50,31 +55,32 @@
        ))
 
 (defvar fsvn-proplist-mode-map nil)
-(setq fsvn-proplist-mode-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+(unless fsvn-proplist-mode-map
+  (setq fsvn-proplist-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-	(fsvn-readonly-mode-keymap map)
+	  (fsvn-readonly-mode-keymap map)
 
-	(define-key map "\C-c\C-c" 'fsvn-proplist-do-marked-execute)
-	(define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
-	(define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	(define-key map "\C-c\C-o" 'fsvn-proplist-propedit-window)
-	(define-key map "\C-m" 'fsvn-proplist-show-value)
-	(define-key map "\C-n" 'fsvn-proplist-next-line)
-	(define-key map "\C-p" 'fsvn-proplist-previous-line)
-	(define-key map "a" 'fsvn-proplist-add-property)
-	(define-key map "d" 'fsvn-proplist-mark-delete)
-	(define-key map "e" 'fsvn-proplist-edit-property)
-	(define-key map "g" 'revert-buffer)
-	(define-key map "n" 'fsvn-proplist-next-line)
-	(define-key map "p" 'fsvn-proplist-previous-line)
-	(define-key map "q" 'fsvn-restore-previous-window-setting)
-	(define-key map "r" 'fsvn-proplist-mark-recursive)
-	(define-key map "u" 'fsvn-proplist-mark-unmark)
-	(define-key map "x" 'fsvn-proplist-do-marked-execute)
+	  (define-key map "\C-c\C-c" 'fsvn-proplist-do-marked-execute)
+	  (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
+	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+	  (define-key map "\C-c\C-o" 'fsvn-proplist-propedit-window)
+	  (define-key map "\C-m" 'fsvn-proplist-show-value)
+	  (define-key map "\C-n" 'fsvn-proplist-next-line)
+	  (define-key map "\C-p" 'fsvn-proplist-previous-line)
+	  (define-key map "a" 'fsvn-proplist-add-property)
+	  (define-key map "d" 'fsvn-proplist-mark-delete)
+	  (define-key map "e" 'fsvn-proplist-edit-property)
+	  (define-key map "g" 'revert-buffer)
+	  (define-key map "n" 'fsvn-proplist-next-line)
+	  (define-key map "p" 'fsvn-proplist-previous-line)
+	  (define-key map "q" 'fsvn-restore-previous-window-setting)
+	  (define-key map "r" 'fsvn-proplist-mark-recursive)
+	  (define-key map "u" 'fsvn-proplist-mark-unmark)
+	  (define-key map "x" 'fsvn-proplist-do-marked-execute)
 
-	map))
+	  map)))
 
 (defcustom fsvn-proplist-mode-hook nil
   "*Run at the very end of `fsvn-proplist-mode'."
@@ -414,17 +420,18 @@ Keybindings:
 (defvar fsvn-propedit-recursive-save nil)
 
 (defvar fsvn-propedit-mode-map nil)
-(setq fsvn-propedit-mode-map
-      (let ((map (make-sparse-keymap)))
-	(set-keymap-parent map text-mode-map)
+(unless fsvn-propedit-mode-map
+  (setq fsvn-propedit-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (set-keymap-parent map text-mode-map)
 
-	(define-key map "\C-c\C-c" 'fsvn-propedit-save)
-	(define-key map "\C-c\C-k" 'fsvn-propedit-restore-window)
-	(define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	(define-key map "\C-c\C-o" 'fsvn-propedit-proplist-window)
-	(define-key map "\C-c\C-r" 'fsvn-propedit-toggle-recursive)
-	(define-key map "\C-x\C-s" 'fsvn-propedit-save)
-	map))
+	  (define-key map "\C-c\C-c" 'fsvn-propedit-save)
+	  (define-key map "\C-c\C-k" 'fsvn-propedit-restore-window)
+	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+	  (define-key map "\C-c\C-o" 'fsvn-propedit-proplist-window)
+	  (define-key map "\C-c\C-r" 'fsvn-propedit-toggle-recursive)
+	  (define-key map "\C-x\C-s" 'fsvn-propedit-save)
+	  map)))
 
 (defcustom fsvn-propedit-mode-hook nil
   "*Run at the very end of `fsvn-propedit-mode'."

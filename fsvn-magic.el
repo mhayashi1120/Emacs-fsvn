@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-deps)
 (require 'fsvn-env)
 (require 'fsvn-ui)
@@ -264,16 +269,16 @@ FIXME Does Emacs have list like this? "
     nil)))
 
 (defmacro fsvn-magic-each-directory-entry (directory ls-var &rest form)
-  `(let ((dir (fsvn-magic-parse-file-name ,directory))
-	 list ret tmp)
+  `(let ((DIR (fsvn-magic-parse-file-name ,directory))
+	 LIST RET TMP)
      (when (fsvn-magic-file-directory-p ,directory)
-       (setq list (fsvn-magic-get-ls dir))
+       (setq LIST (fsvn-magic-get-ls DIR))
        (mapc
 	(lambda (,ls-var)
-	  (when (setq tmp (progn ,@form))
-	    (setq ret (cons tmp ret))))
-	list)
-       (nreverse ret))))
+	  (when (setq TMP (progn ,@form))
+	    (setq RET (cons TMP RET))))
+	LIST)
+       (nreverse RET))))
 
 (defun fsvn-magic-create-remote-name (repos-urlrev)
   ;; FIXME dirty code
@@ -775,16 +780,16 @@ local (non-wc) -> remote : svn add -> svn commit
     (setcdr cache-value value)))
 
 (defmacro fsvn-magic-use-cache-form (function internal-function url)
-  `(let (cache)
+  `(let (CACHE)
      (cond
       (fsvn-magic-disable-cache
        (,function ,url))
-      ((setq cache (fsvn-magic-hit-cache ',function ,url))
-       cache)
+      ((setq CACHE (fsvn-magic-hit-cache ',function ,url))
+       CACHE)
       (t
-       (setq cache (,internal-function ,url))
-       (fsvn-magic-push-cache ',function ,url cache)
-       cache))))
+       (setq CACHE (,internal-function ,url))
+       (fsvn-magic-push-cache ',function ,url CACHE)
+       CACHE))))
 
 (defun fsvn-magic-get-ls (url)
   (fsvn-magic-use-cache-form fsvn-magic-get-ls fsvn-get-ls url))

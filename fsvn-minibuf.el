@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-deps)
 
 
@@ -41,14 +46,9 @@
     file))
 
 (defun fsvn-read-mkdir-directory (dir)
-  (fsvn-expand-file 
-   (read-from-minibuffer "Directory: " (file-name-as-directory dir) nil nil 'fsvn-completing-read-repository-history)))
-
-(defun fsvn-read-working-directory ()
-  (let (dir)
-    (while (and (setq dir (read-directory-name "Directory: " nil nil t))
-		(not (fsvn-directory-versioned-p dir))))
-    (fsvn-expand-file dir)))
+  (if (fsvn-url-repository-p dir)
+      (fsvn-completing-read-url "Directory: " (fsvn-url-as-directory dir) t)
+    (fsvn-read-directory-name "Directory: " (fsvn-url-as-directory dir) nil nil)))
 
 (defun fsvn-read-directory-name (prompt &optional dir default-dirname mustmatch initial)
   (fsvn-expand-file (read-directory-name prompt dir default-dirname mustmatch initial)))
@@ -127,6 +127,24 @@ The value of DEFAULT is not a number, allow to enter a nil value."
       (error "Accept arg must be selected"))
     ret))
 
+;; this implement cannot treat correctly `@' contains filename
+;; (defun fsvn-read-url-with-revision (&optional prompt)
+;;   (let* ((urlrev (fsvn-completing-read-urlrev prompt))
+;; 	 (url (fsvn-urlrev-url urlrev))
+;; 	 (rev (fsvn-completing-read-revision 
+;; 	       (format "%s %s Revision: " (or prompt "URL") url)
+;; 	       (fsvn-urlrev-revision urlrev))))
+;;     (fsvn-url-urlrev url rev)))
+
+(defun fsvn-read-url-with-revision (&optional prompt default-urlrev only-repository)
+  (let* ((default-url (and default-urlrev (fsvn-urlrev-url default-urlrev)))
+	 (default-rev (and default-urlrev (fsvn-urlrev-revision default-urlrev)))
+	 (url (fsvn-completing-read-url prompt default-url only-repository))
+	 (rev (fsvn-completing-read-revision 
+	       (format "%s %s Revision: " (or prompt "URL") url)
+	       default-rev)))
+    (fsvn-url-urlrev url rev)))
+
 
 ;; completing read utility
 
@@ -154,17 +172,17 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 (defun fsvn-completion-window-show (list)
   (unless fsvn-completion-saved-configuration
     (setq fsvn-completion-saved-configuration (current-window-configuration)))
-  (if (and list (equal fsvn-completion-saved-applicant list))
-      (let ((win (get-buffer-window fsvn-completion-buffer)))
-	(when win
-	  (save-selected-window
-	    (select-window win)
-	    (condition-case err
-		(scroll-up)
-	      (end-of-buffer nil)))))
-    (with-output-to-temp-buffer fsvn-completion-buffer
-      (display-completion-list list))
-    (setq fsvn-completion-saved-applicant list)))
+  (let (win)
+    (if (and list (equal fsvn-completion-saved-applicant list)
+	     (setq win (get-buffer-window fsvn-completion-buffer)))
+	(save-selected-window
+	  (select-window win)
+	  (condition-case err
+	      (scroll-up)
+	    (end-of-buffer (progn (goto-char (point-min))))))
+      (with-output-to-temp-buffer fsvn-completion-buffer
+	(display-completion-list list))
+      (setq fsvn-completion-saved-applicant list))))
 
 (defun fsvn-completion-window-delete ()
   (when (and fsvn-completion-saved-configuration
@@ -196,26 +214,42 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 (defvar fsvn-completing-revision-map nil)
 (defvar fsvn-completing-word-class " \n\t")
 
-(setq fsvn-completing-revision-map
-      (let ((map (copy-keymap minibuffer-local-map)))
+(unless fsvn-completing-revision-map
+  (setq fsvn-completing-revision-map
+	(let ((map (copy-keymap minibuffer-local-map)))
 
-	(define-key map "\C-i" 'fsvn-completing-revision)
-	(define-key map " " 'fsvn-completing-revision)
+	  (define-key map "\C-i" 'fsvn-completing-revision)
+	  (define-key map " " 'fsvn-completing-revision)
 
-	map))
+	  map)))
 
-(defun fsvn-completing-read-revision (&optional prompt initial)
+(defun fsvn-completing-read-revision (&optional prompt initial default)
+  "Read revision string from minibuffer.
+"
+  (setq default (or default "HEAD"))
   (catch 'done
-    (while t
-      (let ((value (read-from-minibuffer
-		    (or prompt "Revision: ")
-		    (when initial (fsvn-get-revision-string initial))
-		    fsvn-completing-revision-map nil
-		    'fsvn-revision-read-history)))
-	(when (or (fsvn-revision-date-p value)
-		  (fsvn-revision-number-p value)
-		  (fsvn-revision-symbol-p value))
-	  (throw 'done value))))))
+    (let ((value (when initial (fsvn-get-revision-string initial)))
+	  completions)
+      (while t
+	(setq value
+	      (read-from-minibuffer
+	       (or prompt "Revision: ")
+	       value
+	       fsvn-completing-revision-map nil
+	       'fsvn-revision-read-history))
+       (setq completions (all-completions value fsvn-revision-string-list))
+	(cond
+	 ((string= value "")
+	  (setq value default))
+	 ((> (length completions) 1)
+	  (setq value (try-completion value fsvn-revision-string-list)))
+	 ((= (length completions) 1)
+	  (when (string= (car completions) value)
+	    (throw 'done value))
+	  (setq value (car completions)))
+	 ((or (fsvn-revision-date-p value)
+	      (fsvn-revision-number-p value))
+	  (throw 'done value)))))))
 
 (defun fsvn-completing-revision ()
   (interactive)
@@ -263,22 +297,30 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 (defvar fsvn-completing-read-repository-history nil)
 
 (defvar fsvn-completing-repository-map nil)
-(setq fsvn-completing-repository-map
-      (let ((map (copy-keymap minibuffer-local-map)))
-	(define-key map "\C-i" 'fsvn-completing-url)
-	(define-key map " " 'fsvn-completing-url)
-	map))
+(unless fsvn-completing-repository-map
+  (setq fsvn-completing-repository-map
+	(let ((map (copy-keymap minibuffer-local-map)))
+	  (define-key map "\C-i" 'fsvn-completing-url)
+	  (define-key map " " 'fsvn-completing-url)
+	  map)))
 
 (defvar fsvn-completing-repository-only-repos nil)
 
 (defun fsvn-completing-read-url (&optional prompt default only-repository)
   (fsvn-completing-read-url-initialize)
   (setq fsvn-completing-repository-only-repos only-repository)
-  (fsvn-expand-url
-   (read-from-minibuffer
-    (or prompt "URL: ")
-    default fsvn-completing-repository-map nil
-    'fsvn-completing-read-repository-history)))
+  (let ((url-string))
+    (while (or (null url-string)
+	       (and (not (fsvn-url-local-p url-string))
+		    (not (fsvn-url-repository-p url-string))))
+      (setq url-string (read-from-minibuffer
+		 (or prompt "URL: ")
+		 (or url-string default) fsvn-completing-repository-map nil
+		 'fsvn-completing-read-repository-history)))
+    (fsvn-expand-url url-string)))
+
+(defun fsvn-completing-read-urlrev (&optional prompt default only-repository)
+  (fsvn-url-string-to-urlrev (fsvn-completing-read-url prompt default only-repository)))
 
 (defun fsvn-completing-read-url-initialize ()
   (setq fsvn-completion-repository-cache nil))
@@ -314,9 +356,11 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (let* ((value (fsvn-completing-current-value)))
     ;; todo when file:// then complete local directory.
     (cond
+     ((fsvn-completing-url-local-repository-p value)
+      (fsvn-completing-local-file))
      ((eq (char-before) ?:)
       (fsvn-completing-repos-root))
-     ((fsvn-completing-host-segment-p value)
+     ((fsvn-completing-url-host-segment-p value)
       (fsvn-completing-repos-root))
      (t
       (fsvn-completing-repos-file)))))
@@ -350,7 +394,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
       (insert (fsvn-file-name-nondirectory init)))
     (let* ((value (fsvn-completing-current-value))
 	   (name (fsvn-processing-filename value))
-	   (dirname (fsvn-completing-previous-segment value))
+	   (dirname (fsvn-completing-local-file-previous-segment value))
 	   (regexp (and (string= "" name) (concat "^" (regexp-quote name))))
 	   applicant comp)
       (setq applicant (fsvn-completing-dir-files dirname regexp))
@@ -420,6 +464,15 @@ The value of DEFAULT is not a number, allow to enter a nil value."
     (skip-chars-forward "^/ \t\n")
     (point)))
 
+(defun fsvn-completing-local-file-previous-segment (string)
+  (cond
+   ((string-match "^file:///\\([a-zA-Z]:.*\\)/[^/]*$" string)
+    (match-string 1 string))
+   ((string-match "^file:///\\([a-zA-Z]:\\)" string)
+    (match-string 1 string))
+   (t
+    (fsvn-completing-previous-segment string))))
+
 (defun fsvn-completing-previous-segment (string)
   (cond
    ((fsvn-file-name-root-p string)
@@ -429,9 +482,14 @@ The value of DEFAULT is not a number, allow to enter a nil value."
    ((string-match "^\\(.*\\)/[^/]+$" string)
     (match-string 1 string))))
 
-(defun fsvn-completing-host-segment-p (contents)
+(defun fsvn-completing-url-host-segment-p (contents)
   (let ((regexp (concat "^" (regexp-opt (fsvn-delete "file" fsvn-svn-url-scheme-list) t) ":/+\\([^/]+\\)?$")))
     (string-match regexp contents)))
+
+(defun fsvn-completing-url-local-repository-p (contents)
+  (let ((regexp "^file:///"))
+    (when (string-match regexp contents)
+      (not (fsvn-any-startswith (fsvn-gather-root) contents)))))
 
 (defvar fsvn-completion-repository-cache nil)
 
@@ -466,12 +524,13 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 (defvar fsvn-read-subcommand-args-map nil
   "Local keymap for minibuffer to read fsvn long options.")
 
-(setq fsvn-read-subcommand-args-map
-      (let ((map (copy-keymap minibuffer-local-map)))
+(unless fsvn-read-subcommand-args-map
+  (setq fsvn-read-subcommand-args-map
+	(let ((map (copy-keymap minibuffer-local-map)))
 
-	(define-key map " "    'self-insert-command)
-	(define-key map "\C-i" 'fsvn-subcommand-args-completion)
-	map))
+	  (define-key map " "    'self-insert-command)
+	  (define-key map "\C-i" 'fsvn-subcommand-args-completion)
+	  map)))
 
 (defvar fsvn-reading-subcommand nil)
 (defun fsvn-reading-subcommand (alist subcommand non-global)

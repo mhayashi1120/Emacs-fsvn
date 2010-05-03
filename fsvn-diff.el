@@ -7,6 +7,9 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
 
 
 (require 'diff)

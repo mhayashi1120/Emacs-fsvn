@@ -7,6 +7,9 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
 
 
 (require 'fsvn-env)
@@ -39,6 +42,7 @@
 
 (defconst fsvn-select-file-re-mark "^[^ \n]")
 (defconst fsvn-select-file-re-dir "^..d ")
+(defconst fsvn-select-file-re-symlink "^..l ")
 (defconst fsvn-select-file-re-root "^ \\(Root\\): \\(.+\\)")
 (defconst fsvn-select-file-buffer-name "Fsvn File Select")
 
@@ -58,53 +62,56 @@
 	     '(".+" (fsvn-move-to-filename) nil (0 fsvn-marked-face)))
        (list fsvn-select-file-re-dir
 	     '(".+" (fsvn-move-to-filename) nil (0 fsvn-directory-face)))
+       (list fsvn-select-file-re-symlink
+	     '(".+" (fsvn-move-to-filename) nil (0 fsvn-symlink-face)))
        ))
 
 (defvar fsvn-select-file-diff-map nil)
 (defvar fsvn-select-file-mode-map nil)
+(unless fsvn-select-file-diff-map
+  (setq fsvn-select-file-diff-map
+	(let ((map (make-sparse-keymap)))
 
-(setq fsvn-select-file-diff-map
-      (let ((map (make-sparse-keymap)))
+	  (define-key map "=" 'fsvn-select-file-diff-base)
+	  (define-key map "e" 'fsvn-select-file-ediff-base)
 
-	(define-key map "=" 'fsvn-select-file-diff-base)
-	(define-key map "e" 'fsvn-select-file-ediff-base)
+	  map)))
 
-	map))
+(unless fsvn-select-file-mode-map
+  (setq fsvn-select-file-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
 
-(setq fsvn-select-file-mode-map
-      (let ((map (make-sparse-keymap)))
-	(suppress-keymap map)
+	  (fsvn-readonly-mode-keymap map)
 
-	(fsvn-readonly-mode-keymap map)
+	  (define-key map "," 'scroll-other-window-down)
+	  (define-key map "." 'scroll-other-window)
+	  (define-key map "=" fsvn-select-file-diff-map)
+	  (define-key map "\C-cd" 'fsvn-select-file-delete-this)
+	  (define-key map "\C-c\C-c" 'fsvn-select-file-done)
+	  (define-key map "\C-c\C-k" 'fsvn-select-file-quit)
+	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+	  (define-key map "\C-c\C-o" 'fsvn-select-file-switch-window)
+	  (define-key map "\C-c\C-q" 'fsvn-select-file-quit)
+	  (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
+	  (define-key map "\C-c\ei" 'fsvn-select-file-ignore-this)
+	  (define-key map "\C-m" 'fsvn-select-file-view-file)
+	  (define-key map "\C-n" 'fsvn-next-file)
+	  (define-key map "\C-p" 'fsvn-previous-file)
+	  (define-key map "g" 'revert-buffer)
+	  (define-key map "m" 'fsvn-select-file-mark)
+	  (define-key map "n" 'fsvn-next-file)
+	  (define-key map "p" 'fsvn-previous-file)
+	  (define-key map "u" 'fsvn-select-file-mark-clear)
+	  (define-key map "D" 'fsvn-select-file-do-delete-this)
+	  (define-key map "w" 'fsvn-select-file-copy-filename)
 
-	(define-key map "," 'scroll-other-window-down)
-	(define-key map "." 'scroll-other-window)
-	(define-key map "=" fsvn-select-file-diff-map)
-	(define-key map "\C-cd" 'fsvn-select-file-delete-this)
-	(define-key map "\C-c\C-c" 'fsvn-select-file-done)
-	(define-key map "\C-c\C-k" 'fsvn-select-file-quit)
-	(define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	(define-key map "\C-c\C-o" 'fsvn-select-file-switch-window)
-	(define-key map "\C-c\C-q" 'fsvn-select-file-quit)
-	(define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
-	(define-key map "\C-c\ei" 'fsvn-select-file-ignore-this)
-	(define-key map "\C-m" 'fsvn-select-file-view-file)
-	(define-key map "\C-n" 'fsvn-next-file)
-	(define-key map "\C-p" 'fsvn-previous-file)
-	(define-key map "g" 'revert-buffer)
-	(define-key map "m" 'fsvn-select-file-mark)
-	(define-key map "n" 'fsvn-next-file)
-	(define-key map "p" 'fsvn-previous-file)
-	(define-key map "u" 'fsvn-select-file-mark-clear)
-	(define-key map "D" 'fsvn-select-file-do-delete-this)
-	(define-key map "w" 'fsvn-select-file-copy-filename)
+	  ;;todo not implement
+	  ;;	(define-key map "\C-cN" 'fsvn-select-file-no-unlock)
+	  ;;	(define-key map "\C-cK" 'fsvn-select-file-keep-changelist)
+	  ;;	(define-key map "" 'fsvn-select-file-show-changelist-member)
 
-	;;todo not implement
-	;;	(define-key map "\C-cN" 'fsvn-select-file-no-unlock)
-	;;	(define-key map "\C-cK" 'fsvn-select-file-keep-changelist)
-	;;	(define-key map "" 'fsvn-select-file-show-changelist-member)
-
-	map))
+	  map)))
 
 (defcustom fsvn-select-file-mode-hook nil
   "*Run at the very end of `fsvn-select-file-mode'."
@@ -167,12 +174,12 @@ Keybindings:
 
 (defmacro fsvn-select-file-each-file (var &rest form)
   `(save-excursion
-     (let (,var ret)
+     (let (,var RET)
        (fsvn-select-file-first-file)
        (while (setq ,var (fsvn-current-filename))
-	 (setq ret (cons ,@form ret))
+	 (setq RET (cons ,@form RET))
 	 (fsvn-next-file))
-       (nreverse ret))))
+       (nreverse RET))))
 
 (defun fsvn-select-file-first-file ()
   (let ((saved (point)))
@@ -363,7 +370,10 @@ Keybindings:
     (fsvn-select-file-set-filename-property filename)
     (insert (format "%c %c %s %s\n"
 		    (if mark fsvn-mark-mark-char fsvn-space-char)
-		    (if (file-directory-p filename) ?d fsvn-space-char)
+		    (cond 
+		     ((fsvn-file-exact-directory-p filename) ?d)
+		     ((fsvn-file-symlink-p filename) ?l)
+		     (t fsvn-space-char))
 		    status
 		    filename))
     (when (and (file-directory-p filename)

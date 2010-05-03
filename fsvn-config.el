@@ -7,7 +7,10 @@
 ;;; Commentary:
 ;; 
 
-;; fsvn config
+;;; Code:
+;;
+
+
 
 (defgroup fsvn-config nil
   "Configuration of `fsvn' group.
