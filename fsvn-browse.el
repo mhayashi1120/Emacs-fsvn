@@ -177,6 +177,10 @@
 	  (define-key map "U" 'fsvn-browse-update-path)
 	  (define-key map "\C-c" 'fsvn-browse-commit-path)
 	  ;; 	(define-key map "\C-f" 'fsvn-browse-find-directory)
+	  (define-key map "\C-mI" 'fsvn-browse-mergeinfo-path)
+	  (define-key map "\C-mi" 'fsvn-browse-mergeinfo-this)
+	  (define-key map "\C-mM" 'fsvn-browse-merge-path)
+	  (define-key map "\C-mm" 'fsvn-browse-merge-this)
 	  (define-key map "\C-p" 'fsvn-browse-propview-this)
 	  (define-key map "\C-r" 'fsvn-browse-resolved-selected)
 	  (define-key map "\C-vc" 'fsvn-browse-copy-this)
@@ -1581,10 +1585,25 @@ This means svn editing subcommand (delete, add, move...) work."
        (fsvn-brief-message-show-popup)
        (setq to (fsvn-read-url-with-revision "URL2: " from))
        (fsvn-brief-message-add-message (format "URL2: %s" to))
-       (if current-prefix-arg
-	   (setq args (fsvn-read-svn-subcommand-args "merge" t fsvn-default-args-merge))
-	 fsvn-default-args-merge))
+       (setq args 
+	     (if current-prefix-arg
+		 (fsvn-read-svn-subcommand-args "merge" t fsvn-default-args-merge)
+	       fsvn-default-args-merge)))
      (list from to args))))
+
+(defun fsvn-browse-cmd-read-mergeinfo-this-args ()
+  (fsvn-browse-cmd-wc-only
+   (let* ((file (fsvn-browse-cmd-this-file))
+	  (args (fsvn-browse-cmd-read-mergeinfo-args)))
+     (append file args))))
+
+(defun fsvn-browse-cmd-read-mergeinfo-args ()
+  (fsvn-browse-cmd-wc-only
+   (let ((args 
+	  (if current-prefix-arg
+	      (fsvn-read-svn-subcommand-args "mergeinfo" t fsvn-default-args-mergeinfo)
+	    fsvn-default-args-mergeinfo)))
+     (list args))))
 
 (defun fsvn-browse-cmd-read-branch/tag-args (default-dirname)
   (let ((repos-url (fsvn-browse-current-repository-url))
@@ -2035,7 +2054,7 @@ With \\[universal-argument] prefix, can read optional arguments.
     (message "(No svn Revert performed)")))
 
 (defun fsvn-browse-merge-this (file source1 source2 &optional args)
-  "Execute `merge' for point FILE between source1 and source2.
+  "Execute `merge' for point FILE between SOURCE1 and SOURCE2.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 
 This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
@@ -2044,7 +2063,7 @@ This command covers `merge' first and second form (see \\[fsvn-show-svn-help] an
   (fsvn-start-process-with-popup "merge" source1 source2 args file))
 
 (defun fsvn-browse-merge-path (source1 source2 &optional args)
-  "Execute `merge' for current directory between source1 and source2.
+  "Execute `merge' for current directory between SOURCE1 and SOURCE2.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 
 This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
@@ -2052,9 +2071,19 @@ This command covers `merge' first and second form (see \\[fsvn-show-svn-help] an
   (interactive (fsvn-browse-cmd-read-merge-args))
   (fsvn-start-process-with-popup "merge" source1 source2 args))
 
-(let ((map fsvn-browse-prefix-map))
-  (define-key map "\C-mM" 'fsvn-browse-merge-path)
-  (define-key map "\C-mm" 'fsvn-browse-merge-this))
+(defun fsvn-browse-mergeinfo-path (&optional args)
+  "Execute `mergeinfo' for current directory.
+Optional ARGS (with prefix arg) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-mergeinfo-args))
+  (fsvn-start-process-with-popup "mergeinfo" args (fsvn-browse-current-directory-urlrev)))
+
+(defun fsvn-browse-mergeinfo-this (file &optional args)
+  "Execute `mergeinfo' for point FILE.
+Optional ARGS (with prefix arg) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-mergeinfo-this-args))
+  (fsvn-start-process-with-popup "mergeinfo" file args))
 
 (defun fsvn-browse-log-this (file-struct)
   "Execute `log' for current file."

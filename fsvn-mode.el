@@ -106,6 +106,11 @@
   :group 'fsvn
   :type '(list string))
 
+(defcustom fsvn-default-args-mergeinfo nil
+  "*Default args for `mergeinfo'"
+  :group 'fsvn
+  :type '(list string))
+
 
 
 (defconst fsvn-global-buffer-local-variables
