@@ -1,5 +1,7 @@
 2010-05-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* ADD: implements `mergeinfo'.
+
 	* CHANGE fsvn-browse-open-log-edit -> fsvn-browse-open-message-edit
 	
 	* FIX: fsvn-browse-mkdir in repository.
