@@ -1,5 +1,5 @@
 ;;; fsvn.el --- Fast and Functional Subversion interface for emacs
-;; Copyright (C) 2002-2008 by Masahiro Hayashi
+;; Copyright (C) 2008-2010 by Masahiro Hayashi
 
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
 ;; $Id: fsvn.el 1317 2008-11-01 14:36:27Z masa $
@@ -36,10 +36,8 @@
 
 ;;  But following **disadvantage** has.
 ;;  * Key bindings is not friendly for legacy user.
-;;  * Dired like interface but not equals dired functions.
+;;  * Dired like interface but not equals exactly dired functions.
 ;;  * A little user help.
-;;  * A lot of `fork' or `spawn'. (Cannot work on old machine?)
-;;  * Non strict UI. (ex. file saved but parent directory's mark is not updated)
 
 ;; This package tested following environment.
 ;;      Meadow (based Emacs 22.1) on Windows.  svn 1.6.x
@@ -61,96 +59,28 @@
 ;; * http://tortoisesvn.tigris.org/svn/tortoisesvn/trunk
 ;; * http://svn.meadowy.org/Meadow/trunk/
 
-;;; TODO (Must)
-;; * a lot of todo 2008/11/11 110 -> aim at 30
-;; * all interactive command must be accept argument (ex filename, command arguments)
-;;   this is test for that command.
-;; * fsvn-complete-reding-expand-arguments quoted string
-;; * fsvn-browse in repository mv file
-
-;;; Bug
-;; * funny english (all documentation).
-;; * when non authenticated repository process stopped cause of password prompt. (See QA)
-;; * username and password implementation -> process-send-string sometimes not work.  (on Windows)
-;;   when update, displayed conflict confirm prompt.  (on Windows process-send-string not works.  why?)
-;; * fsvn-log-view-mode mark-active odd when showing details.
-;; * i don't know how to occur.
-;;    apply: Spawning child process: exec format error
-;; * fsvn-open-log-view-mode previous window setting makes odd.
-;; * fsvn-log-view-mode after C-c C-k then return previous buffer, but previous fsvn-log-message-mode shown.
-;; * with-current-buffer problem.
-;; * cygwin multi byte filename problem.
-;; * in fsvn-browse-mode sometime happens apply: Wrong number of arguments: max, 0
-;;    or async process?
-;; * browse to directory that contains many files.
-;; * cannot treat win svk's prompt.
-;; * freezing several time when commit a lot of files.
-;; * authentication interface is not work windows binary.
-;; * in windows "dir." like filename wrong state?
-;; * when revert browse buffer that indicate deleted directory.
-;; * a lot of UI miserable integrations.
-;; * repository browser not works
-;; * in file-select then missing file `svn delete'
-;; * cannot fsvn-browse-*-copy in repository.
-;; * symbolic link problem
-
-;;; TODO (Low priority)
-;; * fsvn-xml-*-dtd-alist check original dtd.
-;; * fsvn-select-file-mode, fsvn-message-edit-mode keymap separate by mode (commit, add...).
-;; * categorize function. (separate file?)
-;; * fsvn-log-message-buffer-name, fsvn-log-sibling-buffer-name contains first space then fontify is not work.
-;; * tsvn:lockmsgminsize, tsvn:logsummary, tsvn:projectlanguage
-;;    http://tortoisesvn.net/docs/nightly/TortoiseSVN_ja/tsvn-dug-propertypage.html
-;; * `merge'
-;; * show current directory status top of the buffer.
-;; * when commit file-select buffer has svn:external file.
-;; * log-message when lock. (optional arg "--message")
-;; * diff in log-view mode when directory compare.
-;; * annoying fsvn-result buffer.
-;; * fsvn-completing-url to parse previous segment
-;; * fsvn-completing-read-url behavior different general Emacs one.
-;; * completing read implementation cleaning.
-;; * what is scheduled commit? `status' forth column.
-;; * fsvn-magic-* inspect how to implements.
-;; * fsvn-prop* code clean.
-;; * improve UI about read arguments (ex --targets like argument not necessary in completion)
-;; * some help mode (command brief description)
-;; * fsvn-blame-minor-mode more efficient UI
-;; * fsvn-log-view-mode gui viewer.
-;; * tortoise like log cache.
-;; * mode-line and easymenu
-;; * diff binary file throw filter program.(Like OpenOffice file)
-;; * parse result threshold
-;; * cannot treat `@' started file name 
-;; * move case wrong file by svn `move'
-;; * dired-mode remove vc-find-file-hook from find-file-hook
-;; * fsvn-file-select-mode now act like editor for modified file or changed directory hierarchy.
-;;   currently `*' mark is display commited files, not manupulated file.
-;; * logview-mode diff with non visible revision.
-;; * fsvn-file-select hide/show non selected files.
-
 ;; NOTE:
-;; Q. How to execute `propset' recrusively?
-;; A. M-x fsvn-propedit-toggle-recursive (or type C-c C-r)
+;; Q.  How to execute `propset' recursively?
+;; A.  M-x fsvn-propedit-toggle-recursive (or type C-c C-r)
 
-;; Q. How to authorize repository. Password prompt stop everything.
-;; A. M-x fsvn-authenticate-repository
+;; Q.  How to authorize repository.  Password prompt stop everything.
+;; A.  M-x fsvn-authenticate-repository
 ;;    This makes svn to cache password.
 
-;; Q. How to use svk in windows.
-;; A. Sample of settings.
+;; Q.  How to use svk in windows.
+;; A.  Sample of settings.
 ;;    (setq fsvn-svk-perl-command "c:/usr/local/svk/bin/perl")
 ;;    (setq fsvn-svk-script "c:/usr/local/svk/bin/svk")
 ;;    
 ;;   Windows native perl.exe displays propmt but not works in Emacs sub process.
 ;;
 
-;; Q. How to create repository
-;; A. M-x fsvn-admin-create-repository
+;; Q.  How to create repository
+;; A.  M-x fsvn-admin-create-repository
 ;;    to create repository if default-directory have no files.
 
-;; Q. How to use in NTEmacs
-;; A. TODO
+;; Q.  How to use in NTEmacs
+;; A.  TODO
 ;;    fiber.exe patch
 
 ;;;;;;;;;; DO following sometimes ;;;;;;;;;;;;;;;;;;;
@@ -212,10 +142,11 @@
 ;; (global-set-key "\C-xvZ" 'fsvn-debug-toggle)
 ;; (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
 
-;; 4. Emacs 22 unicode conversion is wrong.
+;; 4. TODO this is old
+;;    Emacs 22 unicode conversion is wrong.
 ;;    Put following lines into your dot-emacs
 ;;
-;;    thanks.  
+;;    thanks.
 ;;   http://www.pqrs.org/tekezo/emacs/doc/wide-character/index.html
 ;;
 ;;   (utf-translate-cjk-set-unicode-range
@@ -256,6 +187,7 @@
 ;;
 
 ;;; Code:
+;;
 
 
 

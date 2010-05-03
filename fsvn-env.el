@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'dired)
 
 
@@ -15,7 +20,7 @@
 
 (defcustom fsvn-home-directory
   (expand-file-name "~/.fsvn/" )
-  "*Directory of this package. Must be set before load this file."
+  "*Directory of this package.  Must be set before load this file."
   :group 'fsvn
   :type  'directory)
 
@@ -33,26 +38,26 @@ Argument SEQUENCE see `mapcar'."
 
 (defmacro fsvn-loop (loop-count &rest form)
   "Execute FORM LOOP-COUNT times. LOOP-IDX is bound in FORM."
-  `(let ((loop-idx 0))
-     (while (< loop-idx ,loop-count)
+  `(let ((LOOP-IDX 0))
+     (while (< LOOP-IDX ,loop-count)
        ,@form
-       (setq loop-idx (1+ loop-idx)))))
+       (setq LOOP-IDX (1+ LOOP-IDX)))))
 
 (defmacro fsvn-swap (val1 val2)
-  `(let (tmp)
-     (setq tmp ,val2)
+  `(let (TMP)
+     (setq TMP ,val2)
      (setq ,val2 ,val1)
-     (setq ,val1 tmp)))
+     (setq ,val1 TMP)))
 
 (defmacro fsvn-save-window-only (window &rest form)
   "Save selected WINDOW, not contain point.
 Optional argument FORM evaluate Lisp form."
-  `(let ((return-window (get-buffer-window (current-buffer))))
+  `(let ((RETURN-WINDOW (get-buffer-window (current-buffer))))
      (unwind-protect
 	 (progn
 	   (select-window ,window)
 	   ,@form)
-       (when (window-live-p return-window) (select-window return-window)))))
+       (when (window-live-p RETURN-WINDOW) (select-window RETURN-WINDOW)))))
 
 (defun fsvn-cycle-next (list item)
   (let ((found (member item list)))
@@ -97,16 +102,16 @@ Optional argument FORM evaluate Lisp form."
   string)
 
 (defmacro fsvn-string-pad (string maxlen &rest form)
-  `(let ((len (length string)))
-     (if (> len maxlen)
+  `(let ((LEN (length string)))
+     (if (> LEN maxlen)
 	 (substring string 0 maxlen)
        ,@form)))
 
 (defun fsvn-string-rpad (string maxlen &optional char)
-  (fsvn-string-pad string maxlen (concat string (make-string (- maxlen len) (or char fsvn-space-char)))))
+  (fsvn-string-pad string maxlen (concat string (make-string (- maxlen LEN) (or char fsvn-space-char)))))
 
 (defun fsvn-string-lpad (string maxlen &optional char)
-  (fsvn-string-pad string maxlen (concat (make-string (- maxlen len) (or char fsvn-space-char)) string)))
+  (fsvn-string-pad string maxlen (concat (make-string (- maxlen LEN) (or char fsvn-space-char)) string)))
 
 (defun fsvn-string-rtrim (string maxlen)
   (let ((len (length string)))
@@ -204,17 +209,37 @@ Optional argument FORM evaluate Lisp form."
     (cons nil (match-data))))
 
 (defun fsvn-regexp-match (regexp string &optional start)
-  "Wrapper of `string-match'"
+  "Wrapper of `string-match'."
   (when (string-match regexp string start)
     (cons string (match-data))))
 
 (defun fsvn-regexp-matched (matched-object subexp)
-  "Wrapper of `match-string'"
+  "Wrapper of `match-string'."
   (let ((string (car matched-object))
 	(matched (cdr matched-object)))
     (save-match-data
       (set-match-data matched)
       (match-string subexp string))))
+
+
+
+(defun fsvn-member-regexp (regexp list)
+  (catch 'match
+    (while list
+      (when (and (stringp (car list)) (string-match regexp (car list)))
+	(throw 'match list))
+      (setq list (cdr list)))))
+
+(defun fsvn-member-startswith (start-string list)
+  (fsvn-member-regexp (concat "^" (regexp-quote start-string)) list))
+
+(defun fsvn-any-startswith (list string)
+  "STRING startwith any LIST item."
+  (catch 'match
+    (while list
+      (when (string-match (concat "^" (regexp-quote (car list))) string)
+	(throw 'match list))
+      (setq list (cdr list)))))
 
 
 
@@ -258,7 +283,7 @@ Optional argument FORM evaluate Lisp form."
 
 (defun fsvn-defstruct-keyword-number-pair (spec)
   (let ((i 0))
-    (mapcar 
+    (mapcar
      (lambda (sym)
        (prog1
 	   (cons (intern (concat ":" (symbol-name sym))) i)
@@ -271,8 +296,8 @@ Optional argument FORM evaluate Lisp form."
      (fsvn-defstruct-s/getter ,type ,@spec)))
 
 (defmacro fsvn-defstruct-constructor (type &rest spec)
-  `(let ((sym (quote ,(intern (concat (format "fsvn-struct-%s-make" (symbol-name type)))))))
-     (fset sym 
+  `(let ((SYM (quote ,(intern (concat (format "fsvn-struct-%s-make" (symbol-name type)))))))
+     (fset SYM
 	   (lambda (&rest args)
 	     (let* ((alist (quote ,(fsvn-defstruct-keyword-number-pair spec)))
 		    (struct (make-list (length alist) nil))
@@ -291,19 +316,19 @@ Optional argument FORM evaluate Lisp form."
 	       struct)))))
 
 (defmacro fsvn-defstruct-s/getter (type &rest spec)
-  `(let* ((type-name (symbol-name (quote ,type)))
-	  (keys (quote ,spec))
-	  (len (length keys))
-	  (i 0)
+  `(let* ((TYPE-NAME (symbol-name (quote ,type)))
+	  (KEYS (quote ,spec))
+	  (LEN (length KEYS))
+	  (INDEX 0)
 	  member-name setter getter)
-     (while (< i len)
-       (setq member-name (symbol-name (car keys)))
-       (setq setter (intern (format "fsvn-struct-%s-set-%s" type-name member-name)))
-       (fset setter `(lambda (struct value) (setcar (nthcdr ,i struct) value) struct))
-       (setq getter (intern (format "fsvn-struct-%s-get-%s" type-name member-name)))
-       (fset getter `(lambda (struct) (nth ,i struct)))
-       (setq keys (cdr keys))
-       (setq i (1+ i)))))
+     (while (< INDEX LEN)
+       (setq member-name (symbol-name (car KEYS)))
+       (setq setter (intern (format "fsvn-struct-%s-set-%s" TYPE-NAME member-name)))
+       (fset setter `(lambda (struct value) (setcar (nthcdr ,INDEX struct) value) struct))
+       (setq getter (intern (format "fsvn-struct-%s-get-%s" TYPE-NAME member-name)))
+       (fset getter `(lambda (struct) (nth ,INDEX struct)))
+       (setq KEYS (cdr KEYS))
+       (setq INDEX (1+ INDEX)))))
 
 
 
@@ -380,7 +405,7 @@ Optional argument FORM evaluate Lisp form."
 
 (defconst fsvn-temp-buffer-prefix " *Fsvn ")
 (defvar fsvn-temp-buffer-p nil
-  "set t if buffer was made `fsvn-make-temp-buffer'")
+  "Set t if buffer was made `fsvn-make-temp-buffer'.")
 
 (defun fsvn-make-temp-buffer ()
   (let (tmp ret)
@@ -391,8 +416,7 @@ Optional argument FORM evaluate Lisp form."
     ret))
 
 (defmacro fsvn-cleanup-buffer (each-buffer-condition)
-  "`kill-buffer' if EACH-BUFFER-CONDITION return non-null value.
-"
+  "`kill-buffer' if EACH-BUFFER-CONDITION return non-null value."
   `(let ((count 0))
      (save-excursion
        (mapc

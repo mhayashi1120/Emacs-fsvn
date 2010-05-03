@@ -22,10 +22,15 @@
 ;;  Investigate Meadow's all extended function.
 
 ;;; Code:
+;;
+
+
 
 (require 'mw32script)
 (mw32script-make-pathext-regexp)
 (load "mw32misc")
+
+
 
 (defconst mw32cmp-function-alist
   '(
@@ -84,17 +89,17 @@
   "reg.exe specification cannot determine key default value.")
 
 (defmacro mw32cmp-pseudo-registry-narrow (key &rest form)
-  `(let ((mw32cmp-key-regex (concat "^" (regexp-quote ,key)))
-	 mw32cmp-start mw32cmp-end)
+  `(let ((MW32CMP-KEY-REGEX (concat "^" (regexp-quote ,key)))
+	 MW32CMP-START MW32CMP-END)
      (goto-char (point-min))
-     (unless (re-search-forward (concat mw32cmp-key-regex "$") nil t)
+     (unless (re-search-forward (concat MW32CMP-KEY-REGEX "$") nil t)
        (error "failed searcy key %s" key))
-     (setq mw32cmp-start (1+ (point)))
-     (setq mw32cmp-end
-	   (or (and (re-search-forward mw32cmp-key-regex nil t)
+     (setq MW32CMP-START (1+ (point)))
+     (setq MW32CMP-END
+	   (or (and (re-search-forward MW32CMP-KEY-REGEX nil t)
 		    (line-beginning-position))
 	       (point-max)))
-     (narrow-to-region mw32cmp-start mw32cmp-end)
+     (narrow-to-region MW32CMP-START MW32CMP-END)
      (goto-char (point-min))
      ,@form))
 

@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'dired)
 
 
@@ -393,6 +398,7 @@
 		(fsvn-browse-draw-file-status file)
 	      (setq size1 (fsvn-file-size file)
 		    size2 (fsvn-file-size base))
+	      ;;BUG not works fine when svn:eol-style is native
 	      (if (and size1 size2 (/= size1 size2))
 		  ;; changed file size means certainly modified.
 		  (fsvn-browse-put-status-if-weak-internal file ?M 0)

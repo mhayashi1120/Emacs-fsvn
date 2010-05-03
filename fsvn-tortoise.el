@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-ui)
 (require 'fsvn-data)
 
@@ -83,23 +88,23 @@
        userproperties))))
 
 (defmacro fsvn-tortoise-bugtraq:*-exec (dir &rest form)
-  `(let ((url (fsvn-get-directory-parent-property ,dir "bugtraq:url"))
-	 (message (fsvn-get-directory-parent-property ,dir "bugtraq:message"))
-	 (logregex (fsvn-get-directory-parent-property ,dir "bugtraq:logregex"))
-	 (warnifnoissue (fsvn-get-directory-parent-property ,dir "bugtraq:warnifnoissue"))
-	 (number (fsvn-get-directory-parent-property ,dir "bugtraq:number"))
-	 (label (fsvn-get-directory-parent-property ,dir "bugtraq:label"))
-	 (append (fsvn-get-directory-parent-property ,dir "bugtraq:append"))
-	 message-regex logregex1 logregex2)
-     (when logregex
-       (setq logregex (split-string logregex "[\n\r]" t))
-       (when (= (length logregex) 2)
-	(setq logregex1 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (car logregex)))
-	      logregex2 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (cadr logregex))))))
-     (setq number (fsvn-tortoise-boolean-value number nil))
-     (setq warnifnoissue (fsvn-tortoise-boolean-value warnifnoissue t))
-     (setq append  (fsvn-tortoise-boolean-value append t))
-     (setq message-regex (fsvn-tortoise-bugtraq-create-message-regexp message append number))
+  `(let ((URL (fsvn-get-directory-parent-property ,dir "bugtraq:url"))
+	 (MESSAGE (fsvn-get-directory-parent-property ,dir "bugtraq:message"))
+	 (LOGREGEX (fsvn-get-directory-parent-property ,dir "bugtraq:logregex"))
+	 (WARNIFNOISSUE (fsvn-get-directory-parent-property ,dir "bugtraq:warnifnoissue"))
+	 (NUMBER (fsvn-get-directory-parent-property ,dir "bugtraq:number"))
+	 (LABEL (fsvn-get-directory-parent-property ,dir "bugtraq:label"))
+	 (APPEND (fsvn-get-directory-parent-property ,dir "bugtraq:append"))
+	 MESSAGE-REGEX LOGREGEX1 LOGREGEX2)
+     (when LOGREGEX
+       (setq LOGREGEX (split-string LOGREGEX "[\n\r]" t))
+       (when (= (length LOGREGEX) 2)
+	(setq LOGREGEX1 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (car LOGREGEX)))
+	      LOGREGEX2 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (cadr LOGREGEX))))))
+     (setq NUMBER (fsvn-tortoise-boolean-value NUMBER nil))
+     (setq WARNIFNOISSUE (fsvn-tortoise-boolean-value WARNIFNOISSUE t))
+     (setq APPEND  (fsvn-tortoise-boolean-value APPEND t))
+     (setq MESSAGE-REGEX (fsvn-tortoise-bugtraq-create-message-regexp MESSAGE APPEND NUMBER))
      ,@form
      ))
 
@@ -107,41 +112,41 @@
   (fsvn-tortoise-bugtraq:*-exec dir
     (let (real-label)
       (setq real-label
-	    (if label
-		(fsvn-string-rm-rspace label)
+	    (if LABEL
+		(fsvn-string-rm-rspace LABEL)
 	      "Bug ID/Issue ID: "))
       (cond
        ;; bugtraq:logregex priority to bugtraq:message
        ;; http://tortoisesvn.net/docs/release/TortoiseSVN_ja/tsvn-dug-bugtracker.html
-       ((and logregex1 logregex2)
+       ((and LOGREGEX1 LOGREGEX2)
 	(let (ng)
 	  (save-excursion
 	    (goto-char (point-min))
-	    (if (not (re-search-forward logregex1 nil t))
+	    (if (not (re-search-forward LOGREGEX1 nil t))
 		(setq ng t)
-	      (let* ((matched (fsvn-tortoise-gather-matched logregex1)))
+	      (let* ((matched (fsvn-tortoise-gather-matched LOGREGEX1)))
 		(unless (catch 'found
 			  (mapc
 			   (lambda (m)
-			     (when (and m (string-match logregex2 m))
+			     (when (and m (string-match LOGREGEX2 m))
 			       (throw 'found t)))
 			   matched)
 			  nil)
 		  (setq ng t)))))
 	  (when ng
-	    (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid message number real-label append)
-			(null warnifnoissue)
+	    (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
+			(null WARNIFNOISSUE)
 			(y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
 	      (error "Miss \"%s\" in Log message" real-label)))))
-       (message-regex
+       (MESSAGE-REGEX
 	(save-excursion
 	  (goto-char (point-min))
-	  (unless (re-search-forward message-regex nil t)
-	    (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid message number real-label append)
-			(null warnifnoissue)
+	  (unless (re-search-forward MESSAGE-REGEX nil t)
+	    (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
+			(null WARNIFNOISSUE)
 			(y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
 	      (error "Miss \"%s\" in Log message" real-label)))))
-       (label
+       (LABEL
 	(unless (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label))
 	  (error "Set property `bugtraq:logregex' or `bugtraq:message' correctly")))))))
 
@@ -262,17 +267,17 @@
 
 (defun fsvn-tortoise-fontify-buffer ()
   (fsvn-tortoise-bugtraq:*-exec default-directory
-    (when url
+    (when URL
       (cond
-       ((and logregex1 logregex2)
+       ((and LOGREGEX1 LOGREGEX2)
 	(save-excursion
 	  (goto-char (point-min))
-	  (while (re-search-forward logregex1 nil t)
+	  (while (re-search-forward LOGREGEX1 nil t)
 	    (save-restriction
 	      (narrow-to-region (match-beginning 0) (match-end 0))
-	      (fsvn-tortoise-fontify-buffer-url url logregex2)))))
-       (message-regex
-	(fsvn-tortoise-fontify-buffer-url url message-regex))))))
+	      (fsvn-tortoise-fontify-buffer-url URL LOGREGEX2)))))
+       (MESSAGE-REGEX
+	(fsvn-tortoise-fontify-buffer-url URL MESSAGE-REGEX))))))
 
 (defun fsvn-tortoise-fontify-buffer-url (url regexp)
   (let (buffer-read-only real-url)

@@ -7,6 +7,9 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
 
 
 (eval-when-compile
@@ -375,12 +378,12 @@ This implements consider svn:ignored directory."
 
 (defun fsvn-gather-root ()
   (let (ret)
-    (setq ret (mapcar 'car fsvn-repository-alist))
+    (setq ret (mapcar (lambda (x) (fsvn-url-as-directory (car x))) fsvn-repository-alist))
     (fsvn-each-browse-buffer
      (mapc
       (lambda (subdir)
 	(let* ((info (fsvn-browse-subdir.info subdir))
-	       (root (fsvn-xml-info->entry=>repository=>root$ info)))
+	       (root (fsvn-url-as-directory (fsvn-xml-info->entry=>repository=>root$ info))))
 	  (unless (member root ret)
 	    (setq ret (cons root ret)))))
       fsvn-browse-subdir-alist))

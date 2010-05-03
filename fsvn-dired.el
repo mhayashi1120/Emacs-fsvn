@@ -7,6 +7,9 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
 
 
 (require 'dired)
@@ -255,17 +258,17 @@ This function suppress this behavior."
   (fsvn-dired-do-marked-delete files))
 
 (defmacro fsvn-dired-do-move-overwrap (mover message &rest form)
-  `(let (overwrite-query dest)
+  `(let (OVERWRITE-QUERY DEST)
      (when (and (= (length files) 1)
 		(not (file-directory-p destination)))
-       (setq dest destination))
+       (setq DEST destination))
      (mapc
       (lambda (from)
-	(let* ((to (or dest (fsvn-expand-file (fsvn-file-name-nondirectory from) destination)))
+	(let* ((to (or DEST (fsvn-expand-file (fsvn-file-name-nondirectory from) destination)))
 	       (overwrite (file-exists-p to))
 	       (dired-overwrite-confirmed
 		(and overwrite
-		     (dired-query 'overwrite-query "Overwrite `%s'?" to))))
+		     (dired-query 'OVERWRITE-QUERY "Overwrite `%s'?" to))))
 	  (,mover from to dired-overwrite-confirmed)
 	  (fsvn-browse-redraw-wc-file-entry from)
 	  (fsvn-browse-redraw-wc-file-entry to)))

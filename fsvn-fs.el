@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'dired)
 (require 'fsvn-url)
 
@@ -24,11 +29,11 @@
     (set-file-modes file newmode)))
 
 (defun fsvn-file-read-only-p (file)
-  "FILE is read only or not. See owner's bit."
+  "FILE is read only or not.  See owner's bit."
   (= (logand ?\200 (file-modes file)) 0))
 
 (defun fsvn-delete-directory (directory)
-  "recursive delete of DIRECTORY."
+  "Recursive delete of DIRECTORY."
   (mapc
    (lambda (f)
      (if (not (eq t (car (file-attributes f))))
@@ -67,6 +72,9 @@ Overwrite all existing files."
 (defun fsvn-file-exact-directory-p (file)
   ;; dired have this code.
   (eq t (car (file-attributes file))))
+
+(defun fsvn-file-symlink-p (file)
+  (file-symlink-p file))
 
 (defun fsvn-file-size (file)
   (nth 7 (file-attributes file)))

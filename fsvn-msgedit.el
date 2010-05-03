@@ -7,6 +7,11 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
+
+
 (require 'fsvn-mode)
 
 
@@ -36,26 +41,28 @@
 (defvar fsvn-message-edit-subcommand-args nil)
 (defvar fsvn-message-edit-no-unlock nil)
 (defvar fsvn-message-edit-keep-changelist nil)
+(defvar fsvn-message-edit-file-encoding fsvn-svn-common-coding-system)
 
 (defvar fsvn-message-edit-last-message nil)
 (defvar fsvn-message-edit-mode-map nil)
-(setq fsvn-message-edit-mode-map
-      (let ((map (make-sparse-keymap)))
-	(set-keymap-parent map text-mode-map)
+(unless fsvn-message-edit-mode-map
+  (setq fsvn-message-edit-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (set-keymap-parent map text-mode-map)
 
-	(define-key map "\C-c\C-c" 'fsvn-message-edit-done)
-	(define-key map "\C-c\C-k" 'fsvn-message-edit-quit)
-	(define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	(define-key map "\C-c\C-o" 'fsvn-message-edit-switch-window)
-	(define-key map "\C-c\C-q" 'fsvn-message-edit-quit)
-	(define-key map "\en" 'fsvn-message-edit-next-message)
-	(define-key map "\ep" 'fsvn-message-edit-previous-message)
-	(define-key map "\C-cN" 'fsvn-message-edit-toggle-no-unlock)
-	(define-key map "\C-cK" 'fsvn-message-edit-toggle-keep-changelist)
-	(define-key map "\er" 'fsvn-message-edit-re-search-message-forward)
-	(define-key map "\e\C-r" 'fsvn-message-edit-re-search-message-backward)
+	  (define-key map "\C-c\C-c" 'fsvn-message-edit-done)
+	  (define-key map "\C-c\C-k" 'fsvn-message-edit-quit)
+	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+	  (define-key map "\C-c\C-o" 'fsvn-message-edit-switch-window)
+	  (define-key map "\C-c\C-q" 'fsvn-message-edit-quit)
+	  (define-key map "\en" 'fsvn-message-edit-next-message)
+	  (define-key map "\ep" 'fsvn-message-edit-previous-message)
+	  (define-key map "\C-cN" 'fsvn-message-edit-toggle-no-unlock)
+	  (define-key map "\C-cK" 'fsvn-message-edit-toggle-keep-changelist)
+	  (define-key map "\er" 'fsvn-message-edit-re-search-message-forward)
+	  (define-key map "\e\C-r" 'fsvn-message-edit-re-search-message-backward)
 
-	map))
+	  map)))
 
 (defcustom fsvn-message-edit-mode-hook nil
   "*Run at the very end of `fsvn-message-edit-mode'."
@@ -111,7 +118,7 @@ Keybindings:
   (let ((start (point-marker))
 	end)
     (save-excursion
-      (let ((coding-system-for-read fsvn-log-message-file-encoding))
+      (let ((coding-system-for-read fsvn-message-edit-file-encoding))
 	(forward-char (cadr (insert-file-contents file)))
 	(setq end (point-marker))))
     (setq fsvn-message-edit-last-message
@@ -158,7 +165,7 @@ Keybindings:
       (when reverse
 	(setq find-list (nreverse find-list)))
       (catch 'found
-	(let ((coding-system-for-read fsvn-log-message-file-encoding))
+	(let ((coding-system-for-read fsvn-message-edit-file-encoding))
 	  (mapc
 	   (lambda (f)
 	     (with-temp-buffer
@@ -176,6 +183,10 @@ Keybindings:
 	  (sort ret (lambda (x y)
 		      (time-less-p (nth 5 (cdr x)) (nth 5 (cdr y))))))
     (mapcar 'car ret)))
+
+
+
+;; commit
 
 (defun fsvn-message-edit-commit ()
   (run-hooks 'fsvn-message-edit-before-commit-hook)
@@ -244,7 +255,7 @@ Keybindings:
 				       (if message
 					   (list "--file" message)
 					 (list "--message" ""))
-				       "--encoding" (fsvn-coding-system-name fsvn-log-message-file-encoding)
+				       "--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 				       args))
       (set-process-sentinel proc 'fsvn-message-edit-commit-sentinel)
       (set-process-filter proc 'fsvn-process-filter-popup-buffer))
@@ -264,6 +275,30 @@ Keybindings:
       (run-hooks 'fsvn-message-edit-after-commit-hook)
       (fsvn-run-recursive-status (fsvn-find-most-top-buffer-directory default-directory)))))
 
+(defun fsvn-message-edit-commit-check (files)
+  (let ((dir default-directory))
+    (when (fsvn-config-tortoise-property-use fsvn-buffer-repos-root)
+      (fsvn-tortoise-commit-check files dir))
+    ))
+
+(defun fsvn-message-edit-toggle-no-unlock (&optional arg)
+  (interactive "P")
+  (let ((value (fsvn-toggle-mode-line-variable
+		arg 'fsvn-message-edit-no-unlock
+		" (No Unlock)" "no unlock")))
+    (fsvn-message-edit-substitute-subcommand-arg "--no-unlock" value)))
+
+(defun fsvn-message-edit-toggle-keep-changelist (&optional arg)
+  (interactive "P")
+  (let ((value (fsvn-toggle-mode-line-variable
+		arg 'fsvn-message-edit-keep-changelist
+		" (Keep Changelist)" "keep changelist")))
+    (fsvn-message-edit-substitute-subcommand-arg "--keep-changelist" value)))
+
+
+
+;; delete
+
 (defun fsvn-message-edit-delete ()
   (run-hooks 'fsvn-message-edit-before-commit-hook)
   (let ((buffer (fsvn-popup-result-create-buffer))
@@ -276,13 +311,14 @@ Keybindings:
 
 (defun fsvn-message-edit-delete-internal (targets buffer message)
   (let (proc)
-    (setq proc (fsvn-start-command "delete" buffer
-				   "--targets" targets
-				   (if message
-				       (list "--file" message)
-				     (list "--message" ""))
-				   "--encoding" (fsvn-coding-system-name fsvn-log-message-file-encoding)
-				   fsvn-message-edit-subcommand-args))
+    (setq proc (fsvn-start-command-display 
+		"delete" buffer
+		"--targets" targets
+		(if message
+		    (list "--file" message)
+		  (list "--message" ""))
+		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
+		fsvn-message-edit-subcommand-args))
     (set-process-sentinel proc 'fsvn-message-edit-delete-sentinel)
     (set-process-filter proc 'fsvn-process-filter-popup-buffer)))
 
@@ -294,6 +330,10 @@ Keybindings:
 	(when (and x (bufferp x) (buffer-live-p x))
 	  (kill-buffer x))))))
 
+
+
+;; import
+
 (defun fsvn-message-edit-import ()
   (run-hooks 'fsvn-message-edit-before-commit-hook)
   (let ((buffer (fsvn-popup-result-create-buffer)))
@@ -304,12 +344,13 @@ Keybindings:
 (defun fsvn-message-edit-import-internal (buffer)
   (let ((message (fsvn-message-edit-create-message-file))
 	proc)
-    (setq proc (fsvn-start-command "import" buffer
-				   (if message
-				       (list "--file" message)
-				     (list "--message" ""))
-				   "--encoding" (fsvn-coding-system-name fsvn-log-message-file-encoding)
-				   fsvn-message-edit-subcommand-args))
+    (setq proc (fsvn-start-command-display
+		"import" buffer
+		(if message
+		    (list "--file" message)
+		  (list "--message" ""))
+		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
+		fsvn-message-edit-subcommand-args))
     (set-process-sentinel proc 'fsvn-message-edit-import-sentinel)
     (set-process-filter proc 'fsvn-process-filter-popup-buffer)
     proc))
@@ -319,6 +360,10 @@ Keybindings:
     (when (= (process-exit-status proc) 0)
       (kill-buffer (fsvn-message-edit-get-buffer))
       (run-hooks 'fsvn-message-edit-after-commit-hook))))
+
+
+
+;; mkdir
 
 (defun fsvn-message-edit-mkdir ()
   (run-hooks 'fsvn-message-edit-before-commit-hook)
@@ -331,12 +376,13 @@ Keybindings:
 
 (defun fsvn-message-edit-mkdir-internal (buffer message)
   (let (proc)
-    (setq proc (fsvn-start-command "mkdir" buffer
-				   (if message
-				       (list "--file" message)
-				     (list "--message" ""))
-				   "--encoding" (fsvn-coding-system-name fsvn-log-message-file-encoding)
-				   fsvn-message-edit-subcommand-args))
+    (setq proc (fsvn-start-command-display
+		"mkdir" buffer
+		(if message
+		    (list "--file" message)
+		  (list "--message" ""))
+		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
+		fsvn-message-edit-subcommand-args))
     (set-process-sentinel proc 'fsvn-message-edit-mkdir-sentinel)
     (set-process-filter proc 'fsvn-process-filter-popup-buffer)
     proc))
@@ -347,9 +393,47 @@ Keybindings:
       (kill-buffer (fsvn-message-edit-get-buffer))
       (run-hooks 'fsvn-message-edit-after-commit-hook))))
 
+
+
+;; lock
+
 (defun fsvn-message-edit-lock ()
   (fsvn-parse-result-cmd-lock
    (fsvn-call-process-multi-with-popup "lock" fsvn-message-edit-subcommand-args)))
+
+
+
+;; copy
+
+(defun fsvn-message-edit-copy ()
+  (run-hooks 'fsvn-message-edit-before-commit-hook)
+  (let ((buffer (fsvn-popup-result-create-buffer))
+	(message (fsvn-message-edit-create-message-file))
+	proc)
+    (fsvn-restore-window-buffer
+     (fsvn-message-edit-copy-internal buffer message))
+    (fsvn-buffer-popup-as-information buffer)))
+
+(defun fsvn-message-edit-copy-internal (buffer message)
+  (let (proc)
+    (setq proc (fsvn-start-command-display
+		"copy" buffer
+		(if message
+		    (list "--file" message)
+		  (list "--message" ""))
+		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
+		fsvn-message-edit-subcommand-args))
+    (set-process-sentinel proc 'fsvn-message-edit-copy-sentinel)
+    (set-process-filter proc 'fsvn-process-filter-popup-buffer)
+    proc))
+
+(defun fsvn-message-edit-copy-sentinel (proc event)
+  (fsvn-process-exit-handler proc event
+    (when (= (process-exit-status proc) 0)
+      (kill-buffer (fsvn-message-edit-get-buffer))
+      (run-hooks 'fsvn-message-edit-after-commit-hook))))
+
+
 
 (defun fsvn-message-edit-gather-marked-files ()
   (fsvn-message-edit-in-file-select-buffer 'fsvn-select-file-gather-marked-files))
@@ -384,15 +468,9 @@ Keybindings:
 	  (unless (y-or-n-p "Log message is empty.  Really commit? ")
 	    (error "No log messages")))
       (setq tmpfile (fsvn-message-edit-make-message-file))
-      (let ((coding-system-for-write fsvn-log-message-file-encoding))
+      (let ((coding-system-for-write fsvn-message-edit-file-encoding))
 	(write-region (point-min) (point-max) tmpfile nil 'no-msg))
       tmpfile)))
-
-(defun fsvn-message-edit-commit-check (files)
-  (let ((dir default-directory))
-    (when (fsvn-config-tortoise-property-use fsvn-buffer-repos-root)
-      (fsvn-tortoise-commit-check files dir))
-    ))
 
 (defun fsvn-message-edit-make-message-file ()
   (let* ((dir (fsvn-message-edit-get-message-directory))
@@ -447,20 +525,6 @@ Keybindings:
   (fsvn-restore-window-buffer
    (kill-buffer (fsvn-select-file-get-buffer))
    (kill-buffer (current-buffer))))
-
-(defun fsvn-message-edit-toggle-no-unlock (&optional arg)
-  (interactive "P")
-  (let ((value (fsvn-toggle-mode-line-variable
-		arg 'fsvn-message-edit-no-unlock
-		" (No Unlock)" "no unlock")))
-    (fsvn-message-edit-substitute-subcommand-arg "--no-unlock" value)))
-
-(defun fsvn-message-edit-toggle-keep-changelist (&optional arg)
-  (interactive "P")
-  (let ((value (fsvn-toggle-mode-line-variable
-		arg 'fsvn-message-edit-keep-changelist
-		" (Keep Changelist)" "keep changelist")))
-    (fsvn-message-edit-substitute-subcommand-arg "--keep-changelist" value)))
 
 
 

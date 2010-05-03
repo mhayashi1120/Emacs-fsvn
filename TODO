@@ -1,12 +1,110 @@
-* Devide code TODO to this file.
-* Devide code BUG to BUG file.
-* Describe ChangeLog
-* Describe how to install to INSTALL file.
-* `fsvn-magic-directory-files' accept svn:externals
-* Draw symbolic link like dired buffer.
-* fsvn-flatten-command-args move to more critical point.
-* fsvn-url-encode-string more critical point.
-* case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
-* fsvn-svn-command -> fsvn-initialize-loading create fsvn-svn-command-internal
-* fsvn-read-subcommand-args accept quoted string
+# -*- mode: org; -*-
+* General
+** Devide code TODO to this file.
+** Devide code BUG to BUG file.
+** Describe ChangeLog
+** Describe how to install to INSTALL file.
+** all interactive command must be accept argument (ex filename, command arguments)
+  this is test for that command.
+** annoying fsvn-result buffer.
+
+** support `merge'
+ can use ediff-merge
+
+** fsvn-xml-*-dtd-alist check original dtd.
+
+** what is scheduled commit? `status' forth column.
+
+** mode-line and easymenu
+
+** some help mode (command brief description)
+
+** License GPL V2 -> GPL v3
+
+* magic
+** `fsvn-magic-directory-files' accept svn:externals
+
+
+* browse-mode
+** Draw symbolic link like dired buffer.
+** Enable Move file (in repository)
+
+** show current directory status top of the buffer.
+** log message when lock. (optional arg "--message")
+** move case wrong file by svn `move'
+
+** Create branch, tag
+
+* select-file-mode
+** symbolic link
+
+** TODO when commit file-select buffer has svn:external file.
+** Instant viewer that for modified file or changed directory hierarchy.
+  currently `*' mark is display commited files, not manupulated file.
+
+
+* completion
+** fsvn-read-subcommand-args accept quoted string
   space containing filename to quoted string.
+
+** fsvn-completing-url to parse previous segment
+** fsvn-completing-read-url behavior different general Emacs one.
+** completing read implementation cleaning.
+** fsvn-file-select hide/show non selected files.
+
+
+* General (refactor)
+** fsvn-flatten-command-args move to more critical point.
+** fsvn-url-encode-string more critical point.
+** case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
+** fsvn-svn-command -> fsvn-initialize-loading create fsvn-svn-command-internal
+
+** fsvn-select-file-mode, fsvn-message-edit-mode keymap separate by mode (commit, add...).
+** fsvn-magic-* inspect how to implements.
+
+** fsvn-prop* code clean.
+
+
+* logview-mode
+** fsvn-log-message-buffer-name, fsvn-log-sibling-buffer-name contains first space then fontify is not work.
+
+** tortoise like log cache.
+
+** fsvn-log-view-mode gui viewer.
+ call tortoise viewer (Windows)
+** logview-mode diff with non visible revision.
+
+
+* prop-mode
+
+
+* diff
+** async diff
+** ediff directory
+** diff directory
+** diff binary file throw filter program.(Like OpenOffice file)
+
+
+* Other
+** improve UI about read arguments (ex --targets like argument not necessary in completion)
+
+** TODO dired-mode remove vc-find-file-hook from find-file-hook
+
+** fsvn-blame-minor-mode more efficient UI
+
+** parse result threshold
+
+** tsvn:lockmsgminsize, tsvn:logsummary, tsvn:projectlanguage
+   http://tortoisesvn.net/docs/nightly/TortoiseSVN_ja/tsvn-dug-propertypage.html
+
+
+
+
+* popup-result-mode
+
+** `update' `merge' output 
+
+Currently buffer's point is not move from (point-min)
+Sometime prompt stop process, so cannot notice the prompt without scrolling.
+move to point-max? only update or merge (switch?)
+

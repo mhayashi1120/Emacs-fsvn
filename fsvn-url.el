@@ -7,6 +7,9 @@
 ;;; Commentary:
 ;; 
 
+;;; Code:
+;;
+
 
 
 (require 'fsvn-deps)
@@ -18,6 +21,7 @@
 
 
 (defconst fsvn-url-encoding fsvn-svn-common-coding-system)
+(defconst fsvn-url-with-revision-regexp "^\\(.*\\)@\\([^@]+\\)$")
 
 ;; url utility
 
@@ -29,6 +33,28 @@
     (if unibyte-url
 	(decode-coding-string (url-unhex-string unibyte-url) fsvn-url-encoding)
       url)))
+
+(defun fsvn-url-escape-revision-mark (url)
+  (if (string-match fsvn-url-with-revision-regexp url)
+      (concat url "@")
+    url))
+
+(defun fsvn-url-string-url (url-string)
+  (let ((obj (fsvn-url-string-parse url-string)))
+    (car obj)))
+
+(defun fsvn-url-string-revision (url-string)
+  (let ((obj (fsvn-url-string-parse url-string)))
+    (cdr obj)))
+
+(defun fsvn-url-string-parse (url-string)
+  (if (string-match fsvn-url-with-revision-regexp url-string)
+      (cons (match-string 1 url-string) (match-string 2 url-string))
+    (cons url-string nil)))
+
+(defun fsvn-url-string-to-urlrev (url-string)
+  (let ((obj (fsvn-url-string-parse url-string)))
+    (fsvn-url-urlrev (car obj) (cdr obj))))
 
 ;; todo `@' contained file name escaped by following `@'
 (defun fsvn-url-encode-string (urlrev)
