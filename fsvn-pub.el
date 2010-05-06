@@ -21,6 +21,7 @@
 (defvar current-prefix-arg)
 (defvar find-directory-functions)
 (defvar file-name-handler-alist)
+(defvar system-type)
 
 
 
@@ -179,6 +180,12 @@
     (goto-char (point-min))
     (not (re-search-forward "^svn: warning:" nil t))))
 
+(defun fsvn-cleanup-temp-buffer ()
+  (fsvn-cleanup-buffer fsvn-temp-buffer-p))
+
+(defun fsvn-cleanup-result-buffer ()
+  (fsvn-cleanup-buffer fsvn-popup-result-buffer-p))
+
 (defvar fsvn-authenticate-no-prompt nil)
 
 (defun fsvn-authenticate-repository (repository)
@@ -234,12 +241,11 @@
       (message "Authenticated.")))))
 
 
+
 ;; global map command
 (defun fsvn-checkout (url &optional args)
   "`checkout' URL to current directory."
-  (interactive (list (fsvn-completing-read-url "Checkout URL: ")
-		     (when current-prefix-arg
-		       (fsvn-read-svn-subcommand-args "checkout" t))))
+  (interactive (fsvn-cmd-read-checkout-args))
   (let ((dir (fsvn-expand-file default-directory)))
     (when (or (= (length (fsvn-directory-files dir)) 0)
 	      (y-or-n-p "This directory is not empty.  Really checkout? "))
@@ -253,11 +259,7 @@
 
 (defun fsvn-import (file url &optional args)
   "`import' FILE to URL."
-  (interactive (list
-		(fsvn-read-file-name "Imported file: " nil nil t)
-		(fsvn-completing-read-url "Import to URL: ")
-		(when current-prefix-arg
-		  (fsvn-read-svn-subcommand-args "import" t))))
+  (interactive (fsvn-cmd-read-import-args))
   (let ((root (fsvn-get-root-upward url))
 	(browse-buffer (current-buffer))
 	(win-configure (current-window-configuration)))
@@ -265,12 +267,14 @@
       (error "Unable to get root repository"))
     (with-current-buffer (fsvn-message-edit-get-buffer)
       (fsvn-message-edit-mode)
-      (setq fsvn-message-edit-done 'fsvn-message-edit-import)
-      (setq fsvn-message-edit-subcommand-args (list file url args))
-      (setq fsvn-previous-window-configuration win-configure)
       (setq fsvn-buffer-repos-root root)
+      (fsvn-parasite-import-mode 1)
+      (setq fsvn-parasite-import-target-path file)
+      (setq fsvn-parasite-import-target-url url)
+      (setq fsvn-parasite-import-subcommand-args args)
+      (setq fsvn-previous-window-configuration win-configure)
       (run-hooks 'fsvn-message-edit-mode-hook))
-    (fsvn-browse-setup-log-edit-window)))
+    (fsvn-parasite-setup-message-edit-window)))
 
 (defun fsvn-debug-toggle (&optional arg no-msg)
   "Toggle debug output enable/disable.
@@ -346,6 +350,28 @@
        ignore-buffers)))
     (unless no-msg
       (message "Now fsvn feature `%s'" (if feature "ON" "OFF")))))
+
+
+
+(defun fsvn-cmd-read-checkout-args ()
+  (let (url args)
+    (setq url (fsvn-completing-read-url "Checkout URL: "))
+    (setq args 
+	  (if current-prefix-arg
+	      (fsvn-read-svn-subcommand-args "checkout" t fsvn-default-args-checkout)
+	    fsvn-default-args-checkout))
+    (list url args)))
+
+(defun fsvn-cmd-read-import-args ()
+  (let (file url args)
+    (setq file (fsvn-read-file-name "Imported file: " nil nil t))
+    (setq url (fsvn-completing-read-url "Import to URL: "))
+    (setq args
+	  (if current-prefix-arg
+	      (fsvn-read-svn-subcommand-args "import" t fsvn-default-args-import)
+	    fsvn-default-args-import))
+    (list file url args)))
+
 
 
 ;; * vc like global utility.
@@ -456,14 +482,14 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
 "
   (let ((root (or fsvn-buffer-repos-root (fsvn-get-root urlrev)))
 	entries buffer win-config prev-entries)
-    (setq buffer (fsvn-log-view-get-buffer urlrev))
+    (setq buffer (fsvn-log-list-get-buffer urlrev))
     (cond
      ((eq buffer (current-buffer))
       (setq win-config fsvn-previous-window-configuration)
-      (setq prev-entries fsvn-log-view-all-entries))
+      (setq prev-entries fsvn-log-list-all-entries))
      (t
       (setq win-config (current-window-configuration))))
-    (setq entries (fsvn-log-view-cmd urlrev root rev-range count))
+    (setq entries (fsvn-log-list-cmd urlrev root rev-range count))
     (if (null entries)
 	(if prev-entries
 	    (message "No more log entry.")
@@ -477,29 +503,29 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
 	  (setq entries (nreverse entries))
 	  (setq first (car (last entries))
 		last (car entries)))
-	(fsvn-log-view-mode)
-	(erase-buffer)
-	(setq fsvn-buffer-target-directory-p directory-p)
-	(setq fsvn-buffer-target-file (fsvn-urlrev-url urlrev))
+	(fsvn-log-list-mode)
+	(setq fsvn-logview-target-directory-p directory-p)
+	(setq fsvn-logview-target-urlrev (fsvn-urlrev-url urlrev)) ;;TODO url -> urlrev??
+	(setq fsvn-buffer-repos-root root)
 	(setq fsvn-previous-window-configuration win-config)
-	(setq fsvn-log-view-all-entries (fsvn-logs-unique-merge entries prev-entries))
-	(setq fsvn-log-view-target-path
+	(setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))
+	(setq fsvn-log-list-target-path
 	      (if (fsvn-url-local-p urlrev)
 		  (fsvn-wc-file-repository-path urlrev)
 		(fsvn-repository-path root urlrev)))
-	(setq fsvn-buffer-repos-root root)
-	(fsvn-log-view-insert-header-entry urlrev first last)
+	(setq fsvn-log-list-entries entries)
+	(erase-buffer)
+	(fsvn-log-list-insert-header-entry urlrev first last)
 	(mapc
 	 (lambda (entry)
-	   (fsvn-log-view-insert-entry entry))
+	   (fsvn-log-list-insert-entry entry))
 	 entries)
-	(setq fsvn-log-view-entries entries)
-	(fsvn-log-view-goto-first-revision))
+	(fsvn-log-list-goto-first-revision))
       (setq buffer-read-only t)
       (set-buffer-modified-p nil)
       (switch-to-buffer buffer)
-      (fsvn-log-view-setup-window)))
-  (run-hooks 'fsvn-log-view-mode-hook))
+      (fsvn-log-list-setup-window)))
+  (run-hooks 'fsvn-log-list-mode-hook))
 
 
 

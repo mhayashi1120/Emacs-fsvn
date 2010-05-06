@@ -14,6 +14,7 @@
 
 (require 'dired)
 (require 'dired-aux)
+(require 'fsvn-ui)
 
 
 

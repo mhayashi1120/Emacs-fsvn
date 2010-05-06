@@ -188,7 +188,10 @@ This is what the do-commands look for, and what the mark-commands store.")
 (defconst fsvn-brief-message-buffer-name " *Fsvn Popup*")
 
 (defun fsvn-brief-message-show-popup ()
-  (let ((buf (get-buffer-create fsvn-brief-message-buffer-name)))
+  (let* ((buf (get-buffer-create fsvn-brief-message-buffer-name))
+	 (win (get-buffer-window buf)))
+    (when (and win (window-live-p win))
+      (delete-window win))
     (dired-pop-to-buffer buf)))
 
 (defun fsvn-brief-message-clear-message ()
@@ -203,7 +206,8 @@ This is what the do-commands look for, and what the mark-commands store.")
 (defun fsvn-brief-message-add-message (message)
   (with-current-buffer (get-buffer-create fsvn-brief-message-buffer-name)
     (goto-char (point-max))
-    (insert message "\n")))
+    (insert message "\n")
+    (fsvn-brief-message-show-popup)))
 
 (defun fsvn-brief-message-popup (message confirmer)
   (save-window-excursion
@@ -211,6 +215,10 @@ This is what the do-commands look for, and what the mark-commands store.")
     (fsvn-brief-message-show-popup)
     (funcall confirmer)))
 
+(defmacro fsvn-brief-message-showing (&rest form)
+  `(save-window-excursion
+     (fsvn-brief-message-clear-message)
+     ,@form))
 
 
 (provide 'fsvn-ui)

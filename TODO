@@ -1,8 +1,5 @@
 # -*- mode: org; -*-
 * General
-** Devide code TODO to this file.
-** Devide code BUG to BUG file.
-** Describe ChangeLog
 ** Describe how to install to INSTALL file.
 ** all interactive command must be accept argument (ex filename, command arguments)
   this is test for that command.
@@ -30,10 +27,7 @@
 ** Enable Move file (in repository)
 
 ** show current directory status top of the buffer.
-** log message when lock. (optional arg "--message")
 ** move case wrong file by svn `move'
-
-** Create branch, tag
 
 * select-file-mode
 ** symbolic link
@@ -42,6 +36,8 @@
 ** Instant viewer that for modified file or changed directory hierarchy.
   currently `*' mark is display commited files, not manupulated file.
 
+* message-edit-mode
+** parasite-*-execute command accept optional argument
 
 * completion
 ** fsvn-read-subcommand-args accept quoted string
@@ -59,7 +55,6 @@
 ** case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
 ** fsvn-svn-command -> fsvn-initialize-loading create fsvn-svn-command-internal
 
-** fsvn-select-file-mode, fsvn-message-edit-mode keymap separate by mode (commit, add...).
 ** fsvn-magic-* inspect how to implements.
 
 ** fsvn-prop* code clean.
@@ -70,7 +65,7 @@
 
 ** tortoise like log cache.
 
-** fsvn-log-view-mode gui viewer.
+** fsvn-log-list-mode gui viewer.
  call tortoise viewer (Windows)
 ** logview-mode diff with non visible revision.
 

@@ -15,7 +15,6 @@
 (require 'fsvn-env)
 (require 'fsvn-ui)
 (require 'fsvn-mode)
-(require 'fsvn-msgedit)
 (require 'fsvn-cmd)
 (require 'fsvn-url)
 (require 'fsvn-xml)
@@ -32,11 +31,11 @@
 (defconst fsvn-select-file-buffer-local-variables
   '(
     (fsvn-select-file-files-status)
-    (fsvn-select-file-source-files)
-    (fsvn-select-file-done)
-    (fsvn-select-file-subcommand-args)
+    (fsvn-select-file-draw-list-function)
     (fsvn-buffer-repos-root)
     (font-lock-defaults . '(fsvn-select-file-font-lock-keywords t nil nil beginning-of-line))
+
+    ;; BUG only works commit
     (revert-buffer-function . 'fsvn-select-file-revert-buffer)
     ))
 
@@ -48,10 +47,8 @@
 
 (defvar fsvn-select-file-files-status nil
   "Optional")
-(defvar fsvn-select-file-done nil
-  "Required value set command that called when edit done. ")
-(defvar fsvn-select-file-source-files nil)
-(defvar fsvn-select-file-subcommand-args nil)
+
+(defvar fsvn-select-file-draw-list-function nil)
 
 (defvar fsvn-select-file-font-lock-keywords nil)
 (setq fsvn-select-file-font-lock-keywords
@@ -86,14 +83,7 @@
 
 	  (define-key map "," 'scroll-other-window-down)
 	  (define-key map "." 'scroll-other-window)
-	  (define-key map "=" fsvn-select-file-diff-map)
-	  (define-key map "\C-cd" 'fsvn-select-file-delete-this)
-	  (define-key map "\C-c\C-c" 'fsvn-select-file-done)
-	  (define-key map "\C-c\C-k" 'fsvn-select-file-quit)
 	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	  (define-key map "\C-c\C-o" 'fsvn-select-file-switch-window)
-	  (define-key map "\C-c\C-q" 'fsvn-select-file-quit)
-	  (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
 	  (define-key map "\C-c\ei" 'fsvn-select-file-ignore-this)
 	  (define-key map "\C-m" 'fsvn-select-file-view-file)
 	  (define-key map "\C-n" 'fsvn-next-file)
@@ -105,10 +95,15 @@
 	  (define-key map "u" 'fsvn-select-file-mark-clear)
 	  (define-key map "D" 'fsvn-select-file-do-delete-this)
 	  (define-key map "w" 'fsvn-select-file-copy-filename)
+	  
+	  ;; TODO add
+	  (define-key map "\C-cd" 'fsvn-select-file-delete-this)
+
+	  ;;TODO commit
+	  (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
+	  (define-key map "=" fsvn-select-file-diff-map)
 
 	  ;;todo not implement
-	  ;;	(define-key map "\C-cN" 'fsvn-select-file-no-unlock)
-	  ;;	(define-key map "\C-cK" 'fsvn-select-file-keep-changelist)
 	  ;;	(define-key map "" 'fsvn-select-file-show-changelist-member)
 
 	  map)))
@@ -146,10 +141,10 @@ Keybindings:
 
 (defun fsvn-select-file-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))
-	;;FIXME when multible subdir and D mark
+	;;FIXME when multiple subdir and D mark
 	(marked (fsvn-select-file-gather-marked-files))
 	(opoint (point)))
-    (fsvn-select-file-draw-commit-applicant fsvn-select-file-source-files)
+    (funcall fsvn-select-file-draw-list-function)
     (mapc
      (lambda (file)
        (fsvn-select-file-file-put-mark file t))
@@ -285,9 +280,10 @@ Keybindings:
       (when (looking-at "^ Root: .*\n")
 	(replace-match "" nil nil nil 0))
       (insert (format " Root: %s\n" root))
-      (insert "\n"))))
+      (insert "\n")
+      (setq fsvn-buffer-repos-root root))))
 
-(defun fsvn-select-file-draw-commit-applicant (files)
+(defun fsvn-select-file-draw-applicant (files msg no-msg)
   (setq fsvn-select-file-files-status nil)
   (let (buffer-read-only saved point)
     (goto-char (point-min))
@@ -306,32 +302,8 @@ Keybindings:
 	(setq point (point))
 	(goto-char (point-min))
 	(if (= saved point)
-	    (insert " No changed/added files.")
-	  (insert " Commit marked files below.")))
-      (insert "\n")
-      (set-buffer-modified-p nil))))
-
-(defun fsvn-select-file-draw-add-applicant (files)
-  (setq fsvn-select-file-files-status nil)
-  (let (buffer-read-only saved point)
-    (goto-char (point-min))
-    (forward-line 2)
-    (save-restriction
-      (narrow-to-region (point) (point-max))
-      (delete-region (point-min) (point-max))
-      (insert "\n")
-      (insert "\n")
-      (setq saved (point))
-      (mapc
-       (lambda (target)
-	 (fsvn-select-file-draw-target target))
-       (fsvn-select-file-status-before-commit files))
-      (save-excursion
-	(setq point (point))
-	(goto-char (point-min))
-	(if (= saved point)
-	    (insert " No Unknown files.")
-	  (insert " Add marked files below.")))
+	    (insert (format " %s" no-msg))
+	  (insert (format " %s" msg))))
       (insert "\n")
       (set-buffer-modified-p nil))))
 
@@ -462,16 +434,6 @@ Keybindings:
 
 ;; * fsvn-select-file-mode interactive command
 
-(defun fsvn-select-file-done ()
-  (interactive)
-  (call-interactively fsvn-select-file-done))
-
-(defun fsvn-select-file-quit ()
-  (interactive)
-  (fsvn-restore-window-buffer
-   (kill-buffer (fsvn-message-edit-get-buffer))
-   (kill-buffer (current-buffer))))
-
 (defun fsvn-select-file-view-file (file)
   (interactive (fsvn-select-file-command-file))
   ;;TODO when open directory not view-mode 
@@ -511,11 +473,6 @@ Keybindings:
     (fsvn-select-file-redraw-file dir)
     (fsvn-move-to-filename)))
 
-(defun fsvn-select-file-switch-window ()
-  (interactive)
-  (fsvn-restore-default-window-setting)
-  (fsvn-switch-buffer-window (fsvn-message-edit-prepared-buffer)))
-
 (defun fsvn-select-file-revert-this (file &optional args)
   (interactive (fsvn-select-file-cmd-file "revert" fsvn-default-args-revert))
   (when (y-or-n-p "Svn: Revert? ")
@@ -526,30 +483,6 @@ Keybindings:
        (lambda (file)
 	 (fsvn-select-file-remove-file file))
        reverted))))
-
-(defun fsvn-select-file-commit ()
-  (interactive)
-  (save-excursion
-    (unless (fsvn-message-edit-prepared-buffer)
-      (error "Log edit buffer deleted"))
-    (set-buffer (fsvn-message-edit-get-buffer))
-    (fsvn-message-edit-commit)))
-
-(defun fsvn-select-file-add ()
-  (interactive)
-  (let ((files (fsvn-select-file-gather-marked-files))
-	(dir default-directory)
-	buffer targets)
-    (if (= (length files) 0)
-	(message "No file to be added.")
-      (fsvn-restore-window-buffer
-       (setq buffer (fsvn-popup-result-create-buffer))
-       (setq targets (fsvn-make-targets-file files))
-       (fsvn-call-command "add" buffer "--targets" targets fsvn-select-file-subcommand-args)
-       (fsvn-parse-result-cmd-add buffer))
-      (fsvn-buffer-popup-as-information buffer)
-      (fsvn-run-recursive-status (fsvn-find-most-top-buffer-directory dir))
-      (kill-buffer (fsvn-select-file-get-buffer)))))
 
 (defun fsvn-select-file-do-delete-this (file)
   (interactive (list (fsvn-expand-file (fsvn-current-filename))))

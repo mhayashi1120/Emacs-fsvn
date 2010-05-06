@@ -13,6 +13,7 @@
 
 
 (require 'diff)
+(require 'fsvn-deps)
 
 
 
@@ -65,10 +66,6 @@
     file))
 
 ;; subcommand `diff' utility
-
-(defconst fsvn-diff-subcommand-arg-regexp "^--\\(new\\|old\\)=\\(.+\\)")
-(defconst fsvn-diff-separated-regexp
-   "^@@ -\\([0-9]+\\)\\(?:,\\([0-9]+\\)\\)? \\+\\([0-9]+\\)\\(?:,\\([0-9]+\\)\\)? @@")
 
 (defvar fsvn-diff-buffer-subcommand-args nil)
 

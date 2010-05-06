@@ -20,6 +20,12 @@
 
 
 
+(defvar fsvn-propview-target-urlrev nil)
+(defvar fsvn-propview-target-directory-p nil)
+
+
+
+
 (fsvn-defstruct proplist-prop
   name mark recursive-p)
 
@@ -35,9 +41,8 @@
     (font-lock-defaults . '(fsvn-proplist-font-lock-keywords t nil nil beginning-of-line))
     (revert-buffer-function . 'fsvn-proplist-revert-buffer)
     (fsvn-buffer-repos-root)
-    (fsvn-buffer-target-file)
-    (fsvn-buffer-target-read-only)
-    (fsvn-buffer-target-directory-p)
+    (fsvn-propview-target-urlrev)
+    (fsvn-propview-target-directory-p)
     (fsvn-proplist-target-mode)
     ))
 
@@ -107,7 +112,7 @@ Keybindings:
   (font-lock-fontify-buffer))
 
 (defmacro fsvn-proplist-wc-only (&rest form)
-  `(if (fsvn-url-repository-p fsvn-buffer-target-file)
+  `(if (fsvn-url-repository-p fsvn-propview-target-urlrev)
        (message "Cannot edit repository property.")
      ,@form))
 
@@ -268,7 +273,7 @@ Keybindings:
 (defun fsvn-proplist-revert-buffer (ignore-auto noconfirm)
   (let ((propname (fsvn-proplist-current-propname))
 	(opoint (point)))
-    (fsvn-proplist-draw-list fsvn-buffer-target-file)
+    (fsvn-proplist-draw-list fsvn-propview-target-urlrev)
     (or (and propname
 	     (fsvn-proplist-goto-propname propname))
 	(goto-char opoint))
@@ -276,24 +281,24 @@ Keybindings:
     (run-hooks 'fsvn-proplist-mode-hook)))
 
 (defun fsvn-proplist-draw-value (propname)
-  (let ((file fsvn-buffer-target-file)
+  (let ((file fsvn-propview-target-urlrev)
 	(prev-config fsvn-previous-window-configuration)
 	(buffer (fsvn-propedit-get-buffer))
-	(dirp fsvn-buffer-target-directory-p)
+	(dirp fsvn-propview-target-directory-p)
 	(win-config fsvn-default-window-configuration)
 	(root fsvn-buffer-repos-root)
 	(working-dir default-directory)
 	value)
     (with-current-buffer buffer
       (fsvn-propedit-mode)
-      (setq buffer-read-only t)
-      (fsvn-set-default-directory working-dir)
       (setq fsvn-previous-window-configuration prev-config)
       (setq fsvn-default-window-configuration win-config)
-      (setq fsvn-propedit-propname propname)
       (setq fsvn-buffer-repos-root root)
-      (setq fsvn-buffer-target-file file)
-      (setq fsvn-buffer-target-directory-p dirp)
+      (setq fsvn-propview-target-urlrev file)
+      (setq fsvn-propview-target-directory-p dirp)
+      (setq fsvn-propedit-propname propname)
+      (setq buffer-read-only t)
+      (fsvn-set-default-directory working-dir)
       (let (buffer-read-only)
 	(erase-buffer)
 	(when propname
@@ -328,13 +333,13 @@ Keybindings:
   (fsvn-proplist-wc-only
    ;; not move a point because property delete merely occur.
    (fsvn-proplist-put-mark 0 fsvn-mark-delete-char)
-   (when (and recursive fsvn-buffer-target-directory-p)
+   (when (and recursive fsvn-propview-target-directory-p)
      (fsvn-proplist-put-mark 1 fsvn-proplist-recursive-mark-char))))
 
 (defun fsvn-proplist-mark-recursive ()
   (interactive)
   (fsvn-proplist-wc-only
-   (if (not fsvn-buffer-target-directory-p)
+   (if (not fsvn-propview-target-directory-p)
        (message "Cannot put `%c' because not a directory." fsvn-proplist-recursive-mark-char)
      (fsvn-proplist-put-mark 1 fsvn-proplist-recursive-mark-char))))
 
@@ -359,8 +364,8 @@ Keybindings:
 (defun fsvn-proplist-add-property (&optional recurse)
   (interactive "P")
   (fsvn-proplist-wc-only
-   (let ((propname (fsvn-read-propname fsvn-buffer-target-file))
-	 (file fsvn-buffer-target-file)
+   (let ((propname (fsvn-read-propname fsvn-propview-target-urlrev))
+	 (file fsvn-propview-target-urlrev)
 	 ret)
      (when (member propname (fsvn-proplist-get-proplist file))
        (error "Property `%s' is already exists" propname))
@@ -376,7 +381,7 @@ Keybindings:
 (defun fsvn-proplist-do-marked-execute ()
   (interactive)
   (fsvn-proplist-wc-only
-   (let ((file fsvn-buffer-target-file)
+   (let ((file fsvn-propview-target-urlrev)
 	 (fsvn-call-process-buffer (fsvn-popup-result-create-buffer))
 	 value-file buffer-read-only)
      (unwind-protect
@@ -408,15 +413,13 @@ Keybindings:
 (defconst fsvn-propedit-buffer-local-variables
   '(
     (fsvn-buffer-repos-root)
-    (fsvn-buffer-target-file)
-    (fsvn-buffer-target-read-only)
-    (fsvn-buffer-target-directory-p)
+    (fsvn-propview-target-urlrev)
+    (fsvn-propview-target-directory-p)
     (fsvn-propedit-propname)
-    (fsvn-propedit-recursive-save . nil)
+    (fsvn-propedit-recursive-save)
     ))
 
 (defvar fsvn-propedit-propname nil)
-(defvar fsvn-prop-file-default-coding-system fsvn-svn-common-coding-system)
 (defvar fsvn-propedit-recursive-save nil)
 
 (defvar fsvn-propedit-mode-map nil)
@@ -489,7 +492,7 @@ Keybindings:
     (error "Value unchanged"))
   (let ((file (fsvn-propedit-get-value-file))
 	(propname fsvn-propedit-propname)
-	(target fsvn-buffer-target-file)
+	(target fsvn-propview-target-urlrev)
 	(recursive fsvn-propedit-recursive-save)
 	ret output)
     (with-temp-buffer
@@ -513,7 +516,7 @@ Keybindings:
       (let (propnames)
 	(setq propnames (fsvn-proplist-gather-propnames))
 	;; svn:eol-style like non applicable property for directory, but can set recursively.
-	(when (and (member propname (fsvn-proplist-get-proplist fsvn-buffer-target-file))
+	(when (and (member propname (fsvn-proplist-get-proplist fsvn-propview-target-urlrev))
 		   (not (member propname propnames)))
 	  (fsvn-proplist-insert-propname propname))
 	(fsvn-proplist-draw-value propname)))

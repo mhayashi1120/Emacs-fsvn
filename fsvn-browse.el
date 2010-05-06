@@ -19,6 +19,7 @@
 (require 'fsvn-popup)
 (require 'fsvn-msgedit)
 (require 'fsvn-dired)
+(require 'fsvn-parasite)
 
 
 
@@ -76,7 +77,7 @@
     (fsvn-browse-buffer-directories-status-process)
     (fsvn-browse-buffer-cleanup-process)
     (fsvn-buffer-repos-root)
-    (fsvn-buffer-revision)
+    (fsvn-browse-revision)
     (fsvn-browse-ls-comparer)
     (dired-directory)
     ))
@@ -102,6 +103,7 @@
 (defvar fsvn-browse-buffer-directories-status-process nil)
 (defvar fsvn-browse-buffer-cleanup-process nil)
 (defvar fsvn-browse-file-name-function 'fsvn-browse-point-urlrev)
+(defvar fsvn-browse-revision nil)
 
 (defvar fsvn-browse-font-lock-keywords nil)
 (setq fsvn-browse-font-lock-keywords
@@ -872,7 +874,6 @@ PATH is each executed path."
        (when (null info)
 	 (error "%s is not a repository" directory-urlrev))
        (fsvn-browse-create-repos-buffer info))))
-    ;;todo bug when revision changed.
     (setq comparer fsvn-browse-ls-comparer)
     (when (memq type '(revert draw))
       (let (buffer-read-only)
@@ -972,14 +973,14 @@ PATH is each executed path."
 
 (defun fsvn-browse-set-repos-local-variables (info)
   (setq fsvn-buffer-repos-root (fsvn-xml-info->entry=>repository=>root$ info))
-  (setq fsvn-buffer-revision (fsvn-xml-info->entry.revision info))
+  (setq fsvn-browse-revision (fsvn-xml-info->entry.revision info))
   (setq fsvn-browse-repos-p t)
   (let* ((subdir (fsvn-browse-subdir (fsvn-info-repos-path info) t)))
     (fsvn-browse-subdir!info subdir info)))
 
 (defun fsvn-browse-set-wc-local-variables (info directory)
   (setq fsvn-buffer-repos-root (fsvn-xml-info->entry=>repository=>root$ info))
-  (setq fsvn-buffer-revision (fsvn-xml-info->entry.revision info))
+  (setq fsvn-browse-revision (fsvn-xml-info->entry.revision info))
   (setq fsvn-browse-repos-p nil)
   (let* ((subdir (fsvn-browse-subdir directory nil)))
     (fsvn-browse-subdir!info subdir info)))
@@ -1086,14 +1087,14 @@ PATH is each executed path."
     ;; for proplist mode
     (with-current-buffer (fsvn-proplist-get-buffer)
       (fsvn-proplist-mode)
-      (fsvn-proplist-setup-window)
-      (setq fsvn-default-window-configuration (current-window-configuration))
-      (setq fsvn-previous-window-configuration win-configure)
       (setq fsvn-buffer-repos-root root)
-      (setq fsvn-buffer-target-file file)
-      (setq fsvn-buffer-target-directory-p directory-p)
+      (setq fsvn-propview-target-urlrev file)
+      (setq fsvn-propview-target-directory-p directory-p)
+      (setq fsvn-previous-window-configuration win-configure)
       (setq fsvn-proplist-target-mode 'properties)
       (fsvn-set-default-directory working-dir)
+      (fsvn-proplist-setup-window)
+      (setq fsvn-default-window-configuration (current-window-configuration))
       (setq buffer-read-only t)
       (fsvn-proplist-draw-list file)
       (fsvn-proplist-goto-first-property)
@@ -1126,51 +1127,43 @@ PATH is each executed path."
 
 (defmacro fsvn-browse-open-message-edit (&rest form)
   `(let ((ROOT fsvn-buffer-repos-root)
-	 (BROWSE-BUFFER (current-buffer))
 	 (WIN-CONFIGURE (current-window-configuration)))
      (with-current-buffer (fsvn-message-edit-get-buffer)
        (fsvn-message-edit-mode)
-       ,@form
        (setq fsvn-previous-window-configuration WIN-CONFIGURE)
        (setq fsvn-buffer-repos-root ROOT)
+       ,@form
        (run-hooks 'fsvn-message-edit-mode-hook))))
 
 (defmacro fsvn-browse-quick-message-edit (&rest form)
   `(fsvn-browse-open-message-edit
     ,@form
-    (fsvn-browse-setup-log-edit-window)))
+    (fsvn-parasite-setup-message-edit-window)))
 
 (defun fsvn-browse-add-file-select (files args)
   (when (and (fsvn-select-file-prepared-buffer)
 	     (not (y-or-n-p "File select buffer already prepared.  Discard it? ")))
     (error "Kill `%s' Buffer manually" fsvn-select-file-buffer-name))
-  (let* ((browse-buffer (current-buffer))
-	 (win-configure (current-window-configuration))
+  (let* ((win-configure (current-window-configuration))
 	 (root fsvn-buffer-repos-root)
 	 win)
-    (mapc
-     (lambda (b)
-       (when (and b (buffer-live-p b))
-	 (kill-buffer b)))
-     (list (fsvn-select-file-prepared-buffer)))
+    (fsvn-parasite-add-cleanup-buffer)
     (with-current-buffer (fsvn-select-file-get-buffer)
       (fsvn-select-file-mode)
-      (fsvn-select-file-draw-root root)
-      (fsvn-select-file-draw-add-applicant files)
-      (fsvn-select-file-first-file)
-      (setq fsvn-select-file-source-files files)
-      (setq fsvn-select-file-done 'fsvn-select-file-add)
-      (setq fsvn-select-file-subcommand-args args)
       (setq fsvn-previous-window-configuration win-configure)
-      (setq fsvn-buffer-repos-root root)
+      (fsvn-parasite-add-mode 1)
+      (setq fsvn-parasite-add-subcommand-args args)
+      (fsvn-select-file-draw-root root)
+      (fsvn-parasite-add-draw-applicant files)
       (setq buffer-read-only t)
+      (fsvn-select-file-first-file)
       (run-hooks 'fsvn-select-file-mode-hook))
-    (fsvn-browse-setup-add-window)))
+    (fsvn-parasite-add-setup-window)))
 
 (defun fsvn-browse-commit-mode (files args)
   (when (and (fsvn-select-file-prepared-buffer)
 	     (fsvn-message-edit-prepared-buffer))
-    (fsvn-browse-setup-commit-window t)
+    (fsvn-parasite-commit-setup-window t)
     (unless (y-or-n-p "Log edit buffer already prepared. Discard it? ")
       (error "Type C-c C-q for Quit Edit.")))
   (let* ((unsaved (fsvn-files-unsaved-buffers files))
@@ -1178,110 +1171,48 @@ PATH is each executed path."
 	 (win-configure (current-window-configuration))
 	 (root fsvn-buffer-repos-root)
 	 win)
-    ;; todo consider confirm argument
+    ;; todo consider confirm argument to interactive arg
     (when (and unsaved (fsvn-browse-dired-confirm unsaved 'fsvn-unsaved))
       (mapc
        (lambda (buffer)
 	 (with-current-buffer buffer
 	   (save-buffer)))
        unsaved))
-    (mapc
-     (lambda (b)
-       (when (and b (buffer-live-p b))
-	 (kill-buffer b)))
-     (list (fsvn-select-file-prepared-buffer)
-	   (fsvn-message-edit-prepared-buffer)))
+    (fsvn-parasite-commit-cleanup-buffers)
     ;; fsvn-message-edit-mode prior than fsvn-select-file-mode
     (with-current-buffer (fsvn-select-file-get-buffer)
       (fsvn-select-file-mode)
-      (setq fsvn-select-file-source-files files)
-      (setq fsvn-select-file-done 'fsvn-select-file-commit)
       (setq fsvn-previous-window-configuration win-configure)
-      (setq fsvn-buffer-repos-root root)
-      (setq buffer-read-only t)
+      (fsvn-parasite-commit-mode 1)
       (fsvn-select-file-draw-root root)
-      (fsvn-select-file-draw-commit-applicant files)
+      (fsvn-parasite-commit-draw-applicant files)
+      (setq buffer-read-only t)
       (fsvn-select-file-first-file)
       (run-hooks 'fsvn-select-file-mode-hook))
     (fsvn-browse-open-message-edit
+     (fsvn-parasite-commit-mode 1)
+     (fsvn-parasite-commit-set-subcommand-args args)
      (when (fsvn-config-tortoise-property-use root)
-       (fsvn-tortoise-commit-initialize))
-     (setq fsvn-message-edit-done 'fsvn-message-edit-commit)
-     (when (member "--no-unlock" args)
-       (fsvn-message-edit-toggle-no-unlock t))
-     (when (member "--keep-changelist" args)
-       (fsvn-message-edit-toggle-keep-changelist t))
-     (setq fsvn-message-edit-subcommand-args args))
-    (fsvn-browse-setup-commit-window)))
+       (fsvn-tortoise-commit-initialize)))
+    (fsvn-parasite-commit-setup-window)))
 
-(defun fsvn-browse-delete-log-edit (files args)
+(defun fsvn-browse-delete-message-edit (files args)
   (fsvn-browse-quick-message-edit
-   (setq fsvn-message-edit-target-files files)
-   (setq fsvn-message-edit-subcommand-args args)
-   (setq fsvn-message-edit-done 'fsvn-message-edit-delete)))
+   (fsvn-parasite-delete-mode 1)
+   (setq fsvn-parasite-delete-target-files files)
+   (setq fsvn-parasite-delete-subcommand-args args)))
 
-(defun fsvn-browse-mkdir-log-edit (dir)
+(defun fsvn-browse-mkdir-message-edit (dir args)
   (fsvn-browse-quick-message-edit
-   (setq fsvn-message-edit-subcommand-args (list dir))
-   (setq fsvn-message-edit-done 'fsvn-message-edit-mkdir)))
+   (fsvn-parasite-mkdir-mode 1)
+   (setq fsvn-parasite-mkdir-target-directory dir)
+   (setq fsvn-parasite-mkdir-subcommand-args args)))
 
-;;TODO no use?
-(defun fsvn-browse-lock-log-edit (files args)
+(defun fsvn-browse-lock-message-edit (files args)
   (fsvn-browse-quick-message-edit
-   (setq fsvn-message-edit-subcommand-args (list files args))
-   (setq fsvn-message-edit-done 'fsvn-message-edit-lock)))
-
-(defun fsvn-browse-setup-log-edit-window ()
-  (delete-other-windows)
-  (let ((win (split-window)))
-    (set-window-buffer win (fsvn-message-edit-get-buffer))
-    (set-frame-selected-window (selected-frame) win)))
-
-(defun fsvn-browse-setup-add-window ()
-  (delete-other-windows)
-  (let* ((browse (current-buffer))
-	 (select (fsvn-select-file-get-buffer))
-	 (browse-win (split-window))
-	 (file-win (selected-window))
-	 done-command quit-command)
-    (set-window-buffer browse-win browse)
-    (set-window-buffer file-win select)
-    (set-frame-selected-window (selected-frame) file-win)
-    (fsvn-set-buffer-local-variable
-     select
-     'fsvn-default-window-configuration (current-window-configuration))
-    (setq done-command 'fsvn-select-file-done)
-    (setq quit-command 'fsvn-select-file-quit)
-    (message
-     (substitute-command-keys (concat "Type \\[" (symbol-name done-command) "] to finish edit, \
-\\[" (symbol-name quit-command) "] to quit edit.")))))
-
-(defun fsvn-browse-setup-commit-window (&optional no-msg)
-  (delete-other-windows)
-  (let* ((log (fsvn-message-edit-get-buffer))
-	 (fselect (fsvn-select-file-get-buffer))
-	 (log-win (split-window))
-	 (fselect-win (selected-window))
-	 (root fsvn-buffer-repos-root)
-	 sel-buffer sel-window)
-    (set-window-buffer log-win log)
-    (set-window-buffer fselect-win fselect)
-    ;; move focus to log edit buffer.
-    (if (fsvn-config-commit-default-file-select-p root)
-	(setq sel-window fselect-win
-	      sel-buffer fselect)
-      (setq sel-window log-win
-	    sel-buffer log))
-    (set-frame-selected-window (selected-frame) sel-window)
-    (let ((f (lambda (buffer)
-	       (fsvn-set-buffer-local-variable
-		buffer
-		'fsvn-default-window-configuration (current-window-configuration)))))
-      (funcall f log)
-      (funcall f fselect))
-    (switch-to-buffer sel-buffer)
-    (unless no-msg
-      (fsvn-message-edit-commit-show-message))))
+   (fsvn-parasite-lock-mode 1)
+   (setq fsvn-parasite-lock-target-files files)
+   (fsvn-parasite-lock-set-subcommand-args args)))
 
 ;; ** current point function
 
@@ -1368,7 +1299,7 @@ PATH is each executed path."
 
 (defun fsvn-browse-current-revision ()
   "Return current buffer indicate revision."
-  fsvn-buffer-revision)
+  fsvn-browse-revision)
 
 (defun fsvn-browse-current-directory ()
   (file-name-as-directory
@@ -1514,6 +1445,19 @@ This means svn editing subcommand (delete, add, move...) work."
      (setq args (fsvn-browse-cmd-copy/move-read-args "move" 'fsvn-default-args-move))
      (list files dir args))))
 
+(defun fsvn-browse-cmd-read-copy-file-in-repository ()
+  (let (from-url to-url args)
+    (fsvn-brief-message-showing
+     (setq from-url (fsvn-browse-point-repository-urlrev))
+     (fsvn-brief-message-add-message (format "Source URL: %s" from-url))
+     (setq to-url (fsvn-completing-read-url "Destination URL: " from-url t))
+     (fsvn-brief-message-add-message (format "Source URL: %s" from-url))
+     (setq args 
+	   (if current-prefix-arg
+	       (fsvn-read-svn-subcommand-args "copy" t fsvn-default-args-copy)
+	     fsvn-default-args-copy))
+     (list from-url to-url args))))
+
 (defun fsvn-browse-cmd-wc-arg (subcommand &optional default-args)
   (fsvn-browse-cmd-wc-only
    (fsvn-browse-cmd-arg subcommand default-args)))
@@ -1569,6 +1513,15 @@ This means svn editing subcommand (delete, add, move...) work."
 		  src-files 'fsvn-browse-svn:externals-selected 'fsvn-read-versioned-directory))
       (list src-files dest)))))
 
+(defun fsvn-browse-cmd-read-mkdir-args ()
+  (let (dir args)
+    (setq dir (fsvn-read-mkdir-directory (fsvn-browse-current-directory-url)))
+    (setq args
+	  (if current-prefix-arg
+	      (fsvn-read-svn-subcommand-args "mkdir" t fsvn-default-args-mkdir)
+	    fsvn-default-args-mkdir))
+    (list dir args)))
+
 (defun fsvn-browse-cmd-read-merge-this-args ()
   (fsvn-browse-cmd-wc-only
    (let* ((file (fsvn-browse-cmd-this-file))
@@ -1577,19 +1530,17 @@ This means svn editing subcommand (delete, add, move...) work."
 
 (defun fsvn-browse-cmd-read-merge-args ()
   (fsvn-browse-cmd-wc-only
-   (let (from to args)
-     (fsvn-brief-message-clear-message)
-     (setq from (fsvn-read-url-with-revision "URL1: "))
-     (save-window-excursion
-       (fsvn-brief-message-add-message (format "URL1: %s" from))
-       (fsvn-brief-message-show-popup)
-       (setq to (fsvn-read-url-with-revision "URL2: " from))
-       (fsvn-brief-message-add-message (format "URL2: %s" to))
-       (setq args 
-	     (if current-prefix-arg
-		 (fsvn-read-svn-subcommand-args "merge" t fsvn-default-args-merge)
-	       fsvn-default-args-merge)))
-     (list from to args))))
+   (fsvn-brief-message-showing
+    (let (from to args)
+      (setq from (fsvn-read-url-with-revision "URL1: "))
+      (fsvn-brief-message-add-message (format "URL1: %s" from))
+      (setq to (fsvn-read-url-with-revision "URL2: " from))
+      (fsvn-brief-message-add-message (format "URL2: %s" to))
+      (setq args 
+	    (if current-prefix-arg
+		(fsvn-read-svn-subcommand-args "merge" t fsvn-default-args-merge)
+	      fsvn-default-args-merge))
+      (list from to args)))))
 
 (defun fsvn-browse-cmd-read-mergeinfo-this-args ()
   (fsvn-browse-cmd-wc-only
@@ -1714,9 +1665,11 @@ This means svn editing subcommand (delete, add, move...) work."
   (unless (fsvn-browse-current-path)
     (error "This point has no directory"))
   (let* ((info (fsvn-browse-subdir.info (fsvn-browse-subdir (fsvn-browse-current-path) fsvn-browse-repos-p)))
-	 (urlrev (fsvn-url-urlrev (fsvn-xml-info->entry=>url$ info) (fsvn-completing-read-revision)))
+	 (currev (fsvn-get-revision-string (fsvn-browse-current-revision)))
+	 (newrev (fsvn-completing-read-revision))
+	 (urlrev (fsvn-url-urlrev (fsvn-xml-info->entry=>url$ info) newrev))
 	 (file (fsvn-current-filename)))
-    (fsvn-browse-switch-directory-buffer urlrev)
+    (fsvn-browse-switch-directory-buffer urlrev (unless (string= currev newrev) 'revert))
     (when file
       (fsvn-browse-goto-file file))))
 
@@ -1752,15 +1705,14 @@ This means svn editing subcommand (delete, add, move...) work."
 	proc)
     (message "(No svn Cleanup performed)")))
 
-(defun fsvn-browse-mkdir (directory)
-  "Execute `mkdir' with `--parents'
+(defun fsvn-browse-mkdir (directory &optional args)
+  "Execute `mkdir' for read DIRECTORY.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
-  (interactive (list (fsvn-read-mkdir-directory (fsvn-browse-current-directory-url))))
+  (interactive (fsvn-browse-cmd-read-mkdir-args))
   (if (fsvn-url-repository-p directory)
-      (fsvn-browse-mkdir-log-edit directory)
-    (fsvn-call-process-with-popup "mkdir"
-				  (when (fsvn-svn-subcommand-accepted-argument "mkdir" "--parents") "--parents")
-				  directory)
+      (fsvn-browse-mkdir-message-edit directory args)
+    (fsvn-call-process-with-popup "mkdir" args directory)
     (fsvn-browse-add-wc-file-entry directory)))
 
 (defun fsvn-browse-update-selected (files &optional args)
@@ -1844,7 +1796,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive (fsvn-browse-cmd-url-list-arg "delete" fsvn-default-args-delete))
   (cond
    (fsvn-browse-repos-p
-    (fsvn-browse-delete-log-edit files args))
+    (fsvn-browse-delete-message-edit files args))
    ((or (not (interactive-p))
 	current-prefix-arg
 	(fsvn-browse-dired-confirm files 'fsvn-browse-delete-selected))
@@ -1857,14 +1809,19 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-lock-selected (files &optional args)
   "Execute `lock' for selected FILES.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
 "
   (interactive (fsvn-browse-cmd-url-list-arg "lock" fsvn-default-args-lock))
-  (if (or (not (interactive-p))
-	  current-prefix-arg
-	  (fsvn-browse-dired-confirm files 'fsvn-browse-lock-selected))
-      (fsvn-parse-result-cmd-lock
-       (fsvn-call-process-multi-with-popup "lock" files args))
-    (message "(No svn Lock performed)")))
+  (cond
+   ((member "--message" args)
+    (fsvn-browse-lock-message-edit files args))
+   ((or (not (interactive-p))
+	current-prefix-arg
+	(fsvn-browse-dired-confirm files 'fsvn-browse-lock-selected))
+    (fsvn-parse-result-cmd-lock
+     (fsvn-call-process-multi-with-popup "lock" files args)))
+   (t
+    (message "(No svn Lock performed)"))))
 
 (defun fsvn-browse-unlock-selected (files &optional args)
   "Execute `unlock' for selected FILES.
@@ -2021,11 +1978,15 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 (defun fsvn-browse-copy-this-in-repository (from-url to-url &optional args)
   "Execute `copy' for repository file corresponding local file.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
+
+This makes faster copy than in working copy.
 "
-  (interactive)
+  (interactive (fsvn-browse-cmd-read-copy-file-in-repository))
   (fsvn-browse-quick-message-edit
-   (setq fsvn-message-edit-subcommand-args (list from-url to-url args))
-   (setq fsvn-message-edit-done 'fsvn-message-edit-copy)))
+   (fsvn-parasite-copy-mode 1)
+   (setq fsvn-parasite-copy-from-files (list from-url))
+   (setq fsvn-parasite-copy-destination to-url)
+   (setq fsvn-parasite-copy-subcommand-args args)))
 
 (defun fsvn-browse-revert-selected (files &optional args)
   "Execute `revert' for selected FILES.

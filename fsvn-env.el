@@ -241,6 +241,17 @@ Optional argument FORM evaluate Lisp form."
 	(throw 'match list))
       (setq list (cdr list)))))
 
+(defun fsvn-split-list (elt list)
+  (let ((after list)
+	before)
+    (catch 'matched
+      (while after
+	(when (equal elt (car after))
+	  (throw 'matched (cons (nreverse before) after)))
+	(setq before (cons (car after) before))
+	(setq after (cdr after)))
+      (cons (nreverse before) nil))))
+
 
 
 (defun fsvn-month-max-day (year month)
@@ -429,12 +440,6 @@ Optional argument FORM evaluate Lisp form."
 	    (setq count (1+ count))))
 	(buffer-list)))
      count))
-
-(defun fsvn-cleanup-temp-buffer ()
-  (fsvn-cleanup-buffer fsvn-temp-buffer-p))
-
-(defun fsvn-cleanup-result-buffer ()
-  (fsvn-cleanup-buffer fsvn-popup-result-buffer-p))
 
 (defun fsvn-files-unsaved-buffers (files)
   (let (ret tmp)

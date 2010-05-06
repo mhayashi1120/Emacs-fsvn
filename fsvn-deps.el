@@ -29,6 +29,8 @@
 (defvar fsvn-svn-common-coding-system 'utf-8
   "Coding system of default svn implementation.")
 
+(defvar fsvn-prop-file-default-coding-system fsvn-svn-common-coding-system)
+
 (defcustom fsvn-svn-command "svn"
   "*Subversion command. Must be set before load this file.
 If problem in executing this command, check `exec-path' or PATH environment variable.
@@ -399,6 +401,7 @@ Otherwise set absolute path."
     ("svn:mime-type" unable-directory)
     "svn:externals"
     ("svn:needs-lock" unable-directory)
+    "svn:mergeinfo"
     ))
 
 (defconst fsvn-revprop-list
@@ -593,6 +596,12 @@ $"
 	  (fsvn-svn-autoprop-wildcard->regexp-internal string (cdr alist)))
 	(split-string string (car item)))
        (cdr item))))))
+
+
+
+(defconst fsvn-diff-subcommand-arg-regexp "^--\\(new\\|old\\)=\\(.+\\)")
+(defconst fsvn-diff-separated-regexp
+   "^@@ -\\([0-9]+\\)\\(?:,\\([0-9]+\\)\\)? \\+\\([0-9]+\\)\\(?:,\\([0-9]+\\)\\)? @@")
 
 
 
