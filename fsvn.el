@@ -50,9 +50,9 @@
 ;; * fsvn-popup-result-mode (Show svn command output)
 ;; * fsvn-proplist-mode (Property list view)
 ;; * fsvn-propedit-mode (`fsvn-proplist-mode' subwindow property selected)
-;; * fsvn-log-view-mode (Log list)
-;; * fsvn-log-sibling-mode (`fsvn-log-view-mode' subwindow revision changed file list)
-;; * fsvn-log-message-mode (`fsvn-log-view-mode' subwindow revision log message)
+;; * fsvn-log-list-mode (Log list)
+;; * fsvn-log-sibling-mode (`fsvn-log-list-mode' subwindow revision changed file list)
+;; * fsvn-log-message-mode (`fsvn-log-list-mode' subwindow revision log message)
 
 ;; see repositories below
 ;; * http://svn.apache.org/repos/asf/subversion/trunk/

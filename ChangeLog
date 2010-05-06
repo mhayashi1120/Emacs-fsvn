@@ -1,11 +1,31 @@
+2010-05-05  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* ADD: `lock' with message (by universal-argument)
+
+	* CHANGE: fsvn-message-edit-before-commit-hook -> fsvn-minor-commit-before-commit-hook
+
+	* CHANGE: fsvn-message-edit-after-commit-hook -> fsvn-minor-commit-after-commit-hook
+
+	* ADD: create minor mode for editing message edit and file select
+
+	* ADD: fsvn-default-args-mkdir
+
+	* ADD: fsvn-default-args-import
+
+	* CHANGE: fsvn-log-view-* -> fsvn-log-list-*
+
+	* OBSOLETE: fsvn-buffer-target-file -> fsvn-propview-target-urlrev, fsvn-logview-target-urlrev
+	* OBSOLETE: fsvn-buffer-target-directory-p -> fsvn-propview-target-directory-p, fsvn-logview-target-directory-p
+	* OBSOLETE: fsvn-buffer-revision ->  fsvn-log-sibling-revision, fsvn-browse-revision
+	
 2010-05-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* ADD: implements `mergeinfo'.
 
 	* CHANGE fsvn-browse-open-log-edit -> fsvn-browse-open-message-edit
-	
+
 	* FIX: fsvn-browse-mkdir in repository.
-	
+
 	* CHANGE: fsvn-log-message-file-encoding -> fsvn-message-edit-file-encoding
 
 	* ADD: implements `merge'.
@@ -13,6 +33,8 @@
 	* ADD: fsvn-log-view-copy-urlrev
 
 	* FIX: fsvn-completing-read-revision
+
+	* ADD: fsvn-browse-create-branch/fsvn-browse-create-tag
 
 2010-04-29  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 

@@ -33,6 +33,7 @@
        "fsvn-minibuf.el"
        "fsvn-mode.el"
        "fsvn-msgedit.el"
+       "fsvn-parasite.el"
        "fsvn-popup.el"
        "fsvn-proc.el"
        "fsvn-propview.el"

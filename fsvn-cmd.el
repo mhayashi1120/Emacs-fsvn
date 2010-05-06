@@ -12,7 +12,8 @@
 
 
 
-;; no side effect svn command
+(eval-when-compile
+  (require 'cl))
 
 
 
@@ -241,82 +242,6 @@
 
 ;; with side effect svn subcommand
 
-(defmacro fsvn-merged-commit-foreach (alist &rest form)
-  "Each cell of ALIST bound to `from-url' and `to-file'"
-  `(mapc
-    (lambda (cell)
-      (let ((from-url (car cell))
-	    (to-file  (cdr cell)))
-	,@form))
-    ,alist))
-
-(defun fsvn-merged-consecutive-commit (alist from-revs)
-  "ALIST is (from-url . to-file)
-FROM-REVS (from-rev . to-rev)
-"
-  (fsvn-merged-commit-foreach alist
-    (unless (fsvn-url-repository-p from-url)
-      (error "%s is not a url" from-url))
-    (unless (fsvn-url-local-p to-file)
-      (error "%s is not a local path" to-file))
-    (unless (fsvn-file-versioned-directory-p to-file)
-      (error "%s is not under versioned" to-file))
-    (unless (file-exists-p to-file)
-      (error "%s is not exists" to-file))
-    ;; todo check local file status
-    )
-  (let ((logs (fsvn-get-files-logs (mapcar 'car alist) from-revs)))
-    (mapc
-     (lambda (log)
-       (let ((rev (fsvn-xml-log->logentry.revision log)))
-	 (fsvn-merged-commit-foreach alist
-	   (let ((urlrev (fsvn-url-urlrev from-url rev)))
-	     (unless (fsvn-save-file urlrev to-file 'no-msg)
-	       (error "Error while saving %s" urlrev)))))
-       (fsvn-call-command-discard "commit"
-				  "--message" (or (fsvn-xml-log->logentry=>msg$ log) "")
-				  (mapcar 'cdr alist)))
-     logs)))
-
-(defun fsvn-merged-consecutive-commit-url (to-url from-revs from-url)
-  (let* ((log-entries (fsvn-get-file-logs from-url from-revs))
-	 (wc (fsvn-get-temporary-wc (fsvn-url-dirname to-url)))
-	 (filename (fsvn-file-name-nondirectory to-url))
-	 (tmpfile (fsvn-expand-file filename wc)))
-    (mapc
-     (lambda (entry)
-       (let ((urlrev (fsvn-url-urlrev from-url (fsvn-xml-log->logentry.revision entry))))
-	 (unless (fsvn-save-file urlrev tmpfile 'no-msg)
-	   (error "Error while saving %s" urlrev))
-	 (fsvn-call-command-discard "commit"
-				    "--message" (or (fsvn-xml-log->logentry=>msg$ entry) "")
-				    tmpfile)))
-     log-entries)))
-
-;;todo not implements
-(defun fsvn-merged-consecutive-commit-url2 (to-url from-revs from-url)
-  (let* ((log-entries (fsvn-get-file-logs from-url from-revs))
-	 (toinfo (fsvn-get-info-entry to-url)))
-    (let (wc dir)
-      (setq dir
-	    (cond
-	     ((null toinfo)
-	      (fsvn-url-dirname to-url))
-	     ((eq (fsvn-xml-info->entry.kind toinfo) 'dir)
-	      to-url)
-	     (t
-	      (fsvn-url-dirname to-url))))
-      (setq wc (fsvn-get-temporary-wc dir))
-      (mapc
-       (lambda (entry)
-	 (let ((urlrev (fsvn-url-urlrev from-url (fsvn-xml-log->logentry.revision entry))))
-	   (unless (= (fsvn-call-command "export" nil "--quiet" "--force" urlrev wc) 0)
-	     (error "Error while `export' %s" urlrev))
-	   (fsvn-call-command-discard "commit"
-				      "--message" (or (fsvn-xml-log->logentry=>msg$ entry) "")
-				      wc)))
-       log-entries))))
-
 (defun fsvn-asap-add-file (file dest-url &optional filename)
   "DEST-URL is destination.
 FILENAME non-nil means ignore DEST-URL filename section."
@@ -471,7 +396,6 @@ Argument FILES ."
 
 
 
-(put 'fsvn-merged-commit-foreach 'lisp-indent-function 1)
 
 
 

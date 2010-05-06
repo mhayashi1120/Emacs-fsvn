@@ -118,7 +118,7 @@ This variable overwritten by `fsvn-repository-alist'"
   :type 'boolean)
 
 (defcustom fsvn-config-log-limit-count 50
-  "*Log entry limit in `fsvn-log-view-mode'
+  "*Log entry limit in `fsvn-log-list-mode'
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'integer)

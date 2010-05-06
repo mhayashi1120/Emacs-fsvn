@@ -111,6 +111,21 @@
   :group 'fsvn
   :type '(list string))
 
+(defcustom fsvn-default-args-mkdir nil
+  "*Default args for `mkdir'"
+  :group 'fsvn
+  :type '(list string))
+
+(defcustom fsvn-default-args-import nil
+  "*Default args for `import'"
+  :group 'fsvn
+  :type '(list string))
+
+(defcustom fsvn-default-args-checkout nil
+  "*Default args for `checkout'"
+  :group 'fsvn
+  :type '(list string))
+
 
 
 (defconst fsvn-global-buffer-local-variables
@@ -123,10 +138,6 @@
 (defvar fsvn-default-window-configuration nil)
 
 (defvar fsvn-buffer-repos-root nil)
-(defvar fsvn-buffer-revision nil)
-(defvar fsvn-buffer-target-file nil)
-(defvar fsvn-buffer-target-directory-p nil)
-(defvar fsvn-buffer-target-read-only nil)
 
 (defmacro fsvn-restore-window-buffer (&rest form)
   "Set window setting according to variable `fsvn-previous-window-configuration' after evaluate FORM."

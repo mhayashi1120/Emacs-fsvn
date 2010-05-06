@@ -246,6 +246,7 @@ This list sorted revision descending.
    path (fsvn-xml-log->logentry->paths logentry)))
 
 (defun fsvn-revision-range-to-string (rev-range)
+  "REV-RANGE is cons cell car is start revision, cdr is end revision."
   (format "%s:%s"
 	  (fsvn-get-revision-string (car rev-range))
 	  (fsvn-get-revision-string (cdr rev-range))))
