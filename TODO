@@ -95,6 +95,15 @@
 
 
 
+* svk
+
+** Not familiar interface
+
+** depotmap --init
+
+not works on windows
+
+
 * popup-result-mode
 
 ** `update' `merge' output 

@@ -327,7 +327,7 @@
     (write-region "AA" nil file4)
     (setq ignore-file (expand-file-name "ignore" wc1-dir))
     (write-region "ignore" nil ignore-file)
-    (fsvn-browse-add-prop-svn:ignore (list ignore-file))
+    (fsvn-browse-prop-add-svn:ignore-selected (list ignore-file))
     (fsvn-browse-add-selected (nreverse list))
 ;;     (fsvn-browse-commit-path)
     (fsvn-call-command-discard "commit" "--message" "add file") ;; revision 1

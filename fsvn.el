@@ -215,6 +215,7 @@
 (require 'fsvn-pub)
 
 (require 'fsvn-browse)
+(require 'fsvn-dired)
 
 (require 'fsvn-minibuf)
 (require 'fsvn-tortoise)

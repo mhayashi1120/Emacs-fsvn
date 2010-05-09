@@ -159,7 +159,7 @@ FIXME Does Emacs have list like this? "
   "When use asynchronous process.")
 
 ;; for `fsvn-browse-mode'
-(defun fsvn-magic-current-file ()
+(defun fsvn-magic-point-file ()
   (fsvn-magic-current-name fsvn-browse-point-urlrev))
 
 (defun fsvn-magic-current-directory ()

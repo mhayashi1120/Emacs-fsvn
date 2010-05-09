@@ -14,6 +14,12 @@
 
 (require 'dired)
 
+(require 'fsvn-popup)
+(require 'fsvn-browse)
+(require 'fsvn-debug)
+(require 'fsvn-magic)
+(require 'fsvn-ui)
+
 
 
 (defvar iswitchb-buffer-ignore)
@@ -356,22 +362,15 @@
 (defun fsvn-cmd-read-checkout-args ()
   (let (url args)
     (setq url (fsvn-completing-read-url "Checkout URL: "))
-    (setq args 
-	  (if current-prefix-arg
-	      (fsvn-read-svn-subcommand-args "checkout" t fsvn-default-args-checkout)
-	    fsvn-default-args-checkout))
+    (setq args (fsvn-cmd-read-subcommand-args "checkout" fsvn-default-args-checkout))
     (list url args)))
 
 (defun fsvn-cmd-read-import-args ()
   (let (file url args)
     (setq file (fsvn-read-file-name "Imported file: " nil nil t))
     (setq url (fsvn-completing-read-url "Import to URL: "))
-    (setq args
-	  (if current-prefix-arg
-	      (fsvn-read-svn-subcommand-args "import" t fsvn-default-args-import)
-	    fsvn-default-args-import))
+    (setq args (fsvn-cmd-read-subcommand-args "import" fsvn-default-args-import))
     (list file url args)))
-
 
 
 ;; * vc like global utility.
@@ -386,7 +385,7 @@
   (fsvn-open-log-view-mode buffer-file-name nil))
 
 (defun fsvn-vc-commit (&optional arg)
-  (interactive (list (when current-prefix-arg (fsvn-read-svn-subcommand-args "commit" t))))
+  (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
   (unless buffer-file-name
     (error "Buffer is not associated with a file"))
   (when (and (buffer-modified-p)
@@ -398,6 +397,20 @@
     (fsvn-browse-commit-mode (list buffer-file-name) arg)))
 
 
+
+(defun fsvn-initialize-loading ()
+  (fsvn-set-version)
+  (unless (file-directory-p fsvn-home-directory)
+    (make-directory fsvn-home-directory t))
+  (mapc
+   (lambda (dir)
+     (let ((dirname (fsvn-expand-file dir fsvn-home-directory)))
+       (unless (file-directory-p dirname)
+	 (make-directory dirname))))
+   fsvn-temp-directory-dirs)
+  (fsvn-cleanup-temp-directory)
+  (fsvn-build-subcommand)
+  (fsvn-toggle-feature t 'no-msg))
 
 (defun fsvn-toggle-command-boolean (optional-arg current-value)
   (cond

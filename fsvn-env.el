@@ -512,22 +512,6 @@ Optional argument FORM evaluate Lisp form."
 
 
 
-(defun fsvn-initialize-loading ()
-  (fsvn-set-version)
-  (unless (file-directory-p fsvn-home-directory)
-    (make-directory fsvn-home-directory t))
-  (mapc
-   (lambda (dir)
-     (let ((dirname (fsvn-expand-file dir fsvn-home-directory)))
-       (unless (file-directory-p dirname)
-	 (make-directory dirname))))
-   fsvn-temp-directory-dirs)
-  (fsvn-cleanup-temp-directory)
-  (fsvn-build-subcommand)
-  (fsvn-toggle-feature t 'no-msg))
-
-
-
 (defun fsvn-insert-string-to-buffer (string buffer)
   (with-current-buffer buffer
     (save-excursion

@@ -406,10 +406,7 @@ Keybindings:
     (fsvn-log-list-set-subwindow-config)))
 
 (defun fsvn-log-list-cmd-diff-arg ()
-  (list
-   (if current-prefix-arg
-       (fsvn-read-svn-subcommand-args "diff" t fsvn-default-args-diff)
-     fsvn-default-args-diff)))
+  (list (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
 
 (defun fsvn-log-list-matched-entries (text)
   (let (ret)
@@ -959,7 +956,7 @@ Keybindings:
 	    (t
 	     (fsvn-file-name-directory2 target)))))
     (setq to (fsvn-read-file-under-versioned "Copy To: " initial))
-    (setq args (fsvn-browse-cmd-copy/move-read-args "copy" 'fsvn-default-args-copy))
+    (setq args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy))
     (list from to args)))
 
 ;; * fsvn-log-sibling-mode interactive command

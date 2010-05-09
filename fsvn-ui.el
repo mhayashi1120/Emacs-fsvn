@@ -129,6 +129,13 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 
 
+(defcustom fsvn-dired-copy-filename-separator " "
+  "*String value of separate multiple filenames when killing."
+  :group 'fsvn-dired
+  :type 'string)
+
+
+
 ;; playing
 ;;  http://ja.wiktionary.org/wiki/Category:%E8%8B%B1%E8%AA%9E_%E4%B8%8D%E8%A6%8F%E5%89%87%E8%A4%87%E6%95%B0%E5%BD%A2%E3%81%AE%E5%90%8D%E8%A9%9E
 
@@ -219,6 +226,13 @@ This is what the do-commands look for, and what the mark-commands store.")
   `(save-window-excursion
      (fsvn-brief-message-clear-message)
      ,@form))
+
+
+(defmacro fsvn-cmd-read-subcommand-args (subcommand var)
+  `(if current-prefix-arg
+       (fsvn-read-svn-subcommand-args ,subcommand t ,var)
+     ,var))
+
 
 
 (provide 'fsvn-ui)
