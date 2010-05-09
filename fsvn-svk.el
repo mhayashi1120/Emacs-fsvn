@@ -31,7 +31,7 @@
 
 (defcustom fsvn-svk-perl-command nil
   "*Perl command that executing `fsvn-svk-script'.
-If executing problem occur in windows/cygwin then set this value."
+If there is executing problem in windows/cygwin then set path to perl.exe."
   :group 'fsvn-svk)
 
 (defcustom fsvn-svk-script "svk"
@@ -148,6 +148,15 @@ If executing problem occur in windows/cygwin then set this value."
 	      (executable-find fsvn-svk-script))
     (error "cannot execute %s" fsvn-svk-script)))
 
+(defun fsvn-svk-browse-draw-mirrored-url ()
+  (save-excursion
+    (let ((mirroered-url (fsvn-svk-mirrored-repos-root default-directory))
+	  buffer-read-only)
+      (when mirroered-url
+	(goto-char (point-min))
+	(when (re-search-forward fsvn-browse-re-root nil t)
+	  (replace-match mirroered-url t nil nil 2))))))
+
 (defmacro fsvn-svk-process-environment (&rest form)
   `(fsvn-process-environment 
     (let ((process-environment (copy-sequence process-environment)))
@@ -193,28 +202,44 @@ If executing problem occur in windows/cygwin then set this value."
 (defun fsvn-svk-read-depotpath (prompt &optional initial-contents)
   (read-from-minibuffer prompt initial-contents nil nil 'fsvn-svk-read-depotpath-history))
 
+(defun fsvn-svk-browse-cmd-read-create ()
+  (when (eq system-type 'windows-nt)
+    (error "Not supported this function on windows."))
+  (let (url mirrorpath depotpath)
+    (fsvn-brief-message-showing 
+     (setq url (fsvn-browse-current-repository-url))
+     (setq url (fsvn-completing-read-url "Mirroring URL: " url t))
+     (fsvn-brief-message-add-message (format "Mirrored URL: %s" url))
+     (setq mirrorpath (fsvn-svk-read-depotpath "Depotpath (Read-only mirror): " (fsvn-svk-mirror-depotpath)))
+     (fsvn-brief-message-add-message (format "Mirroring Path (Read-only): %s" mirrorpath))
+     (setq depotpath (fsvn-svk-read-depotpath "Depotpath (For working copy): " "//")))
+    (list url mirrorpath depotpath)))
+
 ;; fsvn-svk interactive command
 
 (defun fsvn-svk-browse-create (mirrored-url mirroring-depotpath depotpath)
   "Initialize and create `svk' repository to HOME directory."
-  (interactive (let ((url (fsvn-browse-current-repository-url))
-		     (mirrorpath (fsvn-svk-read-depotpath "Depotpath (Readonly mirror): " (fsvn-svk-mirror-depotpath)))
-		     (depotpath (fsvn-svk-read-depotpath "Depotpath (For working copy): " "//")))
-		 (list url mirrorpath depotpath)))
+  (interactive (fsvn-svk-browse-cmd-read-create))
   (fsvn-async-let ((buffer (fsvn-popup-result-create-buffer))
 		   (url mirrored-url)
 		   (mirrorpath mirroring-depotpath)
 		   (depotpath depotpath))
     (fsvn-buffer-popup-as-information buffer)
+    ;; create ~/.svk and local repository
     (fsvn-svk-start-command "depotmap" buffer "--init")
+    ;; create mirrorpath as mirroring repository and adding svm:* property
     (fsvn-svk-start-command "mirror" buffer mirrorpath url)
+    ;; get all revision log and data to mirroring repository
     (fsvn-svk-start-command "sync" buffer mirrorpath)
+    ;; copy mirroring repository to working repository
     (fsvn-svk-start-command "copy" buffer mirrorpath depotpath)
-    (insert "\n")
-    (insert "####################################################\n")
-    (insert "Done mirrorring.\n")
-    (insert "Checkout " (fsvn-svk-depotpath-url depotpath) "\n")
-    (insert "####################################################\n")))
+    (with-current-buffer buffer
+      (goto-char (point-max))
+      (insert "\n")
+      (insert "####################################################\n")
+      (insert "Done mirrorring.\n")
+      (insert "Checkout " (fsvn-svk-depotpath-url depotpath) "\n")
+      (insert "####################################################\n"))))
 
 (defun fsvn-svk-browse-push ()
   "Push working copy repository to mirroring repository and mirrored repository."
@@ -251,6 +276,12 @@ If executing problem occur in windows/cygwin then set this value."
     (prog1
 	(fsvn-svk-start-command "sync" buffer depotpath)
       (fsvn-buffer-popup-as-information buffer))))
+
+
+
+;; modify browse-mode buffer
+
+(add-hook 'fsvn-browse-mode-hook 'fsvn-svk-browse-draw-mirrored-url)
 
 
 

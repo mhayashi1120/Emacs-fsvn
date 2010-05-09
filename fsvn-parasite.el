@@ -114,7 +114,6 @@
        (:eval fsvn-parasite-commit-no-unlock)
        (:eval fsvn-parasite-commit-keep-changelist))
   fsvn-parasite-commit-mode-map
-  (setq fsvn-select-file-draw-list-function 'fsvn-parasite-commit-draw-list)
   (fsvn-parasite-check-mode 'fsvn-select-file-mode 'fsvn-message-edit-mode)
   (fsvn-parasite-make-buffer-variables fsvn-parasite-commit-buffer-local-variables))
 

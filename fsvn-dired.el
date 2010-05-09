@@ -14,7 +14,10 @@
 
 (require 'dired)
 (require 'dired-aux)
+(require 'bytecomp)
+
 (require 'fsvn-ui)
+(require 'fsvn-browse)
 
 
 
@@ -105,8 +108,8 @@ This function suppress this behavior."
 
 (defun fsvn-dired-get-filenames ()
   (fsvn-dired-switch-by-major-mode
-   (fsvn-dired-get-files)
-   (fsvn-browse-get-files)))
+   (fsvn-dired-gather-selected-files)
+   (fsvn-browse-gather-selected-files)))
 
 (defun fsvn-dired-unmark-all-files (mark)
   (fsvn-dired-switch-by-major-mode
@@ -157,7 +160,7 @@ This function suppress this behavior."
 
 ;; dired extension
 
-(defun fsvn-dired-get-files (&optional get-dot-file)
+(defun fsvn-dired-gather-selected-files (&optional get-dot-file)
   "If region not activate, get current line's filename."
   (let (temp)
     (cond
@@ -288,7 +291,7 @@ This function suppress this behavior."
 
 (defun fsvn-dired-do-marked-delete (files)
   "Act like `dired-do-flagged-delete'. But not equals of this."
-  (interactive (list (fsvn-browse-get-marked-files fsvn-mark-delete-char)))
+  (interactive (list (fsvn-browse-gather-marked-files fsvn-mark-delete-char)))
   (if (and files
 	   (or (not (interactive-p))
 	       (fsvn-browse-dired-confirm files 'delete dired-deletion-confirmer)))
@@ -314,11 +317,6 @@ This function suppress this behavior."
     (when (bolp)
       (backward-delete-char 1))
     (message "%s" (buffer-string))))
-
-(defcustom fsvn-dired-copy-filename-separator " "
-  "*"
-  :group 'fsvn-dired
-  :type 'string)
 
 (defun fsvn-dired-copy-filename-as-kill (files)
   "Copy names of marked (or next ARG) files into the kill ring.
@@ -349,7 +347,7 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
     (message "%s" string)))
 
 (defun fsvn-dired-pseudo-get-filename (&optional localp no-error-if-not-filep)
-  (let ((file (fsvn-magic-current-file)))
+  (let ((file (fsvn-magic-point-file)))
     (when (and (null file) (not no-error-if-not-filep))
       (error "No file on this line"))
     file))
@@ -358,7 +356,7 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
   (let* (all-of-them)
     (if arg
 	(cons (fsvn-dired-pseudo-get-filename) nil)
-      (setq all-of-them (fsvn-browse-get-marked-files))
+      (setq all-of-them (fsvn-browse-gather-marked-files))
       (cond
        ((and filter all-of-them)
 	(fsvn-mapitem
@@ -394,7 +392,7 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
      ((and current-prefix-arg
 	   (setq tmp (fsvn-browse-point-url)))
       (list (cons tmp nil)))
-     ((setq tmp (fsvn-browse-get-files))
+     ((setq tmp (fsvn-browse-gather-selected-files))
       (list tmp))
      (t
       (error "No file on this point")))))
@@ -404,6 +402,14 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
 	    `(lambda () (define-key dired-mode-map ,key ',def)))
   (add-hook 'fsvn-browse-mode-hook
 	    `(lambda () (define-key fsvn-browse-mode-map ,key ',def))))
+
+(defun fsvn-dired-define-browse-key (key def)
+  (add-hook 'fsvn-browse-mode-hook
+	    `(lambda () (define-key fsvn-browse-mode-map ,key ',def))))
+
+(defun fsvn-dired-define-browse-prefix-key (key def)
+  (add-hook 'fsvn-browse-mode-hook
+	    `(lambda () (define-key fsvn-browse-prefix-map ,key ',def))))
 
 
 
@@ -427,6 +433,25 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
     ad-do-it))
 
 (fsvn-dired-define-key "\C-c\C-d" 'fsvn-dired-toggle-browser)
+
+
+
+;; modify fsvn-browse definition
+
+(fsvn-dired-define-browse-key "+" 'fsvn-dired-create-directory)
+(fsvn-dired-define-browse-key "B" 'fsvn-dired-do-byte-compile)
+(fsvn-dired-define-browse-key "C" 'fsvn-dired-do-copy)
+(fsvn-dired-define-browse-key "D" 'fsvn-dired-do-delete)
+(fsvn-dired-define-browse-key "L" 'fsvn-dired-do-load)
+(fsvn-dired-define-browse-key "R" 'fsvn-dired-do-rename)
+(fsvn-dired-define-browse-key "W" 'fsvn-dired-copy-filename-fullpath)
+(fsvn-dired-define-browse-key "Z" 'fsvn-dired-do-compress)
+(fsvn-dired-define-browse-key "w" 'fsvn-dired-copy-filename-as-kill)
+(fsvn-dired-define-browse-key "x" 'fsvn-dired-do-marked-delete)
+(fsvn-dired-define-browse-key "y" 'fsvn-dired-show-file-type)
+(fsvn-dired-define-browse-key "~" 'fsvn-dired-mark-delete-backup-files)
+
+(fsvn-dired-define-browse-prefix-key "w" 'fsvn-dired-copy-repository-url)
 
 
 

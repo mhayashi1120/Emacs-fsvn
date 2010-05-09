@@ -1,3 +1,16 @@
+2010-05-09  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improve svk support
+
+2010-05-08  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Refactor: fsvn-browse-mode function name drastic change.
+	* Refactor: fsvn-magic-current-file -> fsvn-magic-point-file
+	* Refactor: fsvn-browse-log-this -> fsvn-browse-logview-this
+	* ADD: fsvn-browse-guessed-moved-parent-threshold
+	* FIX: fsvn-browse-info-selected, fsvn-browse-info-path
+	       Unable execute in repository.
+
 2010-05-05  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* ADD: `lock' with message (by universal-argument)
@@ -17,7 +30,7 @@
 	* OBSOLETE: fsvn-buffer-target-file -> fsvn-propview-target-urlrev, fsvn-logview-target-urlrev
 	* OBSOLETE: fsvn-buffer-target-directory-p -> fsvn-propview-target-directory-p, fsvn-logview-target-directory-p
 	* OBSOLETE: fsvn-buffer-revision ->  fsvn-log-sibling-revision, fsvn-browse-revision
-	
+
 2010-05-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* ADD: implements `mergeinfo'.
