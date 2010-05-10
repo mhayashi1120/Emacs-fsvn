@@ -102,7 +102,7 @@
 	  (define-key map "N" 'fsvn-log-list-next-mark)
 	  (define-key map "P" 'fsvn-log-list-previous-mark)
 	  (define-key map "R" 'fsvn-log-list-reload-with-revision)
-	  (define-key map "S" 'fsvn-log-list-save)
+	  (define-key map "S" 'fsvn-log-list-save-this)
 	  (define-key map "\C-c\C-k" 'fsvn-log-list-quit)
 	  (define-key map "\C-c\C-o" 'fsvn-log-switch-to-message)
 	  (define-key map "\C-c\C-q" 'fsvn-log-list-quit)
@@ -230,7 +230,7 @@ Keybindings:
 			  (fsvn-url-belongings-p text path))
 		 ;;FIXME regexp not correct
 		 (setq regexp (format "^[AD] \\(%s\\|%s\\)$" text (fsvn-url-decode-string copied))))))
-	   (fsvn-xml-log->logentry->paths logentry)))
+	   (fsvn-log-sibling-sorted-paths logentry)))
 	(fsvn-log-sibling-mode)
 	(when (and path (null regexp))
 	  (setq regexp (concat "^..\\(" (regexp-quote (fsvn-url-decode-string path)) "\\)\\(?:/\\|$\\)")))
@@ -327,20 +327,20 @@ Keybindings:
       (setq third-win (split-window nil (/ (window-height) 2)))
       (set-window-buffer third-win sibling-buffer))))
 
-(defun fsvn-log-list-get-buffer (url)
+(defun fsvn-log-list-get-buffer (urlrev)
   (let ((bufs (buffer-list))
 	target)
     (while bufs
       (with-current-buffer (car bufs)
 	(when (eq major-mode 'fsvn-log-list-mode)
-	  (when (string= fsvn-logview-target-urlrev url)
+	  (when (string= fsvn-logview-target-urlrev urlrev)
 	    (setq target (car bufs))
 	    (setq bufs nil))))
       (setq bufs (cdr bufs)))
     (if target
 	target
       (generate-new-buffer (concat fsvn-log-list-buffer-name
-				   "[" (fsvn-file-name-nondirectory url) "]")))))
+				   "[" (fsvn-file-name-nondirectory urlrev) "]")))))
 
 (defun fsvn-log-list-move-to-message ()
   (let ((eol (line-end-position)))
@@ -405,7 +405,7 @@ Keybindings:
     (fsvn-log-list-draw-details)
     (fsvn-log-list-set-subwindow-config)))
 
-(defun fsvn-log-list-cmd-diff-arg ()
+(defun fsvn-logview-cmd-read-diff-args ()
   (list (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
 
 (defun fsvn-log-list-matched-entries (text)
@@ -579,30 +579,49 @@ Keybindings:
      (t
       (format "%s:%s" start end)))))
 
-;; * fsvn-log-list-mode interactive command
+(defun fsvn-log-list-cmd-revision ()
+  (let ((rev (fsvn-log-list-point-revision)))
+    (unless rev
+      (error "This line has no revision."))
+    rev))
 
-(defun fsvn-log-list-reload-with-change-limit ()
-  (interactive)
+(defun fsvn-log-list-cmd-read-revision ()
+  (list (fsvn-log-list-cmd-revision)))
+
+(defun fsvn-log-list-cmd-read-save-this ()
+  (when fsvn-logview-target-directory-p
+    (error "\"%s\" is directory." fsvn-logview-target-urlrev))
+  (let* ((urlrev fsvn-logview-target-urlrev) ;;BUG consider using urlrev
+	 (rev (fsvn-log-list-point-revision))
+	 (file (fsvn-log-read-save-file (fsvn-urlrev-url urlrev) rev)))
+    (list urlrev file rev)))
+
+(defun fsvn-log-list-cmd-read-reload-with-change-limit ()
   (let (count)
     (setq count
 	  (fsvn-read-number "Log limit count: " (fsvn-config-log-limit-count fsvn-buffer-repos-root)))
+    (list count)))
+
+(defun fsvn-log-list-cmd-read-reload-with-revision ()
+  (let* ((range (fsvn-log-list-current-revision-range))
+	 (new-range (fsvn-completing-read-revision-range range)))
+    (list new-range)))
+
+;; * fsvn-log-list-mode interactive command
+
+(defun fsvn-log-list-reload-with-change-limit (count)
+  (interactive (fsvn-log-list-cmd-read-reload-with-change-limit))
     ;;todo consider rev-range arg
-    (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p nil count)))
+    (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p nil count))
 
 (defun fsvn-log-list-reload-with-revision (&optional range)
-  (interactive (list (fsvn-completing-read-revision-range (fsvn-log-list-current-revision-range))))
+  (interactive (fsvn-log-list-cmd-read-reload-with-revision))
   (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p range t))
 
-(defun fsvn-log-list-save ()
-  (interactive)
-  (when fsvn-logview-target-directory-p
-    (error "\"%s\" is directory." fsvn-logview-target-urlrev))
-  (let* ((url (fsvn-log-list-buffer-url))
-	 (rev (fsvn-log-list-point-revision))
-	 (entry (fsvn-log-list-find-showing-entry rev))
-	 file)
-    (when (setq file (fsvn-log-read-save-file url rev))
-      (fsvn-save-file-background url file rev))))
+(defun fsvn-log-list-save-this (urlrev file revision)
+  "Save current point REVISION to FILE."
+  (interactive (fsvn-log-list-cmd-read-save-this))
+  (fsvn-save-file-background urlrev file revision))
 
 (defun fsvn-log-list-next-line (&optional arg)
   "Move down lines then position at log message.
@@ -644,15 +663,12 @@ Optional prefix ARG says how many lines to move; default is one line."
   (fsvn-log-list-put-mark-this-line)
   (fsvn-log-list-next-line))
 
-(defun fsvn-log-list-show-details ()
-  (interactive)
-  (let ((rev (fsvn-log-list-point-revision)))
-    (if (not rev)
-	(message "This line has no revision.")
-      (fsvn-log-list-draw-details rev)
-      (fsvn-log-list-setup-detail-windows)
-      (setq fsvn-log-list-subwindow-settings (current-window-configuration))
-      (fsvn-log-list-set-subwindow-config))))
+(defun fsvn-log-list-show-details (rev)
+  (interactive (fsvn-log-list-cmd-read-revision))
+  (fsvn-log-list-draw-details rev)
+  (fsvn-log-list-setup-detail-windows)
+  (setq fsvn-log-list-subwindow-settings (current-window-configuration))
+  (fsvn-log-list-set-subwindow-config))
 
 (defun fsvn-log-list-scroll-message-up ()
   "When scroll reached to the top of sibling buffer, scroll the message buffer."
@@ -669,7 +685,7 @@ Optional prefix ARG says how many lines to move; default is one line."
 Mark is activated diff for region terminated revisions.
 Otherwise diff at point revision with working copy file or directory.
 "
-  (interactive (fsvn-log-list-cmd-diff-arg))
+  (interactive (fsvn-logview-cmd-read-diff-args))
   (cond
    (mark-active
     (fsvn-log-list-diff-with-region args))
@@ -691,7 +707,7 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-log-list-ediff-with-wc))))
 
 (defun fsvn-log-list-diff-with-wc (&optional args)
-  (interactive (fsvn-log-list-cmd-diff-arg))
+  (interactive (fsvn-logview-cmd-read-diff-args))
   (let ((file fsvn-logview-target-urlrev)
 	(rev (fsvn-log-list-point-revision))
 	buffer diff-args)
@@ -726,7 +742,7 @@ Otherwise diff at point revision with working copy file or directory.
   (interactive)
   (if (fsvn-log-list-subwindow-display-p)
       (delete-other-windows)
-    (fsvn-log-list-show-details)))
+    (fsvn-log-list-show-details (fsvn-log-list-cmd-revision))))
 
 (defun fsvn-log-list-isearch-text (text)
   (interactive
@@ -806,7 +822,7 @@ Otherwise diff at point revision with working copy file or directory.
 	  (fsvn-readonly-mode-keymap map)
 
 	  (define-key map "=" fsvn-log-sibling-diff-map)
-	  (define-key map "S" 'fsvn-log-sibling-save)
+	  (define-key map "S" 'fsvn-log-sibling-save-this)
 	  (define-key map "\C-c\C-d" 'fsvn-log-sibling-open-this-directory)
 	  (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
 	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-display)
@@ -877,15 +893,16 @@ Keybindings:
 
 (defun fsvn-log-sibling-get-local-filename ()
   "Guessed working copy file."
-  (let* ((point (fsvn-log-sibling-point-url)))
-    (when (and (fsvn-url-local-p default-directory)
-	       (fsvn-directory-versioned-p default-directory))
-      (let* ((info (fsvn-get-info-entry default-directory))
-	     ;;todo big bug. fsvn-xml-info->entry=>url$ contains space url is encoded.
-	     (current (fsvn-xml-info->entry=>url$ info))
-	     (filename (fsvn-url-relative-name current point)))
-	(when (file-exists-p filename)
-	  (fsvn-expand-file filename))))))
+  (let* ((url (fsvn-log-sibling-point-url)))
+    (when url
+      (when (and (fsvn-url-local-p default-directory)
+		 (fsvn-directory-versioned-p default-directory))
+	(let* ((info (fsvn-get-info-entry default-directory))
+	       ;;todo big bug. fsvn-xml-info->entry=>url$ contains space url is encoded.
+	       (current (fsvn-xml-info->entry=>url$ info))
+	       (filename (fsvn-url-relative-name current url)))
+	  (when (file-exists-p filename)
+	    (fsvn-expand-file filename)))))))
 
 (defun fsvn-log-sibling-get-buffer ()
   (get-buffer-create fsvn-log-sibling-buffer-name))
@@ -930,7 +947,7 @@ Keybindings:
 	(setq url (fsvn-expand-url path fsvn-buffer-repos-root))
 	(fsvn-url-urlrev url rev))))))
 
-(defun fsvn-log-sibling-target-file ()
+(defun fsvn-log-sibling-target-urlrev ()
   (with-current-buffer fsvn-log-source-buffer
     fsvn-logview-target-urlrev))
 
@@ -938,13 +955,20 @@ Keybindings:
   (with-current-buffer fsvn-log-source-buffer
     fsvn-logview-target-directory-p))
 
+(defun fsvn-log-sibling-sorted-paths (logentry)
+  (sort (fsvn-xml-log->logentry->paths logentry)
+	(lambda (p1 p2)
+	  (string-lessp 
+	   (fsvn-xml-log->logentry->paths->path$ p1)
+	   (fsvn-xml-log->logentry->paths->path$ p2)))))
+
 (defun fsvn-log-sibling-cmd-read-copy-file ()
   (let ((from (fsvn-log-sibling-point-urlrev))
 	filename target to args initial)
     (unless from
       (error "No file on this line"))
     (setq filename (fsvn-urlrev-filename from))
-    (setq target (fsvn-log-sibling-target-file))
+    (setq target (fsvn-log-sibling-target-urlrev))
     (setq initial 
 	  (fsvn-expand-file 
 	   filename
@@ -959,6 +983,35 @@ Keybindings:
     (setq args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy))
     (list from to args)))
 
+(defun fsvn-log-sibling-cmd-this-local-file ()
+  (let ((file (fsvn-log-sibling-get-local-filename)))
+    (unless file
+      (error "No file on this line"))
+    file))
+
+(defun fsvn-log-sibling-cmd-this-url ()
+  (let ((url (fsvn-log-sibling-point-url)))
+    (unless url
+      (error "No file on this line"))
+    url))
+
+(defun fsvn-log-sibling-cmd-this-urlrev ()
+  (let ((url (fsvn-log-sibling-cmd-this-url)))
+    (fsvn-url-urlrev url fsvn-log-sibling-revision)))
+
+(defun fsvn-log-sibling-cmd-read-this-local-file ()
+  (list (fsvn-log-sibling-cmd-this-local-file)))
+
+(defun fsvn-log-sibling-cmd-read-this-urlrev ()
+  (list (fsvn-log-sibling-cmd-this-urlrev)))
+
+(defun fsvn-log-sibling-cmd-read-save-this ()
+  (let* ((url (fsvn-log-sibling-cmd-this-url))
+	 (rev fsvn-log-sibling-revision)
+	 file)
+    (setq file (fsvn-log-read-save-file url rev))
+    (list (fsvn-url-urlrev url rev) file)))
+
 ;; * fsvn-log-sibling-mode interactive command
 
 (defun fsvn-log-sibling-next-line (&optional arg)
@@ -971,33 +1024,21 @@ Keybindings:
   (interactive "p")
   (forward-line (- arg)))
 
-(defun fsvn-log-sibling-log-this (&optional arg)
-  "Open file log as `fsvn-log-list-mode'.
-If guessed working copy file exists, this file as log target.
-Optional ARG means force to access repository by certainly correct url."
-  (interactive "P")
-  (fsvn-log-sibling-only-file
-   (let ((local-file (fsvn-log-sibling-get-local-filename)))
-     (if (and (null arg) local-file)
-	 (fsvn-open-log-view-mode local-file (fsvn-file-exact-directory-p local-file))
-       (let* ((urlrev (fsvn-log-sibling-point-urlrev))
-	      (info (fsvn-get-info-entry urlrev)))
-	 (fsvn-open-log-view-mode urlrev (eq (fsvn-xml-info->entry.kind info) 'dir)))))))
+(defun fsvn-log-sibling-log-this (urlrev)
+  "Open file log by `fsvn-log-list-mode'."
+  (interactive (fsvn-log-sibling-cmd-read-this-urlrev))
+  (let* ((urlrev (fsvn-log-sibling-point-urlrev))
+	 (info (fsvn-get-info-entry urlrev)))
+    (fsvn-open-log-view-mode urlrev (eq (fsvn-xml-info->entry.kind info) 'dir))))
 
-(defun fsvn-log-sibling-save ()
-  "Save current point url to local file."
-  (interactive)
-  (fsvn-log-sibling-only-file
-   (let* ((url (fsvn-log-sibling-point-url))
-	  (rev fsvn-log-sibling-revision)
-	  filename file)
-     (setq file (fsvn-log-read-save-file url rev))
-     (when file
-       (fsvn-save-file-background (fsvn-url-urlrev url rev) file)))))
+(defun fsvn-log-sibling-save-this (urlrev file)
+  "Save current point URL to local file."
+  (interactive (fsvn-log-sibling-cmd-read-save-this))
+  (fsvn-save-file-background urlrev file))
 
 (defun fsvn-log-sibling-diff-previous (&optional args)
   "Diff with previous version."
-  (interactive (fsvn-log-list-cmd-diff-arg))
+  (interactive (fsvn-logview-cmd-read-diff-args))
   (fsvn-log-sibling-diffable
    (let* (diff-args)
      (setq diff-args (list (format "--new=%s" URLREV)
@@ -1015,24 +1056,15 @@ Optional ARG means force to access repository by certainly correct url."
        (error "Error occur while saving remote file"))
      (fsvn-ediff-files file1 file2))))
 
-(defun fsvn-log-sibling-open-this ()
+(defun fsvn-log-sibling-open-this (filename)
   "Open guessed working copy file."
-  (interactive)
-  ;;TODO open repository file when prev revision?
-  (fsvn-log-sibling-only-file
-   (let* ((filename (fsvn-log-sibling-get-local-filename)))
-     (unless filename
-       (error "File not exists."))
-     (find-file filename))))
+  (interactive (fsvn-log-sibling-cmd-read-this-local-file))
+  (find-file filename))
 
-(defun fsvn-log-sibling-open-this-directory ()
+(defun fsvn-log-sibling-open-this-directory (filename)
   "Open guessed working copy file's directory."
-  (interactive)
-  (fsvn-log-sibling-only-file
-   (let* ((filename (fsvn-log-sibling-get-local-filename)))
-     (unless filename
-       (error "File not exists."))
-     (fsvn-working-copy (file-name-directory filename)))))
+  (interactive (fsvn-log-sibling-cmd-read-this-local-file))
+  (fsvn-working-copy (file-name-directory filename)))
 
 (defun fsvn-log-sibling-copy-this (src-urlrev dest-file &optional args)
   "Execute `copy' for point SRC-URLREV to DEST-FILE.
@@ -1101,14 +1133,29 @@ Keybindings:
 (defun fsvn-log-message-get-buffer ()
   (get-buffer-create fsvn-log-message-buffer-name))
 
+(defun fsvn-log-message-cmd-read-commit ()
+  (cond
+   ((not (buffer-modified-p))
+    (error "Message was not changed."))
+   ((not (y-or-n-p "Really commit changed log? "))
+    (error "quit"))))
+
+(defun fsvn-log-message-cmd-read-quit-edit ()
+  ;;TODO consider specific
+  (when (buffer-modified-p)
+    (error "Log message was changed.")))
+
+(defun fsvn-log-message-cmd-read-browse-this ()
+  (let ((link (get-text-property (point) 'fsvn-url-link)))
+    (unless link
+      (error "No url here."))
+    (list link)))
+
 ;; * fsvn-log-message-mode interactive command
 
-(defun fsvn-log-message-browse-this ()
+(defun fsvn-log-message-browse-this (link)
   (interactive)
-  (let ((prop (get-text-property (point) 'fsvn-url-link)))
-    (unless prop
-      (error "No url here."))
-    (browse-url prop)))
+  (browse-url link))
 
 (defun fsvn-log-message-start-edit ()
   (interactive)
@@ -1118,28 +1165,20 @@ Keybindings:
    (substitute-command-keys (concat "Type \\[fsvn-log-message-commit] to finish edit, "))))
 
 (defun fsvn-log-message-quit-edit ()
-  (interactive)
-  (when (buffer-modified-p)
-    (error "Log message unchanged."))
+  (interactive (fsvn-log-message-cmd-read-quit-edit))
   (setq buffer-read-only t)
   (force-mode-line-update))
 
 (defun fsvn-log-message-commit ()
   "Commit changed log message."
-  (interactive)
-  (cond
-   ((not (buffer-modified-p))
-    (message "Message was not changed."))
-   ((not (y-or-n-p "Really commit changed log? "))
-    )
-   (t
-    (let ((tmpfile (fsvn-get-prop-temp-file "svn:log" (buffer-substring (point-min) (point-max)))))
-      (fsvn-call-process-with-popup "propset"
-				    "--file" tmpfile
-				    "--revprop" "svn:log"
-				    "--revision" fsvn-log-message-revision
-				    fsvn-buffer-repos-root))
-    )))
+  (interactive (fsvn-log-message-cmd-read-commit))
+  (let ((tmpfile (fsvn-get-prop-temp-file "svn:log" (buffer-substring (point-min) (point-max)))))
+    (fsvn-call-process-with-popup "propset"
+				  "--file" tmpfile
+				  "--revprop" "svn:log"
+				  "--revision" fsvn-log-message-revision
+				  fsvn-buffer-repos-root)))
+
 
 
 
@@ -1152,9 +1191,10 @@ Keybindings:
     (setq filename (fsvn-url-decode-string (fsvn-urlrev-filename url)))
     (setq rev-name (fsvn-file-name-as-revisioned filename rev))
     (setq file (read-file-name "Save as: " nil nil nil rev-name))
-    (when (or (not (file-exists-p file))
-	      (y-or-n-p "File exists. overwrite? "))
-      (fsvn-expand-file file))))
+    (when (and (file-exists-p file)
+	       (not (y-or-n-p "File exists. overwrite? ")))
+      (error "quit"))
+    (fsvn-expand-file file)))
 
 (defun fsvn-log-subwindow-switch-to-view ()
   (interactive)

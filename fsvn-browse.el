@@ -171,7 +171,7 @@
 	  (define-key map "E" 'fsvn-browse-export-path)
 	  (define-key map "I" 'fsvn-browse-info-path)
 	  (define-key map "K" 'fsvn-browse-unlock-selected)
-	  (define-key map "L" 'fsvn-browse-log-path)
+	  (define-key map "L" 'fsvn-browse-logview-path)
 	  (define-key map "P" 'fsvn-browse-propview-path)
 	  (define-key map "S" 'fsvn-browse-switch-path)
 	  (define-key map "T" 'fsvn-browse-remove-changelist-selected)
@@ -1899,12 +1899,12 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
   (fsvn-start-copy/move-process-with-popup "move" (list src-file) dest-file args))
 
 ;;NOTE 1.4.x cannot copy/move multiple files
-(defun fsvn-browse-move-selected (src-files dest &optional args)
-  "Execute `move' for selected SRC-FILES to DEST
+(defun fsvn-browse-move-selected (src-files dest-dir &optional args)
+  "Execute `move' for selected SRC-FILES to DEST-DIR
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-move-selected))
-  (fsvn-start-copy/move-process-with-popup "move" src-files dest args))
+  (fsvn-start-copy/move-process-with-popup "move" src-files dest-dir args))
 
 (defun fsvn-browse-copy-this (src-file dest-file &optional args)
   "Execute `copy' for point SRC-FILE to DEST-FILE.
@@ -1914,12 +1914,12 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
   (fsvn-start-copy/move-process-with-popup "copy" (list src-file) dest-file args))
 
 ;;NOTE 1.4.x cannot copy/move multiple files
-(defun fsvn-browse-copy-selected (src-files dest &optional args)
-  "Execute `copy' for selected SRC-FILES to DEST
+(defun fsvn-browse-copy-selected (src-files dest-dir &optional args)
+  "Execute `copy' for selected SRC-FILES to DEST-DIR
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-copy-selected))
-  (fsvn-start-copy/move-process-with-popup "copy" src-files dest args))
+  (fsvn-start-copy/move-process-with-popup "copy" src-files dest-dir args))
 
 (defun fsvn-browse-safe-move-this (src-file dest-file &optional args)
   "Execute `move' for current file as SRC-FILE to DEST-FILE.
@@ -2067,14 +2067,14 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
   (fsvn-start-process-with-popup "mergeinfo" file args))
 
 (defun fsvn-browse-logview-this (file-struct)
-  "Execute `log' for current file."
+  "Execute `log' for current file showing by `fsvn-log-list-mode'."
   (interactive (fsvn-browse-cmd-read-this-file-struct))
   (fsvn-open-log-view-mode
    (fsvn-struct-browse-file-get-name file-struct)
    (fsvn-struct-browse-file-get-directory-p file-struct)))
 
-(defun fsvn-browse-log-path ()
-  "Execute `log' for current directory."
+(defun fsvn-browse-logview-path ()
+  "Execute `log' for current directory showing by `fsvn-log-list-mode'."
   (interactive)
   (fsvn-open-log-view-mode (fsvn-browse-current-directory-urlrev) t))
 

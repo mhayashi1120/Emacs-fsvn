@@ -1,6 +1,17 @@
+2010-05-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: fsvn-log-sibling-save-this
+	       Unable save revisioned url.
+
+	* Refactor: fsvn-log-list-save -> fsvn-log-list-save-this
+
+	* Improvement: fsvn-log-sibling-mode sort all by path name.
+
+	* Change: fsvn-browse-log-path -> fsvn-browse-logview-path
+
 2010-05-09  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
-	* Improve svk support
+	* Improvement: svk support
 
 2010-05-08  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 

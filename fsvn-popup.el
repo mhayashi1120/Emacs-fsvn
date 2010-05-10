@@ -126,6 +126,7 @@ Keybindings:
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
     (unless  (and proc (memq (process-status proc) '(run stop)))
+      ;; delete from variable (kill process by external command ex: kill or taskmanager)
       (setq fsvn-popup-result-process nil)
       (error "No process to kill"))
     (when (y-or-n-p "Active process running.  kill it? ")

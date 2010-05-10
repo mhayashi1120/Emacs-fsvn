@@ -83,7 +83,7 @@ explicitly in calling function.
 
 (defun fsvn-call-command-discard (subcommand &rest args)
   "`call-process' and discard executed command output.
-If error occur in process (exit status non zero value) then raise error."
+If error occur in process (exit status with non zero value) then raise error."
   (with-temp-buffer
     (unless (= (apply 'fsvn-call-command subcommand t args) 0)
       (signal 'fsvn-command-error (list subcommand args (buffer-string))))
