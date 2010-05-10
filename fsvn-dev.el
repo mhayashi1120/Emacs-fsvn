@@ -20,7 +20,8 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 (defun fsvn-browse-cmd-read-upgrade-source-tree-args ()
   (fsvn-browse-cmd-wc-only
    (let ((dir (fsvn-read-directory-name "New Source: " nil nil t)))
-     
+     (unless (y-or-n-p "This takes many seconds. ok? ")
+       (error "quit"))
      (list dir))))
 
 (defun fsvn-browse-upgrade-source-tree (new-source)
@@ -145,6 +146,22 @@ FROM-REVS (from-rev . to-rev)
 				      wc)))
        log-entries))))
 
+
+
+
+(defun fsvn-logs-multiple-url (urlrevs)
+  (let (ret)
+    (mapc
+     (lambda (urlrev)
+       (with-temp-buffer
+	 (let (tmp)
+	   (unless (= (fsvn-call-command "log" (current-buffer) "--xml" "--verbose" urlrev) 0)
+	     (error "Error while executing `svn log'"))
+	   (setq tmp (fsvn-xml-parse-logentry))
+	   (setq ret (fsvn-logs-unique-merge ret tmp))
+	   tmp)))
+     urlrevs)
+    (sort ret (lambda (l1 l2) (< (fsvn-xml-log->logentry.revision l1) (fsvn-xml-log->logentry.revision l2))))))
 
 
 

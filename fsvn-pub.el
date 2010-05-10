@@ -518,7 +518,7 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
 		last (car entries)))
 	(fsvn-log-list-mode)
 	(setq fsvn-logview-target-directory-p directory-p)
-	(setq fsvn-logview-target-urlrev (fsvn-urlrev-url urlrev)) ;;TODO url -> urlrev??
+	(setq fsvn-logview-target-urlrev urlrev)
 	(setq fsvn-buffer-repos-root root)
 	(setq fsvn-previous-window-configuration win-config)
 	(setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))

@@ -18,6 +18,8 @@
 
 ** License GPL V2 -> GPL v3
 
+** file-select, message-edit can kill-buffer when commiting.
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
@@ -69,6 +71,9 @@
  call tortoise viewer (Windows)
 ** logview-mode diff with non visible revision.
 
+** this file arg to interactive arg
+
+** refactor about diff
 
 * prop-mode
 
