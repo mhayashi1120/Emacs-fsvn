@@ -20,6 +20,8 @@
 
 ** file-select, message-edit can kill-buffer when commiting.
 
+** complete revision with electric select
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
@@ -77,6 +79,9 @@
 
 * prop-mode
 
+** prop-recursive-mode
+
+proplist --recursive
 
 * diff
 ** async diff

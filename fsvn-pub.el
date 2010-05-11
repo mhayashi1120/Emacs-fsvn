@@ -198,7 +198,7 @@
   "Authenticate by `svn' to REPOSITORY."
   (interactive (list (fsvn-completing-read-url "Authenticate URL: " nil t)))
   (if (eq system-type 'windows-nt)
-      ;;TODO FIXME not work in windows prompt.
+      ;;TODO FIXME not works prompt on windows.
       (fsvn-win-start-external-terminal (executable-find fsvn-svn-command) "info" repository)
     (let ((buffer (fsvn-make-temp-buffer))
 	  (coding-system-for-write 'unix)

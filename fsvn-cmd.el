@@ -12,11 +12,6 @@
 
 
 
-(eval-when-compile
-  (require 'cl))
-
-
-
 (defun fsvn-get-prop-value-alist (url)
   (mapcar
    (lambda (propname)
