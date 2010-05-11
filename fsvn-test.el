@@ -77,7 +77,9 @@
        (mapc 
 	(lambda (b)
 	  (unless (memq b PREV-BUFFER-LIST)
-	    (kill-buffer b)))
+	    (let ((process (get-buffer-process b)))
+	      (when (or (null process) (eq (process-status process) 'exit))
+		(kill-buffer b)))))
 	(buffer-list))
        (switch-to-buffer PREV-BUFFER)
        (set-window-configuration PREV-WIN-CONFIG))))
@@ -177,8 +179,21 @@
        all)
       (nreverse ret))))
 
-(defun fsvn-test-sit-for ()
-  (sit-for 0.0))
+(defun fsvn-test-sit-for (&optional time)
+  (sit-for (or time 0.0)))
+
+(defun fsvn-test-wait-for ()
+  (while (catch 'wait
+	   (mapc
+	    (lambda (p)
+	      (unless (memq p fsvn-test-start-process-list)
+		(throw 'wait t)))
+	    (process-list))
+	   nil)
+    (sit-for 5)))
+
+(defvar fsvn-test-start-process-list nil)
+(setq fsvn-test-start-process-list (process-list))
 
 (when fsvn-test-check-through-all
   (fsvn-test-gather-function-add-checker))
@@ -290,6 +305,8 @@
 	(repos-url (fsvn-file-name-as-repository repos-dir))
 	(wc1-dir (expand-file-name "wc1" test-dir))
 	(wc2-dir (expand-file-name "wc2" test-dir))
+	(wc3-dir (expand-file-name "wc3" test-dir))
+	(trash-dir (expand-file-name "trash" test-dir))
 	(default-directory test-dir)
 	;; cancel all configuration
 	(fsvn-repository-alist nil)
@@ -304,6 +321,8 @@
 	ignore-file)
    (make-directory wc1-dir)
    (make-directory wc2-dir)
+   (make-directory wc3-dir)
+   (make-directory trash-dir)
    (fsvn-test-async
     (fsvn-admin-create-repository repos-dir)
     (setq default-directory wc1-dir)
@@ -340,7 +359,12 @@
     (fsvn-browse-mark-file-mark) ;; mark file2
     (fsvn-browse-mark-file-delete) ;; delete mark file3
     (fsvn-test-sit-for)
+    (fsvn-test-equal (fsvn-browse-cmd-selected-urls) (list file2))
+    (fsvn-test-equal (fsvn-browse-cmd-selected-urlrevs) (list file2))
+    (fsvn-test-sit-for)
     (fsvn-previous-file 2) ;; move to file2
+    (fsvn-test-equal (fsvn-browse-cmd-this-urlrev) file2)
+    (fsvn-test-equal (fsvn-browse-cmd-this-wc-file) file2)
     (fsvn-test-sit-for)
     (fsvn-browse-mark-file-unmark) ;; unmark file2
     (fsvn-browse-mark-file-unmark) ;; unmark file3
@@ -357,6 +381,7 @@
     (fsvn-test-sit-for)
     ;; modify a file
     (write-region "Z" nil file2 t)
+    (fsvn-browse-diff-this file2)
     (fsvn-call-command-discard "commit" "--message" "modify file") ;; revision 3
     (revert-buffer)
     (fsvn-test-sit-for)
@@ -379,6 +404,17 @@
     (fsvn-test-sit-for)
     (fsvn-browse-info-selected (list file3))
     (fsvn-test-sit-for)
+    ;; blame
+    (fsvn-browse-blame-this file3)
+    (fsvn-test-sit-for)
+    ;; export
+    (let ((export-file (expand-file-name "export-file" trash-dir))
+	  (export-dir (expand-file-name "export-dir" trash-dir)))
+      (fsvn-test-async
+       (fsvn-browse-export-this file3 export-file)
+       (fsvn-test-sit-for)
+       (fsvn-browse-export-path export-dir)
+       (fsvn-test-sit-for)))
     ;; copy
     (if (version<= fsvn-svn-version "1.5.0")
 	(fsvn-test-async
@@ -475,7 +511,17 @@
 ;;       (process-send-string proc "p"))
       ;;todo
       ;;       (fsvn-set-revprop-value (fsvn-url-urlrev url 2) 
-    )))
+    
+    )
+   (fsvn-test-async
+    (dired wc3-dir)
+    (setq default-directory wc3-dir)
+    (fsvn-checkout repos-url)
+    (fsvn-dired-toggle-browser)
+    (fsvn-test-sit-for)
+    (fsvn-browse-logview-path)
+    (fsvn-test-sit-for))
+   (fsvn-test-wait-for)))
 
 ;; check coverage.
 (when fsvn-test-check-through-all

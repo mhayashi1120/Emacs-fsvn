@@ -1550,7 +1550,7 @@ PATH is each executed path."
   (fsvn-browse-cmd-wc-only
    (let* ((file (fsvn-browse-cmd-this-wc-file))
 	  (args (fsvn-browse-cmd-read-merge-path)))
-     (list file args))))
+     (append (list file) args))))
 
 (defun fsvn-browse-cmd-read-merge-path ()
   (fsvn-browse-cmd-wc-only
@@ -1558,7 +1558,7 @@ PATH is each executed path."
     (let (from to args)
       (setq from (fsvn-read-url-with-revision "URL1: "))
       (fsvn-brief-message-add-message (format "URL1: %s" from))
-      (setq to (fsvn-read-url-with-revision "URL2: " from))
+      (setq to (fsvn-read-url-with-revision "URL2: " (fsvn-urlrev-url from)))
       (fsvn-brief-message-add-message (format "URL2: %s" to))
       (setq args (fsvn-cmd-read-subcommand-args "merge" fsvn-default-args-merge))
       (list from to args)))))
@@ -1707,7 +1707,7 @@ PATH is each executed path."
   "Prepare `commit' buffer for changing files in this directory.
 "
   (interactive (fsvn-browse-cmd-read-wc-path-with-args "commit" fsvn-default-args-commit))
-  (fsvn-browse-commit-selected (list (fsvn-browse-current-path))))
+  (fsvn-browse-commit-selected (list (fsvn-browse-current-path)) args))
 
 (defun fsvn-browse-cleanup-path (&optional args)
   (interactive (fsvn-browse-cmd-read-wc-path-with-args "cleanup" fsvn-default-args-cleanup))
