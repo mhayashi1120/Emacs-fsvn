@@ -175,7 +175,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 	     (unless script
 	       (error "Execution error. Script(%s) not found" fsvn-svk-script))
 	     (list fsvn-svk-perl-command script)))
-     (setq internal-args (nconc internal-args (cons subcommand real-args)))
+     (setq internal-args (append internal-args (cons subcommand real-args)))
      (fsvn-debug internal-args)
      (setq proc (apply 'start-process "fsvn svk" buffer internal-args))
      (set-process-sentinel proc 'fsvn-svk-process-sentinel)

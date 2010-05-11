@@ -171,8 +171,8 @@
   (with-temp-buffer
     (let ((args (list "--xml" "--verbose")))
       (when rev-range
-	(setq args (nconc args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
-      (setq args (nconc args (list file)))
+	(setq args (append args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
+      (setq args (append args (list file)))
       (when (= (apply 'fsvn-call-command "log" t args) 0)
 	(fsvn-xml-parse-logentry)))))
 
@@ -189,8 +189,8 @@
   (with-temp-buffer
     (let ((args (list "--xml")))
       (when rev-range
-	(setq args (nconc args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
-      (setq args (nconc args (list file)))
+	(setq args (append args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
+      (setq args (append args (list file)))
       (when (= (apply 'fsvn-call-command "blame" t args) 0)
 	(car (fsvn-xml-parse-blame))))))
 

@@ -177,8 +177,8 @@ Optional argument ARGS svn command arguments."
 	ret)
     (setq args
 	  (if (> (length files) 1)
-	      (nconc args (list "--targets" (fsvn-make-targets-file files)))
-	    (nconc args files)))
+	      (append args (list "--targets" (fsvn-make-targets-file files)))
+	    (append args files)))
     (setq ret (apply 'fsvn-call-command-display command buffer args))
     (fsvn-buffer-popup-as-information buffer)
     (unless (= ret 0)
