@@ -448,7 +448,7 @@ Optional argument FORM evaluate Lisp form."
        (cond
 	((fsvn-file-exact-directory-p file)
 	 (when (setq tmp (fsvn-directory-unsaved-buffers file))
-	   (setq ret (nconc ret tmp))))
+	   (setq ret (append ret tmp))))
 	(t
 	 (let ((buffer (get-file-buffer file)))
 	   (when (and buffer

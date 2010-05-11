@@ -195,7 +195,7 @@ Like `let' binding, varlist binded while executing BODY."
        (cond
 	((null x))
 	((listp x)
-	 (setq ret (nconc (nreverse (fsvn-flatten-command-args x)) ret)))
+	 (setq ret (append (nreverse (fsvn-flatten-command-args x)) ret)))
 	((stringp x)
 	 (cond
 	  ((fsvn-url-repository-p x)

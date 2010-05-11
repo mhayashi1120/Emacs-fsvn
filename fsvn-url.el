@@ -86,7 +86,7 @@
 	 (paren-list (and parent (split-string parent "/"))))
     (when (and path-list (string= (car path-list) ""))
       (setq path-list (cdr path-list)))
-    (fsvn-url-concat-split-path (nconc paren-list path-list))))
+    (fsvn-url-concat-split-path (append paren-list path-list))))
 
 ;; FIXME (fsvn-expand-url "A" "http://a/../../")
 ;;    -> "http:/A" but "http://A" is correct.

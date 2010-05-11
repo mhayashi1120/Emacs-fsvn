@@ -629,8 +629,8 @@ PATH is each executed path."
   (let (proc args)
     (setq args (list "--xml" "--no-ignore" "--non-recursive" "--non-interactive"))
     (when (fsvn-config-browse-show-update (fsvn-xml-info->entry=>repository=>root$ info))
-      (setq args (nconc args (list "--show-updates"))))
-    (setq args (nconc args (list directory)))
+      (setq args (append args (list "--show-updates"))))
+    (setq args (append args (list directory)))
     (setq proc (fsvn-start-command "status"
 				   (fsvn-make-temp-buffer)
 				   args))
