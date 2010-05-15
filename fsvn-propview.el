@@ -390,7 +390,7 @@ Keybindings:
 	    (let ((propname (fsvn-struct-proplist-prop-get-name prop)))
 	      (cond
 	       ((eq (fsvn-struct-proplist-prop-get-mark prop) fsvn-mark-delete-char)
-		(fsvn-call-process-with-popup
+		(fsvn-popup-call-process
 		 "propdel" propname
 		 (when (fsvn-struct-proplist-prop-get-recursive-p prop)
 		   "--recursive")
@@ -399,7 +399,7 @@ Keybindings:
 	       ((fsvn-struct-proplist-prop-get-recursive-p prop)
 		(unless value-file
 		  (setq value-file (fsvn-get-propget-file propname file)))
-		(fsvn-call-process-with-popup
+		(fsvn-popup-call-process
 		 "propset" propname
 		 "--recursive"
 		 "--file" value-file

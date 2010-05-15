@@ -198,7 +198,7 @@ Keybindings: none
 		 ((eq prev-rev rev)) ;; do nothing
 		 (t
 		  (erase-buffer)
-		  (let ((entry (fsvn-find-logs-entry rev data))
+		  (let ((entry (fsvn-logs-find-logentry data rev))
 			msg date)
 		    (setq msg (fsvn-xml-log->logentry=>msg$ entry))
 		    (setq date (format-time-string fsvn-generic-datetime-format (fsvn-xml-log->logentry=>date$ entry)))
@@ -410,7 +410,7 @@ Keybindings: none
 	     (lambda (entry)
 	       (let ((rev (fsvn-xml-blame->target->entry=>commit.revision entry)))
 		 (if rev
-		     (fsvn-find-logs-entry rev logs)
+		     (fsvn-logs-find-logentry logs rev)
 		   nil)))
 	     (fsvn-xml-blame->target->entries blame)))
       (when (fsvn-url-local-p file)

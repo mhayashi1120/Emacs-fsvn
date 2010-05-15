@@ -186,7 +186,7 @@
 
 ;; misc
 
-(defun fsvn-log-create-path-chain (path log-entries)
+(defun fsvn-logs-create-path-chain (log-entries path)
   "Return list of cell like (revision . path).
 This list sorted revision descending.
 "
@@ -213,8 +213,8 @@ This list sorted revision descending.
      log-entries)
     (nreverse ret)))
 
-(defun fsvn-log-chain-find (rev path log-entries)
-  (let ((chain (fsvn-log-create-path-chain path log-entries))
+(defun fsvn-logs-chain-find (log-entries rev path)
+  (let ((chain (fsvn-logs-create-path-chain log-entries path))
 	(prev path))
     (catch 'found
       (mapc
@@ -227,29 +227,11 @@ This list sorted revision descending.
        chain)
       (or prev path))))
 
-(defun fsvn-find-status-entry (status-entries file)
-  (fsvn-find-first
-   (lambda (key item)
-     (string= key (fsvn-xml-status->target->entry.path item)))
-   (directory-file-name file) status-entries))
-
-(defun fsvn-find-logs-entry (rev logs)
+(defun fsvn-logs-find-logentry (logs rev)
   (fsvn-find-first
    (lambda (key item)
      (= key (fsvn-xml-log->logentry.revision item)))
    rev logs))
-
-(defun fsvn-find-logentry-path (path logentry)
-  (fsvn-find-first
-   (lambda (key path-entry)
-     (string= key (fsvn-xml-log->logentry->paths->path$ path-entry)))
-   path (fsvn-xml-log->logentry->paths logentry)))
-
-(defun fsvn-revision-range-to-string (rev-range)
-  "REV-RANGE is cons cell car is start revision, cdr is end revision."
-  (format "%s:%s"
-	  (fsvn-get-revision-string (car rev-range))
-	  (fsvn-get-revision-string (cdr rev-range))))
 
 (defun fsvn-logs-unique-merge (&rest entries)
   (let ((all (apply 'append entries))
@@ -265,6 +247,24 @@ This list sorted revision descending.
 	 (setq ret (cons x ret))))
      all)
     (nreverse ret)))
+
+(defun fsvn-find-status-entry (status-entries file)
+  (fsvn-find-first
+   (lambda (key item)
+     (string= key (fsvn-xml-status->target->entry.path item)))
+   (directory-file-name file) status-entries))
+
+(defun fsvn-find-logentry-path (path logentry)
+  (fsvn-find-first
+   (lambda (key path-entry)
+     (string= key (fsvn-xml-log->logentry->paths->path$ path-entry)))
+   path (fsvn-xml-log->logentry->paths logentry)))
+
+(defun fsvn-revision-range-to-string (rev-range)
+  "REV-RANGE is cons cell car is start revision, cdr is end revision."
+  (format "%s:%s"
+	  (fsvn-get-revision-string (car rev-range))
+	  (fsvn-get-revision-string (cdr rev-range))))
 
 (defun fsvn-set-filename-property (filename)
   (fsvn-string-put-property filename 'fsvn-filename t))

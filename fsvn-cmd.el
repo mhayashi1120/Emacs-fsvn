@@ -201,7 +201,7 @@
      (lambda (entry)
        (let ((rev (fsvn-xml-blame->target->entry=>commit.revision entry)))
 	 (if rev
-	     (fsvn-find-logs-entry rev logs)
+	     (fsvn-logs-find-logentry logs rev)
 	   nil)))
      (fsvn-xml-blame->target->entries blame))))
 

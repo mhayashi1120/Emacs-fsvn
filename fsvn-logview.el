@@ -246,10 +246,10 @@ Keybindings:
       (run-hooks 'fsvn-log-sibling-mode-hook))))
 
 (defun fsvn-log-list-find-showing-entry (rev)
-  (fsvn-find-logs-entry rev fsvn-log-list-entries))
+  (fsvn-logs-find-logentry fsvn-log-list-entries rev))
 
 (defun fsvn-log-list-find-entry (rev)
-  (fsvn-find-logs-entry rev fsvn-log-list-all-entries))
+  (fsvn-logs-find-logentry fsvn-log-list-all-entries rev))
 
 (defun fsvn-log-list-point-revision ()
   (save-excursion
@@ -492,7 +492,7 @@ Keybindings:
       (fsvn-log-list-find-path rev path))))
 
 (defun fsvn-log-list-find-path (rev path)
-  (fsvn-log-chain-find rev path fsvn-log-list-all-entries))
+  (fsvn-logs-chain-find fsvn-log-list-all-entries rev path))
 
 (defun fsvn-log-list-set-subwindow-config ()
   (let* ((subconf fsvn-log-list-subwindow-settings)
@@ -1071,7 +1071,7 @@ Keybindings:
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-log-sibling-cmd-read-copy-file))
-  (fsvn-start-copy/move-process-with-popup "copy" (list src-urlrev) dest-file args))
+  (fsvn-popup-start-copy/move-process "copy" (list src-urlrev) dest-file args))
 
 
 
@@ -1173,7 +1173,7 @@ Keybindings:
   "Commit changed log message."
   (interactive (fsvn-log-message-cmd-read-commit))
   (let ((tmpfile (fsvn-get-prop-temp-file "svn:log" (buffer-substring (point-min) (point-max)))))
-    (fsvn-call-process-with-popup "propset"
+    (fsvn-popup-call-process "propset"
 				  "--file" tmpfile
 				  "--revprop" "svn:log"
 				  "--revision" fsvn-log-message-revision

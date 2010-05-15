@@ -65,7 +65,8 @@
 (defun check-fsvn ()
   (initialize)
   (lint)
-  (compile))
+  (compile)
+  (test))
 
 (defun install-fsvn ()
   (initialize)
@@ -133,5 +134,17 @@
 	      (set-file-modes dest ?\644)))
 	  (list (cons el dest-el) (cons elc dest-elc)))))
      ALL-MODULES)))
+
+(defun test ()
+  (mapc
+   (lambda (m)
+     (load-file m))
+   ALL-MODULES)
+  (load-file "fsvn-test.el")
+  (princ "\n")
+  (princ "-------------------------------------------------------------\n")
+  (princ "Test completed\n")
+  (princ "-------------------------------------------------------------\n")
+  (princ "\n"))
 
 ;;; fsvn-make.el ends here

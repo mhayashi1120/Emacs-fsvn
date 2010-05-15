@@ -85,27 +85,8 @@
        (set-window-configuration PREV-WIN-CONFIG))))
 
 (defun fsvn-test-switch-file (wc1 wc2 file)
-  (let ((r (relative-file-name file wc1)))
+  (let ((r (file-relative-name file wc1)))
     (expand-file-name r wc2)))
-
-(defun fsvn-test-create-mini-files (dir count)
-  (let ((i 0)
-	file files)
-    (while (< i count)
-      (setq file (expand-file-name (format "%08d" (1+ i)) dir))
-      (write-region (format "%d" (1+ i)) nil file)
-      (setq files (cons file files))
-      (incf i))
-    files))
-
-;; unintern test functions
-(defun fsvn-test-unbound-functions ()
-  (mapatoms
-   (lambda (sym)
-     (when (and (string-match "^fsvn-test-" (symbol-name sym))
-		(fboundp sym))
-       (fmakunbound sym)))
-   obarray))
 
 (defvar fsvn-test-check-through-all nil
   "This is testing.")
@@ -182,7 +163,7 @@
 (defun fsvn-test-sit-for (&optional time)
   (sit-for (or time 0.0)))
 
-(defun fsvn-test-wait-for ()
+(defun fsvn-test-wait-for-all-process ()
   (while (catch 'wait
 	   (mapc
 	    (lambda (p)
@@ -191,6 +172,9 @@
 	    (process-list))
 	   nil)
     (sit-for 5)))
+
+(when (require 'testcover nil t)
+  (testcover-start "fsvn-browse"))
 
 (defvar fsvn-test-start-process-list nil)
 (setq fsvn-test-start-process-list (process-list))
@@ -521,7 +505,7 @@
     (fsvn-test-sit-for)
     (fsvn-browse-logview-path)
     (fsvn-test-sit-for))
-   (fsvn-test-wait-for)))
+   (fsvn-test-wait-for-all-process)))
 
 ;; check coverage.
 (when fsvn-test-check-through-all
