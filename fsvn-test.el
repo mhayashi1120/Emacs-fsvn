@@ -174,7 +174,7 @@
     (sit-for 5)))
 
 (when (require 'testcover nil t)
-  (testcover-start "fsvn-browse"))
+  (testcover-start "fsvn-browse.el"))
 
 (defvar fsvn-test-start-process-list nil)
 (setq fsvn-test-start-process-list (process-list))
