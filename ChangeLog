@@ -4,6 +4,8 @@
 	* Refactor: fsvn-log-create-path-chain -> fsvn-logs-create-path-chain
 	* Refactor: fsvn-log-chain-find -> fsvn-logs-chain-find
 	* Refactor: fsvn-popup.el functions to fsvn-popup namespace.
+	* Change: revoke fsvn-svk from fsvn.el.
+	       That depends on user's choice.
 
 2010-05-11  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
