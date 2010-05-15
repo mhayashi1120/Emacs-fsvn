@@ -182,7 +182,7 @@
 				       "--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 				       args))
       (set-process-sentinel proc 'fsvn-parasite-commit-sentinel)
-      (set-process-filter proc 'fsvn-process-filter-popup-buffer))
+      (set-process-filter proc 'fsvn-popup-process-filter-in-buffer))
     (process-put proc 'fsvn-process-start-point output-size)))
 
 (defun fsvn-parasite-commit-sentinel (proc event)
@@ -342,7 +342,7 @@
 		fsvn-parasite-delete-subcommand-args
 		fsvn-parasite-delete-target-files))
     (set-process-sentinel proc 'fsvn-parasite-delete-sentinel)
-    (set-process-filter proc 'fsvn-process-filter-popup-buffer)))
+    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)))
 
 (defun fsvn-parasite-delete-sentinel (proc event)
   (fsvn-process-exit-handler proc event
@@ -417,7 +417,7 @@
 		fsvn-parasite-import-target-path
 		fsvn-parasite-import-target-url))
     (set-process-sentinel proc 'fsvn-parasite-import-sentinel)
-    (set-process-filter proc 'fsvn-process-filter-popup-buffer)
+    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
 
 (defun fsvn-parasite-import-sentinel (proc event)
@@ -483,7 +483,7 @@
 		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 		fsvn-parasite-mkdir-target-directory))
     (set-process-sentinel proc 'fsvn-parasite-mkdir-sentinel)
-    (set-process-filter proc 'fsvn-process-filter-popup-buffer)
+    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
 
 (defun fsvn-parasite-mkdir-sentinel (proc event)
@@ -556,7 +556,7 @@
 		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 		fsvn-parasite-lock-subcommand-args fsvn-parasite-lock-target-files))
     (set-process-sentinel proc 'fsvn-parasite-lock-sentinel)
-    (set-process-filter proc 'fsvn-process-filter-popup-buffer)
+    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
 
 (defun fsvn-parasite-lock-sentinel (proc event)
@@ -630,7 +630,7 @@
 		fsvn-parasite-copy-from-files
 		fsvn-parasite-copy-destination))
     (set-process-sentinel proc 'fsvn-parasite-copy-sentinel)
-    (set-process-filter proc 'fsvn-process-filter-popup-buffer)
+    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
 
 (defun fsvn-parasite-copy-sentinel (proc event)

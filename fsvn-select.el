@@ -477,7 +477,7 @@ Keybindings:
   (interactive (fsvn-select-file-cmd-file "revert" fsvn-default-args-revert))
   (when (y-or-n-p "Svn: Revert? ")
     (let (buffer reverted)
-      (setq buffer (fsvn-call-process-with-popup "revert" args file))
+      (setq buffer (fsvn-popup-call-process "revert" args file))
       (setq reverted (fsvn-parse-result-cmd-revert buffer))
       (mapc
        (lambda (file)
@@ -493,15 +493,19 @@ Keybindings:
       (delete-file file))
     (fsvn-select-file-remove-file file)))
 
-;;TODO this is usefull for missing file (deleted by another process)
 (defun fsvn-select-file-delete-this (file &optional args)
+  "Execute `delete' for point FILE.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+This is usefull for missing file (marked `!')
+"
   (interactive (list (fsvn-expand-file (fsvn-current-filename)) 
 		     (when current-prefix-arg
 		       (fsvn-read-svn-subcommand-args "delete" t nil))))
   (if (or (not (interactive-p))
 	  (fsvn-confirm-prompt 'fsvn-select-file-delete-this "Svn: Delete this file? "))
       (progn
-	(fsvn-call-process-with-popup "delete" args (list file))
+	(fsvn-popup-call-process "delete" args (list file))
 	(fsvn-select-file-redraw-file file))
     (message "(No svn Delete performed)")))
 

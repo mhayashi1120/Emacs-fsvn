@@ -22,6 +22,12 @@
 
 ** complete revision with electric select
 
+** distribute just one file.
+
+remove provide and something..
+
+** interactive-p -> called-interactively-p
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
@@ -39,6 +45,8 @@
 ** TODO when commit file-select buffer has svn:external file.
 ** Instant viewer that for modified file or changed directory hierarchy.
   currently `*' mark is display commited files, not manupulated file.
+
+** enable resolved
 
 * message-edit-mode
 ** parasite-*-execute command accept optional argument
@@ -100,10 +108,13 @@ proplist --recursive
 ** parse result threshold
 
 ** tsvn:lockmsgminsize, tsvn:logsummary, tsvn:projectlanguage
+
    http://tortoisesvn.net/docs/nightly/TortoiseSVN_ja/tsvn-dug-propertypage.html
 
 
 
+
+** fsvn-make cannot make by NTEmacs
 
 * svk
 

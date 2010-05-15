@@ -69,6 +69,7 @@
 
 ;; Q.  How to use svk in windows.
 ;; A.  Sample of settings.
+;;    (require 'fsvn-svk)
 ;;    (setq fsvn-svk-perl-command "c:/usr/local/svk/bin/perl")
 ;;    (setq fsvn-svk-script "c:/usr/local/svk/bin/svk")
 ;;    
@@ -222,7 +223,6 @@
 (require 'fsvn-blame)
 (require 'fsvn-admin)
 (require 'fsvn-magic)
-(require 'fsvn-svk)
 
 
 

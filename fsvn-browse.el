@@ -1730,7 +1730,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive (fsvn-browse-cmd-read-mkdir))
   (if (fsvn-url-repository-p directory)
       (fsvn-browse-mkdir-message-edit directory args)
-    (fsvn-call-process-with-popup "mkdir" args directory)
+    (fsvn-popup-call-process "mkdir" args directory)
     (fsvn-browse-add-wc-file-entry directory)))
 
 (defun fsvn-browse-update-selected (files &optional args)
@@ -1741,7 +1741,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (if (or (not (interactive-p))
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-update-selected))
-      (let ((proc (fsvn-start-process-with-popup "update" args files)))
+      (let ((proc (fsvn-popup-start-process "update" args files)))
 	(fsvn-process-add-filter proc 'fsvn-process-filter-for-update)
 	proc)
     (message "(No svn Update performed)")))
@@ -1754,7 +1754,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
   (if (or (not (interactive-p))
 	  current-prefix-arg
 	  (fsvn-confirm-prompt 'fsvn-browse-update-path "Svn: Update current directory? "))
-      (let ((proc (fsvn-start-process-with-popup "update" args)))
+      (let ((proc (fsvn-popup-start-process "update" args)))
 	(fsvn-process-add-filter proc 'fsvn-process-filter-for-update)
 	proc)
     (message "(No svn Update performed)")))
@@ -1764,7 +1764,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-switch))
-  (fsvn-start-process-with-popup "switch" args repository))
+  (fsvn-popup-start-process "switch" args repository))
 
 (defun fsvn-browse-resolved-selected (files &optional args)
   "Execute `resolved' for current directory.
@@ -1775,7 +1775,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-resolved-selected))
       (fsvn-parse-result-instant-sentinel
-       (fsvn-start-process-with-popup "resolved" args files)
+       (fsvn-popup-start-process "resolved" args files)
        'fsvn-parse-result-cmd-resolved)
     (message "(No svn Resolved performed)")))
 
@@ -1802,7 +1802,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	current-prefix-arg
 	(fsvn-browse-dired-confirm files 'fsvn-browse-add-selected))
     (fsvn-parse-result-instant-sentinel
-     (fsvn-start-process-with-popup "add" args files)
+     (fsvn-popup-start-process "add" args files)
      'fsvn-parse-result-cmd-add))
    (t
     (message "(No svn Add performed)"))))
@@ -1810,6 +1810,8 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-delete-selected (files &optional args)
   "Execute `delete' for selected FILES.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+In the repository buffer, confirm buffer will be shown.
 "
   (interactive (fsvn-browse-cmd-read-url-selected-with-args "delete" fsvn-default-args-delete))
   (cond
@@ -1819,7 +1821,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	current-prefix-arg
 	(fsvn-browse-dired-confirm files 'fsvn-browse-delete-selected))
     (fsvn-parse-result-instant-sentinel
-     (fsvn-start-process-with-popup "delete" args files)
+     (fsvn-popup-start-process "delete" args files)
      'fsvn-parse-result-cmd-delete))
    (t
     (message "(No svn Delete performed)"))))
@@ -1837,7 +1839,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	current-prefix-arg
 	(fsvn-browse-dired-confirm files 'fsvn-browse-lock-selected))
     (fsvn-parse-result-cmd-lock
-     (fsvn-call-process-multi-with-popup "lock" files args)))
+     (fsvn-popup-call-process-multi "lock" files args)))
    (t
     (message "(No svn Lock performed)"))))
 
@@ -1850,7 +1852,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-unlock-selected))
       (fsvn-parse-result-cmd-unlock
-       (fsvn-call-process-multi-with-popup "unlock" files args))
+       (fsvn-popup-call-process-multi "unlock" files args))
     (message "(No svn Unlock performed)")))
 
 (defun fsvn-browse-export-this (file to-file &optional args)
@@ -1858,45 +1860,44 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-export-this))
-  (fsvn-start-process-with-popup "export" file args to-file))
+  (fsvn-popup-start-process "export" file args to-file))
 
 (defun fsvn-browse-export-path (to-dir &optional args)
   "Execute `export' for current directory to TO-DIR
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-export-path))
-  (let ((from-dir (fsvn-browse-current-directory-urlrev)))
-    (if (or (not (interactive-p))
-	    current-prefix-arg
-	    (fsvn-confirm-prompt 'fsvn-browse-export-path "Svn: Export current directory? "))
-	(fsvn-start-process-with-popup "export" args from-dir to-dir)
-      (message "(No svn Export performed)"))))
+  (if (or (not (interactive-p))
+	  current-prefix-arg
+	  (fsvn-confirm-prompt 'fsvn-browse-export-path "Svn: Export current directory? "))
+      (fsvn-popup-start-process "export" args (fsvn-browse-current-directory-urlrev) to-dir)
+    (message "(No svn Export performed)")))
 
 (defun fsvn-browse-add-changelist-selected (name files)
   (interactive (fsvn-browse-cmd-read-add-changelist-selected))
   (if (or (not (interactive-p))
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-add-changelist-selected))
-      (fsvn-start-process-with-popup "changelist" name files)
+      (fsvn-popup-start-process "changelist" name files)
     (message "(No svn Changelist performed)")))
 
 (defun fsvn-browse-remove-changelist-selected (files)
   (interactive (fsvn-browse-cmd-read-wc-selected))
   (if (or (not (interactive-p))
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-remove-changelist-selected))
-      (fsvn-start-process-with-popup "changelist" "--remove" files)
+      (fsvn-popup-start-process "changelist" "--remove" files)
     (message "(No svn Changelist performed)")))
 
 (defun fsvn-browse-resolve-selected (accept-arg files)
   "Execute `resolve' for selected FILES."
   (interactive (fsvn-browse-cmd-read-resolve-selected))
-  (fsvn-start-process-with-popup "resolve" "--accept" accept-arg files))
+  (fsvn-popup-start-process "resolve" "--accept" accept-arg files))
 
 (defun fsvn-browse-move-this (src-file dest-file &optional args)
   "Execute `move' for point SRC-FILE to DEST-FILE.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-move-this))
-  (fsvn-start-copy/move-process-with-popup "move" (list src-file) dest-file args))
+  (fsvn-popup-start-copy/move-process "move" (list src-file) dest-file args))
 
 ;;NOTE 1.4.x cannot copy/move multiple files
 (defun fsvn-browse-move-selected (src-files dest-dir &optional args)
@@ -1904,14 +1905,14 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-move-selected))
-  (fsvn-start-copy/move-process-with-popup "move" src-files dest-dir args))
+  (fsvn-popup-start-copy/move-process "move" src-files dest-dir args))
 
 (defun fsvn-browse-copy-this (src-file dest-file &optional args)
   "Execute `copy' for point SRC-FILE to DEST-FILE.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-copy-this))
-  (fsvn-start-copy/move-process-with-popup "copy" (list src-file) dest-file args))
+  (fsvn-popup-start-copy/move-process "copy" (list src-file) dest-file args))
 
 ;;NOTE 1.4.x cannot copy/move multiple files
 (defun fsvn-browse-copy-selected (src-files dest-dir &optional args)
@@ -1919,7 +1920,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-copy-selected))
-  (fsvn-start-copy/move-process-with-popup "copy" src-files dest-dir args))
+  (fsvn-popup-start-copy/move-process "copy" src-files dest-dir args))
 
 (defun fsvn-browse-safe-move-this (src-file dest-file &optional args)
   "Execute `move' for current file as SRC-FILE to DEST-FILE.
@@ -1944,7 +1945,7 @@ This is usefull for integrate other source management.
       (setq tmpfile (fsvn-make-temp-filename src-file))
       (rename-file dest-file tmpfile t)
       (unwind-protect 
-	  (fsvn-call-process-with-popup "move" (list src-file) dest-file args)
+	  (fsvn-popup-call-process "move" (list src-file) dest-file args)
 	(cond
 	 ((fsvn-file-exact-directory-p tmpfile)
 	  (fsvn-copy-directory tmpfile dest-file))
@@ -1964,7 +1965,7 @@ This is usefull for integrate other source management.
       (setq tmpfile (fsvn-make-temp-filename src-file))
       (rename-file dest-file tmpfile t)
       (unwind-protect 
-	  (fsvn-call-process-with-popup "copy" (list src-file) dest-file args)
+	  (fsvn-popup-call-process "copy" (list src-file) dest-file args)
 	(cond
 	 ((fsvn-file-exact-directory-p tmpfile)
 	  (fsvn-copy-directory tmpfile dest-file))
@@ -2017,7 +2018,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-revert-selected))
       (fsvn-parse-result-instant-sentinel
-       (fsvn-start-process-with-popup "revert" args files)
+       (fsvn-popup-start-process "revert" args files)
        'fsvn-parse-result-cmd-revert)
     (message "(No svn Revert performed)")))
 
@@ -2030,7 +2031,7 @@ With \\[universal-argument] prefix, can read optional arguments.
 	  current-prefix-arg
 	  (fsvn-confirm-prompt 'fsvn-browse-revert-path "Svn: Revert current directory? "))
       (fsvn-parse-result-instant-sentinel
-       (fsvn-start-process-with-popup "revert" (fsvn-browse-current-directory-url) args)
+       (fsvn-popup-start-process "revert" (fsvn-browse-current-directory-url) args)
        'fsvn-parse-result-cmd-revert)
     (message "(No svn Revert performed)")))
 
@@ -2041,7 +2042,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
 "
   (interactive (fsvn-browse-cmd-read-merge-this))
-  (fsvn-start-process-with-popup "merge" source1 source2 args file))
+  (fsvn-popup-start-process "merge" source1 source2 args file))
 
 (defun fsvn-browse-merge-path (source1 source2 &optional args)
   "Execute `merge' for current directory between SOURCE1 and SOURCE2.
@@ -2050,21 +2051,21 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
 "
   (interactive (fsvn-browse-cmd-read-merge-path))
-  (fsvn-start-process-with-popup "merge" source1 source2 args))
+  (fsvn-popup-start-process "merge" source1 source2 args))
 
 (defun fsvn-browse-mergeinfo-path (&optional args)
   "Execute `mergeinfo' for current directory.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-mergeinfo))
-  (fsvn-start-process-with-popup "mergeinfo" args (fsvn-browse-current-directory-urlrev)))
+  (fsvn-popup-start-process "mergeinfo" args (fsvn-browse-current-directory-urlrev)))
 
 (defun fsvn-browse-mergeinfo-this (file &optional args)
   "Execute `mergeinfo' for point FILE.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-mergeinfo-this))
-  (fsvn-start-process-with-popup "mergeinfo" file args))
+  (fsvn-popup-start-process "mergeinfo" file args))
 
 (defun fsvn-browse-logview-this (file-struct)
   "Execute `log' for current file showing by `fsvn-log-list-mode'."
@@ -2095,21 +2096,21 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-urlrev-selected-with-args "info" fsvn-default-args-info))
-  (fsvn-call-process-multi-with-popup "info" files args))
+  (fsvn-popup-call-process-multi "info" files args))
 
 (defun fsvn-browse-info-path (&optional args)
   (interactive (fsvn-browse-cmd-read-urlrev-path-with-args "info" fsvn-default-args-info))
   "Execute `info' for current directory.
 Optional ARGS (with prefix arg) means read svn subcommand arguments.
 "
-  (fsvn-call-process-with-popup "info" args))
+  (fsvn-popup-call-process "info" args))
 
 (defun fsvn-browse-blame-this (file &optional args)
   (interactive (fsvn-browse-cmd-read-urlrev-this-file-with-args "blame" fsvn-default-args-blame))
   "Execute `blame'/`prase'/`annotate' for point FILE.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
-  (fsvn-start-process-with-popup "blame" file args))
+  (fsvn-popup-start-process "blame" file args))
 
 (defun fsvn-browse-prop-add-svn:ignore-selected (files)
   "Ignore point FILE by using `svn:ignore' property."
@@ -2212,7 +2213,7 @@ When SRC-FILES is single list, DEST allows non existence filename."
 	      (split-string prop "\n" t)))
       (setq value (format "%s %s" (fsvn-file-relative (car src-files) targetdir) (fsvn-file-name-nondirectory dest)))
       (setq externals (cons value externals))))
-    (fsvn-start-process-with-popup "propset" "svn:externals" (mapconcat 'identity externals "\n") targetdir)
+    (fsvn-popup-start-process "propset" "svn:externals" (mapconcat 'identity externals "\n") targetdir)
     ;;todo popup something
     ;;     (setq prop (fsvn-get-propget "svn:externals" targetdir))
     ;;todo parse current prop and check it

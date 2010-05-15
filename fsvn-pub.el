@@ -69,7 +69,7 @@
 (defun fsvn-show-svn-help (subcommand)
   (interactive (list (fsvn-read-svn-subcommand)))
   (let ((fsvn-process-environment-lang fsvn-help-locale))
-    (fsvn-call-process-with-popup "help" subcommand)))
+    (fsvn-popup-call-process "help" subcommand)))
 
 (defun fsvn-global-cleanup-buffer ()
   (interactive)
@@ -255,7 +255,7 @@
   (let ((dir (fsvn-expand-file default-directory)))
     (when (or (= (length (fsvn-directory-files dir)) 0)
 	      (y-or-n-p "This directory is not empty.  Really checkout? "))
-      (fsvn-start-process-with-popup "checkout" args url dir))))
+      (fsvn-popup-start-process "checkout" args url dir))))
 
 (defun fsvn-start (repository &optional rev)
   (interactive (list (fsvn-completing-read-url)
@@ -297,7 +297,7 @@
 		 (setq subcommand (fsvn-read-svn-subcommand))
 		 (setq args (fsvn-read-svn-subcommand-args subcommand))
 		 (list subcommand args)))
-  (fsvn-start-process-with-popup subcommand args))
+  (fsvn-popup-start-process subcommand args))
 
 (defun fsvn-toggle-feature (&optional arg no-msg)
   "Toggle `fsvn' feature enable/disable.

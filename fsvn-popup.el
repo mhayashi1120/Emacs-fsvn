@@ -12,18 +12,13 @@
 
 
 
+(require 'fsvn-deps)
 (require 'fsvn-mode)
 (require 'fsvn-cmd)
 
 
 
 (defvar text-mode-map)
-
-(defcustom fsvn-popup-result-update-parsed-threshold 1000
-  "*Threshold of `update' output size for parsing.
-Huge value makes Emacs slow down."
-  :group 'fsvn
-  :type 'integer)
 
 (defconst fsvn-popup-result-mode-line-process
   '(
@@ -35,14 +30,13 @@ Huge value makes Emacs slow down."
     (fsvn-popup-result-buffer-p . t)
     (fsvn-popup-result-process)
     (fsvn-popup-result-end-of-output)
-    (fsvn-popup-result-update-parsed-end)
+    (fsvn-process-filter-for-update-parsed-end)
     ))
 
 (defvar fsvn-popup-result-buffer-p nil)
 (defvar fsvn-popup-result-process nil)
 (defvar fsvn-popup-result-end-of-output nil)
 (defvar fsvn-popup-result-mode-map nil)
-(defvar fsvn-popup-result-update-parsed-end nil)
 
 (unless fsvn-popup-result-mode-map
   (setq fsvn-popup-result-mode-map
@@ -135,28 +129,28 @@ Keybindings:
 
 
 
-(defun fsvn-start-process-with-popup (subcommand &rest args)
+(defun fsvn-popup-start-process (subcommand &rest args)
   "SUBCOMMAND svn command.
 ARGS is svn subcommand args."
   (let ((buffer (fsvn-popup-result-create-buffer))
 	proc)
     (setq proc (fsvn-start-command-display subcommand buffer args))
-    (set-process-sentinel proc 'fsvn-process-sentinel-popup-buffer)
-    (set-process-filter proc 'fsvn-process-filter-popup-buffer)
+    (set-process-sentinel proc 'fsvn-popup-general-process-sentinel)
+    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     (with-current-buffer buffer
       (when (eq major-mode 'fsvn-popup-result-mode)
 	(setq fsvn-popup-result-process proc)))
     (fsvn-buffer-popup-as-information buffer)
     proc))
 
-(defvar fsvn-call-process-buffer nil
+(defvar fsvn-popup-call-process-buffer nil
   "As external arguments. Sequential command execute.")
 
-(defun fsvn-call-process-with-popup (command &rest args)
+(defun fsvn-popup-call-process (command &rest args)
   "COMMAND svn subcommand.
 ARGS is svn subcommand args.  Accepts nil (but not sended).
 return buffer of result output."
-  (let ((buffer (or fsvn-call-process-buffer (fsvn-popup-result-create-buffer)))
+  (let ((buffer (or fsvn-popup-call-process-buffer (fsvn-popup-result-create-buffer)))
 	ret)
     (setq ret (fsvn-call-command-display command buffer args))
     (fsvn-buffer-popup-as-information buffer)
@@ -166,7 +160,7 @@ return buffer of result output."
       (goto-char (point-min)))
     buffer))
 
-(defun fsvn-call-process-multi-with-popup (command files &rest args)
+(defun fsvn-popup-call-process-multi (command files &rest args)
   "`call-process' accepts multiple files.
 subcommand must accept `--targets' argument.
 
@@ -185,7 +179,7 @@ Optional argument ARGS svn command arguments."
       (error "Execution error while `%s'" command))
     buffer))
 
-(defun fsvn-start-copy/move-process-with-popup (command files destination &optional args)
+(defun fsvn-popup-start-copy/move-process (command files destination &optional args)
   "For subcommand `copy' or `move'.
 
 Argument COMMAND svn subcommand.
@@ -193,23 +187,23 @@ Argument FILES target files.
 Argument DESTINATION target directory.
 Optional argument ARGS svn command arguments."
   (let (proc)
-    (setq proc (fsvn-start-process-with-popup command args files destination))
-    (fsvn-process-add-sentinel proc 'fsvn-copy-process-sentinel)
+    (setq proc (fsvn-popup-start-process command args files destination))
+    (fsvn-process-add-sentinel proc 'fsvn-popup-copy-process-sentinel)
     proc))
 
-(defun fsvn-process-filter-popup-buffer (proc event)
+(defun fsvn-popup-process-filter-in-buffer (proc event)
   (fsvn-process-event-handler proc event
     (fsvn-debug event)
     (goto-char (point-max))
     (insert event)
     (setq fsvn-popup-result-end-of-output (point-marker))))
 
-(defun fsvn-process-sentinel-popup-buffer (proc event)
+(defun fsvn-popup-general-process-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (when (local-variable-p 'fsvn-popup-result-process)
       (setq fsvn-popup-result-process nil))))
 
-(defun fsvn-copy-process-sentinel (proc event)
+(defun fsvn-popup-copy-process-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (fsvn-parse-result-cmd-add (current-buffer))
     (fsvn-parse-result-cmd-delete (current-buffer))))

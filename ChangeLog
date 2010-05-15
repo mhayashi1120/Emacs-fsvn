@@ -1,3 +1,10 @@
+2010-05-15  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Refactor: fsvn-find-logs-entry -> fsvn-logs-find-logentry
+	* Refactor: fsvn-log-create-path-chain -> fsvn-logs-create-path-chain
+	* Refactor: fsvn-log-chain-find -> fsvn-logs-chain-find
+	* Refactor: fsvn-popup.el functions to fsvn-popup namespace.
+
 2010-05-11  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: fsvn-browse-commit-path

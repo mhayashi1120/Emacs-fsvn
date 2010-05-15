@@ -2,7 +2,7 @@
 
 default: elc
 
-check:
+check: clean
 	$(EMACS) $(FLAGS) -f check-fsvn $(CONFIG)
 
 elc:

@@ -179,7 +179,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
      (fsvn-debug internal-args)
      (setq proc (apply 'start-process "fsvn svk" buffer internal-args))
      (set-process-sentinel proc 'fsvn-svk-process-sentinel)
-     (set-process-filter proc 'fsvn-process-filter-popup-buffer)
+     (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
      (with-current-buffer buffer
        (when (eq major-mode 'fsvn-popup-result-mode)
 	 (setq fsvn-popup-result-process proc)))

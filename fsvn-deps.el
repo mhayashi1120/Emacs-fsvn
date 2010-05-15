@@ -743,6 +743,12 @@ $"
 
 ;; * subcommand `update' utility.
 
+(defcustom fsvn-popup-result-update-parsed-threshold 1000
+  "*Threshold of `update' output size for parsing.
+Huge value makes Emacs slow down."
+  :group 'fsvn
+  :type 'integer)
+
 (defconst fsvn-process-filter-update-actor-alist
   '(
     (?A . fsvn-process-filter-update-for-added)
@@ -753,9 +759,11 @@ $"
     (?E . fsvn-process-filter-update-for-existed)
     ))
 
+(defvar fsvn-process-filter-for-update-parsed-end nil)
+
 (defun fsvn-process-filter-for-update (proc event)
   (fsvn-process-event-handler proc event
-    (let ((prev (or fsvn-popup-result-update-parsed-end 0))
+    (let ((prev (or fsvn-process-filter-for-update-parsed-end 0))
 	  end line matched-obj)
       (when (< prev fsvn-popup-result-update-parsed-threshold)
 	(goto-char (or prev (point-min)))
@@ -772,7 +780,7 @@ $"
 		(error "Assertion failed (Non defined mark)"))
 	      (funcall (cdr actor-cell) file)))
 	  (forward-line 1))
-	(setq fsvn-popup-result-update-parsed-end end)))))
+	(setq fsvn-process-filter-for-update-parsed-end end)))))
 
 (defun fsvn-process-filter-update-for-added (file)
   (fsvn-browse-add-wc-file-entry file t))
