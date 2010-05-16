@@ -22,10 +22,6 @@
 
 ** complete revision with electric select
 
-** distribute just one file.
-
-remove provide and something..
-
 ** interactive-p -> called-interactively-p
 
 * magic

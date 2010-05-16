@@ -7,6 +7,8 @@
 	* Change: revoke fsvn-svk from fsvn.el.
 	       That depends on user's choice.
 
+	* Improvement: Make distributable only a fsvn.el
+
 2010-05-11  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: fsvn-browse-commit-path

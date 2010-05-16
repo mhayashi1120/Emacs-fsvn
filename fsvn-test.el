@@ -10,7 +10,6 @@
 ;; 
 
 ;;; Code:
-;;
 
 
 
@@ -174,7 +173,21 @@
     (sit-for 5)))
 
 (when (require 'testcover nil t)
-  (testcover-start "fsvn-browse.el"))
+  ;; (mapcar 'testcover-start ALL-MODULES)
+  (testcover-start "fsvn-browse.el")
+  ;; (testcover-start "fsvn-admin.el")
+  ;; (testcover-start "fsvn-cmd.el")
+  ;; (testcover-start "fsvn-config.el")
+  ;; (testcover-start "fsvn-data.el")
+  ;; (testcover-start "fsvn-env.el")
+  ;; (testcover-start "fsvn-fs.el")
+  ;; (testcover-start "fsvn-magic.el")
+  ;; (testcover-start "fsvn-mode.el")
+  ;; (testcover-start "fsvn-pub.el")
+  ;; (testcover-start "fsvn-tortoise.el")
+  ;; (testcover-start "fsvn-ui.el")
+  ;; (testcover-start "fsvn-url.el")
+  )
 
 (defvar fsvn-test-start-process-list nil)
 (setq fsvn-test-start-process-list (process-list))

@@ -22,7 +22,6 @@
 ;;  Investigate Meadow's all extended function.
 
 ;;; Code:
-;;
 
 
 
