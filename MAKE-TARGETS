@@ -17,9 +17,11 @@ install: elc
 clean:
 	-$(RM) $(GOMI)
 
-release: tar
+release: tar single-file
 	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.bz2 $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.gz
+	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn.el
 	mv /tmp/fsvn-$(VERSION).tar.bz2 /tmp/fsvn-$(VERSION).tar.gz $(ARCHIVE_DIR_PREFIX)/
+	mv fsvn.el.tmp $(ARCHIVE_DIR_PREFIX)/fsvn.el
 
 tar:
 	rm -rf /tmp/fsvn-$(VERSION)
@@ -28,3 +30,6 @@ tar:
 	chmod 644 /tmp/fsvn-$(VERSION)/*
 	cd /tmp ; tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION)
 	cd /tmp ; tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
+
+single-file:
+	$(EMACS) $(FLAGS) -f make-fsvn $(CONFIG)

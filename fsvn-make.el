@@ -8,7 +8,6 @@
 ;; 
 
 ;;; Code:
-;;
 
 
 
@@ -57,6 +56,10 @@
 			     "mw32misc.el"
 			     "mw32script.el"
 			     )))))
+
+(defun make-fsvn ()
+  (initialize)
+  (single-file))
 
 (defun compile-fsvn ()
   (initialize)
@@ -146,5 +149,97 @@
   (princ "Test completed\n")
   (princ "-------------------------------------------------------------\n")
   (princ "\n"))
+
+(defvar single-file-done nil)
+
+(defun single-file ()
+  (let ((tmpfile "fsvn.el.tmp"))
+    (setq single-file-done (cons "fsvn.el" nil))
+    (with-temp-buffer
+      (insert-file-contents "fsvn.el")
+      (single-file-parse-required)
+      (goto-char (point-min))
+      (unless (re-search-forward "(provide 'fsvn)" nil t)
+	(error "Unable find provide"))
+      (forward-line -1)
+      (mapc
+       (lambda (m)
+      	 (single-file-file m (current-buffer)))
+       ALL-MODULES)
+      (single-file-remove-duplicated-top-form)
+      (single-file-remove-blank-page)
+      (single-file-remove-blank-lines)
+      (write-region (point-min) (point-max) tmpfile nil 'no-msg))))
+
+(defun single-file-remove-blank-page ()
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^\\([\n]+\\)+" nil t)
+      (replace-match "" nil nil nil 0))))
+
+(defun single-file-remove-duplicated-top-form ()
+  (save-excursion
+    (goto-char (point-min))
+    (let ((prev (point-min))
+	  forms form)
+      (while (setq form
+		   (condition-case err
+		       (read (current-buffer))
+		     (end-of-file nil)))
+	(if (member form forms)
+	    (delete-region prev (point))
+	  (setq forms (cons form forms)))
+	(setq prev (save-excursion (forward-line 1) (point)))))))
+
+(defun single-file-remove-blank-lines ()
+  (save-excursion
+    (goto-char (point-min))
+    (let ((count 0))
+      (while (not (eobp))
+	(cond
+	 ((not (looking-at "\n"))
+	  (setq count 0))
+	 ((= count 1)
+	  (delete-region (point) (save-excursion (forward-line 1) (point)))
+	  (forward-line -1))
+	 (t
+	  (setq count (1+ count))))
+	(forward-line 1)))))
+
+(defun single-file-parse-required ()
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^[ \t]*(require '\\(fsvn-[^)]+\\))" nil t)
+      (let ((module (match-string 1)))
+	(replace-match "")
+	(single-file-file (concat module ".el") (current-buffer))))))
+
+(defun single-file-remove-provide ()
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward "^[ \t]*(provide '.*")
+      (replace-match ""))))
+
+(defun single-file-remove-comments ()
+  (save-excursion
+    (goto-char (point-min))
+    (unless (re-search-forward "^;;; Code.*")
+      (error "Unable find header"))
+    (forward-line 1)
+    (delete-region (point-min) (point))
+    (unless (re-search-forward "^;;; .*\\.el ends here$")
+      (error "Unable find footer"))
+    (forward-line 0)
+    (delete-region (point) (point-max))))
+
+(defun single-file-file (file buffer)
+  (unless (member file single-file-done)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (single-file-parse-required)
+      (single-file-remove-provide)
+      (single-file-remove-comments)
+      (append-to-buffer buffer (point-min) (point-max)))
+    (setq single-file-done (cons file single-file-done))))
 
 ;;; fsvn-make.el ends here
