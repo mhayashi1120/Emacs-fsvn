@@ -197,7 +197,7 @@
       path))))
 
 (defun fsvn-cygwin-svn-p ()
-  (let ((command (executable-find fsvn-svn-command))
+  (let ((command (executable-find fsvn-svn-command-internal))
 	(cygdir (fsvn-cygwin-installed-dir)))
     (and command
 	 cygdir

@@ -191,11 +191,16 @@ Optional argument ARGS svn command arguments."
     proc))
 
 (defun fsvn-popup-process-filter-in-buffer (proc event)
-  (fsvn-process-event-handler proc event
-    (fsvn-debug event)
-    (goto-char (point-max))
-    (insert event)
-    (setq fsvn-popup-result-end-of-output (point-marker))))
+  (fsvn-debug event)
+  (with-current-buffer (process-buffer proc)
+    (let (keep-point)
+      (unless (= (point) (point-max))
+	(setq keep-point (point))
+	(goto-char (point-max)))
+      (insert event)
+      (setq fsvn-popup-result-end-of-output (point-marker))
+      (when keep-point
+	(goto-char keep-point)))))
 
 (defun fsvn-popup-general-process-sentinel (proc event)
   (fsvn-process-exit-handler proc event

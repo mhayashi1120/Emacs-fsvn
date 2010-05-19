@@ -868,8 +868,8 @@ PATH is each executed path."
     (setq comparer fsvn-browse-ls-comparer)
     (when (memq type '(revert draw))
       (let (buffer-read-only)
-	(fsvn-browse-mode)
 	(erase-buffer)
+	(fsvn-browse-mode)
 	(setq fsvn-browse-ls-comparer (or comparer 'fsvn-browse-ls-entry-name-comparer))
 	(fsvn-browse-set-repos-local-variables info)
 	(fsvn-browse-draw-topmost-header info)
@@ -896,8 +896,8 @@ PATH is each executed path."
     (cond
      ((memq type '(revert draw))
       (let (buffer-read-only)
-	(fsvn-browse-mode)
 	(erase-buffer)
+	(fsvn-browse-mode)
 	(setq fsvn-browse-ls-comparer (or comparer 'fsvn-browse-ls-file-name-comparer))
 	(fsvn-browse-set-wc-local-variables parent-info directory)
 	(fsvn-browse-draw-topmost-header parent-info)
@@ -1778,15 +1778,6 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
        'fsvn-parse-result-cmd-resolved)
     (message "(No svn Resolved performed)")))
 
-;;todo not implements add dialog recursively
-;; (defun fsvn-browse-add-path (&optional args)
-;;   "Execute `add' recursively for current directory with confirmation buffer.
-;; Optional ARGS (with prefix arg) means read svn subcommand arguments.
-;; "
-;;   (interactive (fsvn-browse-cmd-read-wc-path-with-args "add" fsvn-browse-add-path-args))
-;;   (fsvn-browse-add-file-select  args)
-;;   )
-
 (defun fsvn-browse-add-selected (files &optional args)
   "Execute `add' for selected FILES.
 If ARGS contains `--non-recursive' or `-N', then confirm buffer will be shown.
@@ -1924,8 +1915,8 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 (defun fsvn-browse-safe-move-this (src-file dest-file &optional args)
   "Execute `move' for current file as SRC-FILE to DEST-FILE.
 Same as `fsvn-browse-move-this' but allows you to DEST-FILE existence.
-This means DEST-FILE contents will be preserved.
-This is usefull for integrate other source management.
+This means DEST-FILE contents will be stashed and finally restored.
+This is useful for integrating other source management.
 "
   (interactive (fsvn-browse-cmd-read-move-this))
   (if (not (file-exists-p dest-file))
@@ -1954,8 +1945,8 @@ This is usefull for integrate other source management.
 (defun fsvn-browse-safe-copy-this (src-file dest-file &optional args)
   "Execute `copy' for current file as SRC-FILE to DEST-FILE.
 Same as `fsvn-browse-copy-this' but allows you to DEST-FILE existence.
-This means DEST-FILE contents will be preserved.
-This is usefull for integrate other source management.
+This means DEST-FILE contents will be stashed and finally restored.
+This is useful for integrating other source management.
 "
   (interactive (fsvn-browse-cmd-read-copy-this))
   (if (not (file-exists-p dest-file))

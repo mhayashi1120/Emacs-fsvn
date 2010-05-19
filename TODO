@@ -24,6 +24,8 @@
 
 ** interactive-p -> called-interactively-p
 
+** Bugreport
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
@@ -61,12 +63,11 @@
 ** fsvn-flatten-command-args move to more critical point.
 ** fsvn-url-encode-string more critical point.
 ** case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
-** fsvn-svn-command -> fsvn-initialize-loading create fsvn-svn-command-internal
-
 ** fsvn-magic-* inspect how to implements.
 
 ** fsvn-prop* code clean.
 
+** run-hooks -> run-mode-hooks (?)
 
 * logview-mode
 ** fsvn-log-message-buffer-name, fsvn-log-sibling-buffer-name contains first space then fontify is not work.
@@ -110,7 +111,7 @@ proplist --recursive
 
 
 
-** fsvn-make cannot make by NTEmacs
+** git
 
 * svk
 

@@ -418,8 +418,8 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
   (around fsvn-dired-mode (dirname &optional switches) disable)
   (if (and (not fsvn-dired-force-dired)
 	   (fsvn-directory-versioned-p dirname)
-	   (stringp fsvn-svn-command)
-	   (executable-find fsvn-svn-command))
+	   (stringp fsvn-svn-command-internal)
+	   (executable-find fsvn-svn-command-internal))
       (condition-case err
 	  (fsvn-working-copy dirname)
 	(error ad-do-it))

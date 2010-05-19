@@ -198,7 +198,7 @@
   (interactive (list (fsvn-completing-read-url "Authenticate URL: " nil t)))
   (if (eq system-type 'windows-nt)
       ;;TODO FIXME not works prompt on windows.
-      (fsvn-win-start-external-terminal (executable-find fsvn-svn-command) "info" repository)
+      (fsvn-win-start-external-terminal (executable-find fsvn-svn-command-internal) "info" repository)
     (let ((buffer (fsvn-make-temp-buffer))
 	  (coding-system-for-write 'unix)
 	  proc)
@@ -360,14 +360,19 @@
 
 (defun fsvn-cmd-read-checkout-args ()
   (let (url args)
-    (setq url (fsvn-completing-read-url "Checkout URL: "))
+    (fsvn-brief-message-showing
+     (setq url (fsvn-completing-read-url "Checkout URL: "))
+     (fsvn-brief-message-add-message (format "Checkout: %s" url)))
     (setq args (fsvn-cmd-read-subcommand-args "checkout" fsvn-default-args-checkout))
     (list url args)))
 
 (defun fsvn-cmd-read-import-args ()
   (let (file url args)
-    (setq file (fsvn-read-file-name "Imported file: " nil nil t))
-    (setq url (fsvn-completing-read-url "Import to URL: "))
+    (fsvn-brief-message-showing
+     (setq file (fsvn-read-file-name "Imported file: " nil nil t))
+     (fsvn-brief-message-add-message (format "Imported: %s" file))
+     (setq url (fsvn-completing-read-url "Import to URL: "))
+     (fsvn-brief-message-add-message (format "Import to: %s" url)))
     (setq args (fsvn-cmd-read-subcommand-args "import" fsvn-default-args-import))
     (list file url args)))
 
@@ -398,6 +403,8 @@
 
 
 (defun fsvn-initialize-loading ()
+  (setq fsvn-svn-command-internal fsvn-svn-command)
+  (setq fsvn-svnadmin-command-internal fsvn-svnadmin-command)
   (fsvn-set-version)
   (unless (file-directory-p fsvn-home-directory)
     (make-directory fsvn-home-directory t))

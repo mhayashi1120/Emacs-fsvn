@@ -1,3 +1,8 @@
+2010-05-19  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: fsvn-make.el
+	       Unable compile emacs current version.
+
 2010-05-15  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Refactor: fsvn-find-logs-entry -> fsvn-logs-find-logentry

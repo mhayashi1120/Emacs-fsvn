@@ -1,4 +1,4 @@
-;;; fsvn-dev.el --- Not enough tested implementation.
+;;; fsvn-dev.el --- Experimental implementation.
 
 ;;; History:
 ;; 
@@ -147,7 +147,6 @@ FROM-REVS (from-rev . to-rev)
 				      "--message" (or (fsvn-xml-log->logentry=>msg$ entry) "")
 				      wc)))
        log-entries))))
-
 
 
 
