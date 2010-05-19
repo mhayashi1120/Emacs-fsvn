@@ -41,7 +41,7 @@
    (let* ((real-args (fsvn-flatten-command-args args))
 	  (coding-system-for-read (fsvn-process-coding-system real-args)))
      (fsvn-debug real-args)
-     (apply 'start-process "fsvn" buffer fsvn-svn-command real-args))))
+     (apply 'start-process "fsvn" buffer fsvn-svn-command-internal real-args))))
 
 (defun fsvn-start-command (subcommand buffer &rest args)
   (apply 'fsvn-start-process buffer subcommand args))
@@ -54,7 +54,7 @@
     proc))
 
 (defun fsvn-call-process (buffer &rest args)
-  "Execute `call-process' with variable `fsvn-svn-command'.
+  "Execute `call-process' with variable `fsvn-svn-command-internal'.
 This is synchronous call, so cannot handle password prompt. Append --non-interactive arg
 explicitly in calling function.
 "
@@ -66,7 +66,7 @@ explicitly in calling function.
 	 (goto-char (point-max))))
      (fsvn-debug real-args)
      (prog1
-	 (apply 'call-process fsvn-svn-command nil buffer nil real-args)
+	 (apply 'call-process fsvn-svn-command-internal nil buffer nil real-args)
        (fsvn-debug buffer)))))
 
 (defun fsvn-call-command (subcommand buffer &rest args)
@@ -220,7 +220,7 @@ Like `let' binding, varlist binded while executing BODY."
        (if (string-match " " x)
 	   (concat "\"" x "\"")
 	 x))
-     (append (list fsvn-svn-command subcommand) real-args)
+     (append (list fsvn-svn-command-internal subcommand) real-args)
      " ")))
 
 (defun fsvn-guess-file-contents-coding-system (flatten-args)

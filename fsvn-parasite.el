@@ -108,7 +108,9 @@
   :type 'hook)
 
 (define-minor-mode fsvn-parasite-commit-mode
-  ""
+  "
+Keybindings:
+\\{fsvn-parasite-commit-mode-map}"
   nil (" (Commit)" 
        (:eval fsvn-parasite-commit-no-unlock)
        (:eval fsvn-parasite-commit-keep-changelist))
@@ -324,7 +326,9 @@
 (defvar fsvn-parasite-delete-target-files nil)
 
 (define-minor-mode fsvn-parasite-delete-mode
-  ""
+  "
+Keybindings:
+\\{fsvn-parasite-delete-mode-map}"
   nil " (Delete)" fsvn-parasite-delete-mode-map
   (fsvn-parasite-check-mode 'fsvn-message-edit-mode)
   (fsvn-parasite-make-buffer-variables fsvn-parasite-delete-buffer-local-variables))
@@ -398,7 +402,9 @@
 (defvar fsvn-parasite-import-target-url nil)
 
 (define-minor-mode fsvn-parasite-import-mode
-  ""
+  "
+Keybindings:
+\\{fsvn-parasite-import-mode-map}"
   nil " (Import)" fsvn-parasite-import-mode-map
   (fsvn-parasite-check-mode 'fsvn-message-edit-mode)
   (fsvn-parasite-make-buffer-variables fsvn-parasite-import-buffer-local-variables))
@@ -437,8 +443,8 @@
      (fsvn-parasite-import-internal buffer))
     (fsvn-buffer-popup-as-information buffer)))
 
-(defalias 'fsvn-parasite-quit-quit 'fsvn-parasite-quit-message-edit)
-(defalias 'fsvn-parasite-quit-cleanup-buffer 'fsvn-parasite-cleanup-message-edit)
+(defalias 'fsvn-parasite-import-quit 'fsvn-parasite-quit-message-edit)
+(defalias 'fsvn-parasite-import-cleanup-buffer 'fsvn-parasite-cleanup-message-edit)
 
 
 
@@ -467,7 +473,9 @@
 (defvar fsvn-parasite-mkdir-target-directory nil)
 
 (define-minor-mode fsvn-parasite-mkdir-mode
-  ""
+  "
+Keybindings:
+\\{fsvn-parasite-mkdir-mode-map}"
   nil " (Make directory)" fsvn-parasite-mkdir-mode-map
   (fsvn-parasite-check-mode 'fsvn-message-edit-mode)
   (fsvn-parasite-make-buffer-variables fsvn-parasite-mkdir-buffer-local-variables))
@@ -535,7 +543,9 @@
 (defvar fsvn-parasite-lock-target-files nil)
 
 (define-minor-mode fsvn-parasite-lock-mode
-  ""
+  "
+Keybindings:
+\\{fsvn-parasite-lock-mode-map}"
   nil " (Lock)" fsvn-parasite-lock-mode-map
   (fsvn-parasite-check-mode 'fsvn-message-edit-mode)
   (fsvn-parasite-make-buffer-variables fsvn-parasite-lock-buffer-local-variables))
@@ -612,7 +622,9 @@
 (defvar fsvn-parasite-copy-destination nil)
 
 (define-minor-mode fsvn-parasite-copy-mode
-  ""
+  "
+Keybindings:
+\\{fsvn-parasite-copy-mode-map}"
   nil " (Copy)" fsvn-parasite-copy-mode-map
   (fsvn-parasite-check-mode 'fsvn-message-edit-mode)
   (fsvn-parasite-make-buffer-variables fsvn-parasite-copy-buffer-local-variables))
@@ -682,7 +694,9 @@
 (defvar fsvn-parasite-add-subcommand-args nil)
 
 (define-minor-mode fsvn-parasite-add-mode
-  ""
+  "
+Keybindings:
+\\{fsvn-parasite-add-mode-map}"
   nil " (Add)" fsvn-parasite-add-mode-map
   (fsvn-parasite-check-mode 'fsvn-select-file-mode)
   (setq fsvn-select-file-draw-list-function 'fsvn-parasite-add-draw-list)

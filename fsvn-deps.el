@@ -48,6 +48,9 @@ Otherwise set absolute path."
 	   string
 	   file))
 
+(defvar fsvn-svn-command-internal nil)
+(defvar fsvn-svnadmin-command-internal nil)
+
 (defmacro fsvn-deps-process-environment (&rest form)
   `(let ((process-environment (copy-sequence process-environment)))
      (setenv "LC_MESSAGES" "C")
@@ -178,7 +181,7 @@ Otherwise set absolute path."
     (fsvn-deps-process-environment
      ;;TODO 1.6.9 stderr "svn: warning: cannot set LC_CTYPE locale"
      ;; not depend on fsvn-call-process
-     (call-process fsvn-svn-command nil (list (current-buffer) nil) nil "--version" "--quiet")
+     (call-process fsvn-svn-command-internal nil (list (current-buffer) nil) nil "--version" "--quiet")
      (setq fsvn-svn-version (car (fsvn-text-buffer-line-as-list))))
     (when (fboundp 'version<=)
       (when (version<= fsvn-svn-version  "1.4")
@@ -216,8 +219,8 @@ Otherwise set absolute path."
     (list fsvn-svnadmin-command
 	  'fsvn-svnadmin-subcommand-completion-alist
 	  'fsvn-svnadmin-subcommand-arguments-alist
-	  (concat "svnadmin-" fsvn-svn-version)) ;; version is guessed same as `svn'
-    )))
+	  (concat "svnadmin-" fsvn-svn-version))))) ;; version is guessed same as `svn'
+
 
 (defun fsvn-subcommand-argument-list (command subcommand)
   "Parse SUBCOMMAND help."

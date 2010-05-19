@@ -58,28 +58,28 @@
 			     )))))
 
 (defun make-fsvn ()
-  (initialize)
-  (single-file))
+  (fsvn-make-initialize)
+  (fsvn-make-single-file))
 
 (defun compile-fsvn ()
-  (initialize)
-  (compile))
+  (fsvn-make-initialize)
+  (fsvn-make-compile))
 
 (defun check-fsvn ()
-  (initialize)
-  (lint)
-  (compile)
-  (test))
+  (fsvn-make-initialize)
+  (fsvn-make-lint)
+  (fsvn-make-compile)
+  (fsvn-make-test))
 
 (defun install-fsvn ()
-  (initialize)
-  (install))
+  (fsvn-make-initialize)
+  (fsvn-make-install))
 
 (defun what-where-fsvn ()
-  (initialize)
-  (install t))
+  (fsvn-make-initialize)
+  (fsvn-make-install t))
 
-(defun initialize ()
+(defun fsvn-make-initialize ()
   (let ((config (or (car command-line-args-left) "MAKE-CFG")))
     (setq load-path (cons "." load-path))
     (load config)
@@ -97,24 +97,24 @@
 	(princ "\n")
 	(error "")))))
 
-(defun compile ()
+(defun fsvn-make-compile ()
   (mapc
    (lambda (m)
      (byte-compile-file m))
    ALL-MODULES))
 
-(defun lint ()
+(defun fsvn-make-lint ()
+  (elint-initialize)
   (mapc
    (lambda (module)
      (find-file module)
      (eval-buffer)
-     (elint-initialize)
      (elint-current-buffer)
      (with-current-buffer "*Elint*"
-       (message (buffer-string))))
+       (message (replace-regexp-in-string "%" "%%" (buffer-string)))))
    ALL-MODULES))
 
-(defun install (&optional just-print)
+(defun fsvn-make-install (&optional just-print)
   (unless (or just-print (file-directory-p INSTALL-DIR))
     (make-directory INSTALL-DIR t))
   (let (src dest elc el)
@@ -138,7 +138,7 @@
 	  (list (cons el dest-el) (cons elc dest-elc)))))
      ALL-MODULES)))
 
-(defun test ()
+(defun fsvn-make-test ()
   (mapc
    (lambda (m)
      (load-file m))
@@ -152,7 +152,7 @@
 
 (defvar single-file-done nil)
 
-(defun single-file ()
+(defun fsvn-make-single-file ()
   (let ((tmpfile "fsvn.el.tmp"))
     (setq single-file-done (cons "fsvn.el" nil))
     (with-temp-buffer

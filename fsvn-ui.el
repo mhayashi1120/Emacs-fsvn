@@ -225,6 +225,189 @@ This is what the do-commands look for, and what the mark-commands store.")
   `(save-window-excursion
      (fsvn-brief-message-clear-message)
      ,@form))
+
+
+
+(require 'electric)
+
+(defvar unread-command-events)
+
+(defvar fsvn-electric-line-select-mode-map nil)
+(defvar fsvn-electric-scroll-terminate nil)
+
+(unless fsvn-electric-line-select-mode-map
+  (setq fsvn-electric-line-select-mode-map
+	(let ((map (make-keymap)))
+	  (fillarray (car (cdr map)) 'undefined)
+
+	  (define-key map "\C-c" nil)
+	  (define-key map "\e" nil)
+
+	  (define-key map "\C-c\C-c" 'fsvn-electric-line-select-quit)
+	  (define-key map "\C-]" 'fsvn-electric-line-select-quit)
+	  (define-key map "q" 'fsvn-electric-line-select-quit)
+	  (define-key map " " 'fsvn-electric-line-select-select)
+	  (define-key map "\C-m" 'fsvn-electric-line-select-select)
+	  (define-key map "\C-n" 'fsvn-electric-next-line)
+	  (define-key map "\C-p" 'fsvn-electric-previous-line)
+	  (define-key map "\C-u" 'universal-argument)
+	  (define-key map "n" 'fsvn-electric-next-line)
+	  (define-key map "p" 'fsvn-electric-previous-line)
+	  (define-key map "\C-v" 'fsvn-electric-scroll-up)
+	  (define-key map "\ev" 'fsvn-electric-scroll-down)
+	  map)))
+
+(defvar fsvn-electric-line-alist nil)
+(defvar fsvn-electric-start-point nil)
+(defvar fsvn-electric-end-point nil)
+(defconst fsvn-electric-line-select-buffer-local-variables
+  '(
+    (fsvn-electric-line-alist)
+    (fsvn-electric-start-point)
+    (fsvn-electric-end-point)
+    (truncate-lines)
+    ))
+
+(defcustom fsvn-electric-line-select-mode-hook nil
+  "*Run at the very end of `fsvn-electric-line-select-mode'."
+  :group 'fsvn
+  :type 'hook)
+
+(define-minor-mode fsvn-electric-line-select-mode
+  "
+Keybindings:
+\\{fsvn-electric-line-select-mode-map"
+  nil " (Electric)" fsvn-electric-line-select-mode-map
+  (fsvn-make-buffer-variables-internal fsvn-electric-line-select-buffer-local-variables))
+
+(defun fsvn-electric-line-select (buffer)
+  (let (select message-log-max)
+    (save-window-excursion
+      (Electric-pop-up-window buffer)
+      (unwind-protect
+	  (progn
+	    (set-buffer buffer)
+	    (fsvn-electric-line-select-buffer-update-highlight)
+	    (setq select
+		  (catch 'fsvn-electric-buffer-menu-select
+		    (message "->")
+		    (when (eq (setq unread-command-events (list (read-event))) ?\s)
+		      (setq unread-command-events nil)
+		      (throw 'fsvn-electric-buffer-menu-select nil))
+		    (let ((start-point (point))
+			  (first (or fsvn-electric-start-point (point-min)))
+			  (last (or fsvn-electric-end-point 
+				    (progn 
+				      (goto-char (1- (point-max))) 
+				      (line-beginning-position )))))
+		      ;; Use start-point if it is meaningful.
+		      (goto-char (if (or (< start-point first)
+					 (> start-point last))
+				     first
+				   start-point))
+		      (Electric-command-loop 'fsvn-electric-buffer-menu-select
+					     nil
+					     t
+					     'fsvn-electric-line-select-buffer-menu-looper
+					     (cons first last))))))
+	(message "")))
+    select))
+
+(defun fsvn-electric-line-select-buffer-menu-looper (state condition)
+  (cond 
+   ((and condition
+	 (not (memq (car condition) '(buffer-read-only
+				      end-of-buffer
+				      beginning-of-buffer))))
+    (signal (car condition) (cdr condition)))
+   ((< (point) (car state))
+    (goto-char (point-min)))
+   ((> (point) (cdr state))
+    (goto-char (point-max))
+    (forward-line -1)
+    (if (pos-visible-in-window-p (point-max))
+	(recenter -1))))
+  (fsvn-electric-line-select-buffer-update-highlight))
+
+(defvar fsvn-electric-line-select-buffer-overlay nil)
+(defun fsvn-electric-line-select-buffer-update-highlight ()
+  (when fsvn-electric-line-select-mode
+    ;; Make sure we have an overlay to use.
+    (unless fsvn-electric-line-select-buffer-overlay
+      (make-local-variable 'fsvn-electric-line-select-buffer-overlay)
+      (setq fsvn-electric-line-select-buffer-overlay (make-overlay (point) (point))))
+    (move-overlay fsvn-electric-line-select-buffer-overlay 
+		  (line-beginning-position)
+		  (line-end-position))
+    (overlay-put fsvn-electric-line-select-buffer-overlay 'face 'highlight)))
+
+(defun fsvn-electric-line-select-quit ()
+  (interactive)
+  (throw 'fsvn-electric-buffer-menu-select nil))
+
+(defun fsvn-electric-line-select-select ()
+  (interactive)
+  (let (p1 p2 filename)
+    (setq p1 (dired-move-to-filename))
+    (setq p2 (dired-move-to-end-of-filename))
+    (setq filename (buffer-substring-no-properties p1 p2))
+  (throw 'fsvn-electric-buffer-menu-select (expand-file-name filename))))
+
+(defmacro fsvn-electric-scroll (scroller error next-pos)
+  `(condition-case nil
+       (prog1
+	   ,scroller
+	 (setq fsvn-electric-scroll-terminate nil))
+     (,error
+      (if (and fsvn-electric-scroll-terminate
+	       (not (pos-visible-in-window-p ,next-pos)))
+	  (goto-char ,next-pos)
+	(ding))
+      (setq fsvn-electric-scroll-terminate t))))
+
+(defun fsvn-electric-scroll-down ()
+  (interactive)
+  (fsvn-electric-scroll (scroll-down) beginning-of-buffer (point-max)))
+
+(defun fsvn-electric-scroll-up ()
+  (interactive)
+  (fsvn-electric-scroll (scroll-up) end-of-buffer (point-min)))
+
+(defun fsvn-electric-previous-line (&optional arg)
+  (interactive "p")
+  (forward-line (- arg)))
+
+(defun fsvn-electric-next-line (&optional arg)
+  (interactive "p")
+  (forward-line arg))
+
+
+
+(require 'ls-lisp)
+
+(defconst fsvn-electric-select-file-list-buffer-name " *Fsvn Electric* ")
+
+(defun fsvn-electric-select-file (base-directory files)
+  (let ((buffer (get-buffer-create fsvn-electric-select-file-list-buffer-name)))
+    (with-current-buffer buffer
+      (set (make-local-variable 'font-lock-defaults)
+	   '(dired-font-lock-keywords t nil nil beginning-of-line))
+      (let ((ls-lisp-filesize-d-fmt "%10d")
+	    ls-lisp-use-insert-directory-program buffer-read-only)
+	(erase-buffer)
+	(fsvn-electric-line-select-mode 1)
+	(setq default-directory (file-name-as-directory base-directory))
+	(mapc
+	 (lambda (file)
+	   (insert "  ")
+	   (insert-directory file "-ald"))
+	 files)
+	(setq fsvn-electric-line-alist (mapcar (lambda (f) (cons f nil)) files)))
+      (font-lock-mode 1)
+      (font-lock-fontify-buffer)
+      (run-hooks 'fsvn-electric-line-select-mode-hook))
+    (fsvn-electric-line-select buffer)))
+
 
 
 (defmacro fsvn-cmd-read-subcommand-args (subcommand var)
