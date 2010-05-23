@@ -578,9 +578,9 @@ Keybindings:
   (when (member "--message" args)
     ;; remove message arguments
     (let ((split (fsvn-split-list "--message" args)))
-      (when (caddr split)
-	(insert (caddr split)))
-      (setq args (append (car split) (cdddr split)))))
+      (when (car (cdr (cdr split)))
+	(insert (car (cdr (cdr split)))))
+      (setq args (append (car split) (cdr (cdr (cdr split)))))))
   (setq fsvn-parasite-lock-subcommand-args args))
 
 (defun fsvn-parasite-lock-execute ()

@@ -176,10 +176,10 @@ Keybindings:
 	(goto-char change))))))
 
 (defun fsvn-proplist-get-proplist (urlrev)
-  (case fsvn-proplist-target-mode
-    (revprop
+  (cond
+    ((eq fsvn-proplist-target-mode 'revprop)
      (fsvn-get-revprops urlrev))
-    (properties
+    ((eq fsvn-proplist-target-mode 'properties)
      (fsvn-get-proplist urlrev))))
 
 (defmacro fsvn-proplist-move-line (&rest form)

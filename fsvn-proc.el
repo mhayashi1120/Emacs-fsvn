@@ -248,7 +248,7 @@ Like `let' binding, varlist binded while executing BODY."
 	     (unless (file-directory-p file)
 	       (throw 'guessed (fsvn-file-guessed-coding-system file)))))))
        flatten-args)
-      default-buffer-file-coding-system)))
+      (default-value 'buffer-file-coding-system))))
 
 
 

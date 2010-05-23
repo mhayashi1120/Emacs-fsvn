@@ -20,7 +20,11 @@
 
 ** file-select, message-edit can kill-buffer when commiting.
 
-** complete revision with electric select
+** complete log revision with electric select
+
+svn://localhost/some 5000 some log message
+svn://localhost/some 5030 some log message
+svn://localhost/some 5050 some log message
 
 ** interactive-p -> called-interactively-p
 
@@ -34,8 +38,9 @@
 ** Draw symbolic link like dired buffer.
 ** Enable Move file (in repository)
 
-** show current directory status top of the buffer.
 ** move case wrong file by svn `move'
+
+fsvn-browse.*move-in-repository
 
 * select-file-mode
 ** symbolic link
@@ -81,6 +86,8 @@
 ** this file arg to interactive arg
 
 ** refactor about diff
+
+** show copy-from
 
 * prop-mode
 

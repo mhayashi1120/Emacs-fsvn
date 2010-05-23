@@ -622,7 +622,7 @@ referenced mew-complete.el"
     ;; space == 0x20 or tab == 0x9
     (if (memq c '(#x20 #x9))
 	nil
-      (car (nreverse (copy-seq prevs))))))
+      (car (nreverse (copy-sequence prevs))))))
 
 (defun fsvn-complete-reading-contents (&optional point)
   (let* ((contents (buffer-substring (point-min) (or point (point-max))))

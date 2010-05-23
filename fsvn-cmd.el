@@ -95,8 +95,9 @@
   (let ((tmp url)
 	root)
     (while (and tmp (null root))
-      (ignore-errors
-	(setq root (fsvn-xml-info->entry=>repository=>root$ (fsvn-get-info-entry tmp))))
+      (condition-case err
+	  (setq root (fsvn-xml-info->entry=>repository=>root$ (fsvn-get-info-entry tmp)))
+	(error))
       (setq tmp (fsvn-url-dirname tmp)))
     root))
 

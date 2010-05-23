@@ -142,9 +142,10 @@ This function suppress this behavior."
 
 (defun fsvn-dired-add-file (file &optional marker-char)
   (fsvn-dired-switch-by-major-mode 
-   (ignore-errors
-     ;;FIXME when tramp like remote directory makes error in `dired-move-to-end-of-filename'
-     (dired-add-file (expand-file-name file) marker-char))
+   (condition-case nil
+       ;;FIXME when tramp like remote directory makes error in `dired-move-to-end-of-filename'
+       (dired-add-file (expand-file-name file) marker-char)
+     (error))
    (let (buffer-read-only)
      (save-excursion
        (unless (fsvn-current-filename)
@@ -290,7 +291,10 @@ This function suppress this behavior."
 
 (defun fsvn-dired-do-marked-delete (files)
   "Act like `dired-do-flagged-delete'. But not equals of this."
-  (interactive (list (fsvn-browse-gather-marked-files fsvn-mark-delete-char)))
+  (interactive (let ((files (fsvn-browse-gather-marked-files fsvn-mark-delete-char)))
+		 (when (fsvn-file-member (fsvn-browse-current-directory) files)
+		   (error "Cannot operate on `.'"))
+		 (list files)))
   (if (and files
 	   (or (not (interactive-p))
 	       (fsvn-browse-dired-confirm files 'delete dired-deletion-confirmer)))
@@ -338,9 +342,15 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
   "Copy names of marked (or next ARG) files into the kill ring.
 See `fsvn-dired-copy-filename-as-kill' but kills full path."
   (interactive (fsvn-dired-cmd-selected-files))
-  (let* ((dir (fsvn-browse-current-repository-url))
+  (let* ((repos-dir (fsvn-browse-current-repository-url))
+	 (dir (fsvn-browse-current-path))
 	 (string (mapconcat (lambda (file)
-			      (fsvn-expand-url (fsvn-file-name-nondirectory file) dir))
+			      (let (name)
+				(setq name 
+				      (if (fsvn-file= file dir)
+					  "."
+					(fsvn-file-name-nondirectory file)))
+				(fsvn-expand-url name repos-dir)))
 			    files fsvn-dired-copy-filename-separator)))
     (kill-new string)
     (message "%s" string)))

@@ -1,5 +1,7 @@
 2010-05-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Fix: remove obsoleted variable default-buffer-file-coding-system
+
 	* Fix: fsvn-log-sibling path is broken. Destructive `sort'.
 
 	* Change: fsvn-browse-mode

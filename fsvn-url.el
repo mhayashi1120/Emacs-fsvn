@@ -255,11 +255,8 @@
   (string= (fsvn-file-absolute-name file1)
 	   (fsvn-file-absolute-name file2)))
 
-(if (memq system-type '(windows-nt))
-    (defun fsvn-file-member (file list)
-      (member-ignore-case file list))
-  (defun fsvn-file-member (file list)
-    (member file list)))
+(defun fsvn-file-member (file list)
+  (fsvn-member file list 'fsvn-file=))
 
 (defun fsvn-file-assoc (elt list)
   (or (fsvn-string-assoc elt list)

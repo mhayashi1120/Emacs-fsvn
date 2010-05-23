@@ -222,6 +222,13 @@ Optional argument FORM evaluate Lisp form."
 
 
 
+(defun fsvn-member (elt list predicate)
+  (catch 'found
+    (while list
+       (when (funcall predicate elt (car list))
+	 (throw 'found list))
+       (setq list (cdr list)))))
+
 (defun fsvn-member-regexp (regexp list)
   (catch 'match
     (while list
@@ -277,7 +284,6 @@ Use %% to put a single % into the output.
 	(setq table (cdr table))))
     (setq ret (concat ret (substring format-string search-start)))
     ret))
-
 
 
 
