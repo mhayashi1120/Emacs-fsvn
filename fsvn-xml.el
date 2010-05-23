@@ -362,6 +362,10 @@
   (fsvn-xml-get-attribute-or-nil
    (fsvn-xml-status->target->entry=>wc-status node) 'tree-conflicted))
 
+(defun fsvn-xml-status->target->entry=>wc-status.wc-locked (node)
+  (fsvn-xml-get-attribute-or-nil
+   (fsvn-xml-status->target->entry=>wc-status node) 'wc-locked))
+
 (defun fsvn-xml-status->target->entry=>wc-status=>lock (node)
   (fsvn-xml-get-child
    (fsvn-xml-status->target->entry=>wc-status node) 'lock))
@@ -578,57 +582,6 @@ if dtd is list call this function recursively.
 	  (cons
 	   attrs
 	   (nreverse ret)))))
-
-(defconst fsvn-xml-accessor-prefix "fsvn-xml-")
-
-(defun fsvn-xml-create-accessor (dtd paren multi-nodes)
-  (let* ((base-nodes (append paren (list (car dtd))))
-	 (base-name (concat fsvn-xml-accessor-prefix (fsvn-xml-create-accessor-node base-nodes multi-nodes)))
-	 (attrs (fsvn-xml-node-attributes dtd))
-	 (name (symbol-name (car dtd)))
-	 (children (fsvn-xml-node-children dtd)))
-    (list
-     (mapcar
-      (lambda (attr)
-	(concat base-name  "." (symbol-name (car attr))))
-      attrs)
-     (cond
-      ((atom children)
-       (concat fsvn-xml-accessor-prefix (fsvn-xml-create-accessor-node paren multi-nodes) "=" name))
-      (t
-       (mapcar
-	(lambda (child)
-	  (fsvn-xml-create-accessor child base-nodes multi-nodes))
-	children))))))
-
-(defun fsvn-xml-create-accessor-node (paren multi-nodes)
-  (let (seq)
-    (setq seq (fsvn-xml-accessor-multi-most-match paren multi-nodes))
-    (cond
-     ((or (null seq)
-	  (equal seq paren))
-      (mapconcat 'symbol-name paren "->"))
-     (t
-      (mapconcat 'symbol-name seq "=>")))))
-
-(defun fsvn-xml-accessor-multi-most-match (nodes multi-nodes)
-  (let (max)
-    (mapc
-     (lambda (seq)
-       (let ((len (length seq))
-	     (i 0)
-	     node)
-	 (catch 'unmatch
-	   (while (< i len)
-	     (setq node (nth i nodes))
-	     (unless (eq node (nth i seq))
-	       (throw 'unmatch t))
-	     (setq i (1+ i)))
-	   (when (> len (length max))
-	     (setq max seq))
-	   )))
-     multi-nodes)
-    max))
 
 (defun fsvn-xml-text-matched (node string)
   (catch 'found

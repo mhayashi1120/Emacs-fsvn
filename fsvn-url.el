@@ -246,10 +246,14 @@
   (concat "file:///" file))
 
 (if (memq system-type '(windows-nt))
-    (defun fsvn-file= (file1 file2)
-      (string= (upcase (directory-file-name file1)) (upcase (directory-file-name file2))))
-  (defun fsvn-file= (file1 file2)
-    (string= (directory-file-name file1) (directory-file-name file2))))
+    (defun fsvn-file-absolute-name (file)
+      (upcase (directory-file-name (fsvn-expand-file file))))
+  (defun fsvn-file-absolute-name (file)
+    (directory-file-name (fsvn-expand-file file))))
+
+(defun fsvn-file= (file1 file2)
+  (string= (fsvn-file-absolute-name file1)
+	   (fsvn-file-absolute-name file2)))
 
 (if (memq system-type '(windows-nt))
     (defun fsvn-file-member (file list)
@@ -275,19 +279,6 @@
 	       (throw 'found item))))
 	 list)
 	nil)))
-
-(if (memq system-type '(windows-nt))
-    (defun fsvn-file-hash-key (file)
-      (apply '+ (string-to-list (upcase file))))
-  (defun fsvn-file-hash-key (file)
-    (apply '+ (string-to-list file))))
-  
-
-
-
-;; for hash table
-(define-hash-table-test 'fsvn-file-hash-test 'fsvn-file= 'fsvn-file-hash-key)
-;; (put 'fsvn-file-hash-test 'hash-table-test nil)
 
 
 

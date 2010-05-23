@@ -391,17 +391,19 @@ Keybindings:
      entries)))
 
 (defun fsvn-browse-ls-merge-wc-entries (directory file-entries status-entries)
-  (let (status-hash ret status path)
+  (let (status-hash key ret status path)
     ;; create hash for a lot of files.
     ;;   3000 files 82sec -> 13sec.
-    (setq status-hash (make-hash-table :test 'fsvn-file-hash-test))
+    (setq status-hash (make-hash-table :test 'equal))
     (mapc
      (lambda (status-entry)
-       (puthash (fsvn-xml-status->target->entry.path status-entry) status-entry status-hash))
+       (setq key (fsvn-file-absolute-name (fsvn-xml-status->target->entry.path status-entry)))
+       (puthash key status-entry status-hash))
      status-entries)
     (mapc
      (lambda (file)
-       (setq status (gethash (directory-file-name file) status-hash))
+       (setq key (fsvn-file-absolute-name file))
+       (setq status (gethash key status-hash))
        (setq ret (cons (cons file status) ret)))
      file-entries)
     (mapc
@@ -441,14 +443,32 @@ Keybindings:
 	(fsvn-xml-lists->list->entry=>commit=>date$ ent2))))
 
 (defun fsvn-browse-ls-directory-files (directory)
-  (let ((files (directory-files directory nil dired-re-no-dot))
+  (let ((files (directory-files directory nil))
+	ret)
+    (mapc
+     (lambda (file)
+       (cond
+	((string= file (fsvn-meta-dir-name)))
+	((string= ".." file))
+	((string= "." file)
+	 (setq ret (cons (concat (file-name-as-directory directory) "." ) ret)))
+	(t
+	 (setq ret (cons (fsvn-expand-file file directory) ret)))))
+     files)
+    ret))
+
+(defun fsvn-browse-directory-files (directory &optional full match)
+  (let ((files (directory-files directory nil (or match dired-re-no-dot)))
+	(filename-func (if full 
+			   (lambda (name) (fsvn-expand-file name directory))
+			 'identity))
 	ret)
     (mapc
      (lambda (file)
        (unless (or (string= file (fsvn-meta-dir-name)))
-	 (setq ret (cons (fsvn-expand-file file directory) ret))))
+	 (setq ret (cons (funcall filename-func file) ret))))
      files)
-    ret))
+    (nreverse ret)))
 
 (defun fsvn-browse-redraw-wc-file-entry (file)
   (let ((dir (fsvn-file-name-directory2 file))
@@ -943,8 +963,7 @@ PATH is each executed path."
       (setq revision (fsvn-xml-info->entry.revision info))
       (setq root (fsvn-xml-info->entry=>repository=>root$ info))
       (insert (format " Revision: %d\n" revision))
-      (insert (format " Root: %s\n" root))
-      (insert "\n"))))
+      (insert (format " Root: %s\n" root)))))
 
 (defun fsvn-browse-set-wc-directory (dir)
   (fsvn-set-default-directory dir)
@@ -1608,6 +1627,7 @@ PATH is each executed path."
 
 (defun fsvn-browse-file-this (urlrev)
   "View file or directory."
+  ;;TODO . file
   (interactive (fsvn-browse-cmd-read-urlrev-this-file))
   (let ((prev-buffer (current-buffer)))
     ;;TODO symlink
