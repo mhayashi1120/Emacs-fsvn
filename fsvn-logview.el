@@ -175,10 +175,10 @@ Keybindings:
      ((null arg)
       (setq scroll nil
 	    scroller 'fsvn-scroll-window-buffer-down))
-     ((plusp arg)
+     ((> arg 0)
       (setq scroll arg
 	    scroller 'fsvn-scroll-window-buffer-up))
-     ((minusp arg)
+     ((< arg 0)
       (setq scroll arg
 	    scroller 'fsvn-scroll-window-buffer-down)))
     (if (eq scroller 'fsvn-scroll-window-buffer-up)

@@ -214,7 +214,7 @@ REV-RANGE cons cell like (from . to)
 		 (message "Merging %s at %d..." url rev)
 		 (with-temp-buffer
 		   (fsvn-call-command "merge" (current-buffer)  "--accept" "postpone" "-c" rev urlrev merging-file))
-		 (when (fsvn-conflict-status-exists-p merging-file)
+		 (when (fsvn-status-conflict-exists-p merging-file)
 		   (setq conflict-info merging-file)
 		   (throw 'conflicted t))
 		 (fsvn-call-command-discard "commit" 
@@ -229,7 +229,7 @@ REV-RANGE cons cell like (from . to)
 	      (error "Resolve conflict and commit it"))
 	  (kill-buffer buffer))))))
 
-(defun fsvn-modified-status-exists-p (file)
+(defun fsvn-status-modified-exists-p (file)
   (let (status-entries)
     (setq status-entries
 	  (if (fsvn-file-exact-directory-p file)
@@ -244,7 +244,7 @@ REV-RANGE cons cell like (from . to)
        status-entries)
       nil)))
 
-(defun fsvn-conflict-status-exists-p (file)
+(defun fsvn-status-conflict-exists-p (file)
   (let (status-entries)
     (setq status-entries
 	  (if (fsvn-file-exact-directory-p file)

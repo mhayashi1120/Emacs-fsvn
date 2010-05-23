@@ -11,11 +11,6 @@
 
 
 
-(eval-when-compile
-  (require 'cl))
-
-
-
 (defvar user-login-name)
 
 
@@ -103,26 +98,28 @@
 
 (defun fsvn-status-get-status-1 (entry)
   "status of entry text."
-  (case (fsvn-xml-status->target->entry=>wc-status.item entry)
-    (added ?A)
-    (conflicted ?C)
-    (deleted ?D)
-    (ignored ?I)
-    (modified ?M)
-    (replaced ?R)
-    (external ?X)
-    (unversioned ??)
-    (missing ?!)
-    (incomplete ?!)
-    (obstructed ?~)
-    (t ?.)))
+  (let ((val (fsvn-xml-status->target->entry=>wc-status.item entry)))
+    (cond
+     ((eq 'added val) ?A)
+     ((eq 'conflicted val) ?C)
+     ((eq 'deleted val) ?D)
+     ((eq 'ignored val) ?I)
+     ((eq 'modified val) ?M)
+     ((eq 'replaced val) ?R)
+     ((eq 'external val) ?X)
+     ((eq 'unversioned val) ??)
+     ((eq 'missing val) ?!)
+     ((eq 'incomplete val) ?!)
+     ((eq 'obstructed val) ?~)
+     (t ?.))))
 
 (defun fsvn-status-get-status-2 (entry)
   "status of entry property."
-  (case (fsvn-xml-status->target->entry=>wc-status.props entry)
-    (modified ?M)
-    (conflicted ?C)
-    (t ?.)))
+  (let ((val (fsvn-xml-status->target->entry=>wc-status.props entry)))
+    (cond
+     ((eq 'modified val) ?M)
+     ((eq 'conflicted val) ?C)
+     (t ?.))))
 
 (defun fsvn-status-get-status-3 (entry)
   (if (fsvn-xml-status->target->entry=>wc-status.wc-locked entry)
