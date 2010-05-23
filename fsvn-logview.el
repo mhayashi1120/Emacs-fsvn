@@ -955,7 +955,7 @@ Keybindings:
     fsvn-logview-target-directory-p))
 
 (defun fsvn-log-sibling-sorted-paths (logentry)
-  (sort (fsvn-xml-log->logentry->paths logentry)
+  (sort (copy-sequence (fsvn-xml-log->logentry->paths logentry))
 	(lambda (p1 p2)
 	  (string-lessp 
 	   (fsvn-xml-log->logentry->paths->path$ p1)

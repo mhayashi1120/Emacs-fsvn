@@ -253,6 +253,34 @@ Optional argument FORM evaluate Lisp form."
 
 
 
+(defun fsvn-text-format (format-string format-table)
+  "Like `format' but can define replace rule by FORMAT-TABLE.
+
+Use %% to put a single % into the output.
+"
+  (let ((search-start 0)
+	(ret "")
+	(escape-char "%")
+	case-fold-search table next-begin search-end)
+    (while (string-match escape-char format-string search-start)
+      (setq search-end (match-beginning 0))
+      (setq next-begin (match-end 0))
+      (setq table (cons (cons escape-char escape-char) format-table))
+      (setq ret (concat ret (substring format-string search-start search-end)))
+      (setq search-start next-begin)
+      (while table
+	(when (and (string-match (caar table) format-string search-start)
+		   (= (match-beginning 0) search-start))
+	  (setq search-start (match-end 0))
+	  (setq ret (concat ret (cdar table)))
+	  (setq table nil))
+	(setq table (cdr table))))
+    (setq ret (concat ret (substring format-string search-start)))
+    ret))
+
+
+
+
 (defun fsvn-month-max-day (year month)
   (let (next-year next-month next-first last-day)
     (if (= month 12)

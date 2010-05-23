@@ -1,3 +1,10 @@
+2010-05-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: fsvn-log-sibling path is broken. Destructive `sort'.
+
+	* Change: fsvn-browse-mode
+	    show current directory status.
+
 2010-05-19  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: fsvn-make.el

@@ -24,7 +24,7 @@
 
 
 (defgroup fsvn-admin nil
-  ""
+  "`svnadmin' interfaces."
   :group 'fsvn)
 
 (defun fsvn-admin-start-command (subcommand buffer &rest args)

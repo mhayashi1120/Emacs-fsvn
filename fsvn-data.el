@@ -125,8 +125,9 @@
     (t ?.)))
 
 (defun fsvn-status-get-status-3 (entry)
-  (case (fsvn-xml-status->target->entry=>wc-status.item entry)
-    (t ?.)))
+  (if (fsvn-xml-status->target->entry=>wc-status.wc-locked entry)
+      ?L
+    ?.))
 
 (defun fsvn-status-get-status-4 (entry)
   (if (eq (fsvn-xml-status->target->entry=>wc-status.copied entry) t)

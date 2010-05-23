@@ -1,4 +1,4 @@
-;;; fsvn.el --- Fast and Functional Subversion interface for emacs
+;;; fsvn.el --- Functional Subversion interface for emacs
 ;; Copyright (C) 2008-2010 by Masahiro Hayashi
 
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
