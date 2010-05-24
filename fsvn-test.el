@@ -36,128 +36,47 @@
        (error "Assertion failed Expected non-nil but `nil'"))
      RET))
 
-(defvar fsvn-test-async-proc nil)
+(defvar fsvn-test-keep-buffers nil)
+
 ;;FIXME or some utility?
 (defmacro fsvn-test-async (&rest form)
   `(let (RET)
-     (setq fsvn-test-async-proc nil)
      (mapc
       (lambda (exec-form)
-	(let ((tmp-ret (eval exec-form))
-	      (tmp-sentinel))
-	  (when (and (processp tmp-ret)
-		     (not (eq (process-status tmp-ret) 'exit)))
-	    (setq fsvn-test-async-proc tmp-ret)
-	    (setq tmp-sentinel (process-sentinel tmp-ret))
-	    (if (null tmp-sentinel)
-		(set-process-sentinel tmp-ret 
-				      (lambda (proc event)
-					(when (eq (process-status proc) 'exit)
-					  (setq fsvn-test-async-proc nil))))
-	      (set-process-sentinel
-	       tmp-ret
-	       `(lambda (proc event) 
-		  (funcall ',tmp-sentinel proc event)
-		  (when (eq (process-status proc) 'exit)
-		    (setq fsvn-test-async-proc nil))))))
+	(let ((tmp-ret (eval exec-form)))
 	  (setq RET tmp-ret)
-	  ;; wait until process exit.
-	  (while fsvn-test-async-proc
-	    (sit-for 0.5))))
+	  (when (processp tmp-ret)
+	    ;; wait until process exit.
+	    (while tmp-ret
+	      (sit-for 0.5)
+	      (when (eq (process-status tmp-ret) 'exit)
+		(setq tmp-ret nil))))
+	  RET))
       ',form)
      RET))
 
 (defmacro fsvn-test-excursion (&rest form)
-  `(let ((PREV-BUFFER-LIST (buffer-list))
-	 (PREV-BUFFER (current-buffer))
-	 (PREV-WIN-CONFIG (current-window-configuration)))
-     (unwind-protect 
-	 (progn ,@form)
-       (mapc 
-	(lambda (b)
-	  (unless (memq b PREV-BUFFER-LIST)
-	    (let ((process (get-buffer-process b)))
-	      (when (or (null process) (eq (process-status process) 'exit))
-		(kill-buffer b)))))
-	(buffer-list))
-       (switch-to-buffer PREV-BUFFER)
-       (set-window-configuration PREV-WIN-CONFIG))))
+  `(if noninteractive
+       (progn ,@form)
+     (let ((PREV-BUFFER-LIST (buffer-list))
+	   (PREV-BUFFER (current-buffer))
+	   (PREV-WIN-CONFIG (current-window-configuration)))
+       (unwind-protect 
+	   (progn ,@form)
+	 (when fsvn-test-keep-buffers
+	   (mapc 
+	    (lambda (b)
+	      (unless (memq b PREV-BUFFER-LIST)
+		(let ((process (get-buffer-process b)))
+		  (when (or (null process) (eq (process-status process) 'exit))
+		    (kill-buffer b)))))
+	    (buffer-list)))
+	 (switch-to-buffer PREV-BUFFER)
+	 (set-window-configuration PREV-WIN-CONFIG)))))
 
 (defun fsvn-test-switch-file (wc1 wc2 file)
   (let ((r (file-relative-name file wc1)))
     (expand-file-name r wc2)))
-
-(defvar fsvn-test-check-through-all nil
-  "This is testing.")
-(defvar fsvn-test-done-functions nil)
-(defvar fsvn-test-target-functions nil)
-(defun fsvn-test-gather-functions ()
-  (let ((targetp (lambda (s) 
-		   (and (string-match "^fsvn-" (symbol-name s)) 
-			(not (string-match "^fsvn-test-" (symbol-name s)))
-			(functionp s)
-			(listp (symbol-function s))))))
-    (mapatoms
-     (lambda (s)
-       (when (funcall targetp s)
-	 (fmakunbound s)))
-     obarray)
-    (load "fsvn.el")
-    (let (ret)
-      (mapatoms
-       (lambda (s)
-	 (when (funcall targetp s)
-	   (setq ret (cons s ret))))
-       obarray)
-      (sort ret 'string-lessp))))
-
-(defun fsvn-test-gather-function-add-checker ()
-  (setq fsvn-test-target-functions (fsvn-test-gather-functions))
-  (mapcar
-   (lambda (s)
-     (let ((func (symbol-function s))
-	   substance checker)
-       (setq substance 
-	     (cond
-	      ((commandp s)
-	       (memq (assq 'interactive func) func))
-	      ((stringp (nth 2 (symbol-function s)))
-	       (nthcdr 2 (symbol-function s)))
-	      (t
-	       (nthcdr 1 (symbol-function s)))))
-       (setq checker
-	     `(unless (memq ',s fsvn-test-done-functions)
-		(setq fsvn-test-done-functions 
-		      (cons ',s fsvn-test-done-functions))))
-       (unless (member checker substance)
-	 (setcdr substance 
-		 (cons checker
-		       (cdr substance))))))
-   fsvn-test-target-functions)
-  (message "%d items adviced." (length fsvn-test-target-functions)))
-
-(defun fsvn-test-all-command-list ()
-  (let ((ret))
-    (mapatoms
-     (lambda (s)
-       (when (and (string-match "^fsvn" (symbol-name s))
-		  (commandp s))
-	 (setq ret (cons s ret))))
-     obarray)
-    (sort ret 'string-lessp)))
-
-(defun fsvn-test-not-yet-tested-command-list ()
-  (let ((all (fsvn-test-all-command-list))
-	ret)
-    (save-window-excursion
-      (find-file (locate-library "fsvn-test"))
-      (mapc
-       (lambda (s)
-	 (goto-char (point-min))
-	 (unless (re-search-forward (format "\\_<%s\\_>" s) nil t)
-	   (setq ret (cons s ret))))
-       all)
-      (nreverse ret))))
 
 (defun fsvn-test-sit-for (&optional time)
   (sit-for (or time 0.0)))
@@ -166,11 +85,23 @@
   (while (catch 'wait
 	   (mapc
 	    (lambda (p)
-	      (unless (memq p fsvn-test-start-process-list)
+	      (unless (or (eq (process-status p) 'exit)
+			  (memq p fsvn-test-start-process-list))
 		(throw 'wait t)))
 	    (process-list))
 	   nil)
     (sit-for 5)))
+
+(defun fsvn-test-unbound-functions ()
+  (let ((targetp (lambda (s) 
+		   (and (string-match "^fsvn-test-" (symbol-name s))
+			(functionp s)
+			(listp (symbol-function s))))))
+    (mapatoms
+     (lambda (s)
+       (when (funcall targetp s)
+	 (fmakunbound s)))
+     obarray)))
 
 (when (require 'testcover nil t)
   ;; (mapcar 'testcover-start ALL-MODULES)
@@ -191,9 +122,6 @@
 
 (defvar fsvn-test-start-process-list nil)
 (setq fsvn-test-start-process-list (process-list))
-
-(when fsvn-test-check-through-all
-  (fsvn-test-gather-function-add-checker))
 
 (fsvn-test-equal (fsvn-flatten-command-args '("a" 1 nil ("b" 2))) '("a" "1" "b" "2"))
 
@@ -294,6 +222,11 @@
 (fsvn-test-non-nil (fsvn-url-belongings-p "http://a" "http://a/"))
 (fsvn-test-non-nil (fsvn-url-belongings-p "http://a/" "http://a/"))
 (fsvn-test-nil (fsvn-url-belongings-p "http://a/b" "http://a/"))
+
+(fsvn-test-non-nil (fsvn-url-child-p "http://a" "http://a/b"))
+(fsvn-test-nil (fsvn-url-child-p "http://a" "http://a/"))
+(fsvn-test-nil (fsvn-url-child-p "http://a/" "http://a/"))
+(fsvn-test-nil (fsvn-url-child-p "http://a/b" "http://a/"))
 
 ;; non interactive test
 (fsvn-test-excursion
@@ -508,7 +441,6 @@
 ;;       (process-send-string proc "p"))
       ;;todo
       ;;       (fsvn-set-revprop-value (fsvn-url-urlrev url 2) 
-    
     )
    (fsvn-test-async
     (dired wc3-dir)
@@ -520,27 +452,7 @@
     (fsvn-test-sit-for))
    (fsvn-test-wait-for-all-process)))
 
-;; check coverage.
-(when fsvn-test-check-through-all
-  (let ((buffer (fsvn-make-temp-buffer))
-	(count 0))
-    (with-current-buffer buffer
-      (mapcar
-       (lambda (symbol)
-	 (let ((symbol-name (symbol-name symbol)))
-	   (cond
-	    ((memq symbol fsvn-test-done-functions)
-	     (setq count (1+ count)))
-	    (t
-	     (insert symbol-name "\n")))))
-       fsvn-test-target-functions))
-    (pop-to-buffer buffer t)
-    (message "%d / %d functions through." count (length fsvn-test-target-functions))))
-
 
-
-;; todo
-;; subr-arity
 
 (defun fsvn-test-make-conflicted-file (file)
   (let (url magic)
@@ -578,6 +490,8 @@
 	 nil)))
      fsvn-magic-handler-alist)
     (nreverse ret)))
+
+(fsvn-test-unbound-functions)
 
 
 

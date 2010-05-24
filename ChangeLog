@@ -1,8 +1,12 @@
 2010-05-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Change: Unsupport 1.4.x
+
 	* Fix: remove obsoleted variable default-buffer-file-coding-system
 
 	* Fix: fsvn-log-sibling path is broken. Destructive `sort'.
+
+	* Fix: Accept 1.6.9-dev like svn version (svn --version --quiet)
 
 	* Change: fsvn-browse-mode
 	    show current directory status.

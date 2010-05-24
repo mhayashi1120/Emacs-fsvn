@@ -1,5 +1,20 @@
 # -*- mode: makefile; -*-
 
+VERSION = 0.9.2
+
+RELEASE_FILES = \
+	fsvn*.el \
+	mw32cmp.el mw32cmp-test.el mw32el-ntemacs.patch \
+	Makefile MAKE-CFG.el MAKE-TARGETS \
+	BUG TODO ChangeLog
+
+RELEASE_SAMPLES = \
+	Samples/Makefile* Samples/MAKE-CFG.el*
+
+ARCHIVE_DIR_PREFIX = ..
+
+GOMI	= *.elc *~
+
 default: elc
 
 check: clean
@@ -26,8 +41,11 @@ release: tar single-file
 tar:
 	rm -rf /tmp/fsvn-$(VERSION)
 	mkdir /tmp/fsvn-$(VERSION)
-	cp -p fsvn*.el mw32*.el mw32el-ntemacs.patch Makefile* MAKE-CFG* MAKE-TARGETS VERSION /tmp/fsvn-$(VERSION)
+	cp -pr $(RELEASE_FILES) /tmp/fsvn-$(VERSION)
 	chmod 644 /tmp/fsvn-$(VERSION)/*
+	mkdir /tmp/fsvn-$(VERSION)/Samples
+	cp -pr $(RELEASE_SAMPLES) /tmp/fsvn-$(VERSION)/Samples
+	chmod 644 /tmp/fsvn-$(VERSION)/Samples/*
 	cd /tmp ; tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION)
 	cd /tmp ; tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
 

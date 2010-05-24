@@ -182,10 +182,14 @@ Otherwise set absolute path."
      ;;TODO 1.6.9 stderr "svn: warning: cannot set LC_CTYPE locale"
      ;; not depend on fsvn-call-process
      (call-process fsvn-svn-command-internal nil (list (current-buffer) nil) nil "--version" "--quiet")
-     (setq fsvn-svn-version (car (fsvn-text-buffer-line-as-list))))
-    (when (fboundp 'version<=)
-      (when (version<= fsvn-svn-version  "1.4")
-	(error "Svn command must be 1.4.x or later")))))
+     (let ((raw-version (car (fsvn-text-buffer-line-as-list)))
+	   version)
+       (when (fboundp 'version<=)
+	 (when (string-match "^\\([0-9]+\\.[0-9]+\\.[0-9]+\\)" raw-version)
+	   (setq version (match-string 1 raw-version)))
+	 (setq fsvn-svn-version (or version raw-version))
+	 (when (version<= fsvn-svn-version  "1.4")
+	   (error "Svn command must be 1.4.x or later")))))))
 
 (defun fsvn-build-subcommand (&optional force)
   (mapcar

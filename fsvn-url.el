@@ -132,10 +132,14 @@
     (when (string-match "\\([^/]+\\)$" tmp)
       (match-string 1 tmp))))
 
-(defun fsvn-url-relative-name (url1 url2)
-  (if (string-match (concat "^" (regexp-quote (fsvn-url-as-directory url1)) "\\(.*\\)") url2)
-      (match-string 1 url2)
-    url2))
+(defun fsvn-url-relative-name (base-url url)
+  (cond
+   ((string= (directory-file-name base-url) (directory-file-name url))
+    ".")
+   ((string-match (concat "^" (regexp-quote (fsvn-url-as-directory base-url)) "\\(.*\\)") url)
+    (match-string 1 url))
+   (t
+    url)))
 
 (defun fsvn-urlrev-directory-file-name (urlrev)
   (let ((urlobj (fsvn-urlrev-parse urlrev)))
@@ -167,9 +171,15 @@
        (not (fsvn-magic-file-name-absolute-p url))))
 
 (defun fsvn-url-belongings-p (parent url)
-  "URL is child of PARENT then return non-nil."
+  "URL is child of PARENT or same as PARENT then return non-nil."
   (or (string-match (concat "^" (regexp-quote (file-name-as-directory parent))) url)
       (fsvn-file= parent url)))
+
+(defun fsvn-url-child-p (parent url)
+  "URL is child of PARENT then return non-nil."
+  (and (not (string= (directory-file-name parent) (directory-file-name url)))
+       (or (string-match (concat "^" (regexp-quote (file-name-as-directory parent))) url)
+	   (fsvn-file= parent url))))
 
 (defun fsvn-url-urlrev (url rev)
   (if rev

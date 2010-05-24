@@ -11,11 +11,11 @@
 
 
 
-(defun fsvn-get-prop-value-alist (url)
+(defun fsvn-get-prop-value-alist (urlrev)
   (mapcar
    (lambda (propname)
-     (cons propname (fsvn-get-propget propname url)))
-   (fsvn-get-proplist url)))
+     (cons propname (fsvn-get-propget propname urlrev)))
+   (fsvn-get-proplist urlrev)))
 
 (defun fsvn-get-propget (propname url)
   (with-temp-buffer
@@ -301,6 +301,17 @@ FILENAME non-nil means ignore DEST-URL filename section."
 
 (defun fsvn-set-prop-delete (file propname)
   (fsvn-call-command-discard "propdel" propname file))
+
+(defun fsvn-duplicate-all-properties (from-file to-file)
+  "Overwrite TO-FILE properties by FROM-FILE properties with ignoring all conflict."
+  (mapc
+   (lambda (p)
+     (fsvn-set-prop-delete to-file p))
+   (fsvn-get-proplist to-file))
+  (mapc
+   (lambda (p)
+     (fsvn-set-prop-value to-file (car p) (cdr p)))
+   (fsvn-get-prop-value-alist from-file)))
 
 (defun fsvn-add-prop-svn:ignore (dir files)
   "DIR is parent of FILES

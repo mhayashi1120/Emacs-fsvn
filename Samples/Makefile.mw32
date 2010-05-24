@@ -1,0 +1,24 @@
+# -*- mode: makefile; -*-
+#
+# Makefile for fsvn (Meadow)
+#
+
+TAR	= tar
+RM	= /bin/rm -f
+
+PREFIX = c:/usr/local/Meadow-dev
+
+EMACS	= $(PREFIX)/bin/Meadow.exe
+
+CONFIG  = Samples/MAKE-CFG.el.mw32
+
+FLAGS   = -batch -q -no-site-file -l fsvn-make.el
+
+EMACSDOC = $(PREFIX)/etc
+BITMAPPATH = $(PREFIX)/bitmap
+INFOPATH = $(PREFIX)/info
+EMACSPATH = $(PREFIX)/bin
+EMACSDATA = $(PREFIX)/etc
+EMACSLOADPATH=
+
+include MAKE-TARGETS

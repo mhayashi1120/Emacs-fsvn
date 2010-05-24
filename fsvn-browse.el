@@ -1627,8 +1627,9 @@ PATH is each executed path."
 
 (defun fsvn-browse-file-this (urlrev)
   "View file or directory."
-  ;;TODO . file
   (interactive (fsvn-browse-cmd-read-urlrev-this-file))
+  (when (fsvn-file= urlrev (fsvn-browse-current-directory))
+    (error "Can't operate on `.'"))
   (let ((prev-buffer (current-buffer)))
     ;;TODO symlink
     (cond
