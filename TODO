@@ -30,6 +30,8 @@ svn://localhost/some 5050 some log message
 
 ** Bugreport
 
+** Test multiple version svn 1.4.x, 1.5.x, 1.6.x
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
@@ -42,6 +44,7 @@ svn://localhost/some 5050 some log message
 
 fsvn-browse.*move-in-repository
 
+** in repository C-x C-f or something bound to open by url function
 * select-file-mode
 ** symbolic link
 

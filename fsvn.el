@@ -23,7 +23,7 @@
 
 ;; fsvn supports
 ;;  * GNU Emacs 22.x or later.
-;;  * Subversion 1.4.x or later.
+;;  * Subversion 1.5.x or later. (1.4.x works but some restriction)
 
 ;; fsvn has TortoiseSVN like user interface by using `svn' command.
 ;;  Have following advantages of other Emacs svn client.
@@ -41,7 +41,7 @@
 
 ;; This package tested following environment.
 ;;      Meadow (based Emacs 22.1) on Windows.  svn 1.6.x
-;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.4.2
+;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x
 
 ;; major-mode and brief description
 ;; * fsvn-browse-mode (dired like interface)
@@ -94,10 +94,10 @@
 ;;; Coding
 
 ;; * name definition
-;;   url -+- filename of local directory (ex c:/hoge /hoge )
-;;        +- real url (ex.  svn://* http:// like string)
+;;   url -+- filename of local directory (e.g. c:/hoge /hoge )
+;;        +- real url (e.g.  svn://* http:// like string)
 ;;
-;;   path -+- filename of local directory (ex c:/hoge /hoge )
+;;   path -+- filename of local directory (e.g. c:/hoge /hoge )
 ;;         +- path to repository object.  only directory.  contains first `/'
 ;;
 ;;   * path is unique in a fsvn-browse-mode buffer.

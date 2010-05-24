@@ -46,7 +46,9 @@
 
 (defun fsvn-copy-directory (source destination &optional ignore-dot-svn)
   "Copy SOURCE directory to DESTINATION.
-Overwrite all existing files."
+Overwrite all existing files.
+IGNORE-DOT-SVN non-nil means do not copy subversion meta directory (Probablly .svn).
+"
   (unless (file-directory-p destination)
     (make-directory destination t))
   (mapc
