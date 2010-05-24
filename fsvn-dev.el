@@ -217,6 +217,8 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 	   (setq relative-name (fsvn-url-relative-name src-url url))
 	   (setq file (fsvn-expand-file relative-name))
 	   (unless (file-exists-p file)
+	     (unless (file-directory-p (file-name-directory file))
+	       (make-directory (file-name-directory file) t))
 	     (fsvn-call-command-discard "export" urlrev file)
 	     ;; not commited file exists `merge' simply ignore the file.
 	     ;; if add this point, sometime `merge' failed.
