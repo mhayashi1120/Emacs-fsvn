@@ -257,6 +257,58 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 
 
 
+(defcustom fsvn-browse-guessed-moved-parent-threshold 4
+  "*"
+  :group 'fsvn
+  :type 'integer)
+
+(defun fsvn-browse-search-guessed-moved-files (file file-versioned-p)
+  (let ((dir (fsvn-file-name-parent-directory file fsvn-browse-guessed-moved-parent-threshold)))
+    (fsvn-mapitem
+     (lambda (f)
+       (let ((versioned (fsvn-get-ls f)))
+	 (cond
+	  ((and file-versioned-p versioned))
+	  ((and (not file-versioned-p) (null versioned)))
+	  (t
+	   f))))
+     ;;TODO hard-coding
+    (fsvn-search-same-name-files dir file 6))))
+
+(defun fsvn-browse-search-moved/copied-file (target-file)
+  (interactive (fsvn-browse-cmd-read-wc-this-file))
+  (fsvn-browse-wc-only
+   (let (files
+	 src-file dest-file file 
+	 file-versioned target-versioned done)
+     (setq target-versioned (fsvn-get-ls target-file))
+     (if target-versioned
+	 (setq src-file target-file)
+       (setq dest-file target-file))
+     (setq files (fsvn-browse-search-guessed-moved-files target-file target-versioned))
+     (while files
+       (setq file (car files))
+       (setq file-versioned (fsvn-get-ls file))
+       (if target-versioned
+	   (setq dest-file file)
+	 (setq src-file file))
+       ;;todo interactive command
+       ;;todo electric
+       (cond
+	((y-or-n-p (format "Move %s to %s? " src-file dest-file))
+	 (fsvn-browse-safe-move-this src-file dest-file)
+	 (setq done t)
+	 (setq files nil))
+	((y-or-n-p (format "Copy %s to %s? " src-file dest-file))
+	 (fsvn-browse-safe-copy-this src-file dest-file)
+	 (setq done t)
+	 (setq files nil)))
+       (setq files (cdr files)))
+     (unless done
+       (message "Cannot do anything.")))))
+
+
+
 ;; TODO similar to fsvn-get-files-logs
 (defun fsvn-logs-multiple-url (urlrevs)
   "Gather non-duplicated log entries."
