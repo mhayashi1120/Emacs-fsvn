@@ -4,7 +4,8 @@
 	* Change: internal command variable (fsvn-svn*-command-internal) make have absolute path.
 	* Improvement: fix async process function
 	* Improvement: MAKE-TARGETS -> MAKE-TARGETS.mk
-
+	* Fix: Putting mark on no file point, mark to all files.
+	
 2010-05-24  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: AutoCheck.sh

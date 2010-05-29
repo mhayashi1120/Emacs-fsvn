@@ -847,12 +847,8 @@ PATH is each executed path."
    ((fsvn-current-filename)
     (fsvn-browse-put-mark-point mark)
     (fsvn-next-file))
-   ((fsvn-browse-current-path)
-    (fsvn-browse-each-file file nil
-      (fsvn-browse-put-mark-point mark)))
    (t
-    (message "Cannot put mark on this line.")
-    (fsvn-next-file))))
+    (error "Cannot put mark on this line."))))
 
 (defun fsvn-browse-switch-directory-buffer (directory-urlrev &optional revert)
   (if (fsvn-url-local-p directory-urlrev)
