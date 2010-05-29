@@ -1,11 +1,9 @@
-# -*- mode: makefile; -*-
-
 VERSION = 0.9.2
 
 RELEASE_FILES = \
 	fsvn*.el \
 	mw32cmp.el mw32cmp-test.el mw32el-ntemacs.patch \
-	Makefile MAKE-CFG.el MAKE-TARGETS \
+	Makefile MAKE-CFG.el MAKE-TARGETS.mk \
 	BUG TODO ChangeLog
 
 RELEASE_SAMPLES = \
@@ -18,7 +16,7 @@ GOMI	= *.elc *~
 default: elc
 
 check: clean
-	$(EMACS) $(FLAGS) -f check-fsvn $(CONFIG)
+	$(EMACS) $(CHECKFLAGS) -f check-fsvn $(CONFIG)
 
 elc:
 	$(EMACS) $(FLAGS) -f compile-fsvn $(CONFIG)

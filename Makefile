@@ -12,5 +12,8 @@ CONFIG  = MAKE-CFG.el
 
 FLAGS   = -batch -q -no-site-file -l fsvn-make.el
 
-include MAKE-TARGETS
+# For windows emacs
+CHECKFLAGS = $(FLAGS)
+
+include MAKE-TARGETS.mk
 

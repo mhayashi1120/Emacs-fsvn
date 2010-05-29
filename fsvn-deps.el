@@ -176,6 +176,13 @@ Otherwise set absolute path."
     "--config-dir"
     ))
 
+(defun fsvn-set-command-information ()
+  (unless (setq fsvn-svn-command-internal (executable-find fsvn-svn-command))
+    (error "No executable \"%s\" in `exec-path'" fsvn-svn-command))
+  (unless (setq fsvn-svnadmin-command-internal (executable-find fsvn-svnadmin-command))
+    (error "No executable \"%s\" in `exec-path'" fsvn-svnadmin-command))
+  (fsvn-set-version))
+
 (defun fsvn-set-version ()
   (with-temp-buffer
     (fsvn-deps-process-environment

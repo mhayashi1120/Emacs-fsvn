@@ -1,3 +1,10 @@
+2010-05-29  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: fsvn-after-save-hook when svn:eol-style property is native
+	* Change: internal command variable (fsvn-svn*-command-internal) make have absolute path.
+	* Improvement: fix async process function
+	* Improvement: MAKE-TARGETS -> MAKE-TARGETS.mk
+
 2010-05-24  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: AutoCheck.sh

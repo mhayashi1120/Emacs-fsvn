@@ -90,6 +90,9 @@ Optional argument FORM evaluate Lisp form."
 
 ;; string,text,regexp utility
 
+(defun fsvn-string-truncate (str end-column)
+  (truncate-string-to-width str (abs end-column) nil ?\s t))
+
 ;;FIXME too heavy?
 (defun fsvn-string-unibyte-only-p (string)
   (let ((un-str (string-make-unibyte string)))
@@ -221,6 +224,48 @@ Optional argument FORM evaluate Lisp form."
       (match-string subexp string))))
 
 
+
+(defun fsvn-filled-column (value &optional pad)
+  (format (concat "%" 
+		  (when pad (int-to-string pad))
+		  (cond 
+		   ((integerp value) "d")
+		   ((stringp value) "s")
+		   ((symbolp value) "s")
+		   (t (error "Not supported"))))
+	  (or value "")))
+
+
+
+(defun fsvn-union (list1 list2 &optional predicate)
+  (let ((list (nreverse (copy-sequence list1)))
+	(pred (or predicate 'member)))
+    (mapc
+     (lambda (i)
+       (unless (funcall pred i list)
+	 (setq list (cons i list))))
+     list2)
+    (nreverse list)))
+
+(defun fsvn-except (list1 list2 &optional predicate)
+  (let ((pred (or predicate 'member))
+	list)
+    (mapc
+     (lambda (i)
+       (unless (funcall pred i list2)
+	 (setq list (cons i list))))
+     list1)
+    (nreverse list)))
+
+(defun fsvn-intersection (list1 list2 &optional predicate)
+  (let ((pred (or predicate 'member))
+	list)
+    (mapc
+     (lambda (i)
+       (when (funcall pred i list2)
+	 (setq list (cons i list))))
+     list1)
+    (nreverse list)))
 
 (defun fsvn-member (elt list predicate)
   (catch 'found

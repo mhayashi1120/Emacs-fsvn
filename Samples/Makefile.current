@@ -12,9 +12,11 @@ CONFIG  = MAKE-CFG.el
 
 FLAGS   = -batch -q -no-site-file -l fsvn-make.el
 
+CHECKFLAGS   = $(FLAGS)
+
 GOMI	= *.elc *~
 
 ARCHIVE_DIR_PREFIX = ..
 
-include MAKE-TARGETS
+include MAKE-TARGETS.mk
 

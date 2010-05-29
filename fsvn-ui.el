@@ -182,6 +182,16 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 
 
+(defun fsvn-header-tail (&optional len)
+  (make-string (abs len) ?-))
+
+(defun fsvn-header-tail-fill-line ()
+  (let ((width (- (frame-width) (current-column))))
+    (when (> width 0)
+      (insert (fsvn-header-tail width) "\n"))))
+
+
+
 (defun fsvn-buffer-popup-as-information (buffer)
   (delete-other-windows)
   (let ((win (split-window)))

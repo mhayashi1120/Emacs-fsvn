@@ -69,7 +69,14 @@
   (fsvn-make-initialize)
   (fsvn-make-lint)
   (fsvn-make-compile)
-  (fsvn-make-test))
+  ;; see comment in `fsvn-test-excursion' at fsvn-test.el
+  (condition-case nil
+      (progn
+	(fsvn-make-test)
+	(kill-emacs))
+    (error
+     (when (eq system-type 'windows-nt)
+       (kill-emacs 1)))))
 
 (defun install-fsvn ()
   (fsvn-make-initialize)

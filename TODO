@@ -30,7 +30,8 @@ svn://localhost/some 5050 some log message
 
 ** Bugreport
 
-** Test multiple version svn 1.4.x, 1.5.x, 1.6.x
+** about SVN_SSH
+** fsvn-string-rtrim to fsvn-string-truncate
 
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals

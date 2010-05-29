@@ -3,9 +3,6 @@
 ;;; Commentary:
 ;; 
 
-;; TODO see testcover.el
-
-
 ;;; History:
 ;; 
 
@@ -37,33 +34,58 @@
      RET))
 
 (defvar fsvn-test-keep-buffers nil)
+(defvar fsvn-test-sit-for-interval 0)
 
 ;;FIXME or some utility?
 (defmacro fsvn-test-async (&rest form)
-  `(let (RET)
+  `(let (FSVN-TEST-ASYNC-RET)
      (mapc
       (lambda (exec-form)
-	(let ((tmp-ret (eval exec-form)))
-	  (setq RET tmp-ret)
-	  (when (processp tmp-ret)
-	    ;; wait until process exit.
-	    (while tmp-ret
-	      (sit-for 0.5)
-	      (when (eq (process-status tmp-ret) 'exit)
-		(setq tmp-ret nil))))
-	  RET))
+	(setq FSVN-TEST-ASYNC-RET (eval exec-form))
+	(when (processp FSVN-TEST-ASYNC-RET)
+	  ;; wait until process exit.
+	  (while (not (eq (process-status FSVN-TEST-ASYNC-RET) 'exit))
+	    (sit-for 3))
+	  FSVN-TEST-ASYNC-RET))
       ',form)
-     RET))
+     FSVN-TEST-ASYNC-RET))
 
 (defmacro fsvn-test-excursion (&rest form)
   `(if noninteractive
-       (progn ,@form)
+       (progn 
+	 (if (eq system-type 'windows-nt)
+	     ;; Ignore  when Windows (NTEmacs 22 & NTEmacs 23 & Meadow 3)
+	     ;; Following two code not works correctly when `noninteractive' call.
+
+	     ;; 1
+	     ;; (let ((buf (get-buffer-create "T"))
+	     ;;       proc)
+	     ;;   (with-current-buffer buf
+	     ;;     (make-variable-buffer-local 'kill-buffer-hook)
+	     ;;     (add-hook 'kill-buffer-hook (lambda () (message "i was killed"))))
+	     ;;   (setq proc (start-process "A" buf "true"))
+	     ;;   (set-process-sentinel proc 
+	     ;; 			(lambda (p e) 
+	     ;; 			  (let ((b (process-buffer p)))
+	     ;; 			    (kill-buffer b))))
+	     ;;   (sit-for 3))
+
+	     ;; 2 
+	     ;; (let ((proc (start-process "TEST" nil "true")))
+	     ;;   (while (eq (process-status proc) 'run)
+	     ;;     (message "%s" (process-status proc))
+	     ;;     (sit-for 3)))
+	     
+	     (message "Not works on Windows. Skipped.")
+	   ,@form))
      (let ((PREV-BUFFER-LIST (buffer-list))
 	   (PREV-BUFFER (current-buffer))
-	   (PREV-WIN-CONFIG (current-window-configuration)))
+	   (PREV-WIN-CONFIG (current-window-configuration))
+	   (INIT-PROCESS-LIST (process-list)))
        (unwind-protect 
 	   (progn ,@form)
-	 (when fsvn-test-keep-buffers
+	 (fsvn-test-wait-for-all-process INIT-PROCESS-LIST)
+	 (unless fsvn-test-keep-buffers
 	   (mapc 
 	    (lambda (b)
 	      (unless (memq b PREV-BUFFER-LIST)
@@ -78,19 +100,26 @@
   (let ((r (file-relative-name file wc1)))
     (expand-file-name r wc2)))
 
-(defun fsvn-test-sit-for (&optional time)
-  (sit-for (or time 0.0)))
+(defun fsvn-test-sit-for ()
+  "Call `sit-for' with `fsvn-test-sit-for-interval' as argument.
+To show and see result.
+"
+  (sit-for fsvn-test-sit-for-interval))
 
-(defun fsvn-test-wait-for-all-process ()
-  (while (catch 'wait
-	   (mapc
-	    (lambda (p)
-	      (unless (or (eq (process-status p) 'exit)
-			  (memq p fsvn-test-start-process-list))
-		(throw 'wait t)))
-	    (process-list))
-	   nil)
-    (sit-for 5)))
+(defun fsvn-test-wait-for-all-process (init-processes)
+  (let (buffer)
+    (while (catch 'wait
+	     (mapc
+	      (lambda (p)
+		(unless (memq p init-processes)
+		  (when (not (eq (process-status p) 'exit))
+		    (throw 'wait t))
+		  (when (and (setq buffer (process-buffer p))
+			     (buffer-live-p buffer))
+		    (throw 'wait t))))
+	      (process-list))
+	     nil)
+      (sit-for 2))))
 
 (defun fsvn-test-unbound-functions ()
   (let ((targetp (lambda (s) 
@@ -103,9 +132,20 @@
 	 (fmakunbound s)))
      obarray)))
 
-(when (require 'testcover nil t)
-  ;; (mapcar 'testcover-start ALL-MODULES)
+(defun fsvn-test-quick-commit (message dir)
+  (fsvn-test-async
+   (fsvn-browse-commit-path)
+   (fsvn-parasite-in-message-edit
+    (insert message))
+   (fsvn-parasite-commit-execute)
+   (dired dir)))
+
+(when (and (not noninteractive) (require 'testcover nil t))
   (testcover-start "fsvn-browse.el")
+  (testcover-start "fsvn-url.el")
+
+  ;; (when (boundp 'ALL-MODULES)
+  ;;   (mapcar 'testcover-start ALL-MODULES))
   ;; (testcover-start "fsvn-admin.el")
   ;; (testcover-start "fsvn-cmd.el")
   ;; (testcover-start "fsvn-config.el")
@@ -117,11 +157,7 @@
   ;; (testcover-start "fsvn-pub.el")
   ;; (testcover-start "fsvn-tortoise.el")
   ;; (testcover-start "fsvn-ui.el")
-  ;; (testcover-start "fsvn-url.el")
   )
-
-(defvar fsvn-test-start-process-list nil)
-(setq fsvn-test-start-process-list (process-list))
 
 (fsvn-test-equal (fsvn-flatten-command-args '("a" 1 nil ("b" 2))) '("a" "1" "b" "2"))
 
@@ -211,7 +247,6 @@
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c/") "http://a/b/c/")
 
 ;; fsvn-file-name-root-p
-;;fsvn-file-name-directory
 ;; fsvn-file-name-nondirectory
 ;; fsvn-expand-file
 ;; fsvn-file-relative
@@ -227,6 +262,24 @@
 (fsvn-test-nil (fsvn-url-child-p "http://a" "http://a/"))
 (fsvn-test-nil (fsvn-url-child-p "http://a/" "http://a/"))
 (fsvn-test-nil (fsvn-url-child-p "http://a/b" "http://a/"))
+
+(fsvn-test-equal (fsvn-file-name-directory "/abcd/efg/.") (expand-file-name "/abcd/efg"))
+(fsvn-test-equal (fsvn-file-name-directory "/abcd/efg/") (expand-file-name "/abcd/efg"))
+(fsvn-test-equal (fsvn-file-name-directory "/abcd/efg") (expand-file-name "/abcd"))
+
+(fsvn-test-equal (fsvn-file-name-directory2 "/abcd/efg/.") "/abcd/efg")
+(fsvn-test-equal (fsvn-file-name-directory2 "/abcd/efg/") "/abcd")
+(fsvn-test-equal (fsvn-file-name-directory2 "/abcd/efg") "/abcd")
+
+(fsvn-test-non-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/c/d"))
+(fsvn-test-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/c/"))
+(fsvn-test-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/c"))
+(fsvn-test-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/"))
+
+(fsvn-test-non-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/c"))
+(fsvn-test-non-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/c/"))
+(fsvn-test-non-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/c/d"))
+(fsvn-test-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/"))
 
 ;; non interactive test
 (fsvn-test-excursion
@@ -278,8 +331,7 @@
     (write-region "ignore" nil ignore-file)
     (fsvn-browse-prop-add-svn:ignore-selected (list ignore-file))
     (fsvn-browse-add-selected (nreverse list))
-;;     (fsvn-browse-commit-path)
-    (fsvn-call-command-discard "commit" "--message" "add file") ;; revision 1
+    (fsvn-test-quick-commit "add file" wc1-dir)  ;; revision 1
     (revert-buffer)
     (fsvn-browse-goto-file file1)
     (fsvn-browse-info-path)
@@ -306,13 +358,13 @@
     (fsvn-browse-mkdir dir2)
     ;; delete a file
     (fsvn-browse-delete-selected (list file1))
-    (fsvn-call-command-discard "commit" "--message" "delete file") ;; revision 2
+    (fsvn-test-quick-commit "delete file" wc1-dir)  ;; revision 2
     (revert-buffer)
     (fsvn-test-sit-for)
     ;; modify a file
     (write-region "Z" nil file2 t)
     (fsvn-browse-diff-this file2)
-    (fsvn-call-command-discard "commit" "--message" "modify file") ;; revision 3
+    (fsvn-test-quick-commit "modify file" wc1-dir)  ;; revision 3
     (revert-buffer)
     (fsvn-test-sit-for)
     ;; revert a file
@@ -437,20 +489,30 @@
     (save-buffer)
     ;;todo
 ;;     (let ((proc (fsvn-browse-update-path)))
-;;       (sit-for 2) ;; waiting response
+;;       (while (eq (process-status proc) 'run)
+;; 	(sit-for 0.5))
 ;;       (process-send-string proc "p"))
       ;;todo
       ;;       (fsvn-set-revprop-value (fsvn-url-urlrev url 2) 
     )
    (fsvn-test-async
     (dired wc3-dir)
-    (setq default-directory wc3-dir)
     (fsvn-checkout repos-url)
     (fsvn-dired-toggle-browser)
     (fsvn-test-sit-for)
     (fsvn-browse-logview-path)
-    (fsvn-test-sit-for))
-   (fsvn-test-wait-for-all-process)))
+    (fsvn-test-sit-for)
+    (fsvn-log-list-quit)
+    (fsvn-test-sit-for)
+    (fsvn-browse-propview-path)
+    (fsvn-test-sit-for)
+    (fsvn-restore-previous-window-setting)
+    (fsvn-test-sit-for)
+    (fsvn-browse-commit-path)
+    (fsvn-test-sit-for)
+    (fsvn-parasite-commit-quit)
+    (fsvn-test-sit-for)
+    )))
 
 
 
