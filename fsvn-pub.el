@@ -403,9 +403,7 @@
 
 
 (defun fsvn-initialize-loading ()
-  (setq fsvn-svn-command-internal fsvn-svn-command)
-  (setq fsvn-svnadmin-command-internal fsvn-svnadmin-command)
-  (fsvn-set-version)
+  (fsvn-set-command-information)
   (unless (file-directory-p fsvn-home-directory)
     (make-directory fsvn-home-directory t))
   (mapc
@@ -439,11 +437,13 @@
 	       (base (fsvn-meta-text-base-file file))
 	       size1 size2)
 	  (fsvn-save-browse-file-excursion file
-	    (if (null base)
+	    (if (or (null base)
+		    (string= 
+		     (downcase (or (fsvn-meta-get-property "svn:eol-style" file) ""))
+		     "native"))
 		(fsvn-browse-draw-file-status file)
 	      (setq size1 (fsvn-file-size file)
 		    size2 (fsvn-file-size base))
-	      ;;BUG not works fine when svn:eol-style is native
 	      (if (and size1 size2 (/= size1 size2))
 		  ;; changed file size means certainly modified.
 		  (fsvn-browse-put-status-if-weak-internal file ?M 0)

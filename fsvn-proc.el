@@ -120,8 +120,8 @@ If error occur in process (exit status with non zero value) then raise error."
 
 (defmacro fsvn-async-let (varlist &rest body)
   "Asynchronous process execute sequentially.
-BODY each form that return process object then stop executing BODY.
-Execute remain of BODY if process exited normally in process-sentinel.
+BODY each form that return process object stopping remaining BODY.
+Execute remaining BODY in process-sentinel if process exited normally.
 Like `let' binding, varlist binded while executing BODY."
   `(let ,varlist
      (let (fsvn-var-list)

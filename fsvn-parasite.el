@@ -266,9 +266,10 @@ Keybindings:
      (if (= (length files) 0)
 	 (message "No file to be commited.")
        (fsvn-parasite-commit-check files)
-       (fsvn-restore-window-buffer
-	(fsvn-parasite-commit-internal files buffer))
-       (fsvn-buffer-popup-as-information buffer)))))
+       (prog1
+	   (fsvn-restore-window-buffer
+	    (fsvn-parasite-commit-internal files buffer))
+	 (fsvn-buffer-popup-as-information buffer))))))
 
 (defun fsvn-parasite-commit-cycle-window ()
   (interactive)
@@ -345,7 +346,8 @@ Keybindings:
 		fsvn-parasite-delete-subcommand-args
 		fsvn-parasite-delete-target-files))
     (set-process-sentinel proc 'fsvn-parasite-delete-sentinel)
-    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)))
+    (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
+    proc))
 
 (defun fsvn-parasite-delete-sentinel (proc event)
   (fsvn-process-exit-handler proc event
@@ -364,11 +366,11 @@ Keybindings:
   (run-hooks 'fsvn-parasite-commit-before-commit-hook)
   (let ((buffer (fsvn-popup-result-create-buffer))
 	(targets (fsvn-make-targets-file fsvn-parasite-delete-target-files))
-	(message (fsvn-message-edit-create-message-file))
-	proc)
-    (fsvn-restore-window-buffer
-     (fsvn-parasite-delete-internal targets buffer message))
-    (fsvn-buffer-popup-as-information buffer)))
+	(message (fsvn-message-edit-create-message-file)))
+    (prog1
+	(fsvn-restore-window-buffer
+	 (fsvn-parasite-delete-internal targets buffer message))
+      (fsvn-buffer-popup-as-information buffer))))
 
 (defalias 'fsvn-parasite-delete-quit 'fsvn-parasite-quit-message-edit)
 (defalias 'fsvn-parasite-delete-cleanup-buffer 'fsvn-parasite-cleanup-message-edit)
@@ -439,9 +441,10 @@ Keybindings:
   (interactive)
   (run-hooks 'fsvn-parasite-commit-before-commit-hook)
   (let ((buffer (fsvn-popup-result-create-buffer)))
-    (fsvn-restore-window-buffer
-     (fsvn-parasite-import-internal buffer))
-    (fsvn-buffer-popup-as-information buffer)))
+    (prog1
+	(fsvn-restore-window-buffer
+	 (fsvn-parasite-import-internal buffer))
+      (fsvn-buffer-popup-as-information buffer))))
 
 (defalias 'fsvn-parasite-import-quit 'fsvn-parasite-quit-message-edit)
 (defalias 'fsvn-parasite-import-cleanup-buffer 'fsvn-parasite-cleanup-message-edit)
@@ -509,9 +512,10 @@ Keybindings:
   (let ((buffer (fsvn-popup-result-create-buffer))
 	(message (fsvn-message-edit-create-message-file))
 	proc)
-    (fsvn-restore-window-buffer
-     (fsvn-parasite-mkdir-internal buffer message))
-    (fsvn-buffer-popup-as-information buffer)))
+    (prog1
+	(fsvn-restore-window-buffer
+	 (fsvn-parasite-mkdir-internal buffer message))
+      (fsvn-buffer-popup-as-information buffer))))
 
 (defalias 'fsvn-parasite-mkdir-quit 'fsvn-parasite-quit-message-edit)
 (defalias 'fsvn-parasite-mkdir-cleanup-buffer 'fsvn-parasite-cleanup-message-edit)
@@ -586,9 +590,10 @@ Keybindings:
 (defun fsvn-parasite-lock-execute ()
   (interactive)
   (let ((buffer (fsvn-popup-result-create-buffer)))
-    (fsvn-restore-window-buffer
-     (fsvn-parasite-lock-internal buffer))
-    (fsvn-buffer-popup-as-information buffer)))
+    (prog1
+	(fsvn-restore-window-buffer
+	 (fsvn-parasite-lock-internal buffer))
+      (fsvn-buffer-popup-as-information buffer))))
 
 (defalias 'fsvn-parasite-lock-quit 'fsvn-parasite-quit-message-edit)
 (defalias 'fsvn-parasite-lock-cleanup-buffer 'fsvn-parasite-cleanup-message-edit)
@@ -660,9 +665,10 @@ Keybindings:
   (let ((buffer (fsvn-popup-result-create-buffer))
 	(message (fsvn-message-edit-create-message-file))
 	proc)
-    (fsvn-restore-window-buffer
-     (fsvn-parasite-copy-internal buffer message))
-    (fsvn-buffer-popup-as-information buffer)))
+    (prog1
+	(fsvn-restore-window-buffer
+	 (fsvn-parasite-copy-internal buffer message))
+      (fsvn-buffer-popup-as-information buffer))))
 
 (defalias 'fsvn-parasite-copy-quit 'fsvn-parasite-quit-message-edit)
 (defalias 'fsvn-parasite-copy-cleanup-buffer 'fsvn-parasite-cleanup-message-edit)

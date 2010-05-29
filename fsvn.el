@@ -66,6 +66,10 @@
 ;; Q.  How to authorize repository.  Password prompt stop everything.
 ;; A.  M-x fsvn-authenticate-repository
 ;;    This makes svn to cache password.
+;;    If possible, to use ssh-agent program when access by svn+ssh protcol.
+;;    TODO: password authenticate only when commit.
+;;          How to send password for stopping processes.
+
 
 ;; Q.  How to use svk in windows.
 ;; A.  Sample of settings.

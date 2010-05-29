@@ -14,6 +14,8 @@ CONFIG  = Samples/MAKE-CFG.el.mw32
 
 FLAGS   = -batch -q -no-site-file -l fsvn-make.el
 
+CHECKFLAGS   = -q -no-site-file -l fsvn-make.el
+
 EMACSDOC = $(PREFIX)/etc
 BITMAPPATH = $(PREFIX)/bitmap
 INFOPATH = $(PREFIX)/info
@@ -21,4 +23,4 @@ EMACSPATH = $(PREFIX)/bin
 EMACSDATA = $(PREFIX)/etc
 EMACSLOADPATH=
 
-include MAKE-TARGETS
+include MAKE-TARGETS.mk

@@ -141,10 +141,11 @@
 (defmacro fsvn-restore-window-buffer (&rest form)
   "Set window setting according to variable `fsvn-previous-window-configuration' after evaluate FORM."
   `(let ((WIN-CONFIGURE fsvn-previous-window-configuration))
-     ,@form
-     (when (and WIN-CONFIGURE
-		(window-configuration-p WIN-CONFIGURE))
-       (set-window-configuration WIN-CONFIGURE))))
+     (prog1
+	 (progn ,@form)
+       (when (and WIN-CONFIGURE
+		  (window-configuration-p WIN-CONFIGURE))
+	 (set-window-configuration WIN-CONFIGURE)))))
 
 (defun fsvn-restore-previous-window-setting ()
   (interactive)

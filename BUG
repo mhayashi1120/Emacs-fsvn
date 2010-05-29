@@ -11,7 +11,7 @@
 
 ** fsvn-cleanup-temp-directory cleanup under other emacs process
 
-** Too late too many files modified.
+** Too slow too many files was modified.
 
 like after merged
 
