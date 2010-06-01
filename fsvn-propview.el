@@ -277,7 +277,7 @@ Keybindings:
 	     (fsvn-proplist-goto-propname propname))
 	(goto-char opoint))
     (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
-    (run-hooks 'fsvn-proplist-mode-hook)))
+    (run-mode-hooks 'fsvn-proplist-mode-hook)))
 
 (defun fsvn-proplist-draw-value (propname)
   (let ((file fsvn-propview-target-urlrev)
@@ -307,7 +307,7 @@ Keybindings:
 	  (when value
 	    (insert value)))
 	(set-buffer-modified-p nil))
-      (run-hooks 'fsvn-propedit-mode-hook))))
+      (run-mode-hooks 'fsvn-propedit-mode-hook))))
 
 (defun fsvn-proplist-command-propname ()
   (let ((propname (fsvn-proplist-current-propname)))

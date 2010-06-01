@@ -1,3 +1,11 @@
+2010-06-01  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: fsvn-log-list-mode about multibyte char.
+
+2010-05-30  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: run-hooks -> run-mode-hooks
+
 2010-05-29  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: fsvn-after-save-hook when svn:eol-style property is native
@@ -5,7 +13,7 @@
 	* Improvement: fix async process function
 	* Improvement: MAKE-TARGETS -> MAKE-TARGETS.mk
 	* Fix: Putting mark on no file point, mark to all files.
-	
+
 2010-05-24  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: AutoCheck.sh

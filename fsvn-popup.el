@@ -90,7 +90,7 @@ Keybindings:
     (setq ret (generate-new-buffer tmp))
     (with-current-buffer ret
       (fsvn-popup-result-mode)
-      (run-hooks 'fsvn-popup-result-mode-hook))
+      (run-mode-hooks 'fsvn-popup-result-mode-hook))
     ret))
 
 ;; * fsvn-popup-result-mode interactive command

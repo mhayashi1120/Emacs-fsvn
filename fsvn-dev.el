@@ -48,7 +48,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 	 (message "Copying %s" new-file)
 	 (cond
 	  ((not (fsvn-file-exact-directory-p nf))
-	   (copy-file nf of t))
+	   (copy-file nf of t t))
 	  (oldfile
 	   (fsvn-browse-upgrade-source-tree-internal of nf))
 	  (t
@@ -539,7 +539,7 @@ Keybindings:
       (fsvn-process-control-activate-timer)
       (setq buffer-read-only t)
       (setq fsvn-process-control-processes processes)
-      (run-hooks 'fsvn-process-control-mode-hook))))
+      (run-mode-hooks 'fsvn-process-control-mode-hook))))
 
 (defun fsvn-process-control-insert-process (process)
   (forward-line 0)

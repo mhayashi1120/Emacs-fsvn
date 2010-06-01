@@ -857,7 +857,7 @@ PATH is each executed path."
   (set-visited-file-modtime (current-time))
   (setq buffer-read-only t)
   (switch-to-buffer (current-buffer))
-  (run-hooks 'fsvn-browse-mode-hook))
+  (run-mode-hooks 'fsvn-browse-mode-hook))
 
 (defun fsvn-browse-draw-repos-directory (directory-urlrev &optional type)
   (let (buffer info comparer)
@@ -1100,7 +1100,7 @@ PATH is each executed path."
       (fsvn-proplist-draw-list file)
       (fsvn-proplist-goto-first-property)
       (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
-      (run-hooks 'fsvn-proplist-mode-hook))
+      (run-mode-hooks 'fsvn-proplist-mode-hook))
     (switch-to-buffer (fsvn-proplist-get-buffer))))
 
 (defun fsvn-browse-revert-buffer (ignore-auto noconfirm)
@@ -1134,7 +1134,7 @@ PATH is each executed path."
        (setq fsvn-previous-window-configuration WIN-CONFIGURE)
        (setq fsvn-buffer-repos-root ROOT)
        ,@form
-       (run-hooks 'fsvn-message-edit-mode-hook))))
+       (run-mode-hooks 'fsvn-message-edit-mode-hook))))
 
 (defmacro fsvn-browse-quick-message-edit (&rest form)
   `(fsvn-browse-open-message-edit
@@ -1158,7 +1158,7 @@ PATH is each executed path."
       (fsvn-parasite-add-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
-      (run-hooks 'fsvn-select-file-mode-hook))
+      (run-mode-hooks 'fsvn-select-file-mode-hook))
     (fsvn-parasite-add-setup-window)))
 
 (defun fsvn-browse-commit-mode (files args)
@@ -1190,7 +1190,7 @@ PATH is each executed path."
       (fsvn-parasite-commit-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
-      (run-hooks 'fsvn-select-file-mode-hook))
+      (run-mode-hooks 'fsvn-select-file-mode-hook))
     (fsvn-browse-open-message-edit
      (fsvn-parasite-commit-mode 1)
      (fsvn-parasite-commit-set-subcommand-args args)
