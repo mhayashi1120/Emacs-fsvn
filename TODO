@@ -33,6 +33,8 @@ svn://localhost/some 5050 some log message
 ** about SVN_SSH
 ** fsvn-string-rtrim to fsvn-string-truncate
 
+** Activate only magic name.
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 

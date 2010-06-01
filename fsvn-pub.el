@@ -134,7 +134,7 @@
 	(fsvn-browse-draw-local-directory dir)
 	(set-visited-file-modtime (current-time))
 	(setq buffer-read-only t)
-	(run-hooks 'fsvn-browse-mode-hook)
+	(run-mode-hooks 'fsvn-browse-mode-hook)
 	(current-buffer)))))
 
 (defun fsvn-save-file (urlrev file &optional no-msg revision)
@@ -278,7 +278,7 @@
       (setq fsvn-parasite-import-target-url url)
       (setq fsvn-parasite-import-subcommand-args args)
       (setq fsvn-previous-window-configuration win-configure)
-      (run-hooks 'fsvn-message-edit-mode-hook))
+      (run-mode-hooks 'fsvn-message-edit-mode-hook))
     (fsvn-parasite-setup-message-edit-window)))
 
 (defun fsvn-debug-toggle (&optional arg no-msg)
@@ -544,7 +544,7 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
       (set-buffer-modified-p nil)
       (switch-to-buffer buffer)
       (fsvn-log-list-setup-window)))
-  (run-hooks 'fsvn-log-list-mode-hook))
+  (run-mode-hooks 'fsvn-log-list-mode-hook))
 
 
 

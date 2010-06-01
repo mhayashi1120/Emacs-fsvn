@@ -211,7 +211,7 @@ Keybindings:
 	(setq fsvn-log-source-buffer main-buffer)
 	(setq fsvn-log-message-revision rev)
 	(setq buffer-read-only t)
-	(run-hooks 'fsvn-log-message-mode-hook)))
+	(run-mode-hooks 'fsvn-log-message-mode-hook)))
     (with-current-buffer (fsvn-log-sibling-get-buffer)
       (fsvn-set-default-directory dir)
       (let (regexp)
@@ -242,7 +242,7 @@ Keybindings:
 	      (when regexp
 		(list (list regexp '(1 fsvn-header-key-face))))))
       (setq buffer-read-only t)
-      (run-hooks 'fsvn-log-sibling-mode-hook))))
+      (run-mode-hooks 'fsvn-log-sibling-mode-hook))))
 
 (defun fsvn-log-list-find-showing-entry (rev)
   (fsvn-logs-find-logentry fsvn-log-list-entries rev))
@@ -282,7 +282,7 @@ Keybindings:
   (let* ((msg (fsvn-xml-log->logentry=>msg$ entry))
 	 (ret
 	  (if msg
-	      (fsvn-string-rtrim (fsvn-string-single-line msg) fsvn-log-list-message-length)
+	      (fsvn-string-truncate (fsvn-string-single-line msg) fsvn-log-list-message-length t)
 	    (make-string 0 0))))
     (fsvn-log-list-message-property ret)))
 

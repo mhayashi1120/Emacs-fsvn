@@ -90,8 +90,8 @@ Optional argument FORM evaluate Lisp form."
 
 ;; string,text,regexp utility
 
-(defun fsvn-string-truncate (str end-column)
-  (truncate-string-to-width str (abs end-column) nil ?\s t))
+(defun fsvn-string-truncate (str length &optional no-fill)
+  (truncate-string-to-width str (abs length) nil (unless no-fill ?\s) t))
 
 ;;FIXME too heavy?
 (defun fsvn-string-unibyte-only-p (string)

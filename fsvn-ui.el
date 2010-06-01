@@ -415,7 +415,7 @@ Keybindings:
 	(setq fsvn-electric-line-alist (mapcar (lambda (f) (cons f nil)) files)))
       (font-lock-mode 1)
       (font-lock-fontify-buffer)
-      (run-hooks 'fsvn-electric-line-select-mode-hook))
+      (run-mode-hooks 'fsvn-electric-line-select-mode-hook))
     (fsvn-electric-line-select buffer)))
 
 
