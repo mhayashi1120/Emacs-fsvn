@@ -170,17 +170,29 @@
        (file-name-absolute-p url)
        (not (fsvn-magic-file-name-absolute-p url))))
 
-(defun fsvn-url-belongings-p (parent url)
+(defun fsvn-url-contains-p (parent url)
   "URL is child of PARENT or same as PARENT then return non-nil."
-  (or (string-match (concat "^" (regexp-quote (file-name-as-directory parent))) url)
+  (or (string-match (concat "^" (regexp-quote (fsvn-url-as-directory parent))) url)
       (fsvn-file= parent url)))
 
-(defun fsvn-url-child-p (parent url)
-  "URL is child of PARENT then return non-nil."
+(defun fsvn-url-descendant-p (parent url)
+  "URL is descendant of PARENT then return non-nil."
   (and (not (string= (directory-file-name parent) (directory-file-name url)))
-       (or (string-match (concat "^" (regexp-quote (file-name-as-directory parent))) url)
-	   (fsvn-file= parent url))))
+       (string-match (concat "^" (regexp-quote (fsvn-url-as-directory parent))) url)))
 
+(defun fsvn-url-child-p (parent url)
+  (and (not (string= (directory-file-name parent) (directory-file-name url)))
+       (string-match (concat "^" (regexp-quote (fsvn-url-as-directory parent)) "[^/]+/?$") url)))
+
+(defun fsvn-url-grand-child-p (parent url)
+  (and (fsvn-url-descendant-p parent url)
+       (not (fsvn-url-child-p parent url))))
+
+(defun fsvn-url-only-child (base-url url)
+  (when (string-match (concat "^\\(" (regexp-quote (fsvn-url-as-directory base-url)) "[^/]+\\)/?") url)
+    (match-string 1 url)))
+
+;;TODO rev is optional?
 (defun fsvn-url-urlrev (url rev)
   (if rev
       (let ((tmp (fsvn-get-revision-string rev)))

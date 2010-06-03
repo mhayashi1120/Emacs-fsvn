@@ -30,7 +30,7 @@
 
 (defconst fsvn-browse-ls-dir-status-length 1)
 (defconst fsvn-browse-ls-status-column 4)
-(defconst fsvn-browse-ls-revision-length 6)
+(defconst fsvn-browse-ls-revision-length 7)
 (defconst fsvn-browse-ls-author-length 15)
 (defconst fsvn-browse-ls-size-length 7)
 (defconst fsvn-browse-ls-dir-status-column
@@ -626,8 +626,18 @@ PATH is each executed path."
 		       (if (eq fsvn-mark-mark-char fsvn-space-char) "un" "")
 		       "marked"))))
 
+(defun fsvn-browse-directories ()
+  (apply 'append
+	 (fsvn-mapitem
+	  (lambda (b)
+	    (with-current-buffer b
+	      (when (eq major-mode 'fsvn-browse-mode)
+		(mapcar 'car fsvn-browse-subdir-alist))))
+	  (buffer-list))))
+
 (defun fsvn-browse-process-locked-p ()
   fsvn-browse-buffer-files-status-process)
+(make-obsolete 'fsvn-browse-process-locked-p nil nil)
 
 (defun fsvn-browse-process-lock (proc)
   (setq fsvn-browse-buffer-files-status-process proc))
@@ -699,20 +709,18 @@ PATH is each executed path."
 	  (and (goto-char saved)
 	       nil)))))
 
-(defmacro fsvn-browse-with-move-dir-status (dir &rest form)
-  `(save-excursion
-     (when (fsvn-browse-goto-file ,dir)
-       (fsvn-browse-move-to-dir-status)
-       ,@form)))
-
 (defun fsvn-browse-move-to-dir-status ()
   (forward-line 0)
   (forward-char fsvn-browse-ls-dir-status-column))
 
+(defun fsvn-browse-draw-dir-status-this-line (&optional mark)
+  (fsvn-browse-move-to-dir-status)
+  (delete-char 1)
+  (insert (or mark ?.)))
+
 (defun fsvn-browse-put-dir-status-current (&optional mark)
   (let (buffer-read-only)
-    (delete-char 1)
-    (insert (or mark ?.))
+    (fsvn-browse-draw-dir-status-this-line mark)
     (setq buffer-undo-list nil)
     (set-buffer-modified-p nil)))
 
@@ -720,10 +728,12 @@ PATH is each executed path."
   (char-after))
 
 (defun fsvn-browse-draw-dir-status (dir &optional mark)
-  (fsvn-browse-with-move-dir-status dir
-    (let ((current (char-after)))
-      (when (fsvn-dir-status-stronger-than mark current)
-	(fsvn-browse-put-dir-status-current mark)))))
+  (save-excursion
+    (when (fsvn-browse-goto-file dir)
+      (fsvn-browse-move-to-dir-status)
+      (let ((current (char-after)))
+	(when (fsvn-status-dir-status-stronger-than-p mark current)
+	  (fsvn-browse-put-dir-status-current mark))))))
 
 (defun fsvn-browse-put-status-if-weak-1 (file mark)
   (fsvn-browse-put-status-if-weak-internal file mark 0))
@@ -733,7 +743,7 @@ PATH is each executed path."
 
 (defun fsvn-browse-put-status-if-weak-internal (file mark column)
   (let ((curr (fsvn-browse-get-status-internal file column)))
-    (when (and curr (or (= curr ?.) (fsvn-file-status-stronger-than mark curr)))
+    (when (and curr (or (= curr ?.) (fsvn-status-file-status-stronger-than-p mark curr)))
       (fsvn-browse-put-status-internal file mark column))))
 
 (defun fsvn-browse-put-status-1 (file mark)
@@ -784,20 +794,23 @@ PATH is each executed path."
     (when status
       (fsvn-browse-draw-status-internal status))))
 
+(defun fsvn-browse-draw-status-string-this-line (status &optional author)
+  (forward-line 0)
+  ;; goto status first column
+  (forward-char fsvn-browse-ls-status-column)
+  (delete-char fsvn-svn-status-length)
+  (insert status)
+  (when author
+    (fsvn-browse-draw-author-this-line author)))
+
 (defun fsvn-browse-draw-status-this-line (&optional status-entry)
-  (let (status author)
-    (when status-entry
-      (setq status  (fsvn-status-get-status status-entry))
-      (setq author (fsvn-browse-status-author-column status-entry)))
-    (setq status (or status (make-string fsvn-svn-status-length ?.)))
-    (let (buffer-read-only)
-      (forward-line 0)
-      ;; goto status first column
-      (forward-char fsvn-browse-ls-status-column)
-      (delete-char fsvn-svn-status-length)
-      (insert status)
-      (when author
-	(fsvn-browse-draw-author-this-line author))
+  (let (buffer-read-only)
+    (let (status author)
+      (when status-entry
+	(setq status  (fsvn-status-get-status status-entry))
+	(setq author (fsvn-browse-status-author-column status-entry)))
+      (setq status (or status (make-string fsvn-svn-status-length ?.)))
+      (fsvn-browse-draw-status-string-this-line status author)
       (setq buffer-undo-list nil)
       (set-buffer-modified-p nil))))
 
@@ -824,6 +837,10 @@ PATH is each executed path."
     (forward-char fsvn-browse-ls-author-column)
     (delete-char fsvn-browse-ls-author-length)
     (insert user-string)))
+
+(defun fsvn-browse-status-string-to-display-status (status-string)
+  ;;TODO more fast 
+  (fsvn-string-rpad (replace-regexp-in-string " " "." status) fsvn-svn-status-length ?.))
 
 (defun fsvn-browse-clear-status (file)
   (when (fsvn-browse-goto-file file)
@@ -917,6 +934,7 @@ PATH is each executed path."
       (fsvn-browse-set-wc-directory (file-name-as-directory directory))
       (when (fsvn-directory-versioned-p directory)
 	(fsvn-browse-status parent-info directory)
+	;;TODO experimental
 	(fsvn-run-recursive-status directory))
       (fsvn-browse-goto-first-file))
      ;;TODO not works fine
@@ -2226,7 +2244,6 @@ When SRC-FILES is single list, DEST allows non existence filename."
 
 
 (put 'fsvn-browse-each-file 'lisp-indent-function 2)
-(put 'fsvn-browse-with-move-dir-status 'lisp-indent-function 1)
 (put 'fsvn-browse-with-move-status 'lisp-indent-function 2)
 
 (provide 'fsvn-browse)

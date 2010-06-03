@@ -67,23 +67,33 @@
      (t
       (memq y (cdr xl))))))
 
-(defun fsvn-dir-status-stronger-than (x y)
+(defun fsvn-status-dir-status-stronger-than-p (x y)
   "Return non-nil if X is stronger than Y."
   (let* ((all '(?C ?M)))
     (fsvn-status-stronger-than all x y)))
 
-(defun fsvn-file-status-stronger-than (x y)
+(defun fsvn-status-file-status-stronger-than-p (x y)
   "Return non-nil if X is stronger than Y."
   (let* ((all '(?C ?A ?D ?I ?M)))
     (fsvn-status-stronger-than all x y)))
 
-(defun fsvn-file-status-dir-status (col1 col2)
+(defun fsvn-status-file-status-to-dir-status (col1 col2)
   (cond
    ((memq ?C (list col1 col2)) ?C)
    ((memq col1 '(?M ?A ?D)) ?M)
    ((eq col2 ?M) ?M)
    ;;FIXME what mean replaced?
    (t nil)))
+
+(defun fsvn-status-dir-status-stronger (x y)
+  (if (fsvn-status-dir-status-stronger-than-p x y) x y))
+
+(defun fsvn-status-file-status-stronger (x y)
+  (if (fsvn-status-file-status-stronger-than-p x y) x y))
+
+(defun fsvn-status-string-to-dir-status (status-string)
+  (let ((list (string-to-list status-string)))
+    (fsvn-status-file-status-to-dir-status (nth 0 list) (nth 1 list))))
 
 (defun fsvn-status-get-status (entry)
   (let (col1 col2 col3 col4 col5 col6 col7)
@@ -338,9 +348,9 @@ This list sorted revision descending.
   (let ((info (fsvn-get-info-entry file)))
     (fsvn-xml-info->entry=>url$ info)))
 
-(defun fsvn-repository-path (root url)
-  (let ((url (fsvn-urlrev-url url)))
-    (when (string-match (concat "^" (regexp-quote root)) url)
+(defun fsvn-repository-path (root urlrev)
+  (let ((url (fsvn-urlrev-url urlrev)))
+    (when (string-match (concat "^" (regexp-quote  root)) url)
       (replace-match "" nil nil url 0))))
 
 (defun fsvn-working-copy-info (directory)
@@ -369,7 +379,7 @@ This implements consider svn:ignored directory."
     (fsvn-each-browse-buffer
      (mapc
       (lambda (subdir)
-	(when (fsvn-url-belongings-p (car subdir) top)
+	(when (fsvn-url-contains-p (car subdir) top)
 	  (setq top (car subdir))))
       fsvn-browse-subdir-alist))
     top))

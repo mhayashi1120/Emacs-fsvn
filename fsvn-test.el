@@ -253,15 +253,15 @@ To show and see result.
 ;; fsvn-url-repository-p
 ;; fsvn-url-local-p
 
-(fsvn-test-non-nil (fsvn-url-belongings-p "http://a" "http://a/b"))
-(fsvn-test-non-nil (fsvn-url-belongings-p "http://a" "http://a/"))
-(fsvn-test-non-nil (fsvn-url-belongings-p "http://a/" "http://a/"))
-(fsvn-test-nil (fsvn-url-belongings-p "http://a/b" "http://a/"))
+(fsvn-test-non-nil (fsvn-url-contains-p "http://a" "http://a/b"))
+(fsvn-test-non-nil (fsvn-url-contains-p "http://a" "http://a/"))
+(fsvn-test-non-nil (fsvn-url-contains-p "http://a/" "http://a/"))
+(fsvn-test-nil (fsvn-url-contains-p "http://a/b" "http://a/"))
 
-(fsvn-test-non-nil (fsvn-url-child-p "http://a" "http://a/b"))
-(fsvn-test-nil (fsvn-url-child-p "http://a" "http://a/"))
-(fsvn-test-nil (fsvn-url-child-p "http://a/" "http://a/"))
-(fsvn-test-nil (fsvn-url-child-p "http://a/b" "http://a/"))
+(fsvn-test-non-nil (fsvn-url-descendant-p "http://a" "http://a/b"))
+(fsvn-test-nil (fsvn-url-descendant-p "http://a" "http://a/"))
+(fsvn-test-nil (fsvn-url-descendant-p "http://a/" "http://a/"))
+(fsvn-test-nil (fsvn-url-descendant-p "http://a/b" "http://a/"))
 
 (fsvn-test-equal (fsvn-file-name-directory "/abcd/efg/.") (expand-file-name "/abcd/efg"))
 (fsvn-test-equal (fsvn-file-name-directory "/abcd/efg/") (expand-file-name "/abcd/efg"))
@@ -271,15 +271,24 @@ To show and see result.
 (fsvn-test-equal (fsvn-file-name-directory2 "/abcd/efg/") "/abcd")
 (fsvn-test-equal (fsvn-file-name-directory2 "/abcd/efg") "/abcd")
 
-(fsvn-test-non-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/c/d"))
-(fsvn-test-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/c/"))
-(fsvn-test-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/c"))
-(fsvn-test-nil (fsvn-url-child-p "http://a/b/c" "http://a/b/"))
+(fsvn-test-non-nil (fsvn-url-descendant-p "http://a/b/c" "http://a/b/c/d"))
+(fsvn-test-nil (fsvn-url-descendant-p "http://a/b/c" "http://a/b/c/"))
+(fsvn-test-nil (fsvn-url-descendant-p "http://a/b/c" "http://a/b/c"))
+(fsvn-test-nil (fsvn-url-descendant-p "http://a/b/c" "http://a/b/"))
 
-(fsvn-test-non-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/c"))
-(fsvn-test-non-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/c/"))
-(fsvn-test-non-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/c/d"))
-(fsvn-test-nil (fsvn-url-belongings-p "http://a/b/c" "http://a/b/"))
+(fsvn-test-non-nil (fsvn-url-contains-p "http://a/b/c" "http://a/b/c"))
+(fsvn-test-non-nil (fsvn-url-contains-p "http://a/b/c" "http://a/b/c/"))
+(fsvn-test-non-nil (fsvn-url-contains-p "http://a/b/c" "http://a/b/c/d"))
+(fsvn-test-nil (fsvn-url-contains-p "http://a/b/c" "http://a/b/"))
+
+(fsvn-test-equal (fsvn-url-only-child "http://a/" "http://a/b/c/d") "http://a/b")
+(fsvn-test-equal(fsvn-url-only-child "http://a/" "http://a/b/") "http://a/b")
+(fsvn-test-equal(fsvn-url-only-child "http://a/" "http://a/b/c") "http://a/b")
+(fsvn-test-nil (fsvn-url-only-child "http://a/" "http://a/"))
+(fsvn-test-nil (fsvn-url-only-child "http://a/" "http://a"))
+(fsvn-test-equal (fsvn-url-only-child "/a" "/a/b/c") "/a/b")
+(fsvn-test-equal (fsvn-url-only-child "/a/b" "/a/b/c") "/a/b/c")
+(fsvn-test-nil (fsvn-url-only-child "/a/b" "/a/b"))
 
 ;; non interactive test
 (fsvn-test-excursion

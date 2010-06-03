@@ -1,6 +1,7 @@
 2010-06-01  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Improvement: fsvn-log-list-mode about multibyte char.
+	* Change: Revision max length to 7
 
 2010-05-30  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
