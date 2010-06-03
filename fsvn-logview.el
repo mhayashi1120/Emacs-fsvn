@@ -40,7 +40,7 @@
     (revert-buffer-function . 'fsvn-log-list-revert-buffer)
     ))
 
-(defconst fsvn-log-list-revision-length 6)
+(defconst fsvn-log-list-revision-length 7)
 (defconst fsvn-log-list-re-mark "^[^ \n]")
 (defconst fsvn-log-list-re-terms
   "^ \\(Terms of entries:\\) \\(.+\\)")
@@ -226,7 +226,7 @@ Keybindings:
 	       ;; copy or move file
 	       (when (and (string= act "A")
 			  (setq copied (fsvn-xml-log->logentry->path.copyfrom-path path-entry))
-			  (fsvn-url-belongings-p text path))
+			  (fsvn-url-contains-p text path))
 		 ;;FIXME regexp not correct
 		 (setq regexp (format "^[AD] \\(%s\\|%s\\)$" text (fsvn-url-decode-string copied))))))
 	   (fsvn-log-sibling-sorted-paths logentry)))
