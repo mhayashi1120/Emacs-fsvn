@@ -840,7 +840,7 @@ PATH is each executed path."
 
 (defun fsvn-browse-status-string-to-display-status (status-string)
   ;;TODO more fast 
-  (fsvn-string-rpad (replace-regexp-in-string " " "." status) fsvn-svn-status-length ?.))
+  (fsvn-string-rpad (replace-regexp-in-string " " "." status-string) fsvn-svn-status-length ?.))
 
 (defun fsvn-browse-clear-status (file)
   (when (fsvn-browse-goto-file file)

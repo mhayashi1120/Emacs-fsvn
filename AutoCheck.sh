@@ -50,17 +50,17 @@ EOF
 }
 
 # for Unix (Linux)
-UNIX_SVN_1_4_BIN=~/src/subversion-old/inst-1.4.x/bin
-UNIX_SVN_1_5_BIN=~/src/subversion-old/inst-1.5.x/bin
-UNIX_SVN_1_6_BIN=~/src/subversion-old/inst-1.6.x/bin
+UNIX_SVN_1_4_BIN=~/src/subversion-dev/inst-1.4.x/bin
+UNIX_SVN_1_5_BIN=~/src/subversion-dev/inst-1.5.x/bin
+UNIX_SVN_1_6_BIN=~/src/subversion-dev/inst-1.6.x/bin
 EMACS_BIN=emacs
 EMACS_CURRENT_BIN=emacs-current
 
 # for Windows
 # TODO not works
-# WIN_SVN_1_4_BIN="c:/usr/local/subversion-old/svn-win32-1.4.6/bin"
-# WIN_SVN_1_5_BIN="c:/usr/local/subversion-old/svn-win32-1.5.6/bin"
-WIN_SVN_1_6_BIN="c:/usr/local/subversion-old/svn-win32-1.6.6/bin"
+# WIN_SVN_1_4_BIN="c:/usr/local/subversion-dev/svn-win32-1.4.6/bin"
+# WIN_SVN_1_5_BIN="c:/usr/local/subversion-dev/svn-win32-1.5.6/bin"
+WIN_SVN_1_6_BIN="c:/usr/local/subversion-dev/svn-win32-1.6.6/bin"
 MEADOW3_BIN="/cygdrive/c/usr/local/Meadow-dev/bin/Meadow.exe"
 NTEMACS22_BIN="/cygdrive/c/usr/local/NTEmacs/22.2/bin/emacs.exe"
 NTEMACS23_BIN="/cygdrive/c/usr/local/NTEmacs/23.1/bin/emacs.exe"
