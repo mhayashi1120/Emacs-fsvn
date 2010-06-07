@@ -238,7 +238,7 @@
 ;; with side effect svn subcommand
 
 (defun fsvn-asap-add-file (file dest-url &optional filename)
-  "DEST-URL is destination.
+  "Add FILE to DEST-URL.
 FILENAME non-nil means ignore DEST-URL filename section."
   (let* ((dest-info (fsvn-get-info-entry dest-url))
 	 (dest-dir (fsvn-url-dirname dest-url))

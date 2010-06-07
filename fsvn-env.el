@@ -49,14 +49,15 @@ Argument SEQUENCE see `mapcar'."
      (setq ,val1 TMP)))
 
 (defmacro fsvn-save-window-only (window &rest form)
-  "Save selected WINDOW, not contain point.
-Optional argument FORM evaluate Lisp form."
+  "Execute FORM just like `progn' in WINDOW.
+Save selected window, not contain point."
   `(let ((RETURN-WINDOW (get-buffer-window (current-buffer))))
      (unwind-protect
 	 (progn
 	   (select-window ,window)
 	   ,@form)
-       (when (window-live-p RETURN-WINDOW) (select-window RETURN-WINDOW)))))
+       (when (window-live-p RETURN-WINDOW) 
+	 (select-window RETURN-WINDOW)))))
 
 (defun fsvn-cycle-next (list item)
   (let ((found (member item list)))

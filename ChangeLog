@@ -1,3 +1,7 @@
+2010-06-07  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* MAKE-TARGETS.mk (archive): Compress single-file
+
 2010-06-01  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Improvement: fsvn-log-list-mode about multibyte char.

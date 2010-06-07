@@ -66,11 +66,13 @@
     (message "%d renamed %d deleted." renamed deleted)))
 
 (defun fsvn-show-svn-help (subcommand)
+  "Show SUBCOMMAND help."
   (interactive (list (fsvn-read-svn-subcommand)))
   (let ((fsvn-process-environment-lang fsvn-help-locale))
     (fsvn-popup-call-process "help" subcommand)))
 
 (defun fsvn-global-cleanup-buffer ()
+  "Cleanup popuped non-active buffers."
   (interactive)
   (when (y-or-n-p "Cleanup waste (non-active) buffer? ")
     (let ((count 0))
@@ -138,7 +140,9 @@
 	(current-buffer)))))
 
 (defun fsvn-save-file (urlrev file &optional no-msg revision)
-  "save URLREV as FILE."
+  "Save URLREV as FILE.
+Optional argument NO-MSG suppress message.
+Optional argument REVISION means point of URLREV log chain."
   (with-temp-buffer
     (if (= (fsvn-call-command "export" (current-buffer)
 			      "--quiet"
@@ -157,7 +161,8 @@
       nil)))
 
 (defun fsvn-save-file-background (urlrev file &optional revision)
-  "save URLREV as FILE in background."
+  "Save URLREV as FILE in background.
+Optional argument REVISION means point of URLREV log chain."
   (let* ((buffer (fsvn-make-temp-buffer))
 	 proc)
     (setq proc (fsvn-start-command "export" buffer
@@ -249,7 +254,9 @@
 
 ;; global map command
 (defun fsvn-checkout (url &optional args)
-  "`checkout' URL to current directory."
+  "Execute `checkout' URL to current directory.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (fsvn-cmd-read-checkout-args))
   (let ((dir (fsvn-expand-file default-directory)))
     (when (or (= (length (fsvn-directory-files dir)) 0)
@@ -263,7 +270,9 @@
   (fsvn-browse-switch-directory-buffer (fsvn-url-urlrev repository rev)))
 
 (defun fsvn-import (file url &optional args)
-  "`import' FILE to URL."
+  "Execute `import' FILE to URL.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (fsvn-cmd-read-import-args))
   (let ((root (fsvn-get-root-upward url))
 	(browse-buffer (current-buffer))
@@ -389,6 +398,7 @@
   (fsvn-open-log-view-mode buffer-file-name nil))
 
 (defun fsvn-vc-commit (&optional arg)
+  "Prepare `commit' buffer for buffer file."
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
   (unless buffer-file-name
     (error "Buffer is not associated with a file"))
@@ -551,7 +561,6 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
 (defvar fsvn-use-experimental-run-recursive-status nil)
 
 (defun fsvn-run-recursive-status1 (directory)
-  "Recursive `status' execute, and set subordinate directory."
   (let (proc)
     (setq proc (fsvn-recursive-status-running-process directory))
     (if proc
@@ -563,6 +572,7 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
       (fsvn-recursive-status-set-subordinate-process directory proc))))
 
 (defun fsvn-run-recursive-status (directory)
+  "Execute `status' to DIRECTORY recursively."
   (if (not fsvn-use-experimental-run-recursive-status)
       (fsvn-run-recursive-status1 directory)
     (require 'fsvn-dev)
