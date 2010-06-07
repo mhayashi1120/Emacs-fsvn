@@ -192,6 +192,14 @@
   (when (string-match (concat "^\\(" (regexp-quote (fsvn-url-as-directory base-url)) "[^/]+\\)/?") url)
     (match-string 1 url)))
 
+(defun fsvn-url-remove-authority (url)
+  ;; ip_server = [user [ : password ] @ ] host [ : port ]
+  (let* ((segment-regexp (regexp-opt fsvn-svn-url-scheme-segment-list))
+	 (regexp (format "^\\(%s\\)\\(?:\\([^:/]+\\):\\)?\\([^@/]+\\)@\\(.+\\)" segment-regexp)))
+    (if (string-match regexp url)
+	(concat (match-string 1 url) (match-string 4 url))
+      url)))
+
 ;;TODO rev is optional?
 (defun fsvn-url-urlrev (url rev)
   (if rev
