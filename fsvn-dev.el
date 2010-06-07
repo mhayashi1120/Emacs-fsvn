@@ -264,7 +264,7 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
     (message "Creating temporary working copy...")
     (if src-directoryp
 	(progn
-	  (setq dest-wc (fsvn-get-temporary-wc dest-url))
+	  (setq dest-wc (fsvn-get-temporary-wc dest-url t))
 	  (setq merging-file dest-wc))
       (setq dest-wc (fsvn-get-temporary-wc (fsvn-url-dirname dest-url)))
       (setq merging-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc)))
