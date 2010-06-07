@@ -30,13 +30,17 @@ install: elc
 clean:
 	-$(RM) $(GOMI)
 
-release: tar single-file
+release: archive single-file
 	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.bz2 $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.gz
 	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn.el
+	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn.el.bz2
+	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn.el.gz
 	mv /tmp/fsvn-$(VERSION).tar.bz2 /tmp/fsvn-$(VERSION).tar.gz $(ARCHIVE_DIR_PREFIX)/
 	mv fsvn.el.tmp $(ARCHIVE_DIR_PREFIX)/fsvn.el
+	bzip2 --keep $(ARCHIVE_DIR_PREFIX)/fsvn.el
+	gzip $(ARCHIVE_DIR_PREFIX)/fsvn.el
 
-tar:
+archive:
 	rm -rf /tmp/fsvn-$(VERSION)
 	mkdir /tmp/fsvn-$(VERSION)
 	cp -pr $(RELEASE_FILES) /tmp/fsvn-$(VERSION)

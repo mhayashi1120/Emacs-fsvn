@@ -31,8 +31,8 @@
 (defvar fsvn-prop-file-default-coding-system fsvn-svn-common-coding-system)
 
 (defcustom fsvn-svn-command "svn"
-  "*Subversion command. Must be set before load this file.
-If problem in executing this command, check `exec-path' or PATH environment variable.
+  "*Subversion command. Must be set before loading this file.
+If are problems while executing this command, check `exec-path' or PATH environment variable.
 Otherwise set absolute path."
   :group 'fsvn
   :type  '(choice
@@ -40,8 +40,8 @@ Otherwise set absolute path."
 	   file))
 
 (defcustom fsvn-svnadmin-command "svnadmin"
-  "*Subversion Administrator command. Must be set before load this file.
-If problem in executing this command, check `exec-path' or PATH environment variable.
+  "*Subversion Administrator command. Must be set before loading this file.
+If are problems while executing this command, check `exec-path' or PATH environment variable.
 Otherwise set absolute path."
   :group 'fsvn
   :type  '(choice
@@ -230,7 +230,7 @@ Otherwise set absolute path."
     (list fsvn-svnadmin-command
 	  'fsvn-svnadmin-subcommand-completion-alist
 	  'fsvn-svnadmin-subcommand-arguments-alist
-	  (concat "svnadmin-" fsvn-svn-version))))) ;; version is guessed same as `svn'
+	  (concat "svnadmin-" fsvn-svn-version))))) ;; version is guessed as `svn'
 
 
 (defun fsvn-subcommand-argument-list (command subcommand)
@@ -293,7 +293,7 @@ Otherwise set absolute path."
     (let (ret)
       (when (re-search-forward "^Available subcommands:")
 	(forward-line 1)
-	;; matches "proplist (plist, pl)" like string
+	;; match to "proplist (plist, pl)" like string
 	(while (looking-at "^[ \t]*\\([^ \t\n]+\\)\\(?:[ \t\n]*\\(?:(\\(.+\\))\\)\\)?")
 	  (let ((subcommand (match-string 1))
 		(aliases (match-string 2)))

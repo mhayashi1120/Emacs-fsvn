@@ -163,7 +163,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 	      (cons (list (fsvn-expand-file file) status) fsvn-recursive-status-parsed))))))
 
 (defun fsvn-run-recursive-status2 (directory)
-  "Recursive `status' execute, and set subordinate directory."
+  "Execute recursive `status', and set subordinate directory."
   (let (proc buffer)
     (setq proc (fsvn-recursive-status-running-process directory))
     (if proc
