@@ -187,7 +187,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 Imported from %u at %r"
 
   "*Format string for commited messages.
-%u is the url that imported from.
+%u is the url that imported from (Non user and password).
 %r is the revision number of imported url.
 %m is the original log message."
   :group 'fsvn
@@ -197,7 +197,7 @@ Imported from %u at %r"
   (let ((msg (or (fsvn-xml-log->logentry=>msg$ log-entry) ""))
 	(rev (fsvn-get-revision-string (fsvn-xml-log->logentry.revision log-entry))))
     (fsvn-text-format fsvn-import-with-log-message-format
-		      `(("u" . ,url)
+		      `(("u" . ,(fsvn-url-remove-authority url))
 			("r" . ,rev)
 			("m" . ,msg)))))
 
