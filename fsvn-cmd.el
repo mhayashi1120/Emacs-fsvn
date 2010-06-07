@@ -211,10 +211,10 @@
 (defun fsvn-get-boolean-prop-value (file propname)
   (not (not (fsvn-get-propget propname file))))
 
-(defun fsvn-get-temporary-wc (urlrev)
+(defun fsvn-get-temporary-wc (urlrev &optional recursive)
   (with-temp-buffer
     (let ((dir (fsvn-make-temp-directory)))
-      (unless (= (fsvn-call-command "checkout" t "--non-recursive" urlrev dir) 0)
+      (unless (= (fsvn-call-command "checkout" t (unless recursive "--non-recursive") urlrev dir) 0)
 	(error "Error while svn `checkout' subcommand"))
       dir)))
 
