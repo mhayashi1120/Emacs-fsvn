@@ -137,9 +137,9 @@ Keybindings:
 	  fsvn-parasite-commit-subcommand-args))))
 
 (defun fsvn-parasite-commit-brief-help ()
-  (concat "Type \\[fsvn-parasite-commit-execute] to commit edit, \
-\\[fsvn-parasite-commit-quit] to quit edit, \
-\\[fsvn-parasite-commit-cycle-window] to cycle window."))
+  (concat "Type \\[fsvn-parasite-commit-execute] to commit edit, "
+	  "\\[fsvn-parasite-commit-quit] to quit edit, "
+	  "\\[fsvn-parasite-commit-cycle-window] to cycle window."))
 
 (defun fsvn-parasite-commit-internal (arg-files arg-buffer)
   (fsvn-async-let ((targets (fsvn-make-targets-file arg-files))
@@ -358,8 +358,8 @@ Keybindings:
 	  (kill-buffer x))))))
 
 (defun fsvn-parasite-delete-brief-help ()
-  (concat "Type \\[fsvn-parasite-delete-execute] to delete files and commit, \
-\\[fsvn-parasite-delete-execute] to quit edit."))
+  (concat "Type \\[fsvn-parasite-delete-execute] to delete files and commit, "
+	  "\\[fsvn-parasite-delete-execute] to quit edit."))
 
 (defun fsvn-parasite-delete-execute ()
   (interactive)
@@ -434,8 +434,8 @@ Keybindings:
       (run-hooks 'fsvn-parasite-commit-after-commit-hook))))
 
 (defun fsvn-parasite-import-brief-help ()
-  (concat "Type \\[fsvn-parasite-import-execute] to import path, \
-\\[fsvn-parasite-import-quit] to quit edit."))
+  (concat "Type \\[fsvn-parasite-import-execute] to import path, "
+	  "\\[fsvn-parasite-import-quit] to quit edit."))
 
 (defun fsvn-parasite-import-execute ()
   (interactive)
@@ -503,8 +503,8 @@ Keybindings:
       (run-hooks 'fsvn-parasite-commit-after-commit-hook))))
 
 (defun fsvn-parasite-mkdir-brief-help ()
-  (concat "Type \\[fsvn-parasite-mkdir-execute] to make directory and commit, \
-\\[fsvn-parasite-mkdir-quit] to quit edit."))
+  (concat "Type \\[fsvn-parasite-mkdir-execute] to make directory and commit, "
+	  "\\[fsvn-parasite-mkdir-quit] to quit edit."))
 
 (defun fsvn-parasite-mkdir-execute ()
   (interactive)
@@ -555,8 +555,8 @@ Keybindings:
   (fsvn-parasite-make-buffer-variables fsvn-parasite-lock-buffer-local-variables))
 
 (defun fsvn-parasite-lock-brief-help ()
-  (concat "Type \\[fsvn-parasite-lock-execute] to lock files, \
-\\[fsvn-parasite-lock-quit] to quit edit."))
+  (concat "Type \\[fsvn-parasite-lock-execute] to lock files, "
+	  "\\[fsvn-parasite-lock-quit] to quit edit."))
 
 (defun fsvn-parasite-lock-internal (buffer)
   (let ((message (fsvn-message-edit-create-message-file))
@@ -656,8 +656,8 @@ Keybindings:
       (run-hooks 'fsvn-parasite-commit-after-commit-hook))))
 
 (defun fsvn-parasite-copy-brief-help ()
-  (concat "Type \\[fsvn-parasite-copy-execute] to copy and commit files, \
-\\[fsvn-parasite-copy-quit] to quit edit."))
+  (concat "Type \\[fsvn-parasite-copy-execute] to copy and commit files, "
+	  "\\[fsvn-parasite-copy-quit] to quit edit."))
 
 (defun fsvn-parasite-copy-execute ()
   (interactive)
@@ -721,8 +721,8 @@ Keybindings:
    (fsvn-select-file-prepared-buffer)))
 
 (defun fsvn-parasite-add-brief-help ()
-  (concat "Type \\[fsvn-parasite-add-execute] to add files, \
-\\[fsvn-parasite-add-quit] to quit edit."))
+  (concat "Type \\[fsvn-parasite-add-execute] to add files, "
+	  "\\[fsvn-parasite-add-quit] to quit edit."))
 
 (defun fsvn-parasite-add-setup-window ()
   (delete-other-windows)

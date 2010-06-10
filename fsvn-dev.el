@@ -931,6 +931,44 @@ Keybindings:
 (global-set-key "\C-xvp" 'fsvn-process-control)
 (put 'fsvn-process-control-retrieve-mark 'lisp-indent-function 1)
 
+
+
+(defvar fsvn-bugreport-mail-address "mhayashi1120@gmail.com")
+
+;;TODO
+(defvar fsvn-bugreport-salutation
+  "
+# If you are a Japanese, please write in Japanese:-)
+
+Describe bug below, using a precise recipe.
+
+When I executed M-x ...
+
+How to send a bug report:
+  1) Be sure to use the LATEST version of fsvn*.el.
+  2) Enable debugger. M-x toggle-debug-on-error or (setq debug-on-error t)
+  3) Use Lisp version instead of compiled one: (load \"fsvn.el\")
+  4) If you got an error, please paste *Backtrace* buffer.
+  5) Type C-c C-c to send.
+")
+
+(defun fsvn-bugreport ()
+  (interactive)
+  (let ((pkgname "fsvn.el"))
+    (reporter-submit-bug-report
+     fsvn-maintainer-mail-address
+     pkgname
+     (apropos-internal "^fsvn-" 'boundp)
+     nil nil fsvn-bugreport-salutation)
+    (mail-position-on-field "subject")
+    (insert pkgname "; Bug report" )
+    (unless (y-or-n-p 
+	     (concat 
+	      "This bug report may contain privacy information (Like password).\n"
+	      "Please delete manually. OK? " ))
+      (set-buffer-modified-p nil)
+      (kill-buffer (current-buffer)))))
+
 
 
 

@@ -157,15 +157,12 @@
 	  (define-key map "e" 'fsvn-browse-ediff-this)
 	  map)))
 
-(defvar fsvn-browse-prefix-map nil)
-(unless fsvn-browse-prefix-map
-  (setq fsvn-browse-prefix-map
+(defvar fsvn-browse-often-use-map nil)
+(unless fsvn-browse-often-use-map
+  (setq fsvn-browse-often-use-map
 	(let ((map (make-sparse-keymap)))
 	  (suppress-keymap map)
 
-	  (define-key map "!" 'fsvn-command)
-	  (define-key map "+" 'fsvn-browse-mkdir)
-	  (define-key map "=" fsvn-browse-diff-map)
 	  (define-key map "C" 'fsvn-browse-commit-path)
 	  (define-key map "E" 'fsvn-browse-export-path)
 	  (define-key map "I" 'fsvn-browse-info-path)
@@ -175,7 +172,35 @@
 	  (define-key map "S" 'fsvn-browse-switch-path)
 	  (define-key map "T" 'fsvn-browse-remove-changelist-selected)
 	  (define-key map "U" 'fsvn-browse-update-path)
+	  (define-key map "a" 'fsvn-browse-add-selected)
+	  (define-key map "b" 'fsvn-browse-blame-this)
+	  (define-key map "c" 'fsvn-browse-commit-selected)
+	  (define-key map "d" 'fsvn-browse-delete-selected)
+	  (define-key map "e" 'fsvn-browse-export-this)
+	  (define-key map "h" 'fsvn-show-svn-help)
+	  (define-key map "i" 'fsvn-browse-info-selected)
+	  (define-key map "k" 'fsvn-browse-lock-selected)
+	  (define-key map "l" 'fsvn-browse-logview-this)
+	  (define-key map "m" 'fsvn-browse-magic-head)
+	  (define-key map "o" 'fsvn-browse-open-repository)
+	  (define-key map "p" 'fsvn-browse-propview-this)
+	  (define-key map "t" 'fsvn-browse-add-changelist-selected)
+	  (define-key map "u" 'fsvn-browse-update-selected)
+
+	  map)))
+
+(defvar fsvn-browse-prefix-map nil)
+(unless fsvn-browse-prefix-map
+  (setq fsvn-browse-prefix-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
+
+	  (define-key map "!" 'fsvn-command)
+	  (define-key map "+" 'fsvn-browse-mkdir)
+	  (define-key map "=" fsvn-browse-diff-map)
+
 	  (define-key map "\C-c" 'fsvn-browse-commit-path)
+	  (define-key map "\C-u" 'fsvn-browse-update-path)
 	  ;; 	(define-key map "\C-f" 'fsvn-browse-find-directory)
 	  (define-key map "\C-mI" 'fsvn-browse-mergeinfo-path)
 	  (define-key map "\C-mi" 'fsvn-browse-mergeinfo-this)
@@ -198,22 +223,22 @@
 	  ;; 	(define-key map "\C-b\C-c" 'fsvn-browse-safe-copy-selected)
 	  (define-key map "\ec" 'fsvn-global-cleanup-buffer)
 	  (define-key map "\ei" 'fsvn-browse-prop-add-svn:ignore-selected)
-	  (define-key map "a" 'fsvn-browse-add-selected)
-	  (define-key map "b" 'fsvn-browse-blame-this)
-	  (define-key map "c" 'fsvn-browse-commit-selected)
-	  (define-key map "d" 'fsvn-browse-delete-selected)
-	  (define-key map "e" 'fsvn-browse-export-this)
-	  (define-key map "h" 'fsvn-show-svn-help)
-	  (define-key map "i" 'fsvn-browse-info-selected)
-	  (define-key map "k" 'fsvn-browse-lock-selected)
-	  (define-key map "l" 'fsvn-browse-logview-this)
-	  (define-key map "m" 'fsvn-browse-magic-head)
-	  (define-key map "o" 'fsvn-browse-open-repository)
-	  (define-key map "p" 'fsvn-browse-propview-this)
-	  (define-key map "t" 'fsvn-browse-add-changelist-selected)
-	  (define-key map "u" 'fsvn-browse-update-selected)
-
 	  (define-key map "\er" 'fsvn-browse-resolve-selected)
+
+	  (map-keymap 
+	   (lambda (key command)
+	     (when (characterp key)
+	       (define-key map (char-to-string key) 
+		 `(lambda () 
+		    (interactive)
+		    (error (concat 
+			    "Sorry... Type "
+			    (substitute-command-keys (concat "`\\[" (symbol-name ',command) "]'"))
+			    " to continue. "
+			    "This command sequence is obsoleted because of violating Major Mode conventions." 
+			   ))))))
+	   fsvn-browse-often-use-map)
+	  
 	  map)))
 
 (defvar fsvn-browse-mode-map nil)
@@ -243,6 +268,7 @@
 	  (define-key map "p" 'fsvn-previous-file)
 	  (define-key map "s" 'fsvn-browse-toggle-sort)
 	  (define-key map "u" 'fsvn-browse-mark-file-unmark)
+	  (define-key map "z" fsvn-browse-often-use-map)
 
 	  map)))
 
