@@ -2,7 +2,7 @@
 ;; Copyright (C) 2008-2010 by Masahiro Hayashi
 
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
-;; $Id: fsvn.el 1317 2008-11-01 14:36:27Z masa $
+;; Keywords: Emacs, Subversion, Frontend
 
 ;; fsvn.el is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,10 +36,10 @@
 
 ;;  But following **disadvantage** has.
 ;;  * Key bindings is not friendly for legacy user.
-;;  * Dired like interface but not equals exactly dired functions.
+;;  * Dired like interface but not exactly equals dired functions.
 ;;  * A little user help.
 
-;; This package tested following environment.
+;; This package is tested on following environment.
 ;;      Meadow (based Emacs 22.1) on Windows.  svn 1.6.x
 ;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x
 
