@@ -67,7 +67,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 	  map)))
 
 (add-hook 'fsvn-browse-mode-hook
-	  (lambda () (define-key fsvn-browse-mode-map "\C-cv" fsvn-svk-browse-map)))
+	  (lambda () (define-key fsvn-browse-mode-map "\C-c\C-k" fsvn-svk-browse-map)))
 
 ;; fsvn-svk internal function
 

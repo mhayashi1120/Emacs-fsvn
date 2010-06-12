@@ -127,12 +127,12 @@
 
 (add-hook 'dired-mode-hook
 	  (lambda ()
-	    (define-key dired-mode-map "\C-cs" tortoise-external-svn-keymap)
+	    (define-key dired-mode-map "\C-c\C-t" tortoise-external-svn-keymap)
 	    ))
 
 (add-hook 'fsvn-browse-mode-hook
 	  (lambda ()
-	    (define-key fsvn-browse-mode-map "\C-cs" tortoise-external-svn-keymap)
+	    (define-key fsvn-browse-mode-map "\C-c\C-t" tortoise-external-svn-keymap)
 	    ))
 
 

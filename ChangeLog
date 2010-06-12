@@ -1,5 +1,21 @@
 2010-06-12  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* fsvn-logview.el (fsvn-log-sibling-mode-map):
+			fsvn-log-sibling-log-this C-c l -> z l
+			(fsvn-log-message-mode-map):
+			fsvn-log-message-browse-this C-c j -> C-c C-m
+				and bugfix
+
+	* fsvn-parasite.el (fsvn-parasite-commit-mode-map):
+			fsvn-parasite-commit-toggle-no-unlock C-c N -> C-c M-n
+			fsvn-parasite-commit-toggle-keep-changelist C-c K -> C-c M-k
+
+	* fsvn-logview.el (fsvn-log-list-mode-map): fsvn-log-list-open-revision Bounded C-c o -> C-c C-m
+
+	* fsvn-win.el : tortoise keymap C-c s -> C-c C-t
+
+	* fsvn-svk.el : svk keymap C-c v -> C-c C-k
+
 	* fsvn-proctl.el: add new major-mode
 
 2010-06-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
