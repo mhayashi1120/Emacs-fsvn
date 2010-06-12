@@ -1,3 +1,7 @@
+2010-06-12  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* fsvn-proctl.el: add new major-mode
+
 2010-06-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* fsvn-browse.el (fsvn-browse-prefix-map): fsvn-browse-update-path bound to C-c C-u

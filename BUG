@@ -43,6 +43,8 @@ a lot of process makes this error?
 ** fsvn-dired-toggle-browser
   in repository.
 
+** Sometimes repeat revret-buffer destroy buffer format.
+
 * select-file-mode
 
 ** freezing several minutes when commit a lot of files.
