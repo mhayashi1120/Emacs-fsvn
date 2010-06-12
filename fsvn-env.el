@@ -615,6 +615,15 @@ Use %% to put a single % into the output.
 
 
 
+(if (fboundp 'characterp) 
+    ;; for Emacs 23 or later
+    (defalias 'fsvn-characterp 'characterp)
+  ;; for Emacs 22
+  (defalias 'fsvn-characterp 'char-valid-p))
+
+
+
+
 (put 'fsvn-loop 'lisp-indent-function 1)
 (put 'fsvn-defstruct 'lisp-indent-function 1)
 (put 'fsvn-save-window-only 'lisp-indent-function 1)

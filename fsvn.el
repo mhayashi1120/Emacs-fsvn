@@ -147,7 +147,7 @@
 ;; (global-set-key "\C-xvI" 'fsvn-import)
 ;; (global-set-key "\C-xvL" 'fsvn-vc-print-log)
 ;; (global-set-key "\C-xvO" 'fsvn-checkout)
-;; (global-set-key "\C-xvP" 'fsvn-process-control)
+;; (global-set-key "\C-xvP" 'fsvn-process-list)
 ;; (global-set-key "\C-xvZ" 'fsvn-debug-toggle)
 ;; (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
 
@@ -225,7 +225,7 @@
 (require 'fsvn-browse)
 (require 'fsvn-dired)
 
-(require 'fsvn-proctl)
+(require 'fsvn-proclist)
 
 (require 'fsvn-minibuf)
 (require 'fsvn-tortoise)

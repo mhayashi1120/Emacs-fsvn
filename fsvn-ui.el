@@ -214,22 +214,11 @@ This is what the do-commands look for, and what the mark-commands store.")
   (with-current-buffer (get-buffer-create fsvn-brief-message-buffer-name)
     (erase-buffer)))
 
-(defun fsvn-brief-message-set-message (message)
-  (with-current-buffer (get-buffer-create fsvn-brief-message-buffer-name)
-    (erase-buffer)
-    (insert message)))
-
 (defun fsvn-brief-message-add-message (message)
   (with-current-buffer (get-buffer-create fsvn-brief-message-buffer-name)
     (goto-char (point-max))
     (insert message "\n")
     (fsvn-brief-message-show-popup)))
-
-(defun fsvn-brief-message-popup (message confirmer)
-  (save-window-excursion
-    (fsvn-brief-message-set-message message)
-    (fsvn-brief-message-show-popup)
-    (funcall confirmer)))
 
 (defmacro fsvn-brief-message-showing (&rest form)
   `(save-window-excursion
@@ -238,7 +227,7 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 
 
-(require 'electric)
+(require 'electric nil t)
 
 (defvar unread-command-events)
 

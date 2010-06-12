@@ -18,6 +18,7 @@
 (require 'fsvn-debug)
 (require 'fsvn-magic)
 (require 'fsvn-ui)
+(require 'fsvn-cmd)
 
 
 
@@ -558,116 +559,22 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
 
 
 
-(defvar fsvn-use-experimental-run-recursive-status nil)
-
-(defun fsvn-run-recursive-status1 (directory)
-  (let (proc)
+(defun fsvn-run-recursive-status (directory)
+  "Execute recursive `status', and set subordinate directory."
+  (let (proc buffer)
     (setq proc (fsvn-recursive-status-running-process directory))
     (if proc
 	(when (eq major-mode 'fsvn-browse-mode)
 	  (setq fsvn-browse-buffer-directories-status-process proc))
-      (setq proc (fsvn-start-command "status" (fsvn-make-temp-buffer) directory "--xml"))
-      (set-process-sentinel proc 'fsvn-recursive-status-sentinel1)
+      (setq buffer (fsvn-make-temp-buffer))
+      (with-current-buffer buffer
+	(make-local-variable 'fsvn-recursive-status-parsed))
+      (setq proc (fsvn-start-command "status" buffer directory))
+      (set-process-sentinel proc 'fsvn-recursive-status-sentinel)
+      (set-process-filter proc 'fsvn-recursive-status-filter)
       (process-put proc 'fsvn-recursive-status-top-directory directory)
-      (fsvn-recursive-status-set-subordinate-process directory proc))))
-
-(defun fsvn-run-recursive-status (directory)
-  "Execute `status' to DIRECTORY recursively."
-  (if (not fsvn-use-experimental-run-recursive-status)
-      (fsvn-run-recursive-status1 directory)
-    (require 'fsvn-dev)
-    (fsvn-run-recursive-status2 directory)))
-
-(defun fsvn-recursive-status-unset-subordinate-process (proc)
-  (fsvn-each-browse-buffer
-   (when (eq fsvn-browse-buffer-directories-status-process proc)
-     (setq fsvn-browse-buffer-directories-status-process nil))))
-
-(defun fsvn-recursive-status-set-subordinate-process (directory proc)
-  (fsvn-each-browse-buffer
-   (mapc
-    (lambda (subdir)
-      (when (fsvn-url-contains-p directory (car subdir))
-	(setq fsvn-browse-buffer-directories-status-process proc)))
-    fsvn-browse-subdir-alist)))
-
-(defun fsvn-recursive-status-running-process (directory)
-  (let* ((dirname (directory-file-name directory))
-	 prop)
-    (catch 'yes
-      (mapc
-       (lambda (p)
-	 (setq prop (process-get p 'fsvn-recursive-status-top-directory))
-	 (when (and prop (or (string-match (concat "^" (regexp-quote prop) "/") dirname)
-			     (string= dirname prop)))
-	   (throw 'yes p)))
-       (process-list))
-      nil)))
-
-(defun fsvn-recursive-status-sentinel1 (proc event)
-  (fsvn-process-exit-handler proc event
-    (when (= (process-exit-status proc) 0)
-      ;; todo when changelist exists.
-      (let ((target (car (fsvn-xml-parse-status))))
-	(fsvn-recursive-status-draw-browsing1 target)))
-    (fsvn-recursive-status-unset-subordinate-process proc)
-    (kill-buffer (current-buffer))))
-
-(defun fsvn-recursive-status-draw-browsing1 (target)
-  (let ((files (fsvn-xml-status->target&cl->entries target))
-	(target-path (fsvn-xml-status->target.path target))
-	dircells)
-    (fsvn-recursive-status-clear-browsing1 target-path)
-    (mapc
-     (lambda (entry)
-       (let ((dir (fsvn-file-name-directory (fsvn-xml-status->target->entry.path entry)))
-	     (col1 (fsvn-status-get-status-1 entry))
-	     (col2 (fsvn-status-get-status-2 entry))
-	     dircol dircell)
-	 ;; --show-updates `status' vs recursive `status'
-	 (unless (fsvn-file= target-path dir)
-	   (fsvn-save-browse-directory-excursion dir
-	     (fsvn-browse-draw-status-internal entry)))
-	 (setq dircol (fsvn-status-file-status-to-dir-status col1 col2))
-	 (when dircol
-	   (setq dircell (fsvn-string-assoc dir dircells))
-	   (cond
-	    ((null dircell)
-	     (setq dircell (cons dir dircol))
-	     (setq dircells (cons dircell dircells)))
-	    ((fsvn-status-dir-status-stronger-than-p dircol (cdr dircell))
-	     (setcdr dircell dircol))))))
-     files)
-    (fsvn-recursive-status-draw-directories1 target-path dircells)))
-
-(defun fsvn-recursive-status-clear-browsing1 (top)
-  (fsvn-each-browse-buffer
-   (let (dir fullname)
-     (mapc
-      (lambda (subdir)
-	(setq dir (car subdir))
-	(when (fsvn-url-contains-p top dir)
-	  (save-excursion
-	    (fsvn-browse-each-file file dir
-	      (setq fullname (fsvn-expand-file file dir))
-	      (when (file-directory-p fullname)
-		(fsvn-browse-move-to-dir-status)
-		(fsvn-browse-put-dir-status-current))))))
-      fsvn-browse-subdir-alist))))
-
-(defun fsvn-recursive-status-draw-directories1 (top dircells)
-  (mapc
-   (lambda (dircell)
-     (let ((dir (fsvn-file-name-directory (car dircell)))
-	   (file (fsvn-file-name-nondirectory (car dircell)))
-	   (dircol (cdr dircell)))
-       (while (and (fsvn-directory-versioned-p dir)
-		   (fsvn-url-contains-p top dir))
-	 (fsvn-save-browse-directory-excursion dir
-	   (fsvn-browse-draw-dir-status file dircol))
-	 (setq file (fsvn-file-name-nondirectory dir))
-	 (setq dir (fsvn-file-name-directory dir)))))
-   dircells))
+      (fsvn-recursive-status-set-subordinate-process directory proc)
+      proc)))
 
 
 

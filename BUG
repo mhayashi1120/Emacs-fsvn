@@ -11,11 +11,6 @@
 
 ** fsvn-cleanup-temp-directory cleanup under other emacs process
 
-** Too slow too many files was modified.
-
-like after merged
-
-fsvn-use-experimental-run-recursive-status was created
 
 ** fsvn-authenticate-repository not works.
 
