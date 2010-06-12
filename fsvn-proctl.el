@@ -44,7 +44,6 @@
     ("PWD" -50)
     ("Command")))
 
-;;TODO not works
 (defvar fsvn-process-control-font-lock-keywords nil)
 (setq fsvn-process-control-font-lock-keywords
       (list
@@ -80,7 +79,7 @@
 	  (define-key map "q" 'fsvn-process-control-quit)
 	  (define-key map "u" 'fsvn-process-control-unmark)
 	  (define-key map "x" 'fsvn-process-control-mark-execute)
-	  (define-key map "\C-cH" 'fsvn-process-control-toggle-show-all)
+	  (define-key map "\C-c\C-h" 'fsvn-process-control-toggle-show-all)
 	  (define-key map "\C-c\C-c" 'fsvn-process-control-mark-execute)
 	  (define-key map "\C-c\C-k" 'fsvn-process-control-quit)
 	  (define-key map "\C-c\C-p" 'fsvn-process-control-send-password-selected)
@@ -174,6 +173,7 @@ Keybindings:
       (fsvn-process-control-activate-timer)
       (setq buffer-read-only t)
       (setq fsvn-process-control-processes processes)
+      ;; Buffer name that starts with space must do this.
       (font-lock-fontify-buffer)
       (run-mode-hooks 'fsvn-process-control-mode-hook))))
 

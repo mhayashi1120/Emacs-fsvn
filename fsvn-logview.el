@@ -121,12 +121,12 @@
 	  (define-key map "g" 'revert-buffer)
 
 	  (define-key map "\C-c\C-r" 'fsvn-log-list-edit-revprop)
-	  (define-key map "\C-co" 'fsvn-log-list-open-revision)
+	  (define-key map "\C-c\C-m" 'fsvn-log-list-open-revision)
 
 	  ;;todo not implement
 	  ;; 	(define-key map "U" 'fsvn-log-list-mark-unmark-all)
-	  ;; 	(define-key map "\C-cr" 'fsvn-log-list-revert-to-revision)
-	  ;; 	(define-key map "\C-cp" 'fsvn-log-list-open-propview)
+	  ;; 	(define-key map "z\C-r" 'fsvn-log-list-revert-to-revision)
+	  ;; 	(define-key map "z\C-p" 'fsvn-log-list-open-propview)
 
 	  map)))
 
@@ -826,7 +826,6 @@ Otherwise diff at point revision with working copy file or directory.
 	  (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
 	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-display)
 	  (define-key map "\C-c\C-o" 'fsvn-log-subwindow-switch-to-view)
-	  (define-key map "\C-cl" 'fsvn-log-sibling-log-this)
 	  (define-key map "\C-m" 'fsvn-log-sibling-open-this)
 	  (define-key map "\C-n" 'fsvn-log-sibling-next-line)
 	  (define-key map "\C-p" 'fsvn-log-sibling-previous-line)
@@ -834,6 +833,7 @@ Otherwise diff at point revision with working copy file or directory.
 	  (define-key map "l" 'fsvn-log-sibling-log-this)
 	  (define-key map "n" 'fsvn-log-sibling-next-line)
 	  (define-key map "p" 'fsvn-log-sibling-previous-line)
+	  (define-key map "zl" 'fsvn-log-sibling-log-this)
 	  map)))
 
 (defcustom fsvn-log-sibling-mode-hook nil
@@ -1095,7 +1095,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 	(let ((map (make-sparse-keymap)))
 	  (set-keymap-parent map text-mode-map)
 
-	  (define-key map "\C-cj" 'fsvn-log-message-browse-this)
+	  (define-key map "\C-c\C-m" 'fsvn-log-message-browse-this)
 	  (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
 	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-display)
 	  (define-key map "\C-c\C-o" 'fsvn-log-switch-to-sibling)
@@ -1153,7 +1153,7 @@ Keybindings:
 ;; * fsvn-log-message-mode interactive command
 
 (defun fsvn-log-message-browse-this (link)
-  (interactive)
+  (interactive (fsvn-log-message-cmd-read-browse-this))
   (browse-url link))
 
 (defun fsvn-log-message-start-edit ()

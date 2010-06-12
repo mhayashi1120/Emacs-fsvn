@@ -78,8 +78,8 @@
 	  (define-key map "\C-c\C-o" 'fsvn-parasite-commit-cycle-window)
 	  (define-key map "\C-c\C-q" 'fsvn-parasite-commit-quit)
 	  (define-key map "\C-c\C-k" 'fsvn-parasite-commit-quit)
-	  (define-key map "\C-cN" 'fsvn-parasite-commit-toggle-no-unlock)
-	  (define-key map "\C-cK" 'fsvn-parasite-commit-toggle-keep-changelist)
+	  (define-key map "\C-c\en" 'fsvn-parasite-commit-toggle-no-unlock)
+	  (define-key map "\C-c\ek" 'fsvn-parasite-commit-toggle-keep-changelist)
 
 	  map)))
 

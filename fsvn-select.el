@@ -96,7 +96,7 @@
 	  (define-key map "w" 'fsvn-select-file-copy-filename)
 	  
 	  ;; TODO add
-	  (define-key map "\C-cd" 'fsvn-select-file-delete-this)
+	  (define-key map "zd" 'fsvn-select-file-delete-this)
 
 	  ;;TODO commit
 	  (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
