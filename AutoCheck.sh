@@ -36,6 +36,8 @@ EOF
 
 	rm -f ${makefile}
 
+	IFS=" 
+"
 	while read line ; do
 		if echo "${line}" | grep -q -e "^ *EMACS[ 	]*=" ; then
 			echo "EMACS	= ${emacs_command}" >> ${makefile}
