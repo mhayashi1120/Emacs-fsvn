@@ -43,11 +43,11 @@ release: archive single-file
 archive:
 	rm -rf /tmp/fsvn-$(VERSION)
 	mkdir /tmp/fsvn-$(VERSION)
-	cp -pr $(RELEASE_FILES) /tmp/fsvn-$(VERSION)
+	cp -p $(RELEASE_FILES) /tmp/fsvn-$(VERSION)
 	chmod 644 /tmp/fsvn-$(VERSION)/*
 	mkdir /tmp/fsvn-$(VERSION)/Samples
-	cp -pr $(RELEASE_SAMPLES) /tmp/fsvn-$(VERSION)/Samples
-	chmod 644 /tmp/fsvn-$(VERSION)/Samples/*
+	cp -p $(RELEASE_SAMPLES) /tmp/fsvn-$(VERSION)/Samples
+	chmod 744 /tmp/fsvn-$(VERSION)/Samples
 	cd /tmp ; tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION)
 	cd /tmp ; tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
 

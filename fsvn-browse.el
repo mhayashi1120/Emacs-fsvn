@@ -186,6 +186,7 @@
 	  (define-key map "p" 'fsvn-browse-propview-this)
 	  (define-key map "t" 'fsvn-browse-add-changelist-selected)
 	  (define-key map "u" 'fsvn-browse-update-selected)
+	  ;; Do not use "v" 
 
 	  map)))
 
@@ -201,13 +202,16 @@
 
 	  (define-key map "\C-c" 'fsvn-browse-commit-path)
 	  (define-key map "\C-u" 'fsvn-browse-update-path)
-	  ;; 	(define-key map "\C-f" 'fsvn-browse-find-directory)
 	  (define-key map "\C-mI" 'fsvn-browse-mergeinfo-path)
 	  (define-key map "\C-mi" 'fsvn-browse-mergeinfo-this)
 	  (define-key map "\C-mM" 'fsvn-browse-merge-path)
 	  (define-key map "\C-mm" 'fsvn-browse-merge-this)
 	  (define-key map "\C-p" 'fsvn-browse-propview-this)
 	  (define-key map "\C-r" 'fsvn-browse-resolved-selected)
+	  (define-key map "\C-bm" 'fsvn-browse-safe-move-this)
+	  (define-key map "\C-bc" 'fsvn-browse-safe-copy-this)
+
+	  ;; C-v map to fsvn-browse-often-use-map
 	  (define-key map "\C-vc" 'fsvn-browse-copy-this)
 	  (define-key map "\C-vm" 'fsvn-browse-move-this)
 	  (define-key map "\C-v\ec" 'fsvn-browse-cleanup-path)
@@ -217,8 +221,7 @@
 	  (define-key map "\C-v\C-c" 'fsvn-browse-copy-selected)
 	  (define-key map "\C-v\C-d" 'fsvn-browse-delete-selected)
 	  (define-key map "\C-v\C-m" 'fsvn-browse-move-selected)
-	  (define-key map "\C-bm" 'fsvn-browse-safe-move-this)
-	  (define-key map "\C-bc" 'fsvn-browse-safe-copy-this)
+
 	  ;; 	(define-key map "\C-b\C-m" 'fsvn-browse-safe-move-selected)
 	  ;; 	(define-key map "\C-b\C-c" 'fsvn-browse-safe-copy-selected)
 	  (define-key map "\ec" 'fsvn-global-cleanup-buffer)
@@ -235,10 +238,16 @@
 			    "Sorry... Type "
 			    (substitute-command-keys (concat "`\\[" (symbol-name ',command) "]'"))
 			    " to continue. "
-			    "This command sequence is obsoleted because of violating Major Mode conventions." 
-			   ))))))
+			    "This command sequence is obsoleted because of violating Major Mode conventions." ))))))
 	   fsvn-browse-often-use-map)
 	  
+	  (map-keymap
+	   (lambda (key command)
+	     ;; only C-v map
+	     (when (and (characterp key) (= key ?\026))
+	       (define-key fsvn-browse-often-use-map "v" command)))
+	   map)
+
 	  map)))
 
 (defvar fsvn-browse-mode-map nil)
