@@ -1,5 +1,7 @@
 2010-06-12  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Improvement: Fix, A lot of modified files make slow.
+
 	* fsvn-logview.el (fsvn-log-sibling-mode-map):
 			fsvn-log-sibling-log-this C-c l -> z l
 			(fsvn-log-message-mode-map):
@@ -16,7 +18,7 @@
 
 	* fsvn-svk.el : svk keymap C-c v -> C-c C-k
 
-	* fsvn-proctl.el: add new major-mode
+	* fsvn-proclist.el: add new major-mode
 
 2010-06-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 

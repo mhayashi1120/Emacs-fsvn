@@ -35,7 +35,7 @@
        "fsvn-parasite.el"
        "fsvn-popup.el"
        "fsvn-proc.el"
-       "fsvn-proctl.el"
+       "fsvn-proclist.el"
        "fsvn-propview.el"
        "fsvn-pub.el"
        "fsvn-select.el"

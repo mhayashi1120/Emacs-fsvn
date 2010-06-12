@@ -18,6 +18,7 @@
 (require 'fsvn-popup)
 (require 'fsvn-msgedit)
 (require 'fsvn-parasite)
+(require 'fsvn-cmd)
 
 
 
@@ -230,7 +231,7 @@
 
 	  (map-keymap 
 	   (lambda (key command)
-	     (when (characterp key)
+	     (when (fsvn-characterp key)
 	       (define-key map (char-to-string key) 
 		 `(lambda () 
 		    (interactive)
@@ -240,11 +241,11 @@
 			    " to continue. "
 			    "This command sequence is obsoleted because of violating Major Mode conventions." ))))))
 	   fsvn-browse-often-use-map)
-	  
+
 	  (map-keymap
 	   (lambda (key command)
 	     ;; only C-v map
-	     (when (and (characterp key) (= key ?\026))
+	     (when (and (fsvn-characterp key) (= key ?\026))
 	       (define-key fsvn-browse-often-use-map "v" command)))
 	   map)
 

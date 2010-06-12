@@ -24,3 +24,6 @@ EMACSDATA = $(PREFIX)/etc
 EMACSLOADPATH=
 
 include MAKE-TARGETS.mk
+
+check-in-console: clean
+	$(EMACS) $(FLAGS) -f check-fsvn $(CONFIG)

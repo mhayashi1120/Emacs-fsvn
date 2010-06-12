@@ -402,6 +402,125 @@ Argument FILES ."
 
 
 
+(defvar fsvn-recursive-status-parsed nil)
+
+(defun fsvn-recursive-status-unset-subordinate-process (proc)
+  (fsvn-each-browse-buffer
+   (when (eq fsvn-browse-buffer-directories-status-process proc)
+     (setq fsvn-browse-buffer-directories-status-process nil))))
+
+(defun fsvn-recursive-status-set-subordinate-process (directory proc)
+  (fsvn-each-browse-buffer
+   (mapc
+    (lambda (subdir)
+      (when (fsvn-url-contains-p directory (car subdir))
+	(setq fsvn-browse-buffer-directories-status-process proc)))
+    fsvn-browse-subdir-alist)))
+
+(defun fsvn-recursive-status-running-process (directory)
+  (let* ((dirname (directory-file-name directory))
+	 prop)
+    (catch 'yes
+      (mapc
+       (lambda (p)
+	 (setq prop (process-get p 'fsvn-recursive-status-top-directory))
+	 (when (and prop (or (string-match (concat "^" (regexp-quote prop) "/") dirname)
+			     (string= dirname prop)))
+	   (throw 'yes p)))
+       (process-list))
+      nil)))
+
+(defun fsvn-recursive-status-sort-directories (topdir)
+  (sort
+   (fsvn-mapitem
+    (lambda (dir)
+      (when (fsvn-url-contains-p topdir dir)
+	dir))
+    (fsvn-browse-directories))
+   (lambda (d1 d2)
+     (> (length d1) (length d2)))))
+
+(defun fsvn-recursive-status-sentinel (proc event)
+  (fsvn-process-exit-handler proc event
+    (let ((parsed (nreverse fsvn-recursive-status-parsed))
+	  directories topdir info)
+      ;; todo when changelist exists.
+      (setq topdir (process-get proc 'fsvn-recursive-status-top-directory))
+      (setq directories (fsvn-recursive-status-sort-directories topdir))
+      (setq info (fsvn-recursive-status-join-info directories parsed))
+      (fsvn-recursive-status-draw-browsing topdir info))
+    (fsvn-recursive-status-unset-subordinate-process proc)
+    (kill-buffer (current-buffer))))
+
+(defun fsvn-recursive-status-join-info (directories parsed-info)
+  (mapcar
+   (lambda (dir)
+     (let (files dirs)
+       (mapc
+	(lambda (status-info)
+	  (let ((file (nth 0 status-info))
+		(status (nth 1 status-info)))
+	    (when (fsvn-url-grand-child-p dir file)
+	      (let ((d (fsvn-url-only-child dir file))
+		    cell)
+		(unless (setq cell (assoc d dirs))
+		  (setq cell (cons d nil))
+		  (setq dirs (cons cell dirs)))
+		(setcdr cell (fsvn-status-dir-status-stronger  
+			      (fsvn-status-string-to-dir-status status)
+			      (cdr cell)))))
+	    (when (fsvn-url-child-p dir file)
+	      (setq files (cons (cons file status) files)))))
+	parsed-info)
+       (cons dir (list (cons 'files files) (cons 'dirs dirs)))))
+   directories))
+
+(defun fsvn-recursive-status-draw-browsing (topdir status-alist)
+  (mapc
+   (lambda (dir-status)
+     (let ((dir (car dir-status))
+	   (files-status (cdr (assq 'files dir-status)))
+	   (dirs-status (cdr (assq 'dirs dir-status))))
+       (fsvn-save-browse-directory-excursion dir
+	 (let (buffer-read-only)
+	   ;; set to file status
+	   ;; --show-updates `status' vs recursive `status'
+	   (unless (fsvn-file= topdir dir)
+	     (mapc
+	      (lambda (status-cell)
+		(let ((file (car status-cell))
+		      (status (cdr status-cell)))
+		  (when (fsvn-browse-goto-file file)
+		    (setq status (fsvn-browse-status-string-to-display-status status))
+		    (fsvn-browse-draw-status-string-this-line status))))
+	      files-status))
+	   ;; initialize directory status column
+	   (fsvn-browse-each-file file dir
+	     (when (fsvn-browse-point-directory-p)
+	       (fsvn-browse-draw-dir-status-this-line)))
+	   ;; set to directory column
+	   (mapc
+	    (lambda (status-cell)
+	      (let ((file (car status-cell))
+		    (status (cdr status-cell)))
+		(when (fsvn-browse-goto-file file)
+		  (fsvn-browse-draw-dir-status-this-line status))))
+	    dirs-status)
+	   (setq buffer-undo-list nil)
+	   (set-buffer-modified-p nil)))))
+   status-alist))
+
+(defun fsvn-recursive-status-filter (proc event)
+  (with-current-buffer (process-buffer proc)
+    (let ((start (point))
+	  file status)
+      (insert event)
+      (goto-char start)
+      (while (re-search-forward "^\\([^?][A-Z+!?~ ]\\{6,7\\}\\) \\([^ ].+\\)\n" nil t)
+	(setq status (match-string 1)
+	      file (match-string 2))
+	(setq fsvn-recursive-status-parsed 
+	      (cons (list (fsvn-expand-file file) status) fsvn-recursive-status-parsed))))))
 
 
 
