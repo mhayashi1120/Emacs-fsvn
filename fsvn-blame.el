@@ -117,25 +117,23 @@ Keybindings: none
 
 "
   (interactive)
+  (unless (buffer-file-name)
+    (error "This buffer has no associated file"))
   (let ((cell (assq 'fsvn-blame-minor-mode minor-mode-alist)))
     (unless cell
       (setq cell (list 'fsvn-blame-minor-mode nil))
       (setq minor-mode-alist
 	    (cons cell minor-mode-alist)))
     (setcdr cell (list " [Fsvn Blame]"))
-    (unless (buffer-file-name)
-      (error "This buffer has no associated file"))
     (if fsvn-blame-minor-mode
 	(fsvn-blame-minor-mode-quit)
       (fsvn-blame-minor-mode-start))))
 
 (defun fsvn-blame-minor-mode-start ()
-  (let ((buffer (current-buffer)))
-    ;; todo rev range
-    (fsvn-blame-file-logs buffer)
-    (fsvn-make-buffer-variables-internal fsvn-blame-minor-buffer-local-variables)
-    (fsvn-blame-activate-timer)
-    (add-hook 'kill-buffer-hook 'fsvn-blame-kill-buffer)))
+  (fsvn-blame-file-logs)
+  (fsvn-make-buffer-variables-internal fsvn-blame-minor-buffer-local-variables)
+  (fsvn-blame-activate-timer)
+  (add-hook 'kill-buffer-hook 'fsvn-blame-kill-buffer))
 
 (defun fsvn-blame-minor-mode-quit ()
   (interactive)
@@ -335,11 +333,12 @@ Keybindings: none
      (delete-process p))
    (fsvn-blame-get-processes)))
 
-(defun fsvn-blame-file-logs (buffer &optional rev-range)
+(defun fsvn-blame-file-logs (&optional rev-range)
   "Execute `log' and `blame' asynchronous process."
   (let ((log (fsvn-make-temp-buffer))
 	(blame (fsvn-make-temp-buffer))
-	(file (buffer-file-name buffer))
+	(urlrev (fsvn-blame-buffer-urlrev))
+	(buffer (current-buffer))
 	range-arg
 	log-proc blame-proc)
     (with-current-buffer (fsvn-blame-get-subwindow-buffer)
@@ -348,8 +347,8 @@ Keybindings: none
     (setq range-arg
 	  (when rev-range
 	    (list "--revision" (fsvn-revision-range-to-string rev-range))))
-    (setq log-proc (fsvn-start-command "log" log "--xml" "--verbose" range-arg file))
-    (setq blame-proc (fsvn-start-command "blame" blame "--xml" range-arg file))
+    (setq log-proc (fsvn-start-command "log" log "--xml" "--verbose" range-arg urlrev))
+    (setq blame-proc (fsvn-start-command "blame" blame "--xml" range-arg urlrev))
     (mapc
      (lambda (list)
        (let ((p (nth 0 list))
@@ -402,7 +401,7 @@ Keybindings: none
 	 fsvn-blame-log-data)
     (let ((logs fsvn-blame-log-data)
 	  (blame fsvn-blame-blame-data)
-	  (file (buffer-file-name))
+	  (urlrev (fsvn-blame-buffer-urlrev))
 	  blame-data diff)
       (setq blame-data
 	    (mapcar
@@ -412,8 +411,8 @@ Keybindings: none
 		     (fsvn-logs-find-logentry logs rev)
 		   nil)))
 	     (fsvn-xml-blame->target->entries blame)))
-      (when (fsvn-url-local-p file)
-	(setq diff (fsvn-diff-file-alist file)))
+      (when (fsvn-url-local-p urlrev)
+	(setq diff (fsvn-diff-file-alist urlrev)))
       (fsvn-blame-make-buffer-overlay blame-data diff)
       (setq fsvn-blame-blame-logs blame-data)
       (setcdr fsvn-blame-spent-time (float-time))))))
@@ -433,6 +432,13 @@ Keybindings: none
        (when (eq (process-get p 'fsvn-blame-file-buffer) buffer)
 	 p))
      (process-list))))
+
+(defun fsvn-blame-buffer-urlrev ()
+  (cond
+   ((fsvn-url-local-p (buffer-file-name))
+    (buffer-file-name))
+   ((fsvn-magic-file-name-absolute-p (buffer-file-name))
+    (fsvn-magic-parse-file-name (buffer-file-name)))))
 
 
 

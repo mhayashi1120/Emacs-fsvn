@@ -782,9 +782,16 @@ Otherwise diff at point revision with working copy file or directory.
     (when (y-or-n-p "Really change revision property? ")
       (fsvn-set-revprop-value urlrev revprop value))))
 
-(defun fsvn-log-list-open-revision (urlrev)
-  (interactive (list (fsvn-log-list-point-urlrev)))
-  (fsvn-browse-switch-directory-buffer urlrev))
+(defun fsvn-log-list-open-revision ()
+  (interactive)
+  (let* ((rev (fsvn-log-list-point-revision))
+	 (url (fsvn-log-list-point-url))
+	 dir-urlrev)
+    (setq dir-urlrev
+	  (if fsvn-logview-target-directory-p
+	      (fsvn-url-urlrev url rev)
+	    (fsvn-url-urlrev (fsvn-url-dirname url) rev)))
+    (fsvn-browse-switch-directory-buffer dir-urlrev)))
 
 (defun fsvn-log-list-quit ()
   (interactive)
