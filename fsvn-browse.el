@@ -1020,11 +1020,8 @@ PATH is each executed path."
 	 (rev (fsvn-xml-info->entry.revision info))
 	 (urlrev (fsvn-url-urlrev url rev)))
     (fsvn-set-default-directory (fsvn-magic-create-name urlrev))
-    (setq dired-directory default-directory)
     ;;   (set (make-local-variable 'list-buffers-directory) default-directory)
-    (unless (file-directory-p default-directory)
-      (error "TODO when happen??")
-      (make-directory default-directory t))))
+    (setq dired-directory default-directory)))
 
 (defun fsvn-browse-set-repos-local-variables (info)
   (setq fsvn-buffer-repos-root (fsvn-xml-info->entry=>repository=>root$ info))

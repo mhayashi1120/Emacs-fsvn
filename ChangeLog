@@ -1,3 +1,9 @@
+2010-06-14  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: Support repository file `blame'
+
+	* Fix: fsvn-log-list-open-revision not works for file.
+
 2010-06-12  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Improvement: Fix, A lot of modified files make slow.
