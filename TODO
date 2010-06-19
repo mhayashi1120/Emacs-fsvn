@@ -15,8 +15,6 @@
 
 ** some help mode (command brief description)
 
-** License GPL V2 -> GPL v3
-
 ** file-select, message-edit can kill-buffer when commiting.
 
 ** complete log revision with electric select
@@ -30,11 +28,9 @@ svn://localhost/some 5050 some log message
 ** Bugreport
 
 ** about SVN_SSH
-** fsvn-string-rtrim to fsvn-string-truncate
+** TODO Activate only magic name.
 
-** Activate only magic name.
-
-** font-lock not works fine some cases.
+** font-lock not works fine in some cases.
 consider `font-lock-fontify' call or not
 
 * magic
