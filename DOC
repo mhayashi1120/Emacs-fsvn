@@ -8,6 +8,7 @@
 
 *** 0.x.x
 
+Check absolute path of release files. (Search by current released version)
 Commit all changes in trunk working copy.
 Change version to release version in this working copy.
 Descrive ChangeLog about this release.
@@ -19,6 +20,7 @@ Create tag to Release-0.m.n
 *** TODO 1.n.o or later
 
 When first release of major version up, make branch like BR-m.x (ex BR-1.x)
+Check absolute path of release files. (Search by current released version)
 Commit all changes in branch working copy.
 Change version to release version in this working copy.
 Descrive ChangeLog about this release.

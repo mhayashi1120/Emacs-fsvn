@@ -93,6 +93,7 @@ fsvn-browse.*move-in-repository
 
 ** show copy-from
 
+** log-sibling return to specific revision file. (use magic file name)
 * prop-mode
 
 ** prop-recursive-mode
