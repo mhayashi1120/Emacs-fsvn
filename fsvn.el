@@ -2,7 +2,9 @@
 ;; Copyright (C) 2008-2010 by Masahiro Hayashi
 
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
+;; URL: http://fsvn.sourceforge.jp/
 ;; Keywords: Emacs, Subversion, Frontend
+;; Version: 0.9.3
 
 ;; fsvn.el is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -41,7 +43,8 @@
 
 ;; This package is tested on following environment.
 ;;      Meadow (based Emacs 22.1) on Windows.  svn 1.6.x
-;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x
+;;      Emacs (23.2) on GNU/Linux (Debian).  svn 1.6.x
+;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.6.x
 
 ;; major-mode and brief description
 ;; * fsvn-browse-mode (dired like interface)
