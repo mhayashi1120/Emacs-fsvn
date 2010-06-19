@@ -516,7 +516,7 @@ Argument FILES ."
 	  file status)
       (insert event)
       (goto-char start)
-      (while (re-search-forward "^\\([^?][A-Z+!?~ ]\\{6,7\\}\\) \\([^ ].+\\)\n" nil t)
+      (while (re-search-forward "^\\([^?][A-Z+!?~ ]\\{5,6\\}\\) \\([^ ].+\\)\n" nil t)
 	(setq status (match-string 1)
 	      file (match-string 2))
 	(setq fsvn-recursive-status-parsed 
