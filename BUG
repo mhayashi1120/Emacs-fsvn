@@ -18,10 +18,6 @@ Google code problem
 can access to read-only, but cannot commit access.
 
 
-** Emacs-lisp illegal conventions
-
-C-c prefix key
-
 * browse-mode
 ** sometime happens apply: Wrong number of arguments: max, 0
    or async process?
@@ -35,8 +31,6 @@ windows only?
 deadlock something?
 a lot of process makes this error?
 
-** fsvn-dired-toggle-browser
-  in repository.
 
 ** Sometimes repeat revret-buffer destroy buffer format.
 
@@ -50,6 +44,11 @@ freeze? deadlock?
 
 * logview-mode
 ** fsvn-log-list-mode mark-active odd when showing details.
+
+log-list has function that edit message and sibling buffers when move line.
+This causes turning off `mark-active'.
+
+
 ** fsvn-open-log-view-mode previous window setting makes odd.
 
 ** fsvn-log-view-mode after C-c C-k then return previous buffer, but previous fsvn-log-message-mode shown.

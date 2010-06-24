@@ -345,7 +345,7 @@ To show and see result.
     (fsvn-browse-goto-file file1)
     (fsvn-browse-info-path)
     (fsvn-test-sit-for)
-    (fsvn-next-file 1) ;; move to file2
+    (fsvn-browse-next-file 1) ;; move to file2
     (fsvn-test-sit-for)
     (fsvn-browse-mark-file-mark) ;; mark file2
     (fsvn-browse-mark-file-delete) ;; delete mark file3
@@ -353,7 +353,7 @@ To show and see result.
     (fsvn-test-equal (fsvn-browse-cmd-selected-urls) (list file2))
     (fsvn-test-equal (fsvn-browse-cmd-selected-urlrevs) (list file2))
     (fsvn-test-sit-for)
-    (fsvn-previous-file 2) ;; move to file2
+    (fsvn-browse-previous-file 2) ;; move to file2
     (fsvn-test-equal (fsvn-browse-cmd-this-urlrev) file2)
     (fsvn-test-equal (fsvn-browse-cmd-this-wc-file) file2)
     (fsvn-test-sit-for)
@@ -561,6 +561,29 @@ To show and see result.
 	 nil)))
      fsvn-magic-handler-alist)
     (nreverse ret)))
+
+(defun fsvn-test-check-menu-spec (spec commands)
+  (mapc
+   (lambda (c)
+     (unless (fsvn-test-check-menu-spec-internal spec c)
+       (error "%s not bound" c)))
+   commands))
+
+(defun fsvn-test-check-menu-spec-internal (spec command)
+  (catch 'found
+    (mapc
+     (lambda (s)
+       (cond
+	((or (listp s)
+	     (vectorp s))
+	 (when (fsvn-test-check-menu-spec-internal s command)
+	   (throw 'found t)))
+	((and (symbolp s)
+	      (commandp s))
+	 (when (eq s command)
+	   (throw 'found t)))))
+     spec)
+    nil))
 
 (fsvn-test-unbound-functions)
 

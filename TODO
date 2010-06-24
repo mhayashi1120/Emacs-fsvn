@@ -33,6 +33,8 @@ svn://localhost/some 5050 some log message
 ** font-lock not works fine in some cases.
 consider `font-lock-fontify' call or not
 
+** tool-bar
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
