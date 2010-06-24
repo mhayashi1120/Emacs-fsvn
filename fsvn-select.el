@@ -85,12 +85,12 @@
 	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
 	  (define-key map "\C-c\ei" 'fsvn-select-file-ignore-this)
 	  (define-key map "\C-m" 'fsvn-select-file-view-file)
-	  (define-key map "\C-n" 'fsvn-next-file)
-	  (define-key map "\C-p" 'fsvn-previous-file)
+	  (define-key map "\C-n" 'fsvn-select-file-next-file)
+	  (define-key map "\C-p" 'fsvn-select-file-previous-file)
 	  (define-key map "g" 'revert-buffer)
 	  (define-key map "m" 'fsvn-select-file-mark)
-	  (define-key map "n" 'fsvn-next-file)
-	  (define-key map "p" 'fsvn-previous-file)
+	  (define-key map "n" 'fsvn-select-file-next-file)
+	  (define-key map "p" 'fsvn-select-file-previous-file)
 	  (define-key map "u" 'fsvn-select-file-mark-clear)
 	  (define-key map "D" 'fsvn-select-file-do-delete-this)
 	  (define-key map "w" 'fsvn-select-file-copy-filename)
@@ -172,7 +172,7 @@ Keybindings:
        (fsvn-select-file-first-file)
        (while (setq ,var (fsvn-current-filename))
 	 (setq RET (cons ,@form RET))
-	 (fsvn-next-file))
+	 (fsvn-select-file-next-file))
        (nreverse RET))))
 
 (defun fsvn-select-file-first-file ()
@@ -230,7 +230,7 @@ Keybindings:
       (while (setq file (fsvn-current-filename))
 	(when (string= (fsvn-expand-file file) filename)
 	  (throw 'found t))
-	(fsvn-next-file))
+	(fsvn-select-file-next-file))
       (goto-char prev)
       nil)))
 
@@ -420,7 +420,7 @@ Keybindings:
 	(setq cur (fsvn-expand-file cur))
 	(if (string-match regexp cur)
 	    (fsvn-select-file-remove-file cur)
-	  (fsvn-next-file))))
+	  (fsvn-select-file-next-file))))
     (fsvn-move-to-filename)))
 
 (defun fsvn-select-file-redraw-file (file)
@@ -455,12 +455,12 @@ Keybindings:
 (defun fsvn-select-file-mark ()
   (interactive)
   (fsvn-select-file-point-put-mark t)
-  (fsvn-next-file))
+  (fsvn-select-file-next-file))
 
 (defun fsvn-select-file-mark-clear ()
   (interactive)
   (fsvn-select-file-point-put-mark nil)
-  (fsvn-next-file))
+  (fsvn-select-file-next-file))
 
 (defun fsvn-select-file-ignore-this (file)
   (interactive (fsvn-select-file-cmd-file))
@@ -520,6 +520,9 @@ This is usefull for missing file (marked `!')
 (defun fsvn-select-file-rename-case-missing-file (file)
   (interactive (list (fsvn-expand-file (fsvn-current-filename)) ))
   (fsvn-rename-case-missing-file file))
+
+(defalias 'fsvn-select-file-next-file 'fsvn-next-file)
+(defalias 'fsvn-select-file-previous-file 'fsvn-previous-file)
 
 
 

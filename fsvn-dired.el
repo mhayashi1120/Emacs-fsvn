@@ -68,7 +68,7 @@ This function suppress this behavior."
        (when file
 	 (fsvn-browse-goto-file file))))
    ;; change to dired
-   (if (null (fsvn-browse-current-directory-url))
+   (if fsvn-browse-repos-p
        (message "Not a local directory.")
      (let (file)
        (when (fsvn-current-filename)

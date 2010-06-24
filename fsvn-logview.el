@@ -50,7 +50,7 @@
 
 (defconst fsvn-log-list-user-name-length 15)
 (defconst fsvn-log-list-message-length 50)
-(defconst fsvn-log-list-buffer-name "Log for ")
+(defconst fsvn-log-list-buffer-name-prefix "Log for ")
 
 (defvar fsvn-log-list-target-path nil)
 (defvar fsvn-log-list-subwindow-settings nil)
@@ -201,46 +201,46 @@ Keybindings:
       (setq logentry (fsvn-log-list-find-showing-entry rev)))
     (with-current-buffer (fsvn-log-message-get-buffer)
       (let ((msg (fsvn-xml-log->logentry=>msg$ logentry)))
-	(fsvn-set-default-directory dir)
-	(let (buffer-read-only)
-	  (erase-buffer)
-	  (when msg
-	    (insert msg)))
-	(fsvn-log-message-mode)
-	(setq fsvn-buffer-repos-root root)
-	(setq fsvn-log-source-buffer main-buffer)
-	(setq fsvn-log-message-revision rev)
-	(setq buffer-read-only t)
-	(run-mode-hooks 'fsvn-log-message-mode-hook)))
+      	(fsvn-set-default-directory dir)
+      	(let (buffer-read-only)
+      	  (erase-buffer)
+      	  (when msg
+      	    (insert msg)))
+      	(fsvn-log-message-mode)
+      	(setq fsvn-buffer-repos-root root)
+      	(setq fsvn-log-source-buffer main-buffer)
+      	(setq fsvn-log-message-revision rev)
+      	(setq buffer-read-only t)
+      	(run-mode-hooks 'fsvn-log-message-mode-hook)))
     (with-current-buffer (fsvn-log-sibling-get-buffer)
       (fsvn-set-default-directory dir)
       (let (regexp)
-	(let (buffer-read-only)
-	  (erase-buffer)
-	  (mapc
-	   (lambda (path-entry)
-	     (let ((act (fsvn-xml-log->logentry->paths->path.action path-entry))
-		   (text (fsvn-xml-log->logentry->paths->path$ path-entry))
-		   copied)
-	       (insert (format "%s %s\n" act text))
-	       ;; copy or move file
-	       (when (and (string= act "A")
-			  (setq copied (fsvn-xml-log->logentry->path.copyfrom-path path-entry))
-			  (fsvn-url-contains-p text path))
-		 ;;FIXME regexp not correct
-		 (setq regexp (format "^[AD] \\(%s\\|%s\\)$" text (fsvn-url-decode-string copied))))))
-	   (fsvn-log-sibling-sorted-paths logentry)))
-	(fsvn-log-sibling-mode)
-	(when (and path (null regexp))
-	  (setq regexp (concat "^..\\(" (regexp-quote (fsvn-url-decode-string path)) "\\)\\(?:/\\|$\\)")))
-	(setq fsvn-buffer-repos-root root)
-	(setq fsvn-log-source-buffer main-buffer)
-	(setq fsvn-log-sibling-target-path path)
-	(setq fsvn-log-sibling-logentry logentry)
-	(setq fsvn-log-sibling-revision rev)
-	(setq fsvn-log-sibling-font-lock-keywords
-	      (when regexp
-		(list (list regexp '(1 fsvn-header-key-face))))))
+      	(let (buffer-read-only)
+      	  (erase-buffer)
+      	  (mapc
+      	   (lambda (path-entry)
+      	     (let ((act (fsvn-xml-log->logentry->paths->path.action path-entry))
+      	  	   (text (fsvn-xml-log->logentry->paths->path$ path-entry))
+      	  	   copied)
+      	       (insert (format "%s %s\n" act text))
+      	       ;; copy or move file
+      	       (when (and (string= act "A")
+      	  		  (setq copied (fsvn-xml-log->logentry->path.copyfrom-path path-entry))
+      	  		  (fsvn-url-contains-p text path))
+      	  	 ;;FIXME regexp not correct
+      	  	 (setq regexp (format "^[AD] \\(%s\\|%s\\)$" text (fsvn-url-decode-string copied))))))
+      	   (fsvn-log-sibling-sorted-paths logentry)))
+      	(fsvn-log-sibling-mode)
+      	(when (and path (null regexp))
+      	  (setq regexp (concat "^..\\(" (regexp-quote (fsvn-url-decode-string path)) "\\)\\(?:/\\|$\\)")))
+      	(setq fsvn-buffer-repos-root root)
+      	(setq fsvn-log-source-buffer main-buffer)
+      	(setq fsvn-log-sibling-target-path path)
+      	(setq fsvn-log-sibling-logentry logentry)
+      	(setq fsvn-log-sibling-revision rev)
+      	(setq fsvn-log-sibling-font-lock-keywords
+      	      (when regexp
+      		(list (list regexp '(1 fsvn-header-key-face))))))
       (setq buffer-read-only t)
       (run-mode-hooks 'fsvn-log-sibling-mode-hook))))
 
@@ -317,14 +317,12 @@ Keybindings:
   (let ((message-buffer (fsvn-log-message-get-buffer))
 	(sibling-buffer (fsvn-log-sibling-get-buffer))
 	first-win second-win third-win)
-    (save-selected-window
-      (delete-other-windows)
-      (setq first-win (get-buffer-window (current-buffer)))
-      (setq second-win (split-window nil (/ (window-height) 4)))
-      (set-window-buffer second-win message-buffer)
-      (set-frame-selected-window (selected-frame) second-win)
-      (setq third-win (split-window nil (/ (window-height) 2)))
-      (set-window-buffer third-win sibling-buffer))))
+    (delete-other-windows)
+    (setq first-win (get-buffer-window (current-buffer)))
+    (setq second-win (split-window first-win (/ (window-height first-win) 4)))
+    (set-window-buffer second-win message-buffer)
+    (setq third-win (split-window second-win (/ (window-height second-win) 2)))
+    (set-window-buffer third-win sibling-buffer)))
 
 (defun fsvn-log-list-get-buffer (urlrev)
   (let ((bufs (buffer-list))
@@ -338,8 +336,8 @@ Keybindings:
       (setq bufs (cdr bufs)))
     (if target
 	target
-      (generate-new-buffer (concat fsvn-log-list-buffer-name
-				   "[" (fsvn-file-name-nondirectory urlrev) "]")))))
+      (generate-new-buffer (concat fsvn-log-list-buffer-name-prefix
+				   "[" (fsvn-url-filename urlrev) "]")))))
 
 (defun fsvn-log-list-move-to-message ()
   (let ((eol (line-end-position)))
@@ -504,8 +502,8 @@ Keybindings:
       (setq fsvn-default-window-configuration subconf)
       (setq fsvn-previous-window-configuration prevconf)
       (when (and (fsvn-config-tortoise-property-use root)
-		 (fsvn-url-local-p default-directory))
-	(fsvn-tortoise-fontify-buffer)))))
+      		 (fsvn-url-local-p default-directory))
+      	(fsvn-tortoise-fontify-buffer)))))
 
 (defun fsvn-log-list-cmd (urlrev root rev-range count)
   (let (real-count real-range matcher default-range-start)
@@ -610,8 +608,8 @@ Keybindings:
 
 (defun fsvn-log-list-reload-with-change-limit (count)
   (interactive (fsvn-log-list-cmd-read-reload-with-change-limit))
-    ;;todo consider rev-range arg
-    (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p nil count))
+  ;;todo consider rev-range arg
+  (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p nil count))
 
 (defun fsvn-log-list-reload-with-revision (&optional range)
   (interactive (fsvn-log-list-cmd-read-reload-with-revision))
@@ -940,8 +938,8 @@ Keybindings:
   (cond
    ((memq (fsvn-log-sibling-point-status) '(?M))
     (let* ((urlrev (fsvn-log-sibling-point-urlrev))
-	  (prev (1- fsvn-log-sibling-revision))
-	  (prev-urlrev (fsvn-url-urlrev (fsvn-log-sibling-point-url) prev)))
+	   (prev (1- fsvn-log-sibling-revision))
+	   (prev-urlrev (fsvn-url-urlrev (fsvn-log-sibling-point-url) prev)))
       prev-urlrev))
    ((memq (fsvn-log-sibling-point-status) '(?A)) ; moved file
     ;; path-entry must be found.
@@ -1180,10 +1178,10 @@ Keybindings:
   (interactive (fsvn-log-message-cmd-read-commit))
   (let ((tmpfile (fsvn-get-prop-temp-file "svn:log" (buffer-substring (point-min) (point-max)))))
     (fsvn-popup-call-process "propset"
-				  "--file" tmpfile
-				  "--revprop" "svn:log"
-				  "--revision" fsvn-log-message-revision
-				  fsvn-buffer-repos-root)))
+			     "--file" tmpfile
+			     "--revprop" "svn:log"
+			     "--revision" fsvn-log-message-revision
+			     fsvn-buffer-repos-root)))
 
 
 

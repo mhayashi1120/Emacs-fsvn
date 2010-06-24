@@ -267,15 +267,15 @@
 	  (define-key map "U" 'fsvn-browse-mark-all-unmark)
 	  (define-key map "\C-c" fsvn-browse-prefix-map)
 	  (define-key map "\C-m" 'fsvn-browse-file-this)
-	  (define-key map "\C-n" 'fsvn-next-file)
-	  (define-key map "\C-p" 'fsvn-previous-file)
+	  (define-key map "\C-n" 'fsvn-browse-next-file)
+	  (define-key map "\C-p" 'fsvn-browse-previous-file)
 	  (define-key map "\d" 'scroll-down)
 	  (define-key map "^" 'fsvn-browse-up-directory)
 	  (define-key map "d" 'fsvn-browse-mark-file-delete)
 	  (define-key map "g" 'revert-buffer)
 	  (define-key map "m" 'fsvn-browse-mark-file-mark)
-	  (define-key map "n" 'fsvn-next-file)
-	  (define-key map "p" 'fsvn-previous-file)
+	  (define-key map "n" 'fsvn-browse-next-file)
+	  (define-key map "p" 'fsvn-browse-previous-file)
 	  (define-key map "s" 'fsvn-browse-toggle-sort)
 	  (define-key map "u" 'fsvn-browse-mark-file-unmark)
 	  (define-key map "z" fsvn-browse-often-use-map)
@@ -644,7 +644,7 @@ PATH is each executed path."
 	 (when (fsvn-browse-goto-first-file)
 	   (while (setq ,var (fsvn-current-filename))
 	     (setq RET (cons (progn ,@form) RET))
-	     (fsvn-next-file))
+	     (fsvn-browse-next-file))
 	   (nreverse RET))))))
 
 (defmacro fsvn-browse-mark-if (predicate msg)
@@ -899,7 +899,7 @@ PATH is each executed path."
   (cond
    ((fsvn-current-filename)
     (fsvn-browse-put-mark-point mark)
-    (fsvn-next-file))
+    (fsvn-browse-next-file))
    (t
     (error "Cannot put mark on this line."))))
 
@@ -2186,6 +2186,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	 (fsvn-set-prop-svn:needs-lock file (not (fsvn-get-prop-svn:needs-lock file))))
        files)
     (message "(No svn Needs-Lock performed)")))
+
+(defalias 'fsvn-browse-next-file 'fsvn-next-file)
+(defalias 'fsvn-browse-previous-file 'fsvn-previous-file)
 
 (defun fsvn-browse-toggle-sort ()
   "Toggle sorting condition mod-time and file-name."
