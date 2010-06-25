@@ -48,6 +48,7 @@ consider `font-lock-fontify' call or not
 fsvn-browse.*move-in-repository
 
 ** in repository C-x C-f or something bound to open by url function
+
 * select-file-mode
 ** symbolic link
 
