@@ -1,3 +1,7 @@
+2010-06-25  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Support tree-conflict showing.
+
 2010-06-19  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Release: 0.9.3

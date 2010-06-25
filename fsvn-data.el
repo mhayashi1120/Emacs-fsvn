@@ -77,9 +77,9 @@
   (let* ((all '(?C ?A ?D ?I ?M)))
     (fsvn-status-stronger-than all x y)))
 
-(defun fsvn-status-file-status-to-dir-status (col1 col2)
+(defun fsvn-status-file-status-to-dir-status (col1 col2 col7)
   (cond
-   ((memq ?C (list col1 col2)) ?C)
+   ((memq ?C (list col1 col2 col7)) ?C)
    ((memq col1 '(?M ?A ?D)) ?M)
    ((eq col2 ?M) ?M)
    ;;FIXME what mean replaced?
@@ -93,7 +93,7 @@
 
 (defun fsvn-status-string-to-dir-status (status-string)
   (let ((list (string-to-list status-string)))
-    (fsvn-status-file-status-to-dir-status (nth 0 list) (nth 1 list))))
+    (fsvn-status-file-status-to-dir-status (nth 0 list) (nth 1 list) (nth 6 list))))
 
 (defun fsvn-status-get-status (entry)
   (let (col1 col2 col3 col4 col5 col6 col7)
