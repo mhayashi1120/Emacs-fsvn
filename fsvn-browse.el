@@ -1743,7 +1743,7 @@ PATH is each executed path."
     (error "This point has no directory"))
   (let* ((info (fsvn-browse-subdir.info (fsvn-browse-subdir (fsvn-browse-current-path) fsvn-browse-repos-p)))
 	 (currev (fsvn-get-revision-string (fsvn-browse-current-revision)))
-	 (newrev (fsvn-completing-read-revision))
+	 (newrev (fsvn-completing-read-revision nil nil nil (fsvn-browse-current-path)))
 	 (urlrev (fsvn-url-urlrev (fsvn-xml-info->entry=>url$ info) newrev))
 	 (file (fsvn-current-filename)))
     (fsvn-browse-switch-directory-buffer urlrev (unless (string= currev newrev) 'revert))

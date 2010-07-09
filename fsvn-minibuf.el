@@ -126,22 +126,13 @@ The value of DEFAULT is not a number, allow to enter a nil value."
       (error "Accept arg must be selected"))
     ret))
 
-;; this implement cannot treat correctly `@' contains filename
-;; (defun fsvn-read-url-with-revision (&optional prompt)
-;;   (let* ((urlrev (fsvn-completing-read-urlrev prompt))
-;; 	 (url (fsvn-urlrev-url urlrev))
-;; 	 (rev (fsvn-completing-read-revision 
-;; 	       (format "%s %s Revision: " (or prompt "URL") url)
-;; 	       (fsvn-urlrev-revision urlrev))))
-;;     (fsvn-url-urlrev url rev)))
-
 (defun fsvn-read-url-with-revision (&optional prompt default-urlrev only-repository)
   (let* ((default-url (and default-urlrev (fsvn-urlrev-url default-urlrev)))
 	 (default-rev (and default-urlrev (fsvn-urlrev-revision default-urlrev)))
 	 (url (fsvn-completing-read-url prompt default-url only-repository))
 	 (rev (fsvn-completing-read-revision 
 	       (format "%s %s Revision: " (or prompt "URL") url)
-	       default-rev)))
+	       default-rev nil url)))
     (fsvn-url-urlrev url rev)))
 
 
@@ -212,6 +203,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 
 (defvar fsvn-completing-revision-map nil)
 (defvar fsvn-completing-word-class " \n\t")
+(defvar fsvn-completing-revision-urlrev nil)
 
 (unless fsvn-completing-revision-map
   (setq fsvn-completing-revision-map
@@ -222,12 +214,13 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 
 	  map)))
 
-(defun fsvn-completing-read-revision (&optional prompt initial default)
+(defun fsvn-completing-read-revision (&optional prompt initial default complete-url)
   "Read revision string from minibuffer.
 "
   (setq default (or default "HEAD"))
   (catch 'done
     (let ((value (when initial (fsvn-get-revision-string initial)))
+	  (fsvn-completing-revision-urlrev complete-url)
 	  completions)
       (while t
 	(setq value
@@ -254,6 +247,13 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (interactive)
   (let ((value (fsvn-completing-current-value)))
     (cond
+     ((and fsvn-completing-revision-urlrev 
+	   (string= "" value) 
+	   (eq last-command 'fsvn-completing-revision))
+      (let (urlrev)
+	(setq urlrev (fsvn-electric-select-log fsvn-completing-revision-urlrev))
+	(when urlrev
+	  (insert (fsvn-get-revision-string (fsvn-urlrev-revision urlrev))))))
      ((string-match "^[0-9]+$" value)
       ;; do nothing
       )
@@ -261,8 +261,9 @@ The value of DEFAULT is not a number, allow to enter a nil value."
       ;; do nothing
       )
      (t
-      (fsvn-completing-revision-symbol value))
-     )))
+      (fsvn-completing-revision-symbol value)))
+    (when (and fsvn-completing-revision-urlrev (string= (fsvn-completing-current-value) ""))
+      (fsvn-complete-reading-temp-message " [Type again]"))))
 
 (defcustom fsvn-completing-max-year 2099
   "*"
@@ -270,7 +271,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   :type 'integer)
 
 (defun fsvn-completing-revision-symbol (value)
-  (let ((comp (try-completion value fsvn-revision-string-list)))
+  (let ((comp (try-completion (upcase value) fsvn-revision-string-list)))
     (cond
      ((eq comp t))
      ((and (stringp comp) (> (length comp) 0))
