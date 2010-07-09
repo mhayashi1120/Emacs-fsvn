@@ -265,9 +265,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (fsvn-popup-start-process "checkout" args url dir))))
 
 (defun fsvn-start (repository &optional rev)
-  (interactive (list (fsvn-completing-read-url)
-		     (when current-prefix-arg
-		       (fsvn-completing-read-revision))))
+  (interactive (let ((url (fsvn-completing-read-url))
+		     rev)
+		 (when current-prefix-arg
+		   (setq rev (fsvn-completing-read-revision nil nil nil url)))
+		 (list url rev)))
   (fsvn-browse-switch-directory-buffer (fsvn-url-urlrev repository rev)))
 
 (defun fsvn-import (file url &optional args)
