@@ -1,3 +1,13 @@
+2010-07-09  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: popup to showing window
+
+2010-06-29  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Undo problems.
+	* Fix: Change keybind fsvn-process-list-toggle-show-all
+	      C-c C-h -> C-c C-t
+
 2010-06-25  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Support tree-conflict showing.

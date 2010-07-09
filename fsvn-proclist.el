@@ -79,7 +79,7 @@
 	  (define-key map "q" 'fsvn-process-list-quit)
 	  (define-key map "u" 'fsvn-process-list-unmark)
 	  (define-key map "x" 'fsvn-process-list-mark-execute)
-	  (define-key map "\C-c\C-h" 'fsvn-process-list-toggle-show-all)
+	  (define-key map "\C-c\C-t" 'fsvn-process-list-toggle-show-all)
 	  (define-key map "\C-c\C-c" 'fsvn-process-list-mark-execute)
 	  (define-key map "\C-c\C-k" 'fsvn-process-list-quit)
 	  (define-key map "\C-c\C-p" 'fsvn-process-list-send-password-selected)
@@ -107,6 +107,7 @@ Keybindings:
   (setq major-mode 'fsvn-process-list-mode)
   (setq mode-name "Fsvn Processes")
   (setq truncate-lines t)
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-process-list-buffer-local-variables)
   (fsvn-browse-setup-mode-line))
 
@@ -138,7 +139,6 @@ Keybindings:
 	(lambda (o)
 	  (move-overlay o (line-beginning-position) (overlay-end o)))
 	overlays)
-       (setq buffer-undo-list nil)
        (set-buffer-modified-p nil))))
 
 (defun fsvn-process-list-draw-list ()

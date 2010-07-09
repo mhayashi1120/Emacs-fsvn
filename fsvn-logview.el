@@ -103,8 +103,10 @@
 	  (define-key map "R" 'fsvn-log-list-reload-with-revision)
 	  (define-key map "S" 'fsvn-log-list-save-this)
 	  (define-key map "\C-c\C-k" 'fsvn-log-list-quit)
+	  (define-key map "\C-c\C-m" 'fsvn-log-list-open-revision)
 	  (define-key map "\C-c\C-o" 'fsvn-log-switch-to-message)
 	  (define-key map "\C-c\C-q" 'fsvn-log-list-quit)
+	  (define-key map "\C-c\C-r" 'fsvn-log-list-edit-revprop)
 	  (define-key map "\C-m" 'fsvn-log-list-show-details)
 	  (define-key map "\C-n" 'fsvn-log-list-next-line)
 	  (define-key map "\C-p" 'fsvn-log-list-previous-line)
@@ -120,12 +122,8 @@
 	  
 	  (define-key map "g" 'revert-buffer)
 
-	  (define-key map "\C-c\C-r" 'fsvn-log-list-edit-revprop)
-	  (define-key map "\C-c\C-m" 'fsvn-log-list-open-revision)
-
 	  ;;todo not implement
 	  ;; 	(define-key map "U" 'fsvn-log-list-mark-unmark-all)
-	  ;; 	(define-key map "z\C-r" 'fsvn-log-list-revert-to-revision)
 	  ;; 	(define-key map "z\C-p" 'fsvn-log-list-open-propview)
 
 	  map)))
@@ -151,6 +149,7 @@ Keybindings:
   (setq major-mode 'fsvn-log-list-mode)
   (setq mode-name "Fsvn Log View")
   (setq truncate-lines t)
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-log-list-buffer-local-variables))
 
 (defmacro fsvn-log-list-each-rev (entry &rest form)
@@ -582,6 +581,27 @@ Keybindings:
       (error "This line has no revision."))
     rev))
 
+(defun fsvn-log-list-cmd-urlrev ()
+  (let ((urlrev (fsvn-log-list-point-urlrev)))
+    (unless urlrev
+      (error "This line has no revision."))
+    urlrev))
+
+(defun fsvn-log-list-cmd-read-revert-to-revision ()
+  (let ((path fsvn-logview-target-urlrev)
+	(urlrev (fsvn-log-list-cmd-urlrev)))
+    (unless (fsvn-url-local-p path)
+      (error "This log has no local relation."))
+    (unless (y-or-n-p (format 
+		       "Revert `%s' to revision %s? " 
+		       (fsvn-file-name-nondirectory path)
+		       (fsvn-urlrev-revision urlrev)))
+      (error "quit"))
+    (list urlrev path)))
+  
+(defun fsvn-log-list-cmd-read-urlrev ()
+  (list (fsvn-log-list-cmd-urlrev)))
+
 (defun fsvn-log-list-cmd-read-revision ()
   (list (fsvn-log-list-cmd-revision)))
 
@@ -881,6 +901,7 @@ Keybindings:
   (setq major-mode 'fsvn-log-sibling-mode)
   (setq mode-name "Fsvn Log Sibling")
   (setq truncate-lines t)
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-log-sibling-buffer-local-variables))
 
 (defmacro fsvn-log-sibling-only-file (&rest form)
@@ -1131,6 +1152,7 @@ Keybindings:
   (setq major-mode 'fsvn-log-message-mode)
   (setq mode-name "Fsvn Log Message")
   (setq truncate-lines t)
+  (setq buffer-undo-list nil)
   (fsvn-make-buffer-variables fsvn-log-message-buffer-local-variables)
   (font-lock-mode 0))
 

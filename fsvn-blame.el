@@ -72,6 +72,7 @@ Keybindings:
   (use-local-map fsvn-blame-subwindow-mode-map)
   (setq major-mode 'fsvn-blame-subwindow-mode)
   (setq mode-name "Fsvn Blame Control")
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-blame-subwindow-buffer-local-variables)
   ;;FIXME too late fontify.
   (font-lock-fontify-buffer))
