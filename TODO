@@ -17,12 +17,6 @@
 
 ** file-select, message-edit can kill-buffer when commiting.
 
-** complete log revision with electric select
-
-svn://localhost/some 5000 some log message
-svn://localhost/some 5030 some log message
-svn://localhost/some 5050 some log message
-
 ** interactive-p -> called-interactively-p
 
 ** Bugreport

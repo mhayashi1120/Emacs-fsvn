@@ -272,11 +272,16 @@ This is what the do-commands look for, and what the mark-commands store.")
 (defvar fsvn-electric-line-alist nil)
 (defvar fsvn-electric-start-point nil)
 (defvar fsvn-electric-end-point nil)
+(defvar fsvn-electric-done-function nil)
+(defvar fsvn-electric-next-data-function nil)
+
 (defconst fsvn-electric-line-select-buffer-local-variables
   '(
     (fsvn-electric-line-alist)
     (fsvn-electric-start-point)
     (fsvn-electric-end-point)
+    (fsvn-electric-done-function)
+    (fsvn-electric-next-data-function)
     (truncate-lines)
     ))
 
@@ -306,12 +311,14 @@ Keybindings:
 		    (when (eq (setq unread-command-events (list (read-event))) ?\s)
 		      (setq unread-command-events nil)
 		      (throw 'fsvn-electric-buffer-menu-select nil))
-		    (let ((start-point (point))
-			  (first (or fsvn-electric-start-point (point-min)))
-			  (last (or fsvn-electric-end-point 
-				    (progn 
-				      (goto-char (1- (point-max))) 
-				      (line-beginning-position )))))
+		    (let* ((start-point (point))
+			   (first-form '(or fsvn-electric-start-point (point-min)))
+			   (last-form '(or fsvn-electric-end-point 
+					   (progn 
+					     (goto-char (1- (point-max))) 
+					     (line-beginning-position))))
+			   (first (eval first-form))
+			   (last (eval last-form)))
 		      ;; Use start-point if it is meaningful.
 		      (goto-char (if (or (< start-point first)
 					 (> start-point last))
@@ -321,7 +328,7 @@ Keybindings:
 					     nil
 					     t
 					     'fsvn-electric-line-select-buffer-menu-looper
-					     (cons first last))))))
+					     (cons first-form last-form))))))
 	(message "")))
     select))
 
@@ -332,9 +339,9 @@ Keybindings:
 				      end-of-buffer
 				      beginning-of-buffer))))
     (signal (car condition) (cdr condition)))
-   ((< (point) (car state))
+   ((< (point) (save-excursion (eval (car state))))
     (goto-char (point-min)))
-   ((> (point) (cdr state))
+   ((> (point) (save-excursion (eval (cdr state))))
     (goto-char (point-max))
     (forward-line -1)
     (if (pos-visible-in-window-p (point-max))
@@ -353,17 +360,23 @@ Keybindings:
 		  (line-end-position))
     (overlay-put fsvn-electric-line-select-buffer-overlay 'face 'highlight)))
 
+(defun fsvn-electric-call-next-data ()
+  (condition-case err
+      (progn
+	(message "Geting Next...")
+	(funcall fsvn-electric-next-data-function))
+    (error
+     (setq fsvn-electric-scroll-terminate t)
+     (setq fsvn-electric-next-data-function nil)
+     (ding))))
+
 (defun fsvn-electric-line-select-quit ()
   (interactive)
   (throw 'fsvn-electric-buffer-menu-select nil))
 
 (defun fsvn-electric-line-select-select ()
   (interactive)
-  (let (p1 p2 filename)
-    (setq p1 (dired-move-to-filename))
-    (setq p2 (dired-move-to-end-of-filename))
-    (setq filename (buffer-substring-no-properties p1 p2))
-  (throw 'fsvn-electric-buffer-menu-select (expand-file-name filename))))
+  (throw 'fsvn-electric-buffer-menu-select (funcall fsvn-electric-done-function)))
 
 (defmacro fsvn-electric-scroll (scroller error next-pos)
   `(condition-case nil
@@ -374,7 +387,8 @@ Keybindings:
       (if (and fsvn-electric-scroll-terminate
 	       (not (pos-visible-in-window-p ,next-pos)))
 	  (goto-char ,next-pos)
-	(ding))
+	(unless fsvn-electric-next-data-function
+	  (ding)))
       (setq fsvn-electric-scroll-terminate t))))
 
 (defun fsvn-electric-scroll-down ()
@@ -383,7 +397,10 @@ Keybindings:
 
 (defun fsvn-electric-scroll-up ()
   (interactive)
-  (fsvn-electric-scroll (scroll-up) end-of-buffer (point-min)))
+  (fsvn-electric-scroll (scroll-up) end-of-buffer (point-min))
+  (when (and fsvn-electric-scroll-terminate fsvn-electric-next-data-function)
+    (setq fsvn-electric-scroll-terminate nil)
+    (fsvn-electric-call-next-data)))
 
 (defun fsvn-electric-previous-line (&optional arg)
   (interactive "p")
@@ -391,7 +408,9 @@ Keybindings:
 
 (defun fsvn-electric-next-line (&optional arg)
   (interactive "p")
-  (forward-line arg))
+  (forward-line arg)
+  (when (and (= (point-max) (point)) fsvn-electric-next-data-function)
+    (fsvn-electric-call-next-data)))
 
 
 
@@ -409,6 +428,7 @@ Keybindings:
 	(erase-buffer)
 	(fsvn-electric-line-select-mode 1)
 	(setq default-directory (file-name-as-directory base-directory))
+	(setq fsvn-electric-done-function 'fsvn-electric-select-file-done)
 	(mapc
 	 (lambda (file)
 	   (insert "  ")
@@ -419,6 +439,67 @@ Keybindings:
       (font-lock-fontify-buffer)
       (run-mode-hooks 'fsvn-electric-line-select-mode-hook))
     (fsvn-electric-line-select buffer)))
+
+(defun fsvn-electric-select-file-done ()
+  (let (p1 p2 filename)
+    (setq p1 (dired-move-to-filename))
+    (setq p2 (dired-move-to-end-of-filename))
+    (setq filename (buffer-substring-no-properties p1 p2))
+    (fsvn-expand-file filename)))
+
+
+
+(defconst fsvn-electric-log-list-buffer-name " *Fsvn Electric Log* ")
+
+(defun fsvn-electric-select-log (urlrev)
+  (let* ((buffer (get-buffer-create fsvn-electric-log-list-buffer-name))
+	 info root entries)
+    (message "Getting info...")
+    (setq info (fsvn-get-info-entry urlrev))
+    (setq root (fsvn-xml-info->entry=>repository=>root$ info))
+    (message "Getting log from repository...")
+    (setq entries (fsvn-log-list-cmd urlrev root nil nil))
+    (with-current-buffer buffer
+      (set (make-local-variable 'font-lock-defaults)
+	   '(fsvn-log-list-font-lock-keywords t nil nil beginning-of-line))
+      (let (buffer-read-only)
+	(fsvn-log-list-mode)
+	(erase-buffer)
+	(mapc
+	 (lambda (entry)
+	   (fsvn-log-list-insert-entry entry))
+	 entries)
+	(setq fsvn-logview-target-urlrev urlrev)
+	(setq fsvn-buffer-repos-root root)
+	(setq fsvn-log-list-all-entries entries)
+	(setq fsvn-log-list-entries entries)
+	(setq fsvn-log-list-target-path 
+	      (fsvn-repository-path root (fsvn-xml-info->entry=>url$ info)))
+	(fsvn-electric-line-select-mode 1)
+	(setq fsvn-electric-next-data-function 'fsvn-electric-select-log-next-data)
+	(setq fsvn-electric-done-function 'fsvn-electric-select-log-done)
+	(font-lock-mode 1)
+	(font-lock-fontify-buffer)))
+    (fsvn-electric-line-select buffer)))
+
+(defun fsvn-electric-select-log-done ()
+  (fsvn-log-list-point-urlrev))
+
+(defun fsvn-electric-select-log-next-data ()
+  (save-excursion
+    (let* ((range (fsvn-log-list-current-revision-range))
+	   (new-range (cons (1- (cdr range)) 0))
+	   (prev-entries fsvn-log-list-all-entries)
+	   buffer-read-only entries)
+      (setq entries (fsvn-log-list-cmd fsvn-logview-target-urlrev fsvn-buffer-repos-root new-range nil))
+      (setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))
+      (setq fsvn-log-list-entries fsvn-log-list-all-entries)
+      (goto-char (point-max))
+      (mapc
+       (lambda (entry)
+	 (fsvn-log-list-insert-entry entry))
+       entries)
+      (font-lock-fontify-buffer))))
 
 
 

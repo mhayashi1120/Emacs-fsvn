@@ -1,5 +1,7 @@
 2010-07-09  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Fix: Wrong fontified in fsvn-log-list-mode
+
 	* Fix: popup to showing window
 
 2010-06-29  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
