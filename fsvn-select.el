@@ -128,6 +128,7 @@ Keybindings:
   (setq major-mode 'fsvn-select-file-mode)
   (setq mode-name "Fsvn File Select")
   (setq truncate-lines t)
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-select-file-buffer-local-variables)
   (font-lock-mode 1)
   (font-lock-fontify-buffer))
@@ -214,8 +215,7 @@ Keybindings:
       (let ((inhibit-read-only t))
 	(delete-char 1)
 	(insert (if mark fsvn-mark-mark-char fsvn-space-char))
-	(set-buffer-modified-p nil)
-	(setq buffer-undo-list nil)))))
+	(set-buffer-modified-p nil)))))
 
 (defun fsvn-select-file-point-put-mark (mark)
   (let ((filename (fsvn-current-filename)))
@@ -350,8 +350,7 @@ Keybindings:
     (when (and (file-directory-p filename)
 	       (eq status1 ??))
       (fsvn-select-file-draw-unversioned-directory-files entry))
-    (set-buffer-modified-p nil)
-    (setq buffer-undo-list nil)))
+    (set-buffer-modified-p nil)))
 
 (defun fsvn-select-file-draw-unversioned-directory-files (entry)
   (let* ((dirname (fsvn-xml-status->target->entry.path entry))

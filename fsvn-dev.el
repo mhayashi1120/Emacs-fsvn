@@ -327,6 +327,19 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 
 
 
+(add-hook 'fsvn-log-list-mode-hook
+	  (lambda ()
+	    (define-key fsvn-log-list-mode-map "\C-c\C-t" 'fsvn-log-list-revert-to-revision)))
+
+(defun fsvn-log-list-revert-to-revision (urlrev local-file)
+  (interactive (fsvn-log-list-cmd-read-revert-to-revision))
+  (fsvn-async-let ((urlrev urlrev)
+		   (local-file local-file))
+    (fsvn-popup-start-process "delete" (list local-file))
+    (fsvn-popup-start-copy/move-process "copy" (list urlrev) local-file)))
+
+
+
 ;; testing
 
 (defconst fsvn-xml-accessor-prefix "fsvn-xml-")
@@ -378,6 +391,32 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 	     (setq max seq)))))
      multi-nodes)
     max))
+
+
+
+(defun fsvn-browse-cmd-read-copy-this-properties ()
+  (fsvn-browse-cmd-wc-only
+   (let ((src-file)
+	 (dest-file (fsvn-browse-point-local-filename))
+	 (arg current-prefix-arg))
+     (unless dest-file
+       (error "No file on this line"))
+     (setq src-file (fsvn-read-file-name "Properties copy from: " nil nil t))
+     (list src-file dest-file arg))))
+
+;;TODO full
+(defun fsvn-browse-copy-this-properties (src-file dest-file &optional full)
+  "Copy SRC-FILE properties to DEST-FILE.
+FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
+  (interactive (fsvn-browse-cmd-read-copy-this-properties))
+  (let ((alist (fsvn-get-prop-value-alist src-file)))
+    (mapc
+     (lambda (key-value)
+       (let ((prop (car key-value))
+	     (val (cdr key-value)))
+	 (fsvn-set-prop-value dest-file prop val)))
+     alist)
+    (fsvn-browse-redraw-wc-file-entry dest-file)))
 
 
 

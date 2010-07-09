@@ -506,7 +506,6 @@ Argument FILES ."
 		(when (fsvn-browse-goto-file file)
 		  (fsvn-browse-draw-dir-status-this-line status))))
 	    dirs-status)
-	   (setq buffer-undo-list nil)
 	   (set-buffer-modified-p nil)))))
    status-alist))
 

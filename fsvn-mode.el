@@ -367,7 +367,6 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (defun fsvn-global-initialize-mode ()
   (kill-all-local-variables)
-  (setq buffer-undo-list nil)
   (set-buffer-modified-p nil))
 
 (defun fsvn-set-default-directory (dir)

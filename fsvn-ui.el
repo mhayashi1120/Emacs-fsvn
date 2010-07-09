@@ -193,11 +193,24 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 
 (defun fsvn-buffer-popup-as-information (buffer)
-  (delete-other-windows)
-  (let ((win (split-window)))
+  (let ((win (fsvn-buffer-popup-window)))
+    (unless win
+      (delete-other-windows)
+      (setq win (split-window)))
     (set-window-buffer win buffer)
     (fsvn-save-window-only win
       (goto-char (point-min)))))
+
+(defun fsvn-buffer-popup-window ()
+  (save-window-excursion
+    (catch 'found
+      (mapc
+       (lambda (w)
+	 (select-window w)
+	 (when (eq major-mode 'fsvn-popup-result-mode)
+	   (throw 'found w)))
+       (window-list))
+      nil)))
 
 
 

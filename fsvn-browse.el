@@ -313,6 +313,7 @@ Keybindings:
   (setq major-mode 'fsvn-browse-mode)
   (setq mode-name "Fsvn Browse")
   (setq truncate-lines t)
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-browse-buffer-local-variables)
   (fsvn-browse-setup-mode-line)
   (font-lock-mode 1)
@@ -757,7 +758,6 @@ PATH is each executed path."
 (defun fsvn-browse-put-dir-status-current (&optional mark)
   (let (buffer-read-only)
     (fsvn-browse-draw-dir-status-this-line mark)
-    (setq buffer-undo-list nil)
     (set-buffer-modified-p nil)))
 
 (defun fsvn-browse-get-dir-status-current ()
@@ -813,7 +813,6 @@ PATH is each executed path."
       (save-excursion
 	(delete-char 1)
 	(insert mark)
-	(setq buffer-undo-list nil)
 	(set-buffer-modified-p nil)))))
 
 (defun fsvn-browse-get-status-internal (file column)
@@ -847,7 +846,6 @@ PATH is each executed path."
 	(setq author (fsvn-browse-status-author-column status-entry)))
       (setq status (or status (make-string fsvn-svn-status-length ?.)))
       (fsvn-browse-draw-status-string-this-line status author)
-      (setq buffer-undo-list nil)
       (set-buffer-modified-p nil))))
 
 (defun fsvn-browse-draw-attr-this-line ()
@@ -864,7 +862,6 @@ PATH is each executed path."
     (fsvn-browse-file-size-text size)
     (insert (fsvn-browse-file-size-text size) " "
 	    (format-time-string fsvn-generic-datetime-format time))
-    (setq buffer-undo-list nil)
     (set-buffer-modified-p nil)))
 
 (defun fsvn-browse-draw-author-this-line (user-string)

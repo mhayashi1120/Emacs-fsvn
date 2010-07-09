@@ -106,6 +106,7 @@ Keybindings:
   (setq major-mode 'fsvn-proplist-mode)
   (setq mode-name "Fsvn Property List")
   (setq truncate-lines t)
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-proplist-buffer-local-variables)
   (font-lock-mode 1)
   (font-lock-fontify-buffer))
@@ -455,6 +456,7 @@ Keybindings:
   (setq major-mode 'fsvn-propedit-mode)
   (setq mode-name '("Fsvn Property Edit" (:eval fsvn-propedit-recursive-save)))
   (setq truncate-lines t)
+  (setq buffer-undo-list nil)
   (fsvn-make-buffer-variables fsvn-propedit-buffer-local-variables))
 
 (defun fsvn-propedit-prepared-buffer ()

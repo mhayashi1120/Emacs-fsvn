@@ -68,6 +68,7 @@ Keybindings:
   (use-local-map fsvn-popup-result-mode-map)
   (setq major-mode 'fsvn-popup-result-mode)
   (setq mode-name "Fsvn Result")
+  (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-popup-result-buffer-local-variables)
   (fsvn-popup-result-setup-mode-line))
 
