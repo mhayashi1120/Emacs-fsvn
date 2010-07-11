@@ -29,6 +29,8 @@ consider `font-lock-fontify' call or not
 
 ** tool-bar
 
+** create README file for github
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
