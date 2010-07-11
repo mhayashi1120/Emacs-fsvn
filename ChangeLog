@@ -4,6 +4,10 @@
 
 	* Fix: Complete revision ignore-case.
 
+	* Add: Merged import.
+
+	* Add: fsvn-browse-paste-properties-to-this
+
 2010-07-09  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Wrong fontified in fsvn-log-list-mode

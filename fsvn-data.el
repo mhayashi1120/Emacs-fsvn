@@ -375,6 +375,7 @@ This implements consider svn:ignored directory."
       curr)))
 
 (defun fsvn-find-most-top-buffer-directory (directory)
+  (defvar fsvn-browse-subdir-alist)
   (let ((top directory))
     (fsvn-each-browse-buffer
      (mapc
@@ -385,6 +386,8 @@ This implements consider svn:ignored directory."
     top))
 
 (defun fsvn-gather-root ()
+  (defvar fsvn-browse-subdir-alist)
+  (defvar fsvn-repository-alist)
   (let (ret)
     (setq ret (mapcar (lambda (x) (fsvn-url-as-directory (car x))) fsvn-repository-alist))
     (fsvn-each-browse-buffer

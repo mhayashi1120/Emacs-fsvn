@@ -19,247 +19,6 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
   (interactive)
   )
 
-(defun fsvn-browse-cmd-read-upgrade-source-tree-args ()
-  (fsvn-browse-cmd-wc-only
-   (let ((dir (fsvn-read-directory-name "New Source: " nil nil t)))
-     (unless (y-or-n-p "This takes many seconds. ok? ")
-       (error "quit"))
-     (list dir))))
-
-(defun fsvn-browse-upgrade-source-tree (new-source)
-  (interactive (fsvn-browse-cmd-read-upgrade-source-tree-args))
-  (fsvn-browse-wc-only
-   (let ((wcpath (fsvn-browse-current-directory)))
-     (fsvn-call-command-discard "update" wcpath)
-     (fsvn-browse-upgrade-source-tree-internal wcpath new-source))))
-
-(defun fsvn-browse-upgrade-source-tree-internal (wcpath new-source-path)
-  (let* ((old-entries (fsvn-get-ls wcpath))
-	 (new-files (fsvn-browse-directory-files new-source-path))
-	 (old-files (mapcar 'fsvn-xml-lists->list->entry=>name$ old-entries))
-	 message-log-max)
-    (mapc
-     (lambda (new-file)
-       (let ((nf (fsvn-expand-file new-file new-source-path))
-	     (of (fsvn-expand-file new-file wcpath))
-	     (oldfile (car (fsvn-file-member new-file old-files))))
-	 (when (and oldfile (not (file-exists-p of)))
-	   (error "Old file missing"))
-	 (message "Copying %s" new-file)
-	 (cond
-	  ((not (fsvn-file-exact-directory-p nf))
-	   (copy-file nf of t t))
-	  (oldfile
-	   (fsvn-browse-upgrade-source-tree-internal of nf))
-	  (t
-	   (fsvn-copy-directory nf of t)))
-	 (unless oldfile
-	   (fsvn-call-command-discard "add" of))
-	 ;;TODO internal fsvn-copy-directory and new-source-path
-	 ;; (when (fsvn-directory-under-versioned-p new-source-path)
-	 ;; 	   (fsvn-duplicate-all-properties nf of))
-	 ))
-     new-files)
-    (mapc
-     (lambda (old-file)
-       (unless (fsvn-file-member old-file new-files)
-	 (let ((of (fsvn-expand-file old-file wcpath)))
-	   (fsvn-call-command-discard "delete" of))
-	 (message "Deleting %s" old-file)))
-     old-files)
-    t))
-
-
-
-(defcustom fsvn-import-with-log-message-format
-  "%m
-
-Imported from %u at %r"
-
-  "*Format string for commited messages.
-%u is the url that imported from (Non user and password).
-%r is the revision number of imported url.
-%m is the original log message."
-  :group 'fsvn
-  :type 'string)
-
-(defun fsvn-import-with-log-formatted-message (url log-entry)
-  (let ((msg (or (fsvn-xml-log->logentry=>msg$ log-entry) ""))
-	(rev (fsvn-get-revision-string (fsvn-xml-log->logentry.revision log-entry))))
-    (fsvn-text-format fsvn-import-with-log-message-format
-		      `(("u" . ,(fsvn-url-remove-authority url))
-			("r" . ,rev)
-			("m" . ,msg)))))
-
-(defun fsvn-overwrite-import-with-log (src-url rev-range dest-url)
-  "Overwrite DEST-URL by SRC-URL completely ignore conflict.
-REV-RANGE cons cell like (from . to)
-"
-  (let* ((src-info (fsvn-get-info-entry src-url))
-	 (src-path (fsvn-info-repos-path src-info))
-	 (src-root (fsvn-xml-info->entry=>repository=>root$ src-info))
-	 (src-directoryp (eq (fsvn-xml-info->entry.kind src-info) 'dir))
-	 (popup-buffer (fsvn-popup-result-create-buffer))
-	 log-entries dest-wc export-file buffer)
-    (message "Getting log...")
-    (setq log-entries (fsvn-get-file-logs src-url rev-range))
-    (message "Creating temporary working copy...")
-    (if src-directoryp
-	(setq dest-wc (fsvn-get-temporary-wc dest-url))
-      (setq dest-wc (fsvn-get-temporary-wc (fsvn-url-dirname dest-url)))
-      (setq export-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc)))
-    (fsvn-buffer-popup-as-information popup-buffer)
-    (setq buffer (fsvn-browse-wc-noselect dest-wc))
-    (with-current-buffer buffer
-      (mapc
-       (lambda (entry)
-	 (when src-directoryp
-	   ;; Export to temporary directory that has directory hierarchy completedly
-	   (setq export-file (fsvn-make-temp-directory)))
-	 (let* ((rev (fsvn-xml-log->logentry.revision entry))
-		(path (fsvn-logs-chain-find log-entries rev src-path))
-		(url (fsvn-expand-url path src-root))
-		(urlrev (fsvn-url-urlrev url rev))
-		(log-message (fsvn-import-with-log-formatted-message url entry))
-		message)
-	   (unless (string= log-message "")
-	     (setq message (fsvn-make-temp-file))
-	     (let ((coding-system-for-write fsvn-message-edit-file-encoding))
-	       (write-region log-message nil message nil 'no-msg)))
-	   (message "Exporting %s at %d..." url rev)
-	   (fsvn-call-command-discard "export" urlrev "--force" export-file)
-	   (when src-directoryp
-	     (fsvn-browse-upgrade-source-tree export-file))
-	   (fsvn-call-command-display "commit" popup-buffer
-				      (if message 
-					  (list "--file" message)
-					(list "--message" "")))))
-       log-entries))
-    (kill-buffer buffer)))
-
-(defun fsvn-merged-import-with-log (src-url rev-range dest-url)
-  "Merge SRC-URL to DEST-URL.
-REV-RANGE cons cell like (from . to)
-
-Intent to mirror SRC-URL and DEST-URL with commit log (Only log message).
-If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-import-with-log'
-"
-  (let* ((src-info (fsvn-get-info-entry src-url))
-	 (src-path (fsvn-info-repos-path src-info))
-	 (src-root (fsvn-xml-info->entry=>repository=>root$ src-info))
-	 (src-directoryp (eq (fsvn-xml-info->entry.kind src-info) 'dir))
-	 (popup-buffer (fsvn-popup-result-create-buffer))
-	 log-entries dest-wc merging-file buffer conflict-urlrev)
-    (message "Getting log...")
-    (setq log-entries (fsvn-get-file-logs src-url rev-range))
-    (message "Creating temporary working copy...")
-    (if src-directoryp
-	(progn
-	  (setq dest-wc (fsvn-get-temporary-wc dest-url t))
-	  (setq merging-file dest-wc))
-      (setq dest-wc (fsvn-get-temporary-wc (fsvn-url-dirname dest-url)))
-      (setq merging-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc)))
-    (setq buffer (fsvn-browse-wc-noselect dest-wc))
-    (fsvn-buffer-popup-as-information popup-buffer)
-    (catch 'conflicted
-      (unwind-protect
-	  (progn
-	    (set-buffer buffer)
-	    (mapc
-	     (lambda (entry)
-	       (let* ((rev (fsvn-xml-log->logentry.revision entry))
-		      (path (fsvn-logs-chain-find log-entries rev src-path))
-		      (url (fsvn-expand-url path src-root))
-		      (urlrev (fsvn-url-urlrev url rev))
-		      (log-message (fsvn-import-with-log-formatted-message url entry))
-		      message status-entries add-files)
-		 (unless (string= log-message "")
-		   (setq message (fsvn-make-temp-file))
-		   (let ((coding-system-for-write fsvn-message-edit-file-encoding))
-		     (write-region log-message nil message nil 'no-msg)))
-		 (message "Merging %s at %d..." url rev)
-		 (cond
-		  (src-directoryp
-		   (setq add-files (fsvn-merged-import-export-non-tree-files src-root src-url entry))
-		   (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "-c" rev urlrev merging-file))
-		  ((file-exists-p merging-file)
-		   (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "-c" rev urlrev merging-file))
-		  (t
-		   (fsvn-call-command-discard "export" "--force" urlrev merging-file)
-		   (fsvn-call-command-display "add" popup-buffer merging-file)))
-		 (when (fsvn-status-conflict-exists-p merging-file)
-		   (setq conflict-urlrev urlrev)
-		   (throw 'conflicted t))
-		 (mapc
-		  (lambda (file)
-		    (fsvn-call-command-display "add" popup-buffer file))
-		  add-files)
-		 (fsvn-call-command-display "commit" 
-					    popup-buffer
-					    (if message 
-						(list "--file" message)
-					      (list "--message" "")))
-		 (fsvn-call-command-discard "update")))
-	     log-entries))
-	(if conflict-urlrev
-	    (progn
-	      (switch-to-buffer buffer)
-	      (error "Conflicted when merging %s. Resolve commit it" conflict-urlrev))
-	  (kill-buffer buffer))))))
-
-(defun fsvn-merged-import-export-non-tree-files (src-root src-url entry)
-  (let ((rev (fsvn-xml-log->logentry.revision entry))
-	add-files)
-    (mapc
-     (lambda (path-entry)
-       (let* ((path (fsvn-xml-log->logentry->paths->path$ path-entry))
-	      (url (fsvn-expand-url path src-root))
-	      (urlrev (fsvn-url-urlrev url rev))
-	      relative-name file)
-	 (when (fsvn-url-descendant-p src-url url)
-	   (setq relative-name (fsvn-url-relative-name src-url url))
-	   (setq file (fsvn-expand-file relative-name))
-	   (unless (file-exists-p file)
-	     (unless (file-directory-p (file-name-directory file))
-	       (make-directory (file-name-directory file) t))
-	     (fsvn-call-command-discard "export" urlrev file)
-	     ;; not commited file exists `merge' simply ignore the file.
-	     ;; if add this point, sometime `merge' failed.
-	     (setq add-files (cons file add-files))))))
-     (fsvn-xml-log->logentry->paths entry))
-    add-files))
-
-(defun fsvn-status-modified-exists-p (file)
-  (let (status-entries)
-    (setq status-entries
-	  (if (fsvn-file-exact-directory-p file)
-	      (fsvn-get-directory-status file)
-	    (list (fsvn-get-file-status file))))
-    (catch 'modified
-      (mapc
-       (lambda (entry)
-	 (when (or (memq (fsvn-xml-status->target->entry=>wc-status.item entry) '(modified added))
-		   (memq (fsvn-xml-status->target->entry=>wc-status.props entry) '(added)))
-	   (throw 'modified t)))
-       status-entries)
-      nil)))
-
-(defun fsvn-status-conflict-exists-p (file)
-  (let (status-entries)
-    (setq status-entries
-	  (if (fsvn-file-exact-directory-p file)
-	      (fsvn-get-directory-status file)
-	    (list (fsvn-get-file-status file))))
-    (catch 'conflicted
-      (mapc
-       (lambda (entry)
-	 (when (or (eq (fsvn-xml-status->target->entry=>wc-status.tree-conflicted entry) t)
-		   (eq (fsvn-xml-status->target->entry=>wc-status.item entry) 'conflicted)
-		   (eq (fsvn-xml-status->target->entry=>wc-status.props entry) 'conflicted))
-	   (throw 'conflicted t)))
-       status-entries)
-      nil)))
-
 
 
 (defcustom fsvn-browse-guessed-moved-parent-threshold 4
@@ -394,32 +153,6 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 
 
 
-(defun fsvn-browse-cmd-read-copy-this-properties ()
-  (fsvn-browse-cmd-wc-only
-   (let ((src-file)
-	 (dest-file (fsvn-browse-point-local-filename))
-	 (arg current-prefix-arg))
-     (unless dest-file
-       (error "No file on this line"))
-     (setq src-file (fsvn-read-file-name "Properties copy from: " nil nil t))
-     (list src-file dest-file arg))))
-
-;;TODO full
-(defun fsvn-browse-copy-this-properties (src-file dest-file &optional full)
-  "Copy SRC-FILE properties to DEST-FILE.
-FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
-  (interactive (fsvn-browse-cmd-read-copy-this-properties))
-  (let ((alist (fsvn-get-prop-value-alist src-file)))
-    (mapc
-     (lambda (key-value)
-       (let ((prop (car key-value))
-	     (val (cdr key-value)))
-	 (fsvn-set-prop-value dest-file prop val)))
-     alist)
-    (fsvn-browse-redraw-wc-file-entry dest-file)))
-
-
-
 (defvar fsvn-bugreport-mail-address "mhayashi1120@gmail.com")
 
 ;;TODO
@@ -480,6 +213,7 @@ How to send a bug report:
      ["Update"     fsvn-browse-update-path       t]
      ["Switch"     fsvn-browse-switch-path       t]
      ["Cleanup"     fsvn-browse-cleanup-path       t]
+     ["Upgrade source tree"           fsvn-browse-upgrade-source-tree t]
      )
     ("Repository Browser"
      ["Magic"      fsvn-browse-magic-head            t]
@@ -521,7 +255,8 @@ How to send a bug report:
      ["Copy in repository" fsvn-browse-copy-this-in-repository t]
      ["Safe Copy" fsvn-browse-safe-copy-this t]
      ["Safe Move" fsvn-browse-safe-move-this t]
-     ["TODO" fsvn-browse-rename-case-missing-file t]
+     ["Fix Filename Case" fsvn-browse-rename-case-missing-file t]
+     ["Paste properties" fsvn-browse-paste-properties-to-this t]
      )
     "----"
     ("Emmulate Dired"

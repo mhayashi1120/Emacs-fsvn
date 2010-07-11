@@ -43,6 +43,16 @@ fsvn-browse.*move-in-repository
 
 ** in repository C-x C-f or something bound to open by url function
 
+** fsvn-browse-svn:externals-selected
+
+from other repository
+
+** rename multiple file that have same filename
+
+SomeFile.Designer.cs -> AnyFile.Designer.cs
+SomeFile.cs          -> AnyFile.cs
+
+
 * select-file-mode
 ** symbolic link
 

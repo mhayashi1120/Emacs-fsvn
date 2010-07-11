@@ -600,13 +600,18 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 (defun fsvn-complete-reading-temp-message (m)
   "Show temporary message in minibuffer.
 referenced mew-complete.el"
-  (let ((savemax (point-max)))
+  (let ((wait-msec (max (* (length m) 0.05) 0.5))
+	(savemodified (buffer-modified-p))
+	savepoint savemax)
     (save-excursion
-      (goto-char (point-max))
-      (insert m))
+      (setq savepoint (point))
+      (insert m)
+      (set-buffer-modified-p savemodified)
+      (setq savemax (point)))
     (let ((inhibit-quit t))
-      (sit-for 0.5)
-      (delete-region savemax (point-max))
+      (sit-for wait-msec)
+      (delete-region savepoint savemax)
+      (set-buffer-modified-p savemodified)
       (when quit-flag
 	(setq quit-flag nil)
 	(setq unread-command-events (list 7))))))

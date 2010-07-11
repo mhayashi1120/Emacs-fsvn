@@ -466,7 +466,7 @@ Keybindings:
     ;; todo found is path. currently this is works
     (fsvn-url-urlrev (fsvn-expand-url (fsvn-urlrev-url found) root) rev)))
 
-(defun fsvn-log-list-buffer-url ()
+(defun fsvn-log-list-repository-url ()
   (fsvn-expand-url fsvn-log-list-target-path fsvn-buffer-repos-root))
 
 (defun fsvn-log-list-point-urlrev ()
@@ -623,6 +623,16 @@ Keybindings:
   (let* ((range (fsvn-log-list-current-revision-range))
 	 (new-range (fsvn-completing-read-revision-range range)))
     (list new-range)))
+
+(defun fsvn-log-list-cmd-read-merged-import ()
+  (let ((url (fsvn-completing-read-url "URL import from: " nil t))
+	from to)
+    (fsvn-brief-message-showing 
+     (fsvn-brief-message-add-message (format "URL: %s" url))
+     (setq from (fsvn-completing-read-revision "Revision from: " nil nil url))
+     (fsvn-brief-message-add-message (format "Revision from: %s" (fsvn-get-revision-string from)))
+     (setq to (fsvn-completing-read-revision "Revision to: " nil nil url))
+     (list url (cons from to)))))
 
 ;; * fsvn-log-list-mode interactive command
 
@@ -821,6 +831,13 @@ Otherwise diff at point revision with working copy file or directory.
   (let ((urlrev (fsvn-log-list-point-urlrev)))
     (kill-new urlrev)
     (message urlrev)))
+
+(defun fsvn-log-list-merged-import (src-url revision-range)
+  "Merged import SRC-URL to current repository with REVISION-RANGE."
+  (interactive (fsvn-log-list-cmd-read-merged-import))
+  (let ((dest-url (fsvn-log-list-repository-url)))
+    (fsvn-merged-import-with-log src-url revision-range dest-url)))
+
 
 
 (defconst fsvn-log-sibling-buffer-name "*Fsvn Sibling*")
@@ -1233,6 +1250,62 @@ Keybindings:
 (defun fsvn-log-switch-to-message ()
   (interactive)
   (fsvn-switch-buffer-window (get-buffer fsvn-log-message-buffer-name) t))
+
+
+
+(defconst fsvn-electric-log-list-buffer-name " *Fsvn Electric Log* ")
+
+(defun fsvn-electric-select-log (urlrev)
+  (let* ((buffer (get-buffer-create fsvn-electric-log-list-buffer-name))
+	 info root entries)
+    (message "Getting info...")
+    (setq info (fsvn-get-info-entry urlrev))
+    (setq root (fsvn-xml-info->entry=>repository=>root$ info))
+    (message "Getting log from repository...")
+    (setq entries (fsvn-log-list-cmd urlrev root nil nil))
+    (with-current-buffer buffer
+      (set (make-local-variable 'font-lock-defaults)
+	   '(fsvn-log-list-font-lock-keywords t nil nil beginning-of-line))
+      (let (buffer-read-only)
+	(fsvn-log-list-mode)
+	(erase-buffer)
+	(mapc
+	 (lambda (entry)
+	   (fsvn-log-list-insert-entry entry))
+	 entries)
+	(setq fsvn-logview-target-urlrev urlrev)
+	(setq fsvn-buffer-repos-root root)
+	(setq fsvn-log-list-all-entries entries)
+	(setq fsvn-log-list-entries entries)
+	(setq fsvn-log-list-target-path 
+	      (fsvn-repository-path root (fsvn-xml-info->entry=>url$ info)))
+	(fsvn-electric-line-select-mode 1)
+	(setq fsvn-electric-next-data-function 'fsvn-electric-select-log-next-data)
+	(setq fsvn-electric-done-function 'fsvn-electric-select-log-done)
+	(font-lock-mode 1)
+	(font-lock-fontify-buffer)))
+    (fsvn-electric-line-select buffer)))
+
+(defun fsvn-electric-select-log-done ()
+  (fsvn-log-list-point-urlrev))
+
+(defun fsvn-electric-select-log-next-data ()
+  (save-excursion
+    (let* ((range (fsvn-log-list-current-revision-range))
+	   (new-range (cons (1- (cdr range)) 0))
+	   (prev-entries fsvn-log-list-all-entries)
+	   buffer-read-only entries)
+      (setq entries (fsvn-log-list-cmd fsvn-logview-target-urlrev fsvn-buffer-repos-root new-range nil))
+      (setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))
+      (setq fsvn-log-list-entries fsvn-log-list-all-entries)
+      (goto-char (point-max))
+      (mapc
+       (lambda (entry)
+	 (fsvn-log-list-insert-entry entry))
+       entries)
+      (font-lock-fontify-buffer))))
+
+
 
 (put 'fsvn-log-list-each-rev 'lisp-indent-function 1)
 

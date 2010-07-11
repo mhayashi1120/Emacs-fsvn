@@ -1174,6 +1174,38 @@ PATH is each executed path."
 	     (fsvn-browse-goto-file file))
 	(goto-char opoint))))
 
+(defun fsvn-browse-upgrade-source-tree-internal (wcpath new-source-path)
+  (let* ((old-entries (fsvn-get-ls wcpath))
+	 (new-files (fsvn-browse-directory-files new-source-path))
+	 (old-files (mapcar 'fsvn-xml-lists->list->entry=>name$ old-entries))
+	 message-log-max)
+    (mapc
+     (lambda (new-file)
+       (let ((nf (fsvn-expand-file new-file new-source-path))
+	     (of (fsvn-expand-file new-file wcpath))
+	     (oldfile (car (fsvn-file-member new-file old-files))))
+	 (when (and oldfile (not (file-exists-p of)))
+	   (error "Old file missing"))
+	 (message "Copying %s" new-file)
+	 (cond
+	  ((not (fsvn-file-exact-directory-p nf))
+	   (copy-file nf of t t))
+	  (oldfile
+	   (fsvn-browse-upgrade-source-tree-internal of nf))
+	  (t
+	   (fsvn-copy-directory nf of t)))
+	 (unless oldfile
+	   (fsvn-call-command-discard "add" of))))
+     new-files)
+    (mapc
+     (lambda (old-file)
+       (unless (fsvn-file-member old-file new-files)
+	 (let ((of (fsvn-expand-file old-file wcpath)))
+	   (fsvn-call-command-discard "delete" of))
+	 (message "Deleting %s" old-file)))
+     old-files)
+    t))
+
 (defmacro fsvn-browse-open-message-edit (&rest form)
   `(let ((ROOT fsvn-buffer-repos-root)
 	 (WIN-CONFIGURE (current-window-configuration)))
@@ -1432,6 +1464,16 @@ PATH is each executed path."
       (error "No file on this line"))
     files))
 
+(defun fsvn-browse-cmd-read-paste-properties-to-this ()
+  (fsvn-browse-cmd-wc-only
+   (let ((src-file)
+	 (dest-file (fsvn-browse-point-local-filename))
+	 (arg current-prefix-arg))
+     (unless dest-file
+       (error "No file on this line"))
+     (setq src-file (fsvn-read-file-name "Properties copy from: " nil nil t))
+     (list src-file dest-file arg))))
+
 
 
 ;; general read function
@@ -1640,6 +1682,13 @@ PATH is each executed path."
     (setq dest-url (fsvn-completing-read-url "Branch/Tag URL: " dest-url t))
     (setq args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy))
     (list repos-url dest-url args)))
+
+(defun fsvn-browse-cmd-read-upgrade-source-tree-args ()
+  (fsvn-browse-cmd-wc-only
+   (let ((dir (fsvn-read-directory-name "New Source: " nil nil t)))
+     (unless (y-or-n-p "This takes many seconds. ok? ")
+       (error "quit"))
+     (list dir))))
 
 ;; * fsvn-browse-mode interactive command
 
@@ -2074,7 +2123,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-browse-revert-path (&optional args)
   "Execute `revert' for current directory.
-With \\[universal-argument] prefix, can read optional arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-wc-path-with-args "revert" fsvn-default-args-revert))
   (if (or (not (interactive-p))
@@ -2151,7 +2200,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-info-path (&optional args)
   (interactive (fsvn-browse-cmd-read-urlrev-path-with-args "info" fsvn-default-args-info))
   "Execute `info' for current directory.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (fsvn-popup-call-process "info" args))
 
@@ -2243,7 +2292,6 @@ DEST must be a directory when SRC-FILES is multiple.
 When SRC-FILES is single list, DEST allows non existence filename."
   (interactive (fsvn-browse-cmd-read-svn:externals-selected))
   (let (targetdir prop externals value)
-    ;;todo
     (cond
      ((fsvn-file-exact-directory-p dest)
       (setq targetdir dest)
@@ -2266,13 +2314,38 @@ When SRC-FILES is single list, DEST allows non existence filename."
 	      (split-string prop "\n" t)))
       (setq value (format "%s %s" (fsvn-file-relative (car src-files) targetdir) (fsvn-file-name-nondirectory dest)))
       (setq externals (cons value externals))))
-    (fsvn-popup-start-process "propset" "svn:externals" (mapconcat 'identity externals "\n") targetdir)
-    ;;todo popup something
-    ;;     (setq prop (fsvn-get-propget "svn:externals" targetdir))
-    ;;todo parse current prop and check it
-    ;;     (split-string prop "\n" t)
-    ;;todo other repository
-    ))
+    (fsvn-popup-start-process "propset" "svn:externals" (mapconcat 'identity externals "\n") targetdir)))
+
+(defun fsvn-browse-upgrade-source-tree (new-source)
+  "Upgrade current directory tree by NEW-SOURCE tree.
+NEW-SOURCE is intent on unpacked `source.tar.gz'.
+After executing this command, current directory tree will be exactly equals NEW-SOURCE.
+You have to \\<fsvn-browse-mode-map>\\[fsvn-browse-commit-path] to commit all changes."
+  (interactive (fsvn-browse-cmd-read-upgrade-source-tree-args))
+  (fsvn-browse-wc-only
+   (let ((wcpath (fsvn-browse-current-directory)))
+     (fsvn-call-command-discard "update" wcpath)
+     (fsvn-browse-upgrade-source-tree-internal wcpath new-source))))
+
+(defun fsvn-browse-paste-properties-to-this (src-file dest-file &optional full)
+  "Copy SRC-FILE properties to DEST-FILE.
+FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
+  (interactive (fsvn-browse-cmd-read-paste-properties-to-this))
+  (let ((alist (fsvn-get-prop-value-alist src-file)))
+    (mapc
+     (lambda (key-value)
+       (let ((prop (car key-value))
+	     (val (cdr key-value)))
+	 (fsvn-set-prop-value dest-file prop val)))
+     alist)
+    (when full
+      (let ((list (fsvn-get-proplist dest-file)))
+	(mapc
+	 (lambda (prop)
+	   (unless (assoc prop alist)
+	     (fsvn-set-prop-delete dest-file prop)))
+	 list)))
+    (fsvn-browse-redraw-wc-file-entry dest-file)))
 
 
 
