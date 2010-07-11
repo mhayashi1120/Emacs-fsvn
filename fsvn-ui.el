@@ -449,60 +449,6 @@ Keybindings:
 
 
 
-(defconst fsvn-electric-log-list-buffer-name " *Fsvn Electric Log* ")
-
-(defun fsvn-electric-select-log (urlrev)
-  (let* ((buffer (get-buffer-create fsvn-electric-log-list-buffer-name))
-	 info root entries)
-    (message "Getting info...")
-    (setq info (fsvn-get-info-entry urlrev))
-    (setq root (fsvn-xml-info->entry=>repository=>root$ info))
-    (message "Getting log from repository...")
-    (setq entries (fsvn-log-list-cmd urlrev root nil nil))
-    (with-current-buffer buffer
-      (set (make-local-variable 'font-lock-defaults)
-	   '(fsvn-log-list-font-lock-keywords t nil nil beginning-of-line))
-      (let (buffer-read-only)
-	(fsvn-log-list-mode)
-	(erase-buffer)
-	(mapc
-	 (lambda (entry)
-	   (fsvn-log-list-insert-entry entry))
-	 entries)
-	(setq fsvn-logview-target-urlrev urlrev)
-	(setq fsvn-buffer-repos-root root)
-	(setq fsvn-log-list-all-entries entries)
-	(setq fsvn-log-list-entries entries)
-	(setq fsvn-log-list-target-path 
-	      (fsvn-repository-path root (fsvn-xml-info->entry=>url$ info)))
-	(fsvn-electric-line-select-mode 1)
-	(setq fsvn-electric-next-data-function 'fsvn-electric-select-log-next-data)
-	(setq fsvn-electric-done-function 'fsvn-electric-select-log-done)
-	(font-lock-mode 1)
-	(font-lock-fontify-buffer)))
-    (fsvn-electric-line-select buffer)))
-
-(defun fsvn-electric-select-log-done ()
-  (fsvn-log-list-point-urlrev))
-
-(defun fsvn-electric-select-log-next-data ()
-  (save-excursion
-    (let* ((range (fsvn-log-list-current-revision-range))
-	   (new-range (cons (1- (cdr range)) 0))
-	   (prev-entries fsvn-log-list-all-entries)
-	   buffer-read-only entries)
-      (setq entries (fsvn-log-list-cmd fsvn-logview-target-urlrev fsvn-buffer-repos-root new-range nil))
-      (setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))
-      (setq fsvn-log-list-entries fsvn-log-list-all-entries)
-      (goto-char (point-max))
-      (mapc
-       (lambda (entry)
-	 (fsvn-log-list-insert-entry entry))
-       entries)
-      (font-lock-fontify-buffer))))
-
-
-
 (defmacro fsvn-cmd-read-subcommand-args (subcommand var)
   `(if current-prefix-arg
        (fsvn-read-svn-subcommand-args ,subcommand t ,var)
