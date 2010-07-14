@@ -1856,7 +1856,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-browse-update-path (&optional args)
   "Execute `update' for current directory.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-wc-path-with-args "update" fsvn-default-args-update))
   (if (or (not (interactive-p))
@@ -1963,7 +1963,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-browse-export-path (to-dir &optional args)
   "Execute `export' for current directory to TO-DIR
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-export-path))
   (if (or (not (interactive-p))
@@ -1993,7 +1993,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 
 (defun fsvn-browse-move-this (src-file dest-file &optional args)
   "Execute `move' for point SRC-FILE to DEST-FILE.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-move-this))
   (fsvn-popup-start-copy/move-process "move" (list src-file) dest-file args))
@@ -2001,14 +2001,14 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 ;;NOTE 1.4.x cannot copy/move multiple files
 (defun fsvn-browse-move-selected (src-files dest-dir &optional args)
   "Execute `move' for selected SRC-FILES to DEST-DIR
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-move-selected))
   (fsvn-popup-start-copy/move-process "move" src-files dest-dir args))
 
 (defun fsvn-browse-copy-this (src-file dest-file &optional args)
   "Execute `copy' for point SRC-FILE to DEST-FILE.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-copy-this))
   (fsvn-popup-start-copy/move-process "copy" (list src-file) dest-file args))
@@ -2016,7 +2016,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 ;;NOTE 1.4.x cannot copy/move multiple files
 (defun fsvn-browse-copy-selected (src-files dest-dir &optional args)
   "Execute `copy' for selected SRC-FILES to DEST-DIR
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-copy-selected))
   (fsvn-popup-start-copy/move-process "copy" src-files dest-dir args))
@@ -2073,14 +2073,14 @@ This is useful for integrating other source management.
 
 (defun fsvn-browse-create-branch (urlrev branch-url &optional args)
   "Create branch executing `copy'.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-branch/tag "branches"))
   (fsvn-browse-copy-this-in-repository urlrev branch-url args))
 
 (defun fsvn-browse-create-tag (urlrev tag-url &optional args)
   "Create tag executing `copy'.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-branch/tag "tags"))
   (fsvn-browse-copy-this-in-repository urlrev tag-url args))
@@ -2088,7 +2088,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 ;;TODO
 ;; (defun fsvn-browse-copy-path-in-repository (to-url &optional args)
 ;;   "Execute `copy' for repository file corresponding current directory.
-;; Optional ARGS (with prefix arg) means read svn subcommand arguments.
+;; Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 ;; This makes faster copy than in working copy.
 ;; "
@@ -2097,7 +2097,7 @@ Optional ARGS (with prefix arg) means read svn subcommand arguments.
 
 (defun fsvn-browse-copy-this-in-repository (from-url to-url &optional args)
   "Execute `copy' for repository file corresponding local file.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 This makes faster copy than in working copy.
 "
@@ -2136,7 +2136,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-browse-merge-this (file source1 source2 &optional args)
   "Execute `merge' for point FILE between SOURCE1 and SOURCE2.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
 "
@@ -2145,7 +2145,7 @@ This command covers `merge' first and second form (see \\[fsvn-show-svn-help] an
 
 (defun fsvn-browse-merge-path (source1 source2 &optional args)
   "Execute `merge' for current directory between SOURCE1 and SOURCE2.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 This command covers `merge' first and second form (see \\[fsvn-show-svn-help] and type \"merge\")
 "
@@ -2154,14 +2154,14 @@ This command covers `merge' first and second form (see \\[fsvn-show-svn-help] an
 
 (defun fsvn-browse-mergeinfo-path (&optional args)
   "Execute `mergeinfo' for current directory.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-mergeinfo))
   (fsvn-popup-start-process "mergeinfo" args (fsvn-browse-current-directory-urlrev)))
 
 (defun fsvn-browse-mergeinfo-this (file &optional args)
   "Execute `mergeinfo' for point FILE.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-mergeinfo-this))
   (fsvn-popup-start-process "mergeinfo" file args))

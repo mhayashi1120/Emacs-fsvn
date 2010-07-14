@@ -1110,7 +1110,7 @@ Keybindings:
 
 (defun fsvn-log-sibling-copy-this (src-urlrev dest-file &optional args)
   "Execute `copy' for point SRC-URLREV to DEST-FILE.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-log-sibling-cmd-read-copy-file))
   (fsvn-popup-start-copy/move-process "copy" (list src-urlrev) dest-file args))

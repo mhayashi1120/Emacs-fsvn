@@ -4,7 +4,7 @@ RELEASE_FILES = \
 	fsvn*.el \
 	mw32cmp.el mw32cmp-test.el mw32el-ntemacs.patch \
 	Makefile MAKE-CFG.el MAKE-TARGETS.mk \
-	BUG TODO ChangeLog
+	BUG INSTALL TODO ChangeLog
 
 RELEASE_SAMPLES = \
 	Samples/Makefile* Samples/MAKE-CFG.el*

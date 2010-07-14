@@ -93,36 +93,46 @@ If error occur in process (exit status with non zero value) then raise error."
       (cons "--non-interactive" args)
     args))
 
+(defmacro fsvn-process-filter/sentinel-manager (process event property)
+  `(let ((list (process-get ,process ,property))
+	 ret)
+     (while list
+       (setq ret (funcall (car list) ,process ,event))
+       (setq list (cdr list)))
+     ret))
+
+(defun fsvn-process-sentinel-manager (process event)
+  (fsvn-process-filter/sentinel-manager process event 'fsvn-process-sentinel-list))
+
+(defun fsvn-process-filter-manager (process event)
+  (fsvn-process-filter/sentinel-manager process event 'fsvn-process-filter-list))
+
+(defmacro fsvn-process-add-filter/sentinel (proc sentinel/filter manager property getter setter)
+  `(let ((current (,getter proc))
+	 functions)
+     (unless (eq current ,property)
+       (,setter proc ,manager)
+       (when current
+	 (process-put proc ,property (cons current nil))))
+     (setq functions (process-get proc ,property))
+     (setq functions (append functions (list ,sentinel/filter)))
+     (process-put proc ,property functions)))
+
 (defun fsvn-process-add-sentinel (proc sentinel)
-  (let ((current (process-sentinel proc))
-	new)
-    (setq new
-	  (if current
-	      (fsvn-process-create-actor current sentinel)
-	    sentinel))
-    (set-process-sentinel proc new)))
+  (fsvn-process-add-filter/sentinel
+   proc sentinel 'fsvn-process-sentinel-manager 'fsvn-process-sentinel-list
+   process-sentinel set-process-sentinel))
 
 (defun fsvn-process-add-filter (proc filter)
-  (let ((current (process-filter proc))
-	new)
-    (setq new
-	  (if current
-	      (fsvn-process-create-actor current filter)
-	    filter))
-    (set-process-filter proc new)))
-
-(defun fsvn-process-create-actor (current added)
-  `(lambda (proc event)
-     (mapc
-      (lambda (actor)
-	(funcall actor proc event))
-      '(,current ,added))))
+  (fsvn-process-add-filter/sentinel
+   proc filter 'fsvn-process-filter-manager 'fsvn-process-filter-list
+   process-filter set-process-filter))
 
 (defmacro fsvn-async-let (varlist &rest body)
-  "Asynchronous process execute sequentially.
+  "Execute asynchronous process sequentially.
 BODY each form that return process object stopping remaining BODY.
 Execute remaining BODY in process-sentinel if process exited normally.
-Like `let' binding, varlist binded while executing BODY."
+Like `let' binding, varlist bound while executing BODY. (sentinel and filter too)"
   `(let ,varlist
      (let (fsvn-var-list)
        (mapc
@@ -140,22 +150,32 @@ Like `let' binding, varlist binded while executing BODY."
 	',varlist)
        (fsvn-async-executor ',body fsvn-var-list))))
 
-(defun fsvn-async-create-wrapper (fsvn-original-actor fsvn-var-alist fsvn-sentinel-p)
+(defun fsvn-async-create-sentinel (fsvn-original-actor fsvn-var-alist)
   "Create process sentinel/filter FSVN-ORIGINAL-ACTOR that executed in FSVN-VAR-ALIST"
   `(lambda (fsvn-async-proc fsvn-async-event)
      (let ,fsvn-var-alist
        ,(if fsvn-original-actor
 	    `(,fsvn-original-actor fsvn-async-proc fsvn-async-event)
-	  `(with-current-buffer (process-buffer fsvn-async-proc)
-	     (save-excursion
-	       (goto-char (point-max))
-	       (insert fsvn-async-event))))
-       ,(when fsvn-sentinel-p
-	  `(when (= (process-exit-status fsvn-async-proc) 0)
-	     (with-current-buffer (process-buffer fsvn-async-proc)
-	       (fsvn-async-executor 
-		(process-get fsvn-async-proc 'fsvn-async-remain-forms)
-		',(mapcar 'car fsvn-var-alist))))))))
+	  `(fsvn-async-default-filter/sentinel fsvn-async-proc fsvn-async-event))
+       (when (= (process-exit-status fsvn-async-proc) 0)
+	 (with-current-buffer (process-buffer fsvn-async-proc)
+	   (fsvn-async-executor 
+	    (process-get fsvn-async-proc 'fsvn-async-remain-forms)
+	    ',(mapcar 'car fsvn-var-alist)))))))
+
+(defun fsvn-async-create-filter (fsvn-original-actor fsvn-var-alist)
+  "Create process sentinel/filter FSVN-ORIGINAL-ACTOR that executed in FSVN-VAR-ALIST"
+  `(lambda (fsvn-async-proc fsvn-async-event)
+     (let ,fsvn-var-alist
+       ,(if fsvn-original-actor
+	    `(,fsvn-original-actor fsvn-async-proc fsvn-async-event)
+	  `(fsvn-async-default-filter/sentinel fsvn-async-proc fsvn-async-event)))))
+
+(defun fsvn-async-default-filter/sentinel (proc event)
+  (with-current-buffer (process-buffer proc)
+    (save-excursion
+      (goto-char (point-max))
+      (insert event))))
 
 (defun fsvn-async-executor (fsvn-exec-list fsvn-var-list)
   (let (fsvn-ret-return fsvn-exec-form)
@@ -170,10 +190,11 @@ Like `let' binding, varlist binded while executing BODY."
 		  (cons var (cons (list 'quote (eval var)) nil)))
 		fsvn-var-list)))
 	  (process-put fsvn-ret-return 'fsvn-async-remain-forms fsvn-exec-list)
-	  (set-process-sentinel fsvn-ret-return 
-				(fsvn-async-create-wrapper (process-sentinel fsvn-ret-return) fsvn-var-alist t))
+	  ;;TODO add-sentinel makes bug? recursive call?
+	  (set-process-sentinel fsvn-ret-return
+				(fsvn-async-create-sentinel (process-sentinel fsvn-ret-return) fsvn-var-alist))
 	  (set-process-filter fsvn-ret-return 
-			      (fsvn-async-create-wrapper (process-filter fsvn-ret-return) fsvn-var-alist nil)))
+			      (fsvn-async-create-filter (process-filter fsvn-ret-return) fsvn-var-alist)))
 	(setq fsvn-exec-list nil)))
     fsvn-ret-return))
 

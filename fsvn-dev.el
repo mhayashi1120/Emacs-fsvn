@@ -14,7 +14,7 @@
 ;; mv -> switch
 (defun fsvn-browse-move-this-in-repository (src-file to-url &optional args)
   "Execute `move' for repository file corresponding local file.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive)
   )
