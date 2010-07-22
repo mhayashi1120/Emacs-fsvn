@@ -1,0 +1,14 @@
+;;; -*-Emacs-Lisp-*-
+
+;; MAKE-CFG: installation setting about fsvn (for NTEmacs).
+
+;;; Code:
+
+(setq fsvn-svn-command "c:/usr/local/subversion/bin/svn.exe")
+(setq fsvn-svnadmin-command "c:/usr/local/subversion/bin/svnadmin.exe")
+
+(setq INSTALL-DIR (expand-file-name "../site-lisp/fsvn" (invocation-directory)))
+
+;; (setq load-path (cons "~/.emacs.d/meadow" load-path))
+
+;;; MAKE-CFG ends here

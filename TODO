@@ -1,0 +1,154 @@
+# -*- mode: org; -*-
+* General
+** Describe how to install to INSTALL file.
+** all interactive command must be accept argument (ex filename, command arguments)
+  this is test for that command.
+** annoying fsvn-result buffer.
+
+** `merge' can use ediff-merge
+
+** fsvn-xml-*-dtd-alist check original dtd.
+
+** what is scheduled commit? `status' forth column.
+
+** mode-line and easymenu
+
+** some help mode (command brief description)
+
+** file-select, message-edit can kill-buffer when commiting.
+
+** interactive-p -> called-interactively-p
+
+** Bugreport
+
+** about SVN_SSH
+** TODO Activate only magic name.
+
+** font-lock not works fine in some cases.
+consider `font-lock-fontify' call or not
+
+** tool-bar
+
+* magic
+** `fsvn-magic-directory-files' accept svn:externals
+
+
+* browse-mode
+** Draw symbolic link like dired buffer.
+** Enable Move file (in repository)
+
+** move case wrong file by svn `move'
+
+fsvn-browse.*move-in-repository
+
+** in repository C-x C-f or something bound to open by url function
+
+** fsvn-browse-svn:externals-selected
+
+from other repository
+
+** rename multiple file that have same filename
+
+SomeFile.Designer.cs -> AnyFile.Designer.cs
+SomeFile.cs          -> AnyFile.cs
+
+
+* select-file-mode
+** symbolic link
+
+** TODO when commit file-select buffer has svn:external file.
+** Instant viewer that for modified file or changed directory hierarchy.
+  currently `*' mark is display commited files, not manupulated file.
+
+** enable resolved
+
+* message-edit-mode
+** parasite-*-execute command accept optional argument
+
+* completion
+** fsvn-read-subcommand-args accept quoted string
+  space containing filename to quoted string.
+
+** fsvn-completing-url to parse previous segment
+** fsvn-completing-read-url behavior different general Emacs one.
+** completing read implementation cleaning.
+** fsvn-file-select hide/show non selected files.
+
+
+* General (refactor)
+** fsvn-flatten-command-args move to more critical point.
+** fsvn-url-encode-string more critical point.
+** case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
+** fsvn-magic-* inspect how to implements.
+
+** fsvn-prop* code clean.
+
+** run-hooks -> run-mode-hooks (?)
+
+* logview-mode
+** fsvn-log-message-buffer-name, fsvn-log-sibling-buffer-name contains first space then fontify is not work.
+
+** tortoise like log cache.
+
+** fsvn-log-list-mode gui viewer.
+ call tortoise viewer (Windows)
+** logview-mode diff with non visible revision.
+
+** this file arg to interactive arg
+
+** refactor about diff
+
+** show copy-from
+
+** log-sibling return to specific revision file. (use magic file name)
+* prop-mode
+
+** prop-recursive-mode
+
+proplist --recursive
+
+* diff
+** async diff
+** ediff directory
+** diff directory
+** diff binary file throw filter program.(Like OpenOffice file)
+
+
+* Other
+** improve UI about read arguments (ex --targets like argument not necessary in completion)
+
+** TODO dired-mode remove vc-find-file-hook from find-file-hook
+
+** fsvn-blame-minor-mode more efficient UI
+
+** fsvn-blame-minor-mode accept revision range
+
+
+** parse result threshold
+
+** tsvn:lockmsgminsize, tsvn:logsummary, tsvn:projectlanguage
+
+   http://tortoisesvn.net/docs/nightly/TortoiseSVN_ja/tsvn-dug-propertypage.html
+
+
+
+
+** git
+
+* svk
+
+** Not familiar interface
+
+** depotmap --init
+
+not works on windows
+
+
+* popup-result-mode
+
+** `update' `merge' output 
+
+Currently buffer's point is not move from (point-min)
+Sometime prompt stop process, so cannot notice the prompt without scrolling.
+move to point-max? only update or merge (switch?)
+
