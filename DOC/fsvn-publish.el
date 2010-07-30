@@ -21,10 +21,10 @@
 
 (defconst fsvn-publish-publishing-transform
       '(
-	("^basicuse-ja.wiki.htm$" . "howto/basicuse.htm.ja")
-	("^basicuse-en.wiki.htm$" . "howto/basicuse.htm.en")
-	("^install-ja.wiki.htm$" . "howto/install.htm.ja")
-	("^install-en.wiki.htm$" . "howto/install.htm.en")
+	("^basicuse-ja.wiki.html$" . "howto/basicuse.html.ja")
+	("^basicuse-en.wiki.html$" . "howto/basicuse.html.en")
+	("^install-ja.wiki.html$" . "howto/install.html.ja")
+	("^install-en.wiki.html$" . "howto/install.html.en")
 	))
 
 (defconst fsvn-publish-publishing-directory
@@ -71,7 +71,7 @@
 	 (emacs-wiki-publishing-directory fsvn-publish-publishing-directory)
 	 (emacs-wiki-publishing-header (fsvn-publish-header))
 	 (emacs-wiki-publishing-footer (fsvn-publish-footer))
-	 (emacs-wiki-publishing-file-suffix ".htm")
+	 (emacs-wiki-publishing-file-suffix ".html")
 	 (emacs-wiki-publishing-transforms  fsvn-publish-publishing-transform)
 	 (emacs-wiki-after-file-publish-hook)
 	 (coding-system-for-read 'utf-8-unix)
