@@ -42,6 +42,12 @@
      (title . "How to install fsvn.el"))
     ))
 
+(defun fsvn-publish-content-lang ()
+  (defvar published)
+  (let ((regexp (concat (regexp-quote emacs-wiki-publishing-file-suffix) ".\\(.+\\)$")))
+    (string-match regexp published)
+    (match-string 1 published)))
+
 (defun fsvn-publish-header ()
   (with-temp-buffer
     (insert-file-contents (expand-file-name "header.htm" fsvn-publish-template-directory))
