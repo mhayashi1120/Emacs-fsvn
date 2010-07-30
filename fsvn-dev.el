@@ -14,7 +14,7 @@
 ;; mv -> switch
 (defun fsvn-browse-move-this-in-repository (src-file to-url &optional args)
   "Execute `move' for repository file corresponding local file.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive)
   )
@@ -196,45 +196,45 @@ How to send a bug report:
 
 (defconst fsvn-browse-mode-menu-spec
   '("fsvn"
-    ["Update"     fsvn-browse-update-path       t]
-    ["Commit"     fsvn-browse-commit-path       t]
-    ["Log"        fsvn-browse-logview-path      t]
-    ["Diff"       fsvn-browse-diff-this         t]
+    ["Update" fsvn-browse-update-path t]
+    ["Commit" fsvn-browse-commit-path t]
+    ["Log" fsvn-browse-logview-path t]
+    ["Diff" fsvn-browse-diff-this t]
     "----"
     ("Manipulate Current Directory"
-     ["Commit"     fsvn-browse-commit-path       t]
-     ["Export"     fsvn-browse-export-path       t]
-     ["Info"       fsvn-browse-info-path         t]
-     ["Log"        fsvn-browse-logview-path      t]
-     ["Merge"      fsvn-browse-merge-path        t]
-     ["Mkdir"      fsvn-browse-mkdir             t]
-     ["Proplist"   fsvn-browse-propview-path     t]
-     ["Revert"     fsvn-browse-revert-path       t]
-     ["Update"     fsvn-browse-update-path       t]
-     ["Switch"     fsvn-browse-switch-path       t]
-     ["Cleanup"     fsvn-browse-cleanup-path       t]
-     ["Upgrade source tree"           fsvn-browse-upgrade-source-tree t]
+     ["Commit" fsvn-browse-commit-path t]
+     ["Export" fsvn-browse-export-path t]
+     ["Info" fsvn-browse-info-path t]
+     ["Log" fsvn-browse-logview-path t]
+     ["Merge" fsvn-browse-merge-path t]
+     ["Mkdir" fsvn-browse-mkdir t]
+     ["Proplist" fsvn-browse-propview-path t]
+     ["Revert" fsvn-browse-revert-path t]
+     ["Update" fsvn-browse-update-path t]
+     ["Switch" fsvn-browse-switch-path t]
+     ["Cleanup" fsvn-browse-cleanup-path t]
+     ["Upgrade source tree" fsvn-browse-upgrade-source-tree t]
      )
     ("Repository Browser"
-     ["Magic"      fsvn-browse-magic-head            t]
-     ["Browser"    fsvn-browse-open-repository       t]
-     ["Mergeinfo"  fsvn-browse-mergeinfo-path t]
-     ["Branch"  fsvn-browse-create-branch t]
-     ["Tag"  fsvn-browse-create-tag t]
+     ["Magic" fsvn-browse-magic-head t]
+     ["Browser" fsvn-browse-open-repository t]
+     ["Mergeinfo" fsvn-browse-mergeinfo-path t]
+     ["Branch" fsvn-browse-create-branch t]
+     ["Tag" fsvn-browse-create-tag t]
      )
     ("Manipulate Files"
-     ["Delete selected"   fsvn-browse-delete-selected   t]
-     ["Add selected"      fsvn-browse-add-selected      t]
-     ["Revert selected"   fsvn-browse-revert-selected   t]
-     ["Copy selected"     fsvn-browse-copy-selected     t]
-     ["Move selected"     fsvn-browse-move-selected     t]
-     ["Lock selected"     fsvn-browse-lock-selected     t]
-     ["Unlock selected"   fsvn-browse-unlock-selected     t]
-     ["Update selected"   fsvn-browse-update-selected   t]
+     ["Delete selected" fsvn-browse-delete-selected t]
+     ["Add selected" fsvn-browse-add-selected t]
+     ["Revert selected" fsvn-browse-revert-selected t]
+     ["Copy selected" fsvn-browse-copy-selected t]
+     ["Move selected" fsvn-browse-move-selected t]
+     ["Lock selected" fsvn-browse-lock-selected t]
+     ["Unlock selected" fsvn-browse-unlock-selected t]
+     ["Update selected" fsvn-browse-update-selected t]
      ["Add to changelist" fsvn-browse-add-changelist-selected t]
      ["Remove from changelist" fsvn-browse-remove-changelist-selected t]
-     ["Commit selected"   fsvn-browse-commit-selected t]
-     ["Info selected"     fsvn-browse-info-selected t]
+     ["Commit selected" fsvn-browse-commit-selected t]
+     ["Info selected" fsvn-browse-info-selected t]
      ["Externals" fsvn-browse-svn:externals-selected t]
      ["Resolved selected" fsvn-browse-resolved-selected t]
      ["Resolve selected" fsvn-browse-resolve-selected t]
@@ -242,12 +242,12 @@ How to send a bug report:
      ["Toggle svn:ignore selected" fsvn-browse-prop-add-svn:ignore-selected t]
      )
     ("Manipulate A File"
-     ["Proplist of point" fsvn-browse-propview-this     t]
-     ["Merge to point"    fsvn-browse-merge-this        t]
-     ["Mergeinfo of point"    fsvn-browse-mergeinfo-this        t]
-     ["EDiff"             fsvn-browse-ediff-this        t]
-     ["Diff"              fsvn-browse-diff-this         t]
-     ["Blame/Annotate"    fsvn-browse-blame-this  t]
+     ["Proplist of point" fsvn-browse-propview-this t]
+     ["Merge to point" fsvn-browse-merge-this t]
+     ["Mergeinfo of point" fsvn-browse-mergeinfo-this t]
+     ["EDiff" fsvn-browse-ediff-this t]
+     ["Diff" fsvn-browse-diff-this t]
+     ["Blame/Annotate" fsvn-browse-blame-this t]
      ["Export" fsvn-browse-export-this t]
      ["Log" fsvn-browse-logview-this t]
      ["Copy" fsvn-browse-copy-this t]
@@ -260,25 +260,118 @@ How to send a bug report:
      )
     "----"
     ("Emmulate Dired"
-     ["Mark Regexp"        fsvn-browse-mark-file-regexp    t]
-     ["Mark Delete Regexp" fsvn-browse-mark-delete-regexp  t]
-     ["Unmark All"         fsvn-browse-mark-all-unmark     t]
-     ["Unmark File"        fsvn-browse-mark-file-unmark     t]
-     ["Mark Delete"        fsvn-browse-mark-file-delete     t]
-     ["Mark"        fsvn-browse-mark-file-mark     t]
-     ["Diff"               fsvn-browse-diff-local          t]
-     ["Next"               fsvn-browse-next-file          t]
-     ["Previous"               fsvn-browse-previous-file          t]
-     ["Sort"               fsvn-browse-toggle-sort          t]
-     ["View"               fsvn-browse-file-this          t]
-     ["Up"               fsvn-browse-up-directory          t]
+     ["Mark Regexp" fsvn-browse-mark-file-regexp t]
+     ["Mark Delete Regexp" fsvn-browse-mark-delete-regexp t]
+     ["Unmark All" fsvn-browse-mark-all-unmark t]
+     ["Unmark File" fsvn-browse-mark-file-unmark t]
+     ["Mark Delete" fsvn-browse-mark-file-delete t]
+     ["Mark" fsvn-browse-mark-file-mark t]
+     ["Diff" fsvn-browse-diff-local t]
+     ["Next" fsvn-browse-next-file t]
+     ["Previous" fsvn-browse-previous-file t]
+     ["Sort" fsvn-browse-toggle-sort t]
+     ["View" fsvn-browse-file-this t]
+     ["Up" fsvn-browse-up-directory t]
      )
     ))
 
 (easy-menu-define fsvn-browse-mode-menu
   fsvn-browse-mode-map
-  "Menu used in Browse mode."
+  "Menu used in Fsvn Browse mode."
   fsvn-browse-mode-menu-spec)
+
+(defconst fsvn-log-list-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-log-list-mode-menu
+  fsvn-log-list-mode-map
+  "Menu used in Fsvn Log List mode."
+  fsvn-log-list-mode-menu-spec)
+
+(defconst fsvn-log-sibling-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-log-sibling-mode-menu
+  fsvn-log-sibling-mode-map
+  "Menu used in Fsvn Log Sibling mode."
+  fsvn-log-sibling-mode-menu-spec)
+
+(defconst fsvn-log-message-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-log-message-mode-menu
+  fsvn-log-message-mode-map
+  "Menu used in Fsvn Log Message mode."
+  fsvn-log-message-mode-menu-spec)
+
+(defconst fsvn-proplist-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-proplist-mode-menu
+  fsvn-proplist-mode-map
+  "Menu used in Fsvn Property List mode."
+  fsvn-proplist-mode-menu-spec)
+
+(defconst fsvn-propedit-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-propedit-mode-menu
+  fsvn-propedit-mode-map
+  "Menu used in Fsvn Property Edit mode."
+  fsvn-propedit-mode-menu-spec)
+
+(defconst fsvn-process-list-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-process-list-mode-menu
+  fsvn-process-list-mode-map
+  "Menu used in Fsvn Processes mode."
+  fsvn-process-list-mode-menu-spec)
+
+(defconst fsvn-popup-result-mode-menu-spec
+  '("fsvn"
+     ["Kill running process" fsvn-popup-result-kill-process t]
+     ["Send password" fsvn-popup-result-send-password t]
+     ["Send input string to process" fsvn-popup-result-send-string t]
+    ))
+
+(easy-menu-define fsvn-popup-result-mode-menu
+  fsvn-popup-result-mode-map
+  "Menu used in Fsvn Result mode."
+  fsvn-popup-result-mode-menu-spec)
+
+(defconst fsvn-select-file-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-select-file-mode-menu
+  fsvn-select-file-mode-map
+  "Menu used in Fsvn File Select mode."
+  fsvn-select-file-mode-menu-spec)
+
+(defconst fsvn-message-edit-mode-menu-spec
+  '("fsvn"
+
+    ))
+
+(easy-menu-define fsvn-message-edit-mode-menu
+  fsvn-message-edit-mode-map
+  "Menu used in Fsvn Log Message Edit mode."
+  fsvn-message-edit-mode-menu-spec)
+
 
 
 

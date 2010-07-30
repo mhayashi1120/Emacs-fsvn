@@ -68,7 +68,7 @@ Keybindings:
   (fsvn-global-initialize-mode)
   (use-local-map fsvn-message-edit-mode-map)
   (setq major-mode 'fsvn-message-edit-mode)
-  (setq mode-name "Fsvn Log Edit")
+  (setq mode-name "Fsvn Log Message Edit")
   (setq buffer-undo-list nil)
   (setq buffer-read-only nil)
   (fsvn-make-buffer-variables fsvn-message-edit-buffer-local-variables)

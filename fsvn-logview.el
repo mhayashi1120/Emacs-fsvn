@@ -1110,7 +1110,7 @@ Keybindings:
 
 (defun fsvn-log-sibling-copy-this (src-urlrev dest-file &optional args)
   "Execute `copy' for point SRC-URLREV to DEST-FILE.
-Optional ARGS (with prefix arg) means read svn subcommand arguments.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-log-sibling-cmd-read-copy-file))
   (fsvn-popup-start-copy/move-process "copy" (list src-urlrev) dest-file args))
@@ -1197,17 +1197,22 @@ Keybindings:
 ;; * fsvn-log-message-mode interactive command
 
 (defun fsvn-log-message-browse-this (link)
+  "Ask a WWW browser to load URL if exists on the point."
   (interactive (fsvn-log-message-cmd-read-browse-this))
   (browse-url link))
 
 (defun fsvn-log-message-start-edit ()
+  "Prepare editing commited log message."
   (interactive)
   (setq buffer-read-only nil)
   (force-mode-line-update)
   (message
-   (substitute-command-keys (concat "Type \\[fsvn-log-message-commit] to finish edit, "))))
+   (substitute-command-keys 
+    (concat "Type \\[fsvn-log-message-commit] to finish edit, \
+\\[fsvn-log-message-quit-edit] to quit edit."))))
 
 (defun fsvn-log-message-quit-edit ()
+  "Discard changes."
   (interactive (fsvn-log-message-cmd-read-quit-edit))
   (setq buffer-read-only t)
   (force-mode-line-update))
@@ -1221,7 +1226,6 @@ Keybindings:
 			     "--revprop" "svn:log"
 			     "--revision" fsvn-log-message-revision
 			     fsvn-buffer-repos-root)))
-
 
 
 
