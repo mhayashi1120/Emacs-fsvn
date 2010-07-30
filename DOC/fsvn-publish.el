@@ -39,7 +39,7 @@
     ("Wiki/howto/install-ja.wiki" 
      (title . "fsvn.el のインストール"))
     ("Wiki/howto/install-en.wiki" 
-     (title . "fsvn.el Install")) ;; TODO how to install
+     (title . "How to install fsvn.el"))
     ))
 
 (defun fsvn-publish-header ()
