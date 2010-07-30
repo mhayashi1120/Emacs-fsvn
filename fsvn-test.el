@@ -290,7 +290,7 @@ To show and see result.
 (fsvn-test-equal (fsvn-url-only-child "/a/b" "/a/b/c") "/a/b/c")
 (fsvn-test-nil (fsvn-url-only-child "/a/b" "/a/b"))
 
-(unless noninteractive
+(unless (or noninteractive (eq system-type 'windows-nt))
   (let ((buffer (fsvn-popup-result-create-buffer)))
     (with-current-buffer buffer
       (fsvn-async-let ()
