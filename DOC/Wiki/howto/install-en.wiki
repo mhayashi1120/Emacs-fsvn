@@ -1,0 +1,22 @@
+----
+* Install
+----
+1. First of all, unpack archive file
+ =tar xzf fsvn-(version).tar.gz=
+2. If you have `make' command, `cd' to the directory where you unpacked fsvn.
+  1. TODO when NTEmacs
+  2. Edit MAKE-CFG.el and Makefile.
+  3. Optionally invoke the following command show installed files where to go.
+    =make what-where=
+  4. Invoke the following command.
+    =make install=
+3. If you have no `make' command simply copy &#42;.el files to `load-path' where you want.
+
+----
+** .emacs
+----
+=(require 'fsvn)=
+----
+** .emacs (Option)
+----
+[[http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn][dot.sample]]

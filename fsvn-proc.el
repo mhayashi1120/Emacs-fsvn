@@ -151,7 +151,7 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
        (fsvn-async-executor ',body fsvn-var-list))))
 
 (defun fsvn-async-create-sentinel (fsvn-original-actor fsvn-var-alist)
-  "Create process sentinel/filter FSVN-ORIGINAL-ACTOR that executed in FSVN-VAR-ALIST"
+  "Create process sentinel FSVN-ORIGINAL-ACTOR that executed in FSVN-VAR-ALIST"
   `(lambda (fsvn-async-proc fsvn-async-event)
      (let ,fsvn-var-alist
        ,(if fsvn-original-actor
@@ -161,7 +161,8 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
 	 (with-current-buffer (process-buffer fsvn-async-proc)
 	   (fsvn-async-executor 
 	    (process-get fsvn-async-proc 'fsvn-async-remain-forms)
-	    ',(mapcar 'car fsvn-var-alist)))))))
+	    ',(mapcar 'car fsvn-var-alist)
+	    fsvn-async-proc))))))
 
 (defun fsvn-async-create-filter (fsvn-original-actor fsvn-var-alist)
   "Create process sentinel/filter FSVN-ORIGINAL-ACTOR that executed in FSVN-VAR-ALIST"
@@ -177,26 +178,69 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
       (goto-char (point-max))
       (insert event))))
 
-(defun fsvn-async-executor (fsvn-exec-list fsvn-var-list)
-  (let (fsvn-ret-return fsvn-exec-form)
-    (while fsvn-exec-list
-      (setq fsvn-exec-form (car fsvn-exec-list))
-      (setq fsvn-exec-list (cdr fsvn-exec-list))
-      (setq fsvn-ret-return (eval fsvn-exec-form))
-      (when (processp fsvn-ret-return)
-	(let ((fsvn-var-alist
+(defun fsvn-async-executor (forms variables &optional exited-process)
+  (let (ret form suspended)
+    (while forms
+      (setq form (car forms))
+      (setq forms (cdr forms))
+      (setq ret (eval form))
+      (cond
+       ((not (processp ret))) ;; do nothing
+       ((process-get ret 'fsvn-async-under-controlled-p)
+	;; Child level of `fsvn-asyc-let'
+	;;FIXME althogh current implement not through this condition.
+
+	;; works well.
+	;; (fsvn-async-let ()
+	;;   (start-process) 
+	;;   (fsvn-async-let ()
+	;;     (start-process))
+	;;   (start-process))
+
+	;; not work
+	;; (fsvn-async-let ()
+	;;   (start-process) 
+	;;   (fsvn-async-let ()
+	;;     (start-process)
+	;;     (fsvn-async-let ()
+	;;       (start-process))
+	;;     (start-process))
+	;;   (start-process))
+
+	(let ((var-alist
 	       (mapcar
 		(lambda (var)
 		  (cons var (cons (list 'quote (eval var)) nil)))
-		fsvn-var-list)))
-	  (process-put fsvn-ret-return 'fsvn-async-remain-forms fsvn-exec-list)
-	  ;;TODO add-sentinel makes bug? recursive call?
-	  (set-process-sentinel fsvn-ret-return
-				(fsvn-async-create-sentinel (process-sentinel fsvn-ret-return) fsvn-var-alist))
-	  (set-process-filter fsvn-ret-return 
-			      (fsvn-async-create-filter (process-filter fsvn-ret-return) fsvn-var-alist)))
-	(setq fsvn-exec-list nil)))
-    fsvn-ret-return))
+		variables))
+	      (delegate (process-get ret 'fsvn-async-delegate-function)))
+	  (process-put ret 'fsvn-async-delegate-function 
+		       `(lambda () (fsvn-async-executor ',forms ',variables)))
+	  (setq forms nil
+		suspended t)))
+       (t
+	;; Sibling level in `fsvn-asyc-let'
+	(let ((var-alist
+	       (mapcar
+		(lambda (var)
+		  (cons var (cons (list 'quote (eval var)) nil)))
+		variables)))
+	  (process-put ret 'fsvn-async-under-controlled-p t)
+	  (process-put ret 'fsvn-async-remain-forms forms)
+	  (set-process-sentinel ret
+				(fsvn-async-create-sentinel (process-sentinel ret) var-alist))
+	  (set-process-filter ret 
+			      (fsvn-async-create-filter (process-filter ret) var-alist))
+	  (when exited-process
+	    (process-put ret 'fsvn-async-delegate-function 
+			 (process-get exited-process 'fsvn-async-delegate-function))))
+	(setq forms nil
+	      suspended t))))
+    (when exited-process
+      (unless suspended
+	(let ((func (process-get exited-process 'fsvn-async-delegate-function)))
+	  (when func
+	    (funcall func)))))
+    ret))
 
 (defmacro fsvn-process-event-handler (proc event &rest form)
   `(with-current-buffer (process-buffer ,proc)

@@ -290,6 +290,20 @@ To show and see result.
 (fsvn-test-equal (fsvn-url-only-child "/a/b" "/a/b/c") "/a/b/c")
 (fsvn-test-nil (fsvn-url-only-child "/a/b" "/a/b"))
 
+(let ((buffer (fsvn-popup-result-create-buffer)))
+  (with-current-buffer buffer
+    (fsvn-async-let ()
+      (start-process "TEST1" (current-buffer) "sh" "-c" "echo 1 && sleep 1 && echo 2")
+      ;; (fsvn-async-let ()
+      ;;   (start-process "TEST2" (current-buffer) "sh" "-c" "echo 3 && sleep 1 && echo 4")
+      ;;   (start-process "TEST3" (current-buffer) "sh" "-c" "echo 5 && sleep 1 && echo 6"))
+      (start-process "TEST4" (current-buffer) "sh" "-c" "echo 7 && sleep 1 && echo 8")
+      (start-process "TEST5" (current-buffer) "sh" "-c" "echo 9 && sleep 1 && echo 10")))
+  (sit-for 5)
+  (with-current-buffer buffer
+    (fsvn-test-equal "1\n2\nfinished\n7\n8\nfinished\n9\n10\nfinished\n" (buffer-string)))
+  (kill-buffer buffer))
+
 ;; non interactive test
 (fsvn-test-excursion
  (let* ((test-dir (fsvn-make-temp-directory))
