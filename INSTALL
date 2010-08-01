@@ -2,9 +2,7 @@
 
    tar xzf fsvn-(version).tar.gz
 
-2. cd to the directory where you unpacked fsvn.
-
-3. If you have `make' command, following instructions.
+2. If you have `make' command, `cd' to the directory where you unpacked fsvn.
 
   a. Edit MAKE-CFG.el and Makefiler.
 
@@ -18,4 +16,4 @@
 
   ** On NTEmacs read the mw32cmp.el header and complete the instalattion. **
 
-4. If you have no `make' command simply copy *.el files to `load-path' where you want.
+3. If you have no `make' command simply copy *.el files to `load-path' where you want.
