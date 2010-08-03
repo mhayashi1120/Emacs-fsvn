@@ -54,6 +54,7 @@ from other repository
 SomeFile.Designer.cs -> AnyFile.Designer.cs
 SomeFile.cs          -> AnyFile.cs
 
+** can create patch
 
 * select-file-mode
 ** symbolic link
@@ -91,6 +92,10 @@ SomeFile.cs          -> AnyFile.cs
 ** fsvn-log-message-buffer-name, fsvn-log-sibling-buffer-name contains first space then fontify is not work.
 
 ** tortoise like log cache.
+
+cache log xml file to ~/.fsvn/cache/logs/{md5}
+each file contains one revision
+revision range and log base url
 
 ** fsvn-log-list-mode gui viewer.
  call tortoise viewer (Windows)
