@@ -425,7 +425,7 @@ Keybindings:
     (setq diff-args (list
 		     (format "--new=%s" (cdr revs))
 		     (format "--old=%s" (car revs))))
-    (fsvn-diff-call-process diff-args args)))
+    (fsvn-diff-start-process diff-args args)))
 
 (defun fsvn-log-list-ediff-with-region ()
   (let* ((revs (fsvn-log-list-region-revision))
@@ -739,7 +739,7 @@ Otherwise diff at point revision with working copy file or directory.
 	(rev (fsvn-log-list-point-revision))
 	buffer diff-args)
     (setq diff-args (list "--revision" rev file))
-    (fsvn-diff-call-process diff-args args)))
+    (fsvn-diff-start-process diff-args args)))
 
 (defun fsvn-log-list-ediff-with-wc ()
   (interactive)
@@ -1085,7 +1085,7 @@ Keybindings:
    (let* (diff-args)
      (setq diff-args (list (format "--new=%s" URLREV)
 			   (format "--old=%s" PREV-URLREV)))
-     (fsvn-diff-call-process diff-args args))))
+     (fsvn-diff-start-process diff-args args))))
 
 (defun fsvn-log-sibling-ediff-previous ()
   "Ediff with previous version."

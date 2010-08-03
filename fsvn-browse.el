@@ -2254,7 +2254,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (fsvn-browse-wc-only
    (let ((diff-args (list file args)))
-     (fsvn-diff-call-process diff-args))))
+     (fsvn-diff-start-process diff-args))))
 
 (defun fsvn-browse-ediff-this (file)
   "Ediff for point FILE."

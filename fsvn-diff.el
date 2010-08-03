@@ -68,11 +68,14 @@
 
 (defvar fsvn-diff-buffer-subcommand-args nil)
 
-(defun fsvn-diff-call-process (&rest args)
-  (let ((buffer (fsvn-diff-get-buffer args)))
-    (fsvn-call-command-display "diff" buffer args)
-    (fsvn-diff-setup-mode buffer args)
-    (fsvn-buffer-popup-as-information buffer)))
+(defun fsvn-diff-start-process (&rest args)
+  (let ((buffer (fsvn-diff-get-buffer args))
+	proc)
+    (prog1
+	(setq proc (fsvn-start-command-display "diff" buffer args))
+      (fsvn-diff-setup-mode buffer args)
+      (fsvn-buffer-popup-as-information buffer)
+      (set-process-sentinel proc (lambda (proc event))))))
 
 (defun fsvn-diff-get-buffer (diff-args)
   (let ((args (fsvn-flatten-command-args diff-args))

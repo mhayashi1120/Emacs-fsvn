@@ -169,11 +169,13 @@
 	(setq dir (fsvn-file-name-directory2 dir)))
       nil)))
 
-(defun fsvn-get-file-logs (file &optional rev-range)
+(defun fsvn-get-file-logs (file &optional rev-range count)
   (with-temp-buffer
     (let ((args (list "--xml" "--verbose")))
       (when rev-range
 	(setq args (append args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
+      (when count
+	(setq args (append args (list "--limit" count))))
       (setq args (append args (list file)))
       (when (= (apply 'fsvn-call-command "log" t args) 0)
 	(fsvn-xml-parse-logentry)))))

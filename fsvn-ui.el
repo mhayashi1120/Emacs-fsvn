@@ -199,7 +199,8 @@ This is what the do-commands look for, and what the mark-commands store.")
       (setq win (split-window)))
     (set-window-buffer win buffer)
     (fsvn-save-window-only win
-      (goto-char (point-min)))))
+      (goto-char (point-min)))
+    (redisplay t)))
 
 (defun fsvn-buffer-popup-window ()
   (save-window-excursion

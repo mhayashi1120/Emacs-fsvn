@@ -110,10 +110,9 @@ SomeFile.cs          -> AnyFile.cs
 proplist --recursive
 
 * diff
-** async diff
 ** ediff directory
 ** diff directory
-** diff binary file throw filter program.(Like OpenOffice file)
+** diff binary file invoke filter program. (Like OpenOffice file)
 
 
 * Other

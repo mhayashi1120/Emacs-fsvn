@@ -442,7 +442,7 @@ Keybindings:
   (interactive (fsvn-select-file-cmd-file "diff" fsvn-default-args-diff))
   (let (diff-args)
     (setq diff-args (list file args))
-    (fsvn-diff-call-process diff-args)))
+    (fsvn-diff-start-process diff-args)))
 
 (defun fsvn-select-file-ediff-base (file)
   (interactive (fsvn-select-file-command-file))

@@ -7,14 +7,18 @@
 
 ;;; Code:
 
+;; requires extended emacs-wiki-mode that have not been published.
+(require 'emacs-wiki)
+
 (defvar fsvn-publish-doc-directory
   "~/.emacs.d/util/fsvn/DOC")
 
 (set-alist 'emacs-wiki-projects
 	     "FsvnWiki" 
-	     '((emacs-wiki-directories . ("~/.emacs.d/util/fsvn/DOC/Wiki/" "~/.emacs.d/util/fsvn/DOC/Wiki/howto"))
+	     `((emacs-wiki-directories . ,(list (expand-file-name "Wiki" fsvn-publish-doc-directory)
+						(expand-file-name "Wiki/howto" fsvn-publish-doc-directory)))
 	       (emacs-wiki-project-server-prefix)
-	       (emacs-wiki-publishing-directory . "~/.emacs.d/util/fsvn/DOC/WebWiki")))
+	       (emacs-wiki-publishing-directory . ,(expand-file-name "WebWiki" fsvn-publish-doc-directory))))
 
 (defconst fsvn-publish-template-directory
   (expand-file-name "Templates" fsvn-publish-doc-directory))
@@ -71,7 +75,6 @@
 
 (defun fsvn-publish ()
   (interactive)
-  (require 'emacs-wiki)
   (let* ((emacs-wiki-current-project "FsvnWiki")
 	 (emacs-wiki-directories)
 	 (emacs-wiki-publishing-directory fsvn-publish-publishing-directory)
