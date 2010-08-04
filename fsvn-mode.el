@@ -11,6 +11,8 @@
 
 
 
+(require 'easymenu)
+
 (require 'fsvn-deps)
 (require 'fsvn-env)
 (require 'fsvn-ui)

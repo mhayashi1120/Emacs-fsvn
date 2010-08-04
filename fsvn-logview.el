@@ -634,7 +634,7 @@ Keybindings:
      (setq to (fsvn-completing-read-revision "Revision to: " nil nil url))
      (list url (cons from to)))))
 
-;; * fsvn-log-list-mode interactive command
+;; * fsvn-log-list-mode interactive commands
 
 (defun fsvn-log-list-reload-with-change-limit (count)
   (interactive (fsvn-log-list-cmd-read-reload-with-change-limit))
@@ -1054,7 +1054,7 @@ Keybindings:
     (setq file (fsvn-log-read-save-file url rev))
     (list (fsvn-url-urlrev url rev) file)))
 
-;; * fsvn-log-sibling-mode interactive command
+;; * fsvn-log-sibling-mode interactive commands
 
 (defun fsvn-log-sibling-next-line (&optional arg)
   "Move to next line."
@@ -1179,14 +1179,14 @@ Keybindings:
 (defun fsvn-log-message-cmd-read-commit ()
   (cond
    ((not (buffer-modified-p))
-    (error "Message was not changed."))
+    (error "Message is not changed."))
    ((not (y-or-n-p "Really commit changed log? "))
     (error "quit"))))
 
 (defun fsvn-log-message-cmd-read-quit-edit ()
   ;;TODO consider specific
   (when (buffer-modified-p)
-    (error "Log message was changed.")))
+    (error "Log message is changed.")))
 
 (defun fsvn-log-message-cmd-read-browse-this ()
   (let ((link (get-text-property (point) 'fsvn-url-link)))
@@ -1194,7 +1194,7 @@ Keybindings:
       (error "No url here."))
     (list link)))
 
-;; * fsvn-log-message-mode interactive command
+;; * fsvn-log-message-mode interactive commands
 
 (defun fsvn-log-message-browse-this (link)
   "Ask a WWW browser to load URL if exists on the point."
@@ -1308,6 +1308,100 @@ Keybindings:
 	 (fsvn-log-list-insert-entry entry))
        entries)
       (font-lock-fontify-buffer))))
+
+
+
+(defconst fsvn-log-list-mode-menu-spec
+  '("fsvn"
+    ["Show Details" fsvn-log-list-show-details t]
+    ["Save" fsvn-log-list-save-this t]
+    ("General"
+     ["Next Marked" fsvn-log-list-next-mark t]
+     ["Next" fsvn-log-list-next-line t]
+     ["Previous Marked" fsvn-log-list-previous-mark t]
+     ["Previous" fsvn-log-list-previous-line t]
+     ["Put Mark" fsvn-log-list-mark-put-mark t]
+     ["Quit" fsvn-log-list-quit t]
+     ["Scroll Down" fsvn-log-list-scroll-message-down t]
+     ["Scroll Up" fsvn-log-list-scroll-message-up t]
+     ["Unmark" fsvn-log-list-mark-unmark t]
+     )
+    ("Log"
+     ["Change List Count" fsvn-log-list-reload-with-change-limit t]
+     ["Cycle Window" fsvn-log-switch-to-message t]
+     ["Next Range" fsvn-log-list-next-log t]
+     ["Open" fsvn-log-list-open-revision t]
+     ["Previous Range" fsvn-log-list-previous-log t]
+     ["Reload with Revision Range" fsvn-log-list-reload-with-revision t]
+     ["Save" fsvn-log-list-save-this t]
+     ["Show Details" fsvn-log-list-show-details t]
+     ["Toggle Details" fsvn-log-list-toggle-details t]
+     )
+    ("Diff"
+     ["Diff" fsvn-log-list-diff-generic t]
+     ["Diww with wc" fsvn-log-list-diff-with-wc t]
+     ["Ediff with wc" fsvn-log-list-ediff-with-wc t]
+     ["Ediff" fsvn-log-list-ediff-generic t]
+     )
+    ("Search"
+     ["ISearch and Jump" fsvn-log-list-isearch-text t]
+     ["Search and Mark" fsvn-log-list-mark-searched t]
+     )
+    ("Edit"
+     ["Copy to wc" fsvn-log-list-copy-urlrev t]
+     ["Edit Revision Property" fsvn-log-list-edit-revprop t]
+     ["Import with Merge" fsvn-log-list-merged-import t]
+     )
+    ))
+
+(easy-menu-define fsvn-log-list-mode-menu
+  fsvn-log-list-mode-map
+  "Menu used in Fsvn Log List mode."
+  fsvn-log-list-mode-menu-spec)
+
+(defconst fsvn-log-sibling-mode-menu-spec
+  '("fsvn"
+    ("General"
+     ["Close Window" fsvn-restore-previous-window-setting t]
+     ["Next" fsvn-log-sibling-next-line t]
+     ["Previous" fsvn-log-sibling-previous-line t]
+     ["Restore Window Settings" fsvn-restore-default-window-display t]
+     )
+    ("Show"
+     ["Log" fsvn-log-sibling-log-this t]
+     ["Open Directory" fsvn-log-sibling-open-this-directory t]
+     ["Open" fsvn-log-sibling-open-this t]
+     ["Save" fsvn-log-sibling-save-this t]
+     )
+    ("Diff"
+     ["Diff Previous" fsvn-log-sibling-diff-previous t]
+     ["Ediff Previous" fsvn-log-sibling-ediff-previous t]
+     )
+    ("Other"
+     ["" fsvn-log-sibling-copy-this t]
+     )
+    ))
+
+(easy-menu-define fsvn-log-sibling-mode-menu
+  fsvn-log-sibling-mode-map
+  "Menu used in Fsvn Log Sibling mode."
+  fsvn-log-sibling-mode-menu-spec)
+
+(defconst fsvn-log-message-mode-menu-spec
+  '("fsvn"
+    ["Cycle Window" fsvn-log-switch-to-sibling t]
+    ["Browse URL at Point" fsvn-log-message-browse-this t]
+    ["Prepare for Edit Message" fsvn-log-message-start-edit t]
+    ["Commit Changed Message" fsvn-log-message-commit t]
+    ["Quit Edit" fsvn-log-message-quit-edit t]
+    ["Restore Window Settings" fsvn-restore-default-window-display t]
+    ["Close Window" fsvn-restore-previous-window-setting t]
+    ))
+
+(easy-menu-define fsvn-log-message-mode-menu
+  fsvn-log-message-mode-map
+  "Menu used in Fsvn Log Message mode."
+  fsvn-log-message-mode-menu-spec)
 
 
 

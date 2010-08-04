@@ -176,7 +176,7 @@ Keybindings:
 	 (temporary-file-directory dir))
     (make-temp-file (format-time-string "%s"))))
 
-;; * fsvn-message-edit-mode interactive command
+;; * fsvn-message-edit-mode interactive commands
 
 (defun fsvn-message-edit-previous-message ()
   (interactive)

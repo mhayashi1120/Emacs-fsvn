@@ -430,7 +430,7 @@ Keybindings:
       (forward-line 0)
       (fsvn-select-file-draw-internal status))))
 
-;; * fsvn-select-file-mode interactive command
+;; * fsvn-select-file-mode interactive commands
 
 (defun fsvn-select-file-view-file (file)
   (interactive (fsvn-select-file-command-file))

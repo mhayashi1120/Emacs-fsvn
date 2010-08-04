@@ -94,7 +94,7 @@ Keybindings:
       (run-mode-hooks 'fsvn-popup-result-mode-hook))
     ret))
 
-;; * fsvn-popup-result-mode interactive command
+;; * fsvn-popup-result-mode interactive commands
 
 (defun fsvn-popup-result-send-string ()
   (interactive)

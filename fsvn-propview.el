@@ -316,7 +316,7 @@ Keybindings:
       (error "No propname on this line"))
     (list (fsvn-proplist-current-propname))))
 
-;; * fsvn-proplist-mode interactive command
+;; * fsvn-proplist-mode interactive commands
 
 (defun fsvn-proplist-next-line (&optional arg)
   (interactive "p")
@@ -485,7 +485,7 @@ Keybindings:
     (let (buffer-read-only)
       (erase-buffer))))
 
-;; * fsvn-propedit-mode interactive command
+;; * fsvn-propedit-mode interactive commands
 
 (defun fsvn-propedit-save ()
   (interactive)
