@@ -1,6 +1,0 @@
-----
-* Basic use of fsvn.el
-----
-** First of all
-----
-TODO
