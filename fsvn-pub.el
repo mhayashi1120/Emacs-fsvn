@@ -512,7 +512,12 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Argument REV-RANGE revision range cons cell `(start . end)'
 Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings.
 "
-  (let ((root (or fsvn-buffer-repos-root (fsvn-get-root urlrev)))
+  (let ((root (or (and fsvn-buffer-repos-root
+		       (string-match 
+			(concat "^" (regexp-quote fsvn-buffer-repos-root))
+			urlrev)
+		       fsvn-buffer-repos-root)
+		  (fsvn-get-root urlrev)))
 	entries buffer win-config prev-entries)
     (setq buffer (fsvn-log-list-get-buffer urlrev))
     (cond

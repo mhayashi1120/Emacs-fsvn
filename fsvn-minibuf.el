@@ -131,7 +131,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 	 (default-rev (and default-urlrev (fsvn-urlrev-revision default-urlrev)))
 	 (url (fsvn-completing-read-url prompt default-url only-repository))
 	 (rev (fsvn-completing-read-revision 
-	       (format "%s %s Revision: " (or prompt "URL") url)
+	       (format "%s%s Revision: " (or prompt "URL: ") url)
 	       default-rev nil url)))
     (fsvn-url-urlrev url rev)))
 

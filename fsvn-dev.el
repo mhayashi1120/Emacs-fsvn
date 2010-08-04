@@ -201,77 +201,79 @@ How to send a bug report:
     ["Log" fsvn-browse-logview-path t]
     ["Diff" fsvn-browse-diff-this t]
     "----"
-    ("Manipulate Current Directory"
+    ("Current Directory"
+     ["Cleanup" fsvn-browse-cleanup-path t]
      ["Commit" fsvn-browse-commit-path t]
      ["Export" fsvn-browse-export-path t]
      ["Info" fsvn-browse-info-path t]
      ["Log" fsvn-browse-logview-path t]
      ["Merge" fsvn-browse-merge-path t]
+     ["Mergeinfo" fsvn-browse-mergeinfo-path t]
      ["Mkdir" fsvn-browse-mkdir t]
+     ["Patch" fsvn-browse-create-patch-path t]
      ["Proplist" fsvn-browse-propview-path t]
      ["Revert" fsvn-browse-revert-path t]
-     ["Update" fsvn-browse-update-path t]
      ["Switch" fsvn-browse-switch-path t]
-     ["Cleanup" fsvn-browse-cleanup-path t]
+     ["Update" fsvn-browse-update-path t]
      ["Upgrade source tree" fsvn-browse-upgrade-source-tree t]
      )
-    ("Repository Browser"
-     ["Magic" fsvn-browse-magic-head t]
-     ["Browser" fsvn-browse-open-repository t]
-     ["Mergeinfo" fsvn-browse-mergeinfo-path t]
-     ["Branch" fsvn-browse-create-branch t]
-     ["Tag" fsvn-browse-create-tag t]
-     )
-    ("Manipulate Files"
-     ["Delete selected" fsvn-browse-delete-selected t]
-     ["Add selected" fsvn-browse-add-selected t]
-     ["Revert selected" fsvn-browse-revert-selected t]
-     ["Copy selected" fsvn-browse-copy-selected t]
-     ["Move selected" fsvn-browse-move-selected t]
-     ["Lock selected" fsvn-browse-lock-selected t]
-     ["Unlock selected" fsvn-browse-unlock-selected t]
-     ["Update selected" fsvn-browse-update-selected t]
+    ("Selected Files"
+     ["Add" fsvn-browse-add-selected t]
      ["Add to changelist" fsvn-browse-add-changelist-selected t]
-     ["Remove from changelist" fsvn-browse-remove-changelist-selected t]
-     ["Commit selected" fsvn-browse-commit-selected t]
-     ["Info selected" fsvn-browse-info-selected t]
+     ["Commit" fsvn-browse-commit-selected t]
+     ["Copy" fsvn-browse-copy-selected t]
+     ["Delete" fsvn-browse-delete-selected t]
      ["Externals" fsvn-browse-svn:externals-selected t]
-     ["Resolved selected" fsvn-browse-resolved-selected t]
-     ["Resolve selected" fsvn-browse-resolve-selected t]
-     ["Toggle svn:needs-lock selected" fsvn-browse-prop-toggle-svn:needs-lock-selected t]
-     ["Toggle svn:ignore selected" fsvn-browse-prop-add-svn:ignore-selected t]
+     ["Info" fsvn-browse-info-selected t]
+     ["Lock" fsvn-browse-lock-selected t]
+     ["Move" fsvn-browse-move-selected t]
+     ["Patch" fsvn-browse-create-patch-selected t]
+     ["Remove from changelist" fsvn-browse-remove-changelist-selected t]
+     ["Resolve" fsvn-browse-resolve-selected t]
+     ["Resolved" fsvn-browse-resolved-selected t]
+     ["Revert" fsvn-browse-revert-selected t]
+     ["Toggle svn:ignore" fsvn-browse-prop-add-svn:ignore-selected t]
+     ["Toggle svn:needs-lock" fsvn-browse-prop-toggle-svn:needs-lock-selected t]
+     ["Unlock" fsvn-browse-unlock-selected t]
+     ["Update" fsvn-browse-update-selected t]
      )
-    ("Manipulate A File"
-     ["Proplist of point" fsvn-browse-propview-this t]
-     ["Merge to point" fsvn-browse-merge-this t]
-     ["Mergeinfo of point" fsvn-browse-mergeinfo-this t]
-     ["EDiff" fsvn-browse-ediff-this t]
-     ["Diff" fsvn-browse-diff-this t]
+    ("File At Point"
      ["Blame/Annotate" fsvn-browse-blame-this t]
-     ["Export" fsvn-browse-export-this t]
-     ["Log" fsvn-browse-logview-this t]
-     ["Copy" fsvn-browse-copy-this t]
-     ["Move" fsvn-browse-move-this t]
      ["Copy in repository" fsvn-browse-copy-this-in-repository t]
+     ["Copy" fsvn-browse-copy-this t]
+     ["Diff" fsvn-browse-diff-this t]
+     ["EDiff" fsvn-browse-ediff-this t]
+     ["Export" fsvn-browse-export-this t]
+     ["Fix Filename Case" fsvn-browse-rename-case-missing-file t]
+     ["Log" fsvn-browse-logview-this t]
+     ["Merge" fsvn-browse-merge-this t]
+     ["Mergeinfo" fsvn-browse-mergeinfo-this t]
+     ["Move" fsvn-browse-move-this t]
+     ["Paste properties" fsvn-browse-paste-properties-to-this t]
+     ["Proplist" fsvn-browse-propview-this t]
      ["Safe Copy" fsvn-browse-safe-copy-this t]
      ["Safe Move" fsvn-browse-safe-move-this t]
-     ["Fix Filename Case" fsvn-browse-rename-case-missing-file t]
-     ["Paste properties" fsvn-browse-paste-properties-to-this t]
+     )
+    ("Repository"
+     ["Browser" fsvn-browse-open-repository t]
+     ["Create Branch" fsvn-browse-create-branch t]
+     ["Create Tag" fsvn-browse-create-tag t]
+     ["Open dired by Magic" fsvn-browse-magic-head t]
      )
     "----"
     ("Emmulate Dired"
-     ["Mark Regexp" fsvn-browse-mark-file-regexp t]
-     ["Mark Delete Regexp" fsvn-browse-mark-delete-regexp t]
-     ["Unmark All" fsvn-browse-mark-all-unmark t]
-     ["Unmark File" fsvn-browse-mark-file-unmark t]
-     ["Mark Delete" fsvn-browse-mark-file-delete t]
-     ["Mark" fsvn-browse-mark-file-mark t]
      ["Diff" fsvn-browse-diff-local t]
+     ["Mark Delete Regexp" fsvn-browse-mark-delete-regexp t]
+     ["Mark Delete" fsvn-browse-mark-file-delete t]
+     ["Mark Regexp" fsvn-browse-mark-file-regexp t]
+     ["Mark" fsvn-browse-mark-file-mark t]
      ["Next" fsvn-browse-next-file t]
      ["Previous" fsvn-browse-previous-file t]
      ["Sort" fsvn-browse-toggle-sort t]
-     ["View" fsvn-browse-file-this t]
+     ["Unmark All" fsvn-browse-mark-all-unmark t]
+     ["Unmark File" fsvn-browse-mark-file-unmark t]
      ["Up" fsvn-browse-up-directory t]
+     ["View" fsvn-browse-file-this t]
      )
     ))
 
@@ -372,6 +374,30 @@ How to send a bug report:
   "Menu used in Fsvn Log Message Edit mode."
   fsvn-message-edit-mode-menu-spec)
 
+
+
+;; ~/.fsvn/cache/log/{root-hash}
+;; ~/.fsvn/cache/log/{root-hash}/revs
+;; ~/.fsvn/cache/log/{root-hash}/revs/{1,2,3,....N}
+;; ~/.fsvn/cache/log/{root-hash}/index/{path-hash}....
+
+(defun fsvn-log-cache-create (root path entries)
+  )
+
+(defun fsvn-log-cache-search (urlrev root rev-range count)
+  )
+
+(defun fsvn-log-cache-clenup (root)
+  )
+
+
+
+(defmacro fsvn-test-buffer-has (buffer regexp)
+  `(with-current-buffer ,buffer
+     (save-excursion
+       (goto-char (point-min))
+       (unless (re-search-forward ,regexp nil t)
+	 (error "Assertion failed Expected %s have not found" ,regexp)))))
 
 
 

@@ -218,6 +218,8 @@
 	  (define-key map "\C-v\ec" 'fsvn-browse-cleanup-path)
 	  (define-key map "\C-vr" 'fsvn-browse-revert-selected)
 	  (define-key map "\C-vR" 'fsvn-browse-revert-path)
+	  (define-key map "\C-vp" 'fsvn-browse-create-patch-selected)
+	  (define-key map "\C-vP" 'fsvn-browse-create-patch-path)
 	  (define-key map "\C-va" 'fsvn-browse-add-selected)
 	  (define-key map "\C-v\C-c" 'fsvn-browse-copy-selected)
 	  (define-key map "\C-v\C-d" 'fsvn-browse-delete-selected)
@@ -1464,16 +1466,6 @@ PATH is each executed path."
       (error "No file on this line"))
     files))
 
-(defun fsvn-browse-cmd-read-paste-properties-to-this ()
-  (fsvn-browse-cmd-wc-only
-   (let ((src-file)
-	 (dest-file (fsvn-browse-point-local-filename))
-	 (arg current-prefix-arg))
-     (unless dest-file
-       (error "No file on this line"))
-     (setq src-file (fsvn-read-file-name "Properties copy from: " nil nil t))
-     (list src-file dest-file arg))))
-
 
 
 ;; general read function
@@ -1689,6 +1681,29 @@ PATH is each executed path."
      (unless (y-or-n-p "This takes many seconds. ok? ")
        (error "quit"))
      (list dir))))
+
+(defun fsvn-browse-cmd-read-paste-properties-to-this ()
+  (fsvn-browse-cmd-wc-only
+   (let ((src-file)
+	 (dest-file (fsvn-browse-point-local-filename))
+	 (arg current-prefix-arg))
+     (unless dest-file
+       (error "No file on this line"))
+     (setq src-file (fsvn-read-file-name "Properties copy from: " nil nil t))
+     (list src-file dest-file arg))))
+
+(defun fsvn-browse-cmd-read-create-patch-path ()
+  (let* ((patch (fsvn-read-file-name "Patch file: ")))
+    (when (file-exists-p patch)
+      (unless (y-or-n-p "File exists. Overwrite? ")
+	(error "quit")))
+    (list patch)))
+
+(defun fsvn-browse-cmd-read-create-patch-selected ()
+  (fsvn-browse-cmd-wc-only
+   (let* ((files (fsvn-browse-cmd-selected-urls))
+	  (patch (car (fsvn-browse-cmd-read-create-patch-path))))
+    (list files patch))))
 
 ;; * fsvn-browse-mode interactive command
 
@@ -2346,6 +2361,24 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
 	     (fsvn-set-prop-delete dest-file prop)))
 	 list)))
     (fsvn-browse-redraw-wc-file-entry dest-file)))
+
+(defun fsvn-browse-create-patch-path (patch-file)
+  "Create PATCH-FILE for current directory."
+  (interactive (fsvn-browse-cmd-read-create-patch-path))
+  (fsvn-browse-create-patch-selected (list default-directory) patch-file))
+
+(defun fsvn-browse-create-patch-selected (files patch-file)
+  "Create PATCH-FILE for for selected FILES."
+  (interactive (fsvn-browse-cmd-read-create-patch-selected))
+  (let ((file (fsvn-expand-file patch-file))
+	proc)
+    (write-region "" nil file)
+    (setq proc (fsvn-start-process nil "diff" (mapcar 'fsvn-file-relative files)))
+    (set-process-sentinel proc (lambda (proc event) 
+				 (message "Patch was created.")))
+    (set-process-filter proc `(lambda (proc event)
+				(write-region event nil ,file t)))
+    proc))
 
 
 

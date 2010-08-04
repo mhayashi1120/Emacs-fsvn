@@ -1,3 +1,7 @@
+2010-08-04  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: Can create patch.
+
 2010-08-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Improvement: Make `svn diff' asynchrounous.

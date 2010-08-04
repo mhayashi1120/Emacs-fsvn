@@ -54,7 +54,6 @@ from other repository
 SomeFile.Designer.cs -> AnyFile.Designer.cs
 SomeFile.cs          -> AnyFile.cs
 
-** can create patch
 
 * select-file-mode
 ** symbolic link
@@ -86,7 +85,6 @@ SomeFile.cs          -> AnyFile.cs
 
 ** fsvn-prop* code clean.
 
-** run-hooks -> run-mode-hooks (?)
 
 * logview-mode
 ** fsvn-log-message-buffer-name, fsvn-log-sibling-buffer-name contains first space then fontify is not work.
