@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+	<meta name="Content-Language" content="ja"/>
+	<meta http-equiv="Content-Style-Type" content="text/css"/>
+	<meta http-equiv="Content-Script-Type" content="text/javascript"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta http-equiv="Pragma" content="no-cache"/>
+	<meta http-equiv="Cache-Control" content="no-cache"/>
+
+	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/sfx.net.css"/>
+	<!--[if IE]><link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/iestyles.net.css"><![endif]-->
+	<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/ie6styles.net.css"><![endif]-->
+	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/sf.jp.theme.css"/>
+	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
+
+	<title>fsvn.el の使い方</title>
+
+  </head>
+  <body>
+	<a href="../index.html">Top</a>
+
+	<hr />
+	<h2>fsvn.el の基本的な使い方</h2>
+	<hr />
+	<h3>まず最初に</h3>
+	リポジトリへのアクセスにパスワードが必要な場合、認証情報を svn コマンドにキャッシュしてもらわないと動作しません。
+	<p>
+	  <code>M-x fsvn-authenticate-repository</code>
+	</p>
+	で操作する対象のリポジトリ(URL)を指定し、パスワードを入力してください。
+	<hr />
+	<h3>`fsvn-browse-mode'でよく使うコマンド</h3>
+	<hr />
+	<table class="ewiki-table" border="2" cellpadding="5">
+	  <tbody>
+		<tr>
+		  <td>z U (C-c C-u)</td><td>現在のディレクトリを更新する (update)</td>
+		</tr>
+		<tr>
+		  <td>z a</td><td>カーソル位置、またはマークしたファイルを追加する (add)</td>
+		</tr>
+		<tr>
+		  <td>z d</td><td>カーソル位置、またはマークしたファイルを削除する (delete)</td>
+		</tr>
+		<tr>
+		  <td>z c</td><td>カーソル位置、またはマークしたファイルの確認バッファ `fsvn-select-file-mode' を開く (commit)</td>
+		</tr>
+		<tr>
+		  <td>z C (C-c C-c)</td><td>現在のディレクトリの確認バッファ `fsvn-select-file-mode' を開く (commit)</td>
+		</tr>
+		<tr>
+		  <td>z L</td><td>現在のディレクトリのログを `fsvn-log-view-mode' で表示する (log)</td>
+		</tr>
+		<tr>
+		  <td>z l</td><td>カーソル位置のファイルのログを `fsvn-log-view-mode' で表示する (log)</td>
+		</tr>
+		<tr>
+		  <td>z p</td><td>`fsvn-proplist-mode' によるカーソル位置のファイルのプロパティの表示する (proplist)</td>
+		</tr>
+		<tr>
+		  <td>C-c C-v C-c</td><td>カーソル位置、またはマークしたファイルをコピーする (copy)</td>
+		</tr>
+		<tr>
+		  <td>C-c C-m C-m</td><td>カーソル位置、またはマークしたファイルを移動する (move)</td>
+		</tr>
+		<tr>
+		  <td>C-c C-v c</td><td>カーソル位置のファイルをコピーする (copy)</td>
+		</tr>
+		<tr>
+		  <td>C-c C-m m</td><td>カーソル位置のファイルを移動する (move)</td>
+		</tr>
+		<tr>
+		  <td>C-c C-v r</td><td>カーソル位置、またはマークしたファイルを元に戻す (revert)</td>
+		</tr>
+		<tr>
+		  <td>z k</td><td>カーソル位置、またはマークしたファイルをロックする (lock)</td>
+		</tr>
+		<tr>
+		  <td>z K</td><td>カーソル位置、またはマークしたファイルのロックを解除する (unlock)</td>
+		</tr>
+		<tr>
+		  <td>C-c C-d</td><td>`dired-mode' へ切り替える</td>
+		</tr>
+	  </tbody>
+	</table>
+
+	<hr />
+	<h3>`fsvn-message-edit-mode', `fsvn-select-file-mode'でよく使うコマンド (commit 時など)</h3>
+	<hr />
+	<table class="ewiki-table" border="2" cellpadding="5">
+	  <tbody>
+		<tr>
+		  <td>C-c C-c</td><td>メッセージの編集を終えて確定する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-k</td><td>メッセージの編集内容を破棄する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-o</td><td>関係するバッファがあれば切り替える</td>
+		</tr>
+		<tr>
+		  <td>&#61; &#61;</td><td>対象ファイルがバージョン管理下にある場合に diff を実行する (`fsvn-select-file-mode' のみ)</td>
+		</tr>
+		<tr>
+		  <td>&#61; e</td><td>&#61; &#61; と同じだが ediff を使用する</td>
+		</tr>
+	  </tbody>
+	</table>
+
+	<hr />
+	<h3>`fsvn-log-view-mode' でよく使うコマンド</h3>
+	<hr />
+	<table class="ewiki-table" border="2" cellpadding="5">
+	  <tbody>
+		<tr>
+		  <td>&#61; &#61;</td><td>作業コピーとの diff, リージョンが活性のときは始点と終点のリビジョンを比較する</td>
+		</tr>
+		<tr>
+		  <td>&#61; e</td><td>&#61; &#61; と同じだが ediff を使用する</td>
+		</tr>
+		<tr>
+		  <td>&gt;</td><td>表示中よりも過去のログを表示する</td>
+		</tr>
+		<tr>
+		  <td>&lt;</td><td>表示中よりも未来のログを表示する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-k</td><td>終了する</td>
+		</tr>
+	  </tbody>
+	</table>
+
+	<hr />
+	<h3>`fsvn-proplist-mode' でよく使うコマンド</h3>
+	<hr />
+	<table class="ewiki-table" border="2" cellpadding="5">
+	  <tbody>
+		<tr>
+		  <td>C-m</td><td>カーソル位置のプロパティの値を表示する</td>
+		</tr>
+		<tr>
+		  <td>a</td><td>プロパティを追加する</td>
+		</tr>
+		<tr>
+		  <td>d</td><td>カーソル位置のプロパティに削除用マークをつける</td>
+		</tr>
+		<tr>
+		  <td>e</td><td>カーソル位置のプロパティの編集を開始する</td>
+		</tr>
+		<tr>
+		  <td>r</td><td>カーソル位置のプロパティに再帰用マークをつける</td>
+		</tr>
+		<tr>
+		  <td>u</td><td>カーソル位置のプロパティにつけられたマークを外す</td>
+		</tr>
+		<tr>
+		  <td>x</td><td>マークされたプロパティへの操作を実行する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-k</td><td>終了する</td>
+		</tr>
+	  </tbody>
+	</table>
+
+	<hr />
+	<h3>`fsvn-propedit-mode' でよく使うコマンド</h3>
+	<hr />
+	<table class="ewiki-table" border="2" cellpadding="5">
+	  <tbody>
+		<tr>
+		  <td>C-c C-c</td><td>編集内容を保存する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-k</td><td>編集内容を破棄する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-o</td><td>`fsvn-proplist-mode'へ移動する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-r</td><td>編集内容を保存するときに再帰的に保存するようマークをつける</td>
+		</tr>
+	  </tbody>
+	</table>
+
+
+
+	<!-- Google Analytics -->
+	<script type="text/javascript">
+
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-16604794-9']);
+	  _gaq.push(['_setDomainName', '.sourceforge.jp']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+	  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+
+	<hr/>
+
+	<!-- Sourceforge.jp Logo -->
+	<div>
+	  <a href="http://sourceforge.jp/">
+		<img src="http://sourceforge.jp/sflogo.php?group_id=4907&amp;type=3"  width="210" height="63" border="0" alt="SourceForge.JP"/>
+	  </a>
+
+	  <!-- Google Adsense -->
+	  <script type="text/javascript">
+		<!--
+			google_ad_client="pub-8552692955110453";
+			google_ad_host="pub-9941151214016196";
+			google_alternate_color="FFFFFF";
+			google_ad_width=468;
+			google_ad_height=60;
+			google_ad_format="468x60_as";
+			google_ad_type="text_image";
+			google_color_border="003399";
+			google_color_bg="EEEEEE";
+			google_color_link="0000FF";
+			google_color_url="0000FF";
+			google_color_text="000000";
+			//-->
+	  </script>
+	  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+	  </script>
+	</div>
+
+  </body>
+</html>

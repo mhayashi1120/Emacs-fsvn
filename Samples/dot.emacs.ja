@@ -1,0 +1,21 @@
+;; exec-path に svn コマンドへの PATH を設定する。
+(setq exec-path (cons "/path/to/subversion/bin" exec-path))
+
+;; cygwin と windows native の svn が exec-path に混在している場合は上記の設定では動作しません。
+;; 以下のように絶対パスで指定してください。
+;; (setq fsvn-svn-command "c:/path/to/subversion/bin/svn.exe"
+;;       fsvn-svnadmin-command "c:/path/to/subversion/bin/svnadmin.exe")
+
+(require 'fsvn)
+
+;; ヘルプの表示言語を設定する
+(setq fsvn-help-locale "ja")
+
+;; 表示しているファイルの注釈を表示する
+(global-set-key "\C-xvG" 'fsvn-blame-minor-mode)
+;; 現在のディレクトリのファイルを指定した URL へ import する
+(global-set-key "\C-xvI" 'fsvn-import)
+;; 指定した URL から checkout する
+(global-set-key "\C-xvO" 'fsvn-checkout)
+;; 非同期プロセスが終了後に残した buffer を消す
+(global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
