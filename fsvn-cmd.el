@@ -150,13 +150,17 @@
       (when (= (apply 'fsvn-call-command "log" t args) 0)
 	(car (fsvn-xml-parse-logentry))))))
 
+;;TODO move to fsvn-deps
 (defun fsvn-get-file-parent-property (file propname &optional with-dir)
   (if (fsvn-file-exact-directory-p file)
       (fsvn-get-directory-parent-property file propname with-dir)
     (let ((dir (file-name-directory (directory-file-name file))))
       (fsvn-get-directory-parent-property dir propname with-dir))))
 
+;;TODO move to fsvn-deps
 (defun fsvn-get-directory-parent-property (directory propname &optional with-dir)
+  "Get DIRECTORY property PROPNAME upward to ancestor.
+WITH-DIR non-nil means return cell like (directory-name . property-value)."
   (let ((dir directory))
     (catch 'found
       (while (and (fsvn-directory-versioned-p dir)
