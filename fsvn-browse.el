@@ -2310,7 +2310,7 @@ When SRC-FILES is single list, DEST allows non existence filename."
     (cond
      ((fsvn-file-exact-directory-p dest)
       (setq targetdir dest)
-      (setq prop (fsvn-get-propget "svn:externals" targetdir))
+      (setq prop (fsvn-get-propget targetdir "svn:externals"))
       (when prop
 	(setq externals
 	      (split-string prop "\n" t)))
@@ -2323,7 +2323,7 @@ When SRC-FILES is single list, DEST allows non existence filename."
       (error "Destination file already exists."))
      (t
       (setq targetdir (fsvn-file-name-directory dest))
-      (setq prop (fsvn-get-propget "svn:externals" targetdir))
+      (setq prop (fsvn-get-propget targetdir "svn:externals"))
       (when prop
 	(setq externals
 	      (split-string prop "\n" t)))
@@ -2351,14 +2351,14 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      (lambda (key-value)
        (let ((prop (car key-value))
 	     (val (cdr key-value)))
-	 (fsvn-set-prop-value dest-file prop val)))
+	 (fsvn-set-propset dest-file prop val)))
      alist)
     (when full
       (let ((list (fsvn-get-proplist dest-file)))
 	(mapc
 	 (lambda (prop)
 	   (unless (assoc prop alist)
-	     (fsvn-set-prop-delete dest-file prop)))
+	     (fsvn-set-propdel dest-file prop)))
 	 list)))
     (fsvn-browse-redraw-wc-file-entry dest-file)))
 

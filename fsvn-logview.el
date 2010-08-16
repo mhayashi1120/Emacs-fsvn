@@ -691,6 +691,7 @@ Optional prefix ARG says how many lines to move; default is one line."
   (fsvn-log-list-next-line))
 
 (defun fsvn-log-list-show-details (rev)
+  "Show details about REV at point."
   (interactive (fsvn-log-list-cmd-read-revision))
   (fsvn-log-list-draw-details rev)
   (fsvn-log-list-setup-detail-windows)
@@ -708,8 +709,8 @@ Optional prefix ARG says how many lines to move; default is one line."
   (fsvn-log-list-scroll-message-buffer nil))
 
 (defun fsvn-log-list-diff-generic (&optional args)
-  "Diff current line with anything following case.
-Mark is activated diff for region terminated revisions.
+  "Diff current revision at point following cases.
+When mark is activated diff for region terminated revisions.
 Otherwise diff at point revision with working copy file or directory.
 "
   (interactive (fsvn-logview-cmd-read-diff-args))
@@ -734,6 +735,7 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-log-list-ediff-with-wc))))
 
 (defun fsvn-log-list-diff-with-wc (&optional args)
+  "Diff between current revision at point and log starting point."
   (interactive (fsvn-logview-cmd-read-diff-args))
   (let ((file fsvn-logview-target-urlrev)
 	(rev (fsvn-log-list-point-revision))
@@ -742,6 +744,7 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-diff-start-process diff-args args)))
 
 (defun fsvn-log-list-ediff-with-wc ()
+  "Ediff between current revision at point and log starting point."
   (interactive)
   (let* ((file fsvn-logview-target-urlrev)
 	 (urlrev (fsvn-log-list-point-urlrev))
@@ -750,6 +753,7 @@ Otherwise diff at point revision with working copy file or directory.
       (fsvn-ediff-files tmpfile file))))
 
 (defun fsvn-log-list-previous-log ()
+  "Diff between current revision at point and previous (-1) revision."
   (interactive)
   (let ((range (fsvn-log-list-current-revision-range))
 	new-range)
@@ -772,6 +776,8 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-log-list-show-details (fsvn-log-list-cmd-revision))))
 
 (defun fsvn-log-list-isearch-text (text)
+  "isearch TEXT in log all contents.
+see `fsvn-log-list-mark-searched'"
   (interactive
    (let* ((prompt (format "Search Text (%s): " (or (car fsvn-log-list-isarch-history) "")))
 	  (readed (read-from-minibuffer prompt
@@ -791,6 +797,8 @@ Otherwise diff at point revision with working copy file or directory.
       (message "No message was matched."))))
 
 (defun fsvn-log-list-mark-searched (text)
+  "Mark revision that have TEXT.
+see `fsvn-log-list-isearch-text'"
   (interactive (list (read-from-minibuffer
 		      "Search Text: " nil nil nil 'fsvn-log-list-isarch-history)))
   (let ((entries (fsvn-log-list-matched-entries text)))
@@ -811,6 +819,7 @@ Otherwise diff at point revision with working copy file or directory.
       (fsvn-set-revprop-value urlrev revprop value))))
 
 (defun fsvn-log-list-open-revision ()
+  "Open revision as file"
   (interactive)
   (let* ((rev (fsvn-log-list-point-revision))
 	 (url (fsvn-log-list-point-url))
@@ -827,6 +836,7 @@ Otherwise diff at point revision with working copy file or directory.
    (kill-buffer (current-buffer))))
 
 (defun fsvn-log-list-copy-urlrev ()
+  "Copy url at point."
   (interactive)
   (let ((urlrev (fsvn-log-list-point-urlrev)))
     (kill-new urlrev)

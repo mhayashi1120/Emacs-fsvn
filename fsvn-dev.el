@@ -192,6 +192,27 @@ How to send a bug report:
 
 
 
+;;TODO
+
+(add-hook 'fsvn-log-list-mode-hook
+	  (lambda ()
+	    (define-key fsvn-log-list-mode-map "l" 'fsvn-log-list-diff-local)))
+
+(defun fsvn-logview-cmd-read-diff-local ()
+  (list (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
+
+(defun fsvn-log-list-diff-local (local-file &optional args)
+  "Diff current revision at point with LOCAL-FILE.
+"
+  (interactive (fsvn-logview-cmd-read-diff-local))
+  (let ((file fsvn-logview-target-urlrev)
+	(rev (fsvn-log-list-point-revision))
+	buffer diff-args)
+    (setq diff-args (list "--revision" rev file))
+    (fsvn-diff-start-process diff-args args)))
+
+
+
 (defconst fsvn-proplist-mode-menu-spec
   '("fsvn"
 

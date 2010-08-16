@@ -2,12 +2,7 @@
 ;;; mw32cmp.el --- Meadow compatibility for NTEmacs.
 ;;
 ;; 1. run following command in expanded directory.
-;; svn export http://svn.meadowy.org/Meadow/trunk/lisp/international/mw32mci.el ./mw32mci.el
-;; svn export http://svn.meadowy.org/Meadow/trunk/lisp/international/mw32misc.el ./mw32misc.el
 ;; svn export http://svn.meadowy.org/Meadow/trunk/lisp/international/mw32script.el ./mw32script.el
-;;
-;; 2. run following command in expanded directory.
-;; patch < mw32el-ntemacs.patch
 ;;
 
 ;;; History:
@@ -27,7 +22,6 @@
 
 (require 'mw32script)
 (mw32script-make-pathext-regexp)
-(load "mw32misc")
 
 
 

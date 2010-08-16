@@ -16,10 +16,10 @@
 (defun fsvn-get-prop-value-alist (urlrev)
   (mapcar
    (lambda (propname)
-     (cons propname (fsvn-get-propget propname urlrev)))
+     (cons propname (fsvn-get-propget urlrev propname)))
    (fsvn-get-proplist urlrev)))
 
-(defun fsvn-get-propget (propname url)
+(defun fsvn-get-propget (url propname)
   (with-temp-buffer
     ;; don't use --xml because 1.4.x not supported.
     (when (= (fsvn-call-command "propget" t propname url) 0)
@@ -217,7 +217,7 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
   (fsvn-get-boolean-prop-value file "svn:needs-lock"))
 
 (defun fsvn-get-boolean-prop-value (file propname)
-  (not (not (fsvn-get-propget propname file))))
+  (not (not (fsvn-get-propget file propname))))
 
 (defun fsvn-get-temporary-wc (urlrev &optional recursive)
   (with-temp-buffer
@@ -293,9 +293,10 @@ FILENAME non-nil means ignore DEST-URL filename section."
 
 
 
-(defun fsvn-set-prop-value (file propname value)
+(defun fsvn-set-propset (file propname value)
   (let ((tmpfile (fsvn-get-prop-temp-file propname value)))
     (fsvn-call-command-discard "propset" propname "--file" tmpfile file)))
+
 
 (defun fsvn-set-revprop-value (urlrev propname value)
   (let ((url (fsvn-urlrev-url urlrev))
@@ -307,18 +308,18 @@ FILENAME non-nil means ignore DEST-URL filename section."
 			       "--revision" rev
 			       url)))
 
-(defun fsvn-set-prop-delete (file propname)
+(defun fsvn-set-propdel (file propname)
   (fsvn-call-command-discard "propdel" propname file))
 
 (defun fsvn-duplicate-all-properties (from-file to-file)
   "Overwrite TO-FILE properties by FROM-FILE properties with ignoring all conflict."
   (mapc
    (lambda (p)
-     (fsvn-set-prop-delete to-file p))
+     (fsvn-set-propdel to-file p))
    (fsvn-get-proplist to-file))
   (mapc
    (lambda (p)
-     (fsvn-set-prop-value to-file (car p) (cdr p)))
+     (fsvn-set-propset to-file (car p) (cdr p)))
    (fsvn-get-prop-value-alist from-file)))
 
 (defun fsvn-add-prop-svn:ignore (dir files)
@@ -334,7 +335,7 @@ FILES accept a file as string."
      (cond
       ((stringp files) (list files))
       ((listp files) files)))
-    (fsvn-set-prop-value dir "svn:ignore" (mapconcat 'identity values "\n"))))
+    (fsvn-set-propset dir "svn:ignore" (mapconcat 'identity values "\n"))))
 
 (defun fsvn-set-prop-svn:executable (file value)
   (fsvn-set-boolean-prop-value file "svn:executable" value))
@@ -344,8 +345,8 @@ FILES accept a file as string."
 
 (defun fsvn-set-boolean-prop-value (file propname value)
   (if value
-      (fsvn-set-prop-value file propname "*")
-    (fsvn-set-prop-delete file propname)))
+      (fsvn-set-propset file propname "*")
+    (fsvn-set-propdel file propname)))
 
 
 
@@ -721,6 +722,13 @@ Argument FILES ."
 	      file (match-string 2))
 	(setq fsvn-recursive-status-parsed 
 	      (cons (list (fsvn-expand-file file) status) fsvn-recursive-status-parsed))))))
+
+
+
+(defalias 'fsvn-set-prop-value 'fsvn-set-propset)
+(defalias 'fsvn-set-prop-delete 'fsvn-set-propdel)
+(make-obsolete 'fsvn-set-prop-value 'fsvn-set-propset "fsvn 0.9.5")
+(make-obsolete 'fsvn-set-prop-delete 'fsvn-set-propdel "fsvn 0.9.5")
 
 
 

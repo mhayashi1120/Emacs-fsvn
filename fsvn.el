@@ -1,7 +1,7 @@
 ;;; fsvn.el --- Functional Subversion interface for emacs
 ;; Copyright (C) 2008-2010 by Masahiro Hayashi
 
-;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
+;; Author: Hayashi Masahiro <mhayashi1120@gmail.com>
 ;; URL: http://fsvn.sourceforge.jp/
 ;; Keywords: Emacs, Subversion, Frontend
 ;; Version: 0.9.4

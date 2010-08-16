@@ -304,7 +304,7 @@ Keybindings:
 	(when propname
 	  (setq value (if (fsvn-url-local-p file)
 			  (fsvn-meta-get-property propname file)
-			(fsvn-get-propget propname file)))
+			(fsvn-get-propget file propname)))
 	  (when value
 	    (insert value)))
 	(set-buffer-modified-p nil))
@@ -398,7 +398,7 @@ Keybindings:
 		(fsvn-proplist-delete-entry propname))
 	       ((fsvn-struct-proplist-prop-get-recursive-p prop)
 		(unless value-file
-		  (setq value-file (fsvn-get-propget-file propname file)))
+		  (setq value-file (fsvn-get-propget-file file propname)))
 		(fsvn-popup-call-process
 		 "propset" propname
 		 "--recursive"

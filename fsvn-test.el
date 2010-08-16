@@ -433,9 +433,9 @@ To show and see result.
     (fsvn-browse-cleanup-path)
     (fsvn-test-sit-for)
     ;; property
-    (fsvn-set-prop-value file3 "fsvn:test" "a\nb")
+    (fsvn-set-propset file3 "fsvn:test" "a\nb")
     (fsvn-browse-update-path)
-    (fsvn-test-equal (fsvn-get-propget "fsvn:test" file3) "a\nb")
+    (fsvn-test-equal (fsvn-get-propget file3 "fsvn:test") "a\nb")
     (fsvn-test-equal (length (fsvn-meta-get-properties file3)) 1)
     (fsvn-test-equal (fsvn-meta-get-property "fsvn:test" file3) "a\nb")
     (fsvn-test-equal (fsvn-get-proplist file3) '("fsvn:test"))

@@ -1,3 +1,15 @@
+2010-08-16  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Simplify NTEmacs install process.
+
+2010-08-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: obsolete fsvn-set-prop-value -> fsvn-set-propset
+	          obsolete fsvn-set-prop-delete -> fsvn-set-propdel
+	          fsvn-get-propget change arg order
+
+	* Fix: fsvn-svk some refactor
+
 2010-08-05  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Change: Drastic changes about svk implements.

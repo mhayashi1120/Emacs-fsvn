@@ -193,7 +193,8 @@ Keybindings: none
 		      (null (setq rev (overlay-get overlay 'fsvn-blame-revision))))
 		  (erase-buffer)
 		  (insert "No revision here.\n"))
-		 ((eq prev-rev rev)) ;; do nothing
+		 ((and (eq prev-rev rev)
+		       (> (buffer-size) 0))) ;; do nothing
 		 (t
 		  (erase-buffer)
 		  (let ((entry (fsvn-logs-find-logentry data rev))
@@ -211,9 +212,12 @@ Keybindings: none
 	      (fsvn-blame-minor-setup-subwindow control-buffer))
 	  ;;FIXME if error occur
 	  (error (insert (format "%s" err)))))
-      (if rev
-	  (fsvn-blame-highlight-revision rev)
+      (cond
+       ((null rev)
 	(fsvn-blame-dehighlight-all))
+       ((eq prev-rev rev))
+       (t
+	(fsvn-blame-highlight-revision rev)))
       (setq fsvn-blame-previous-revision rev))))
 
 (defun fsvn-blame-highlight-revision (rev)

@@ -126,7 +126,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
       (mapc
        (lambda (entry)
 	 (setq url (fsvn-expand-url (fsvn-xml-lists->list->entry=>name$ entry) top-url))
-	 (when (string= (fsvn-get-propget "svm:uuid" url) uuid)
+	 (when (string= (fsvn-get-propget url "svm:uuid") uuid)
 	   (setq depot (concat (fsvn-svk-mirror-top-depotpath) (fsvn-xml-lists->list->entry=>name$ entry)))
 	   (throw 'found depot)))
        (fsvn-get-ls top-url))
@@ -193,6 +193,19 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
       (setenv "EDITOR" fsvn-svk-editor-command)
       ,@form)))
 
+(defun fsvn-svk-call-command (subcommand buffer &rest args)
+  (fsvn-svk-process-environment
+   (let ((real-args (fsvn-flatten-command-args args))
+	 command internal-args script)
+     (if (null fsvn-svk-perl-command)
+	 (setq command fsvn-svk-script
+	       internal-args (cons subcommand real-args))
+       (setq command fsvn-svk-perl-command
+	     internal-args (append (list fsvn-svk-perl-command subcommand)
+				   real-args)))
+     (fsvn-debug internal-args)
+     (apply 'call-process command nil buffer nil internal-args))))
+
 (defun fsvn-svk-start-command (subcommand buffer &rest args)
   (fsvn-svk-process-environment
    (let ((real-args (fsvn-flatten-command-args args))
@@ -201,8 +214,6 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 	   (if (null fsvn-svk-perl-command)
 	       (list fsvn-svk-script)
 	     (setq script (executable-find fsvn-svk-script))
-	     (unless script
-	       (error "Execution error. Script(%s) not found" fsvn-svk-script))
 	     (list fsvn-svk-perl-command script)))
      (setq internal-args (append internal-args (cons subcommand real-args)))
      (fsvn-debug internal-args)
@@ -216,6 +227,8 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 
 (defun fsvn-svk-process-sentinel (proc event)
   (fsvn-process-exit-handler proc event
+    (when (/= (process-exit-status proc) 0)
+      (insert event))
     (setq fsvn-popup-result-process nil)
     (when (and (eq system-type 'windows-nt)
 	       (/= (process-exit-status proc) 0))
@@ -228,7 +241,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
     (fsvn-win-start-external-terminal args)))
 
 (defun fsvn-svk-server-start ()
-  (unless server-process
+  (unless (and (boundp 'server-process) (eq (process-status server-process) 'listen))
     (server-start)))
 
 (defvar fsvn-svk-read-depotpath-history nil)
@@ -255,6 +268,35 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
     (fsvn-svk-browse-resync "Synchronize mirrored repository and mirroring path? ")
     ))
 
+(defun fsvn-svk-depotmap-init (buffer)
+  (let ((proc (fsvn-svk-start-command "depotmap" buffer "--init")))
+    (fsvn-process-add-filter proc 
+			     (lambda (proc event)
+			       (when (string-match "^Repository .* does not exist, create\\? (y/n)" event)
+				 (process-send-string proc "y\n"))))
+    proc))
+
+(defun fsvn-svk-mirror-start (buffer mirrorpath url)
+  (unless (fsvn-svk-mirror-path-exists-p mirrorpath)
+    (let ((proc (fsvn-svk-start-command "mirror" buffer mirrorpath url)))
+      proc)))
+
+(defun fsvn-svk-mirror-path-exists-p (mirrorpath)
+  (with-temp-buffer
+    (unless (= (fsvn-svk-call-command "mirror" (current-buffer) "--list") 0)
+      (error "Failed exit while listing mirrors"))
+    (goto-char (point-min))
+    (re-search-forward (concat "^" (regexp-quote (fsvn-svk-depotpath-name mirrorpath))) nil t)))
+
+(defun fsvn-svk-sync-start (buffer mirrorpath)
+  (let ((proc (fsvn-svk-start-command "sync" buffer mirrorpath)))
+    proc))
+
+(defun fsvn-svk-depotpath-name (depotpath)
+  (if (string-match "/$" depotpath)
+      (substring depotpath 0 -1)
+    depotpath))
+
 ;; fsvn-svk interactive command
 
 (defun fsvn-svk-browse-create (mirrored-url)
@@ -267,11 +309,11 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 		   (depotpath (fsvn-svk-working-depotpath mirrored-url)))
     (fsvn-buffer-popup-as-information buffer)
     ;; create ~/.svk and local repository
-    (fsvn-svk-start-command "depotmap" buffer "--init")
+    (fsvn-svk-depotmap-init buffer)
     ;; create mirrorpath as mirroring repository and adding svm:* property
-    (fsvn-svk-start-command "mirror" buffer mirrorpath url)
+    (fsvn-svk-mirror-start buffer mirrorpath url)
     ;; get all revision log and data to mirroring repository
-    (fsvn-svk-start-command "sync" buffer mirrorpath)
+    (fsvn-svk-sync-start buffer mirrorpath)
     ;; copy mirroring repository to working repository
     (fsvn-svk-start-command "copy" buffer "-p" mirrorpath depotpath)
     (with-current-buffer buffer
