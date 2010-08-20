@@ -33,7 +33,7 @@
 
 	  <li>If you have `make' command, `cd' to the directory where you unpacked fsvn.
 		<ol>
-		  <li>TODO when NTEmacs
+		  <li>When to use on NTEmacs, read mw32cmp.el header to prepare.
 		  </li>
 
 		  <li>Edit MAKE-CFG.el and Makefile.
