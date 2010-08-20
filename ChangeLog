@@ -1,3 +1,7 @@
+2010-08-21  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: Some of NTEmacs compatibility with Meadow.
+
 2010-08-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Improvement: Use `quit' signal.
