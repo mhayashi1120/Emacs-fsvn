@@ -5,8 +5,6 @@
 
 * General
 
-** a lot of UI miserable integrations.
-
 ** cannot treat `@' started file name 
 
 ** fsvn-cleanup-temp-directory cleanup under other emacs process

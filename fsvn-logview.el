@@ -436,13 +436,17 @@ Keybindings:
       (error "Error occur while saving remote file"))
     (fsvn-ediff-files tmpfile1 tmpfile2)))
 
-(defun fsvn-log-list-region-revision ()
-  (let ((beg (region-beginning))
-	(fin (region-end))
-	(path fsvn-log-list-target-path)
+(defun fsvn-log-list-region-revision (&optional as-is)
+  (let ((path fsvn-log-list-target-path)
 	(root fsvn-buffer-repos-root)
 	from-rev to-rev
-	from-urlrev to-urlrev)
+	from-urlrev to-urlrev
+	beg fin)
+    (if (= (region-beginning) (point))
+	(setq beg (region-end)
+	      fin (region-beginning))
+      (setq beg (region-beginning)
+	    fin (region-end)))
     (save-excursion
       (goto-char beg)
       (setq from-rev (fsvn-log-list-point-revision))
@@ -451,7 +455,7 @@ Keybindings:
     (unless (and (numberp from-rev)
 		 (numberp to-rev))
       (error "Region terminated by unrevisioned line"))
-    (when (> from-rev to-rev)
+    (when (and (not as-is) (> from-rev to-rev))
       (fsvn-swap from-rev to-rev))
     (setq from-urlrev (fsvn-log-list-revision-path root path from-rev))
     (setq to-urlrev (fsvn-log-list-revision-path root path to-rev))
@@ -596,7 +600,7 @@ Keybindings:
 		       "Revert `%s' to revision %s? " 
 		       (fsvn-file-name-nondirectory path)
 		       (fsvn-urlrev-revision urlrev)))
-      (error "quit"))
+      (signal 'quit nil))
     (list urlrev path)))
   
 (defun fsvn-log-list-cmd-read-urlrev ()
@@ -1191,7 +1195,7 @@ Keybindings:
    ((not (buffer-modified-p))
     (error "Message is not changed."))
    ((not (y-or-n-p "Really commit changed log? "))
-    (error "quit"))))
+    (signal 'quit nil))))
 
 (defun fsvn-log-message-cmd-read-quit-edit ()
   ;;TODO consider specific
@@ -1250,7 +1254,7 @@ Keybindings:
     (setq file (read-file-name "Save as: " nil nil nil rev-name))
     (when (and (file-exists-p file)
 	       (not (y-or-n-p "File exists. overwrite? ")))
-      (error "quit"))
+      (signal 'quit nil))
     (fsvn-expand-file file)))
 
 (defun fsvn-log-subwindow-switch-to-view ()

@@ -1,8 +1,5 @@
 # -*- mode: org; -*-
 * General
-** Describe how to install to INSTALL file.
-** all interactive command must be accept argument (ex filename, command arguments)
-  this is test for that command.
 ** annoying fsvn-result buffer.
 
 ** `merge' can use ediff-merge
@@ -27,9 +24,10 @@
 ** font-lock not works fine in some cases.
 consider `font-lock-fontify' call or not
 
+buffer name start with ` ' (space)
+
 ** tool-bar
 
-** create README file for github
 
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
@@ -69,7 +67,7 @@ SomeFile.cs          -> AnyFile.cs
 
 * completion
 ** fsvn-read-subcommand-args accept quoted string
-  space containing filename to quoted string.
+  space containing filename must have quoted string.
 
 ** fsvn-completing-url to parse previous segment
 ** fsvn-completing-read-url behavior different general Emacs one.

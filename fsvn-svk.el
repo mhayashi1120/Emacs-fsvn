@@ -259,7 +259,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-confirm (op-symbol)
   (let ((message (cdr (assq op-symbol fsvn-svk-confirm-alist))))
     (unless (y-or-n-p (nth 0 message))
-      (error "quit"))))
+      (signal 'quit nil))))
 
 (defconst fsvn-svk-confirm-alist
   '(

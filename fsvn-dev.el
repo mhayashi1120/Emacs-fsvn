@@ -211,6 +211,28 @@ How to send a bug report:
     (setq diff-args (list "--revision" rev file))
     (fsvn-diff-start-process diff-args args)))
 
+(defun fsvn-log-list-cmd-read-create-patch-region ()
+  (unless mark-active
+    (error "Mark is not active"))
+  (let* ((region (fsvn-log-list-region-revision t))
+	 (patch (fsvn-read-file-name "Patch file: ")))
+    (when (file-exists-p patch)
+      (unless (y-or-n-p "File exists. Overwrite? ")
+	(signal 'quit nil)))
+    (list (car region) (cdr region) patch)))
+
+(defun fsvn-log-list-create-patch-region (from-urlrev to-urlrev patch-file)
+  (interactive (fsvn-log-list-cmd-read-create-patch-region))
+  (let ((file (fsvn-expand-file patch-file))
+	proc)
+    (write-region "" nil file)
+    (setq proc (fsvn-start-process nil "diff" from-urlrev to-urlrev))
+    (set-process-sentinel proc (lambda (proc event) 
+				 (message "Patch was created.")))
+    (set-process-filter proc `(lambda (proc event)
+				(write-region event nil ,file t)))
+    proc))
+
 
 
 (defconst fsvn-proplist-mode-menu-spec

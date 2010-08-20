@@ -1,3 +1,7 @@
+2010-08-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: Use `quit' signal.
+
 2010-08-16  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Simplify NTEmacs install process.

@@ -1595,7 +1595,7 @@ PATH is each executed path."
        ((file-directory-p to-file)
 	(error "Destination directory exists"))
        ((not (y-or-n-p "Desitination file exists. Really overwrite? "))
-	(error "Quit"))))
+	(signal 'quit nil))))
     (list file to-file args)))
 
 (defun fsvn-browse-cmd-read-export-path ()
@@ -1679,7 +1679,7 @@ PATH is each executed path."
   (fsvn-browse-cmd-wc-only
    (let ((dir (fsvn-read-directory-name "New Source: " nil nil t)))
      (unless (y-or-n-p "This takes many seconds. ok? ")
-       (error "quit"))
+       (signal 'quit nil))
      (list dir))))
 
 (defun fsvn-browse-cmd-read-paste-properties-to-this ()
@@ -1696,7 +1696,7 @@ PATH is each executed path."
   (let* ((patch (fsvn-read-file-name "Patch file: ")))
     (when (file-exists-p patch)
       (unless (y-or-n-p "File exists. Overwrite? ")
-	(error "quit")))
+	(signal 'quit nil)))
     (list patch)))
 
 (defun fsvn-browse-cmd-read-create-patch-selected ()
