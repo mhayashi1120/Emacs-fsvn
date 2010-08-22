@@ -222,6 +222,8 @@ How to send a bug report:
     (list (car region) (cdr region) patch)))
 
 (defun fsvn-log-list-create-patch-region (from-urlrev to-urlrev patch-file)
+  "Create PATCH-FILE contains FROM-URLREV to TO-URLREV.
+FROM-URLREV is marked point revision, TO-URLREV is current point revision."
   (interactive (fsvn-log-list-cmd-read-create-patch-region))
   (let ((file (fsvn-expand-file patch-file))
 	proc)

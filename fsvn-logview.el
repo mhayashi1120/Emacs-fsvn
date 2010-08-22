@@ -729,7 +729,7 @@ Otherwise diff at point revision with working copy file or directory.
 (defun fsvn-log-list-ediff-generic ()
   (interactive)
   (when fsvn-logview-target-directory-p
-    (error "Cannot execute ediff.  This log list target is directory"))
+    (error "Cannot execute ediff.  This log is targeting to directory"))
   (cond
    (mark-active
     (fsvn-log-list-ediff-with-region))

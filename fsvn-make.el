@@ -53,8 +53,6 @@
     (setq ALL-MODULES
 	(append ALL-MODULES (list 
 			     "mw32cmp.el"
-			     "mw32mci.el"
-			     "mw32misc.el"
 			     "mw32script.el"
 			     )))))
 
@@ -93,9 +91,7 @@
     (load config)
     (when (and (eq system-type 'windows-nt)
 	       (not (featurep 'meadow)))
-      (unless (and (file-exists-p "mw32mci.el")
-		   (file-exists-p "mw32misc.el")
-		   (file-exists-p "mw32script.el"))
+      (unless (and (file-exists-p "mw32script.el"))
 	;; for NTEmacs
 	(princ "\n")
 	(princ "-------------------------------------------------------------\n")
