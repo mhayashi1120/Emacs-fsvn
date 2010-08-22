@@ -1,8 +1,8 @@
-VERSION = 0.9.4
+VERSION = 0.9.5
 
 RELEASE_FILES = \
 	fsvn*.el \
-	mw32cmp.el mw32cmp-test.el mw32el-ntemacs.patch \
+	mw32cmp.el mw32cmp-test.el \
 	Makefile MAKE-CFG.el MAKE-TARGETS.mk \
 	BUG INSTALL TODO ChangeLog
 

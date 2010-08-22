@@ -4,7 +4,7 @@
 ;; Author: Hayashi Masahiro <mhayashi1120@gmail.com>
 ;; URL: http://fsvn.sourceforge.jp/
 ;; Keywords: Emacs, Subversion, Frontend
-;; Version: 0.9.4
+;; Version: 0.9.5
 
 ;; fsvn.el is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -207,7 +207,7 @@
   :group 'tools
   :prefix "fsvn-")
 
-(defvar fsvn-version "0.9.4"
+(defvar fsvn-version "0.9.5"
   "Version of fsvn.")
 
 
