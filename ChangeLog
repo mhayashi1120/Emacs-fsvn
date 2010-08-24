@@ -1,3 +1,43 @@
+2010-08-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: completing read command argument quoted string.
+
+	* Add: easymenu (proplist, propedit)
+
+	* Add: fsvn-log-list-revert-to-revision key is bound to `C-c C-t'
+
+	* Add: fsvn-log-list-create-patch-generic key is bound to `= p'
+
+	* Change: fsvn-browse-cmd-read-create-patch-path -> fsvn-cmd-read-patch-file
+
+2010-08-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Release: 0.9.5
+
+2010-08-21  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: Some of NTEmacs compatibility with Meadow.
+
+2010-08-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: Use `quit' signal.
+
+2010-08-16  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Simplify NTEmacs install process.
+
+2010-08-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: obsolete fsvn-set-prop-value -> fsvn-set-propset
+	          obsolete fsvn-set-prop-delete -> fsvn-set-propdel
+	          fsvn-get-propget change arg order
+
+	* Fix: fsvn-svk some refactor
+
+2010-08-05  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: Drastic changes about svk implements.
+
 2010-08-04  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: Easy Menu (browse, log)

@@ -304,9 +304,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (message "fsvn debug %s." (if fsvn-debug-enabled "enabled" "disabled"))))
 
 (defun fsvn-command (subcommand args)
-  (interactive (let (subcommand args)
-		 (setq subcommand (fsvn-read-svn-subcommand))
-		 (setq args (fsvn-read-svn-subcommand-args subcommand))
+  "Execute `svn SUBCOMMAND ARGS'"
+  (interactive (let* ((subcommand (fsvn-read-svn-subcommand))
+		      (args (fsvn-read-svn-subcommand-args subcommand)))
 		 (list subcommand args)))
   (fsvn-popup-start-process subcommand args))
 
@@ -369,6 +369,13 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (message "Now fsvn feature `%s'" (if feature "ON" "OFF")))))
 
 
+
+(defun fsvn-cmd-read-patch-file ()
+  (let* ((patch (fsvn-read-file-name "Patch file: ")))
+    (when (file-exists-p patch)
+      (unless (y-or-n-p "File exists. Overwrite? ")
+	(signal 'quit nil)))
+    (list (fsvn-expand-file patch))))
 
 (defun fsvn-cmd-read-checkout-args ()
   (let (url args)

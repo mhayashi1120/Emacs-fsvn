@@ -1,8 +1,5 @@
 # -*- mode: org; -*-
 * General
-** Describe how to install to INSTALL file.
-** all interactive command must be accept argument (ex filename, command arguments)
-  this is test for that command.
 ** annoying fsvn-result buffer.
 
 ** `merge' can use ediff-merge
@@ -27,9 +24,13 @@
 ** font-lock not works fine in some cases.
 consider `font-lock-fontify' call or not
 
+buffer name start with ` ' (space)
+
 ** tool-bar
 
-** create README file for github
+** to configure ex: C-c C-u
+
+** search log diff and message
 
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
@@ -68,9 +69,6 @@ SomeFile.cs          -> AnyFile.cs
 ** parasite-*-execute command accept optional argument
 
 * completion
-** fsvn-read-subcommand-args accept quoted string
-  space containing filename to quoted string.
-
 ** fsvn-completing-url to parse previous segment
 ** fsvn-completing-read-url behavior different general Emacs one.
 ** completing read implementation cleaning.
@@ -98,10 +96,6 @@ revision range and log base url
 ** fsvn-log-list-mode gui viewer.
  call tortoise viewer (Windows)
 ** logview-mode diff with non visible revision.
-
-** this file arg to interactive arg
-
-** refactor about diff
 
 ** show copy-from
 

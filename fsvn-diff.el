@@ -137,6 +137,18 @@
 
 
 
+(defun fsvn-diff-create-patch (patch-file &rest args)
+  (let (proc)
+    (write-region "" nil patch-file nil 'no-msg)
+    (setq proc (apply 'fsvn-start-process nil "diff" args))
+    (set-process-sentinel proc (lambda (proc event) 
+				 (message "Patch was created.")))
+    (set-process-filter proc `(lambda (proc event)
+				(write-region event nil ,patch-file t 'no-msg)))
+    proc))
+
+
+
 (provide 'fsvn-diff)
 
 ;;; fsvn-diff.el ends here

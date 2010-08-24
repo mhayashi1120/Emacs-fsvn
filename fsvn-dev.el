@@ -19,6 +19,16 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive)
   )
 
+;;TODO
+;; (defun fsvn-browse-copy-path-in-repository (to-url &optional args)
+;;   "Execute `copy' for repository file corresponding current directory.
+;; Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+;; This makes faster copy than in working copy.
+;; "
+;;   (interactive)
+;;   (fsvn-browse-copy-this-in-repository (fsvn-browse-current-repository-url) to-url args))
+
 
 
 (defcustom fsvn-browse-guessed-moved-parent-threshold 4
@@ -83,19 +93,6 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	 (setq entries (fsvn-logs-unique-merge entries entry))))
      urlrevs)
     (sort entries (lambda (l1 l2) (< (fsvn-xml-log->logentry.revision l1) (fsvn-xml-log->logentry.revision l2))))))
-
-
-
-(add-hook 'fsvn-log-list-mode-hook
-	  (lambda ()
-	    (define-key fsvn-log-list-mode-map "\C-c\C-t" 'fsvn-log-list-revert-to-revision)))
-
-(defun fsvn-log-list-revert-to-revision (urlrev local-file)
-  (interactive (fsvn-log-list-cmd-read-revert-to-revision))
-  (fsvn-async-let ((urlrev urlrev)
-		   (local-file local-file))
-    (fsvn-popup-start-process "delete" (list local-file))
-    (fsvn-popup-start-copy/move-process "copy" (list urlrev) local-file)))
 
 
 
@@ -189,28 +186,29 @@ How to send a bug report:
       (set-buffer-modified-p nil)
       (kill-buffer (current-buffer)))))
 
-
 
 
-(defconst fsvn-proplist-mode-menu-spec
-  '("fsvn"
+;;TODO
 
-    ))
+(add-hook 'fsvn-log-list-mode-hook
+	  (lambda ()
+	    (define-key fsvn-log-list-mode-map "l" 'fsvn-log-list-diff-local)))
 
-(easy-menu-define fsvn-proplist-mode-menu
-  fsvn-proplist-mode-map
-  "Menu used in Fsvn Property List mode."
-  fsvn-proplist-mode-menu-spec)
+(defun fsvn-logview-cmd-read-diff-local ()
+  (list (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
 
-(defconst fsvn-propedit-mode-menu-spec
-  '("fsvn"
+(defun fsvn-log-list-diff-local (local-file &optional args)
+  "Diff current revision at point with LOCAL-FILE.
+"
+  (interactive (fsvn-logview-cmd-read-diff-local))
+  (let ((file fsvn-logview-target-urlrev)
+	(rev (fsvn-log-list-point-revision))
+	buffer diff-args)
+    ;; TODO svn can't accept non versioned file
+    (setq diff-args (list "--revision" rev file))
+    (fsvn-diff-start-process diff-args args)))
 
-    ))
-
-(easy-menu-define fsvn-propedit-mode-menu
-  fsvn-propedit-mode-map
-  "Menu used in Fsvn Property Edit mode."
-  fsvn-propedit-mode-menu-spec)
+
 
 (defconst fsvn-process-list-mode-menu-spec
   '("fsvn"

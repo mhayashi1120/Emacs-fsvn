@@ -4,7 +4,7 @@
 1. First of all, unpack archive file
  =tar xzf fsvn-(version).tar.gz=
 2. If you have `make' command, `cd' to the directory where you unpacked fsvn.
-  1. TODO when NTEmacs
+  1. When to use on NTEmacs, read mw32cmp.el header to prepare.
   2. Edit MAKE-CFG.el and Makefile.
   3. Optionally invoke the following command show installed files where to go.
     =make what-where=

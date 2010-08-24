@@ -79,18 +79,18 @@ The value of DEFAULT is not a number, allow to enter a nil value."
     n))
 
 (defvar fsvn-read-subcommand-history nil)
-(defun fsvn-read-subcommand (alist)
+(defun fsvn-read-subcommand (alist &optional prompt)
   (let ((readed  (completing-read
-		  "svn subcommand: "
+		  (concat prompt "svn subcommand: ")
 		  alist
 		  nil t nil 'fsvn-read-subcommand-history)))
     (cdr (assoc readed alist))))
 
-(defun fsvn-read-svn-subcommand ()
-  (fsvn-read-subcommand fsvn-svn-subcommand-completion-alist))
+(defun fsvn-read-svn-subcommand (&optional prompt)
+  (fsvn-read-subcommand fsvn-svn-subcommand-completion-alist prompt))
 
-(defun fsvn-read-svnadmin-subcommand ()
-  (fsvn-read-subcommand fsvn-svnadmin-subcommand-completion-alist))
+(defun fsvn-read-svnadmin-subcommand (&optional prompt)
+  (fsvn-read-subcommand fsvn-svnadmin-subcommand-completion-alist prompt))
 
 (defvar fsvn-read-propname-history nil)
 (defun fsvn-read-propname (file)
@@ -671,8 +671,15 @@ referenced mew-complete.el"
       (setq prev (point))
       (condition-case err
 	  (while (not (eobp))
-	    (forward-sexp)
-	    (setq ret (cons (buffer-substring prev (point)) ret))
+	    (if (= (char-syntax (char-after (point))) ?\")
+		(progn
+		  (forward-char 1)
+		  (setq prev (point))
+		  (skip-syntax-forward "^\"")
+		  (setq ret (cons (buffer-substring prev (point)) ret))
+		  (skip-syntax-forward "\""))
+	      (skip-syntax-forward "^-")
+	      (setq ret (cons (buffer-substring prev (point)) ret)))
 	    (skip-syntax-forward "-")
 	    (setq prev (point)))
 	(scan-error

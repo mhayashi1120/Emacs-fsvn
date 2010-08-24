@@ -1,13 +1,8 @@
 ;;; -*- Coding: utf-8 -*-
 ;;; mw32cmp.el --- Meadow compatibility for NTEmacs.
 ;;
-;; 1. run following command in expanded directory.
-;; svn export http://svn.meadowy.org/Meadow/trunk/lisp/international/mw32mci.el ./mw32mci.el
-;; svn export http://svn.meadowy.org/Meadow/trunk/lisp/international/mw32misc.el ./mw32misc.el
+;; Run following command in expanded directory.
 ;; svn export http://svn.meadowy.org/Meadow/trunk/lisp/international/mw32script.el ./mw32script.el
-;;
-;; 2. run following command in expanded directory.
-;; patch < mw32el-ntemacs.patch
 ;;
 
 ;;; History:
@@ -27,7 +22,6 @@
 
 (require 'mw32script)
 (mw32script-make-pathext-regexp)
-(load "mw32misc")
 
 
 
@@ -61,19 +55,20 @@
   '(
     (registry-binary                     "REG_BINARY"                     mw32cmp-registry-parse-binary)
     (registry-dword                      "REG_DWORD"                      mw32cmp-registry-parse-dword)
-    (registry-dword-little-endian        "REG_DWORD"                      mw32cmp-registry-parse-dword-little-endian)
-    (registry-dword-big-endian           "REG_DWORD_BIG_ENDIAN"           mw32cmp-registry-parse-dword-big-endian)
+    (registry-dword-little-endian        "REG_DWORD"                      mw32cmp-registry-parse-dword)
     (registry-expand-sz                  "REG_EXPAND_SZ"                  mw32cmp-registry-parse-expand-sz)
-    (registry-link                       "REG_LINK"                       mw32cmp-registry-parse-link)
 
     (registry-multi-sz                   "REG_MULTI_SZ"                   mw32cmp-registry-parse-multi-sz)
     ;;todo reg.exe return reg_none but regedit display this key as reg_dword
     (registry-qword                       "REG_NONE"                       mw32cmp-registry-parse-qword)
 ;;    (registry-none                       "REG_NONE"                       mw32cmp-registry-parse-none)
     (registry-qword                      "REG_QWORD"                      mw32cmp-registry-parse-qword)
-    (registry-qword-little-endian        "REG_QWORD"                      mw32cmp-registry-parse-qword-little-endian)
-    (registry-resource-list              "REG_RESOURCE_LIST"              mw32cmp-registry-parse-resource-list)
+    (registry-qword-little-endian        "REG_QWORD"                      mw32cmp-registry-parse-qword)
     (registry-sz                         "REG_SZ"                         mw32cmp-registry-parse-sz)
+
+    (registry-link                       "REG_LINK"                       mw32cmp-registry-parse-link)
+    (registry-dword-big-endian           "REG_DWORD_BIG_ENDIAN"           mw32cmp-registry-parse-dword-big-endian)
+    (registry-resource-list              "REG_RESOURCE_LIST"              mw32cmp-registry-parse-resource-list)
     (registry-full-resource-descriptor   "REG_FULL_RESOURCE_DESCRIPTOR"   mw32cmp-registry-parse-full-resource-descriptor)
     (registry-resource-requirements-list "REG_RESOURCE_REQUIREMENTS_LIST" mw32cmp-registry-parse-resource-requirements-list)
     ))
@@ -115,11 +110,12 @@
 
 (defun mw32cmp-pseudo-registry-get (key &optional name)
   (mw32cmp-pseudo-registry-check)
+  (mw32cmp-pseudo-check-string key)
   (if name
       (let ((args (list "query" key))
 	    (name-regex mw32cmp-pseudo-registry-value-regexp)
 	    ret reg)
-	(setq args (nconc args (list "/v" name)))
+	(setq args (append args (list "/v" name)))
 	(with-temp-buffer
 	  (unless (= (apply 'call-process "reg" nil t nil args) 0)
 	    (signal 'error (list "Cannot open registry key" key)))
@@ -138,6 +134,7 @@
 
 (defun mw32cmp-pseudo-registry-list-keys (key &optional with-data)
   (mw32cmp-pseudo-registry-check)
+  (mw32cmp-pseudo-check-string key)
   (let (args regexp ret matcher)
     (setq args (list "query" key))
     (setq matcher
@@ -160,6 +157,7 @@
 
 (defun mw32cmp-pseudo-registry-list-values (key &optional with-data)
   (mw32cmp-pseudo-registry-check)
+  (mw32cmp-pseudo-check-string key)
   (let (args matcher)
     (setq args (list "query" key))
     (with-temp-buffer
@@ -178,11 +176,90 @@
 	    (forward-line 1))
 	  (nreverse ret))))))
 
-(defun mw32cmp-pseudo-registry-words-to-integer (lword hword &optional hhword hhhword))
-(defun mw32cmp-pseudo-registry-create-key (key))
-(defun mw32cmp-pseudo-registry-delete-key (key))
-(defun mw32cmp-pseudo-registry-delete-value (key name))
-(defun mw32cmp-pseudo-registry-set (key name data))
+(defun mw32cmp-pseudo-registry-words-to-integer (lword hword &optional hhword hhhword)
+  (error "Not implemented yet"))
+
+(defun mw32cmp-pseudo-registry-create-key (key)
+  (mw32cmp-pseudo-registry-check)
+  (let (args)
+    (setq args (list "add" key "/f"))
+    (mw32cmp-call-reg-update-process args)))
+
+(defun mw32cmp-pseudo-registry-delete-key (key)
+  (mw32cmp-pseudo-registry-check)
+  (mw32cmp-pseudo-check-string key)
+  (let (args)
+    (setq args (list "delete" key "/f"))
+    (or (mw32cmp-call-reg-update-process args)
+	(signal 'error 
+		(cons "Invalid registry key" 
+		      (mw32cmp-registry-pseudo-parse-key key))))))
+
+(defun mw32cmp-pseudo-registry-delete-value (key name)
+  (mw32cmp-pseudo-registry-check)
+  (mw32cmp-pseudo-check-string key)
+  (mw32cmp-pseudo-check-string name)
+  (let (args)
+    (setq args (list "delete" key "/f" "/v" name))
+    (or (mw32cmp-call-reg-update-process args)
+	(let ((parsed (mw32cmp-registry-pseudo-parse-key key)))
+	  (signal 'error (cons "Invalid registry name" 
+			       (cons (car parsed) 
+				     (cons (cdr parsed) name))))))))
+
+(defun mw32cmp-pseudo-registry-set (key name data)
+  (mw32cmp-pseudo-registry-check)
+  (mw32cmp-pseudo-check-string key)
+  (mw32cmp-pseudo-check-string name)
+  (mw32cmp-pseudo-check-list data)
+  (let ((parsed (mw32cmp-registry-pseudo-parse-data data))
+	 args)
+    (setq args (list "add" key "/f"
+		     "/v" name 
+		     "/t" (car parsed)
+		     "/d" (cdr parsed)))
+    ;; BUG Create key under non-existent key meadow version throw error.
+    ;;     but reg.exe create full path to key.
+    ;;TODO only works string
+    (mw32cmp-call-reg-update-process args)))
+
+(defun mw32cmp-pseudo-check-string (data)
+  (unless (stringp data)
+    (signal 'wrong-type-argument (list 'stringp data))))
+
+(defun mw32cmp-pseudo-check-list (data)
+  (unless (listp data)
+    (signal 'wrong-type-argument (list 'listp data))))
+
+(defun mw32cmp-call-reg-update-process (args)
+  (= (apply 'call-process "reg" nil (current-buffer) nil args) 0))
+
+(defun mw32cmp-registry-pseudo-symbol-to-type (symbol)
+  (or (cadr (assq symbol mw32cmp-registry-type-alist))
+      "REG_SZ"))
+
+(defun mw32cmp-registry-pseudo-parse-key (key)
+  "return cons cell (rootkey . subkey)"
+  (when (stringp key)
+    (when (string-match "^\\([^\\\\]+\\)\\(?:\\\\\\(.*\\)\\)?" key)
+      (cons (match-string 1 key) (match-string 2 key)))))
+
+(defun mw32cmp-registry-pseudo-parse-data (data)
+  (let* ((sym (cdr data))
+	 (type (mw32cmp-registry-pseudo-symbol-to-type sym)))
+    (cond
+     ((memq sym '(registry-sz registry-expand-sz))
+      (unless (stringp (car data))
+	(signal 'wrong-type-argument (car data)))
+      (cons type (car data)))
+     ((eq sym 'registry-multi-sz)
+      (unless (listp (car data))
+	(signal 'wrong-type-argument (car data)))
+      ;;FIXME see reg add /? about \0. Consider data contains that string.
+      (cons type (mapconcat 'identity (car data) "\\0")))
+     (t
+      ;;TODO
+      (cons type (car data))))))
 
 (defsubst mw32cmp-pseudo-registry-matched-name-object ()
   (let ((reg-name (match-string 1))
@@ -221,12 +298,10 @@
   (unless (string-match "^0x\\([0-9a-z]+\\)$" value)
     (signal 'error (list "Not a hex value" value)))
   (let ((hex (match-string 1 value))
-	val)
-    ;;FIXME quick hack this is not a time value..
-    (setq val (seconds-to-time (string-to-number hex 16)))
-    (cons (nth 0 val) (nth 1 val))))
+	num val)
+    (setq num (string-to-number hex 16))
+    (cons (floor num 65536) (floor (mod num 65536)))))
 
-(defun mw32cmp-registry-parse-dword-little-endian (value) value)
 (defun mw32cmp-registry-parse-dword-big-endian (value) value)
 (defun mw32cmp-registry-parse-expand-sz (value) value)
 (defun mw32cmp-registry-parse-link (value) value)
@@ -245,7 +320,6 @@
       (setq i (+ i 4)))
     list))
 
-(defun mw32cmp-registry-parse-qword-little-endian (value) value)
 (defun mw32cmp-registry-parse-resource-list (value) value)
 (defun mw32cmp-registry-parse-sz (value)
   ;;FIXME correct variable?
@@ -274,8 +348,29 @@
   (replace-regexp-in-string "/" "\\\\" file))
 
 (defun mw32cmp-pseudo-unix-to-dos-argument (filename ep h2sp qp s2isp)
-  ;;todo
-  filename)
+  ""
+  (let (ret qf)
+    (mapc
+     (lambda (c)
+       (if (and (eq c ?\\) ep)
+	   (setq ret (cons c ret))
+	 (if qf
+	     (if (eq c qf)
+		 (setq qf nil)
+	       (setq ret (cons c ret)))
+	   (cond
+	    ((eq c ?/)
+	     (setq ret (cons (if s2isp ?\\ c) ret)))
+	    ((eq c ?=)
+	     (setq ret (cons (if h2sp ?/ c) ret)))
+	    ((memq c '(?/ ?\"))
+	     (if qp
+		 (setq qf c)
+	       (setq ret (cons c ret))))
+	    (t
+	     (setq ret (cons c ret)))))))
+     (string-to-list filename))
+    (concat (nreverse ret))))
 
 
 

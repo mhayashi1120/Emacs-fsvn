@@ -80,6 +80,7 @@
 	  (define-key map "=" 'fsvn-log-list-diff-generic)
 	  (define-key map "e" 'fsvn-log-list-ediff-generic)
 	  (define-key map "w" 'fsvn-log-list-diff-with-wc)
+	  (define-key map "p" 'fsvn-log-list-create-patch-generic)
 
 	  map)))
 
@@ -107,6 +108,7 @@
 	  (define-key map "\C-c\C-o" 'fsvn-log-switch-to-message)
 	  (define-key map "\C-c\C-q" 'fsvn-log-list-quit)
 	  (define-key map "\C-c\C-r" 'fsvn-log-list-edit-revprop)
+	  (define-key map "\C-c\C-t" 'fsvn-log-list-revert-to-revision)
 	  (define-key map "\C-m" 'fsvn-log-list-show-details)
 	  (define-key map "\C-n" 'fsvn-log-list-next-line)
 	  (define-key map "\C-p" 'fsvn-log-list-previous-line)
@@ -436,13 +438,25 @@ Keybindings:
       (error "Error occur while saving remote file"))
     (fsvn-ediff-files tmpfile1 tmpfile2)))
 
-(defun fsvn-log-list-region-revision ()
-  (let ((beg (region-beginning))
-	(fin (region-end))
-	(path fsvn-log-list-target-path)
+(defun fsvn-log-list-create-patch-region (patch-file)
+  "Create PATCH-FILE in region terminated point as from and to revision.
+from is marked point, to is current point."
+  (let* ((region (fsvn-log-list-region-revision t))
+	 (from-urlrev (car region))
+	 (to-urlrev (cdr region)))
+    (fsvn-diff-create-patch patch-file from-urlrev to-urlrev)))
+
+(defun fsvn-log-list-region-revision (&optional as-is)
+  (let ((path fsvn-log-list-target-path)
 	(root fsvn-buffer-repos-root)
 	from-rev to-rev
-	from-urlrev to-urlrev)
+	from-urlrev to-urlrev
+	beg fin)
+    (if (= (region-beginning) (point))
+	(setq beg (region-end)
+	      fin (region-beginning))
+      (setq beg (region-beginning)
+	    fin (region-end)))
     (save-excursion
       (goto-char beg)
       (setq from-rev (fsvn-log-list-point-revision))
@@ -451,7 +465,7 @@ Keybindings:
     (unless (and (numberp from-rev)
 		 (numberp to-rev))
       (error "Region terminated by unrevisioned line"))
-    (when (> from-rev to-rev)
+    (when (and (not as-is) (> from-rev to-rev))
       (fsvn-swap from-rev to-rev))
     (setq from-urlrev (fsvn-log-list-revision-path root path from-rev))
     (setq to-urlrev (fsvn-log-list-revision-path root path to-rev))
@@ -596,7 +610,7 @@ Keybindings:
 		       "Revert `%s' to revision %s? " 
 		       (fsvn-file-name-nondirectory path)
 		       (fsvn-urlrev-revision urlrev)))
-      (error "quit"))
+      (signal 'quit nil))
     (list urlrev path)))
   
 (defun fsvn-log-list-cmd-read-urlrev ()
@@ -691,6 +705,7 @@ Optional prefix ARG says how many lines to move; default is one line."
   (fsvn-log-list-next-line))
 
 (defun fsvn-log-list-show-details (rev)
+  "Show details about REV at point."
   (interactive (fsvn-log-list-cmd-read-revision))
   (fsvn-log-list-draw-details rev)
   (fsvn-log-list-setup-detail-windows)
@@ -708,8 +723,8 @@ Optional prefix ARG says how many lines to move; default is one line."
   (fsvn-log-list-scroll-message-buffer nil))
 
 (defun fsvn-log-list-diff-generic (&optional args)
-  "Diff current line with anything following case.
-Mark is activated diff for region terminated revisions.
+  "Diff current revision at point following cases.
+When mark is activated diff for region terminated revisions.
 Otherwise diff at point revision with working copy file or directory.
 "
   (interactive (fsvn-logview-cmd-read-diff-args))
@@ -722,9 +737,10 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-log-list-diff-with-wc args))))
 
 (defun fsvn-log-list-ediff-generic ()
+  "Act like `fsvn-log-list-diff-generic' except directory."
   (interactive)
   (when fsvn-logview-target-directory-p
-    (error "Cannot execute ediff.  This log list target is directory"))
+    (error "Cannot execute ediff.  This log is targeting to directory"))
   (cond
    (mark-active
     (fsvn-log-list-ediff-with-region))
@@ -734,6 +750,7 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-log-list-ediff-with-wc))))
 
 (defun fsvn-log-list-diff-with-wc (&optional args)
+  "Diff between current revision at point and log starting point."
   (interactive (fsvn-logview-cmd-read-diff-args))
   (let ((file fsvn-logview-target-urlrev)
 	(rev (fsvn-log-list-point-revision))
@@ -742,6 +759,7 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-diff-start-process diff-args args)))
 
 (defun fsvn-log-list-ediff-with-wc ()
+  "Ediff between current revision at point and log starting point."
   (interactive)
   (let* ((file fsvn-logview-target-urlrev)
 	 (urlrev (fsvn-log-list-point-urlrev))
@@ -749,7 +767,24 @@ Otherwise diff at point revision with working copy file or directory.
     (when (fsvn-save-file urlrev tmpfile t)
       (fsvn-ediff-files tmpfile file))))
 
+(defun fsvn-log-list-create-patch-generic (patch-file)
+  "Create patch act like `fsvn-log-list-diff-generic'"
+  (interactive (fsvn-cmd-read-patch-file))
+  (cond
+   (mark-active
+    (fsvn-log-list-create-patch-region patch-file))
+   ((fsvn-url-repository-p fsvn-logview-target-urlrev)
+    (error "This buffer has non working copy"))
+   (t
+    (fsvn-log-create-patch-wc patch-file))))
+
+(defun fsvn-log-create-patch-wc (patch-file)
+  (let ((rev (fsvn-log-list-point-revision))
+	(local-file (fsvn-file-relative fsvn-logview-target-urlrev default-directory)))
+    (fsvn-diff-create-patch patch-file (list "--revision" rev) local-file)))
+
 (defun fsvn-log-list-previous-log ()
+  "Diff between current revision at point and previous (-1) revision."
   (interactive)
   (let ((range (fsvn-log-list-current-revision-range))
 	new-range)
@@ -772,6 +807,8 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-log-list-show-details (fsvn-log-list-cmd-revision))))
 
 (defun fsvn-log-list-isearch-text (text)
+  "isearch TEXT in log all contents.
+see `fsvn-log-list-mark-searched'"
   (interactive
    (let* ((prompt (format "Search Text (%s): " (or (car fsvn-log-list-isarch-history) "")))
 	  (readed (read-from-minibuffer prompt
@@ -791,6 +828,8 @@ Otherwise diff at point revision with working copy file or directory.
       (message "No message was matched."))))
 
 (defun fsvn-log-list-mark-searched (text)
+  "Mark revision that have TEXT.
+see `fsvn-log-list-isearch-text'"
   (interactive (list (read-from-minibuffer
 		      "Search Text: " nil nil nil 'fsvn-log-list-isarch-history)))
   (let ((entries (fsvn-log-list-matched-entries text)))
@@ -811,6 +850,7 @@ Otherwise diff at point revision with working copy file or directory.
       (fsvn-set-revprop-value urlrev revprop value))))
 
 (defun fsvn-log-list-open-revision ()
+  "Open revision as file"
   (interactive)
   (let* ((rev (fsvn-log-list-point-revision))
 	 (url (fsvn-log-list-point-url))
@@ -827,6 +867,7 @@ Otherwise diff at point revision with working copy file or directory.
    (kill-buffer (current-buffer))))
 
 (defun fsvn-log-list-copy-urlrev ()
+  "Copy url at point."
   (interactive)
   (let ((urlrev (fsvn-log-list-point-urlrev)))
     (kill-new urlrev)
@@ -837,6 +878,15 @@ Otherwise diff at point revision with working copy file or directory.
   (interactive (fsvn-log-list-cmd-read-merged-import))
   (let ((dest-url (fsvn-log-list-repository-url)))
     (fsvn-merged-import-with-log src-url revision-range dest-url)))
+
+(defun fsvn-log-list-revert-to-revision (urlrev local-file)
+  "LOCAL-FILE is reverted to URLREV.
+LOCAL-FILE is completely replaced by URLREV."
+  (interactive (fsvn-log-list-cmd-read-revert-to-revision))
+  (fsvn-async-let ((urlrev urlrev)
+		   (local-file local-file))
+    (fsvn-popup-start-process "delete" (list local-file))
+    (fsvn-popup-start-copy/move-process "copy" (list urlrev) local-file)))
 
 
 
@@ -1181,7 +1231,7 @@ Keybindings:
    ((not (buffer-modified-p))
     (error "Message is not changed."))
    ((not (y-or-n-p "Really commit changed log? "))
-    (error "quit"))))
+    (signal 'quit nil))))
 
 (defun fsvn-log-message-cmd-read-quit-edit ()
   ;;TODO consider specific
@@ -1240,7 +1290,7 @@ Keybindings:
     (setq file (read-file-name "Save as: " nil nil nil rev-name))
     (when (and (file-exists-p file)
 	       (not (y-or-n-p "File exists. overwrite? ")))
-      (error "quit"))
+      (signal 'quit nil))
     (fsvn-expand-file file)))
 
 (defun fsvn-log-subwindow-switch-to-view ()
@@ -1342,6 +1392,7 @@ Keybindings:
      ["Diww with wc" fsvn-log-list-diff-with-wc t]
      ["Ediff with wc" fsvn-log-list-ediff-with-wc t]
      ["Ediff" fsvn-log-list-ediff-generic t]
+     ["Patch" fsvn-log-list-create-patch-generic t]
      )
     ("Search"
      ["ISearch and Jump" fsvn-log-list-isearch-text t]
@@ -1351,6 +1402,7 @@ Keybindings:
      ["Copy to wc" fsvn-log-list-copy-urlrev t]
      ["Edit Revision Property" fsvn-log-list-edit-revprop t]
      ["Import with Merge" fsvn-log-list-merged-import t]
+     ["Revert" fsvn-log-list-revert-to-revision t]
      )
     ))
 

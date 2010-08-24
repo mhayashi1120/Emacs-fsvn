@@ -304,7 +304,7 @@ Keybindings:
 	(when propname
 	  (setq value (if (fsvn-url-local-p file)
 			  (fsvn-meta-get-property propname file)
-			(fsvn-get-propget propname file)))
+			(fsvn-get-propget file propname)))
 	  (when value
 	    (insert value)))
 	(set-buffer-modified-p nil))
@@ -329,6 +329,7 @@ Keybindings:
    (forward-line (- arg))))
 
 (defun fsvn-proplist-mark-delete (&optional recursive)
+  "Put delete mark."
   (interactive "P")
   (fsvn-proplist-wc-only
    ;; not move a point because property delete merely occur.
@@ -337,6 +338,7 @@ Keybindings:
      (fsvn-proplist-put-mark 1 fsvn-proplist-recursive-mark-char))))
 
 (defun fsvn-proplist-mark-recursive ()
+  "Put recursive mark."
   (interactive)
   (fsvn-proplist-wc-only
    (if (not fsvn-propview-target-directory-p)
@@ -344,6 +346,7 @@ Keybindings:
      (fsvn-proplist-put-mark 1 fsvn-proplist-recursive-mark-char))))
 
 (defun fsvn-proplist-mark-unmark ()
+  "Remove all marks."
   (interactive)
   (fsvn-proplist-put-mark 0)
   (fsvn-proplist-put-mark 1))
@@ -398,7 +401,7 @@ Keybindings:
 		(fsvn-proplist-delete-entry propname))
 	       ((fsvn-struct-proplist-prop-get-recursive-p prop)
 		(unless value-file
-		  (setq value-file (fsvn-get-propget-file propname file)))
+		  (setq value-file (fsvn-get-propget-file file propname)))
 		(fsvn-popup-call-process
 		 "propset" propname
 		 "--recursive"
@@ -545,6 +548,44 @@ Keybindings:
     (when list-buffer
       (fsvn-restore-default-window-setting)
       (fsvn-switch-buffer-window list-buffer))))
+
+
+
+(defconst fsvn-proplist-mode-menu-spec
+  '("fsvn"
+    ["Mark Delete" fsvn-proplist-mark-delete t]
+    ["Mark Recursive" fsvn-proplist-mark-recursive t]
+    ["Unmark" fsvn-proplist-mark-unmark t]
+    ["Edit" fsvn-proplist-edit-property t]
+    ["Add" fsvn-proplist-add-property t]
+    ["Show" fsvn-proplist-show-value t]
+    ["Execute to Marked Properties" fsvn-proplist-do-marked-execute t]
+    ("Move"
+     ["Prev" fsvn-proplist-previous-line t]
+     ["Next" fsvn-proplist-next-line t]
+     ["Cycle Window" fsvn-proplist-propedit-window t]
+     )
+    ))
+
+(easy-menu-define fsvn-proplist-mode-menu
+  fsvn-proplist-mode-map
+  "Menu used in Fsvn Property List mode."
+  fsvn-proplist-mode-menu-spec)
+
+(defconst fsvn-propedit-mode-menu-spec
+  '("fsvn"
+    ["Save" fsvn-propedit-save t]
+    ["Toggle Recursive" fsvn-propedit-toggle-recursive t]
+    ["Cycle Window" fsvn-propedit-proplist-window t]
+    ["Restore Window Setting" fsvn-propedit-restore-window t]
+    ))
+
+(easy-menu-define fsvn-propedit-mode-menu
+  fsvn-propedit-mode-map
+  "Menu used in Fsvn Property Edit mode."
+  fsvn-propedit-mode-menu-spec)
+
+
 
 (provide 'fsvn-propview)
 

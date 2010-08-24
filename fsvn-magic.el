@@ -446,8 +446,7 @@ FIXME Does Emacs have list like this? "
        ;; 10. inode number. **** Don't use this. Not reliable.****
        (fsvn-magic-info-pseudo-inode-number info)
        ;; 11. Device number. **** Don't use this. Not reliable.****
-       (fsvn-magic-info-pseudo-device-number info)
-       ))))
+       (fsvn-magic-info-pseudo-device-number info)))))
 
 (defun fsvn-magic-file-symlink-p (filename)
   (let* ((file (fsvn-magic-parse-file-name filename))
@@ -455,7 +454,7 @@ FIXME Does Emacs have list like this? "
 	 (name (fsvn-urlrev-filename file))
 	 (pinfo (fsvn-magic-get-info-entry parent))
 	 value values)
-    (when (setq value (fsvn-get-propget "svn:externals" parent))
+    (when (setq value (fsvn-get-propget parent "svn:externals"))
       (catch 'found
 	(mapc
 	 (lambda (item)

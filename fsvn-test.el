@@ -246,6 +246,10 @@ To show and see result.
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c") "http://a/b/c/")
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c/") "http://a/b/c/")
 
+(fsvn-test-equal 
+ (fsvn-complete-reading-split-arguments "-R \"white - space.txt\" -r 10:20")
+ '("-R" "white - space.txt" "-r" "10:20"))
+
 ;; fsvn-file-name-root-p
 ;; fsvn-file-name-nondirectory
 ;; fsvn-expand-file
@@ -433,9 +437,9 @@ To show and see result.
     (fsvn-browse-cleanup-path)
     (fsvn-test-sit-for)
     ;; property
-    (fsvn-set-prop-value file3 "fsvn:test" "a\nb")
+    (fsvn-set-propset file3 "fsvn:test" "a\nb")
     (fsvn-browse-update-path)
-    (fsvn-test-equal (fsvn-get-propget "fsvn:test" file3) "a\nb")
+    (fsvn-test-equal (fsvn-get-propget file3 "fsvn:test") "a\nb")
     (fsvn-test-equal (length (fsvn-meta-get-properties file3)) 1)
     (fsvn-test-equal (fsvn-meta-get-property "fsvn:test" file3) "a\nb")
     (fsvn-test-equal (fsvn-get-proplist file3) '("fsvn:test"))

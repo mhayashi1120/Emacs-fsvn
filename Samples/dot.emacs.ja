@@ -13,9 +13,32 @@
 
 ;; 表示しているファイルの注釈を表示する
 (global-set-key "\C-xvG" 'fsvn-blame-minor-mode)
+
 ;; 現在のディレクトリのファイルを指定した URL へ import する
 (global-set-key "\C-xvI" 'fsvn-import)
+
 ;; 指定した URL から checkout する
 (global-set-key "\C-xvO" 'fsvn-checkout)
+
 ;; 非同期プロセスが終了後に残した buffer を消す
 (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
+
+;; svn コマンドを実行する
+(global-set-key "\C-xv!" 'fsvn-command)
+
+;; svn コマンドの結果を表示するバッファを順次表示する
+(global-set-key "\C-xv," 'fsvn-backward-popup-result-buffer)
+(global-set-key "\C-xv." 'fsvn-forward-popup-result-buffer)
+
+;; 現在のバッファの commit 準備をする
+(global-set-key "\C-xvV" 'fsvn-vc-commit)
+
+;; 現在のバッファのログを表示する
+(global-set-key "\C-xvL" 'fsvn-vc-print-log)
+
+;; process の一覧を表示する。
+(global-set-key "\C-xvP" 'fsvn-process-list)
+
+;; debug 情報の出力有無を切り替える。
+(global-set-key "\C-xvZ" 'fsvn-debug-toggle)
+

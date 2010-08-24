@@ -158,11 +158,10 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
 	    `(,fsvn-original-actor fsvn-async-proc fsvn-async-event)
 	  `(fsvn-async-default-filter/sentinel fsvn-async-proc fsvn-async-event))
        (when (= (process-exit-status fsvn-async-proc) 0)
-	 (with-current-buffer (process-buffer fsvn-async-proc)
-	   (fsvn-async-executor 
-	    (process-get fsvn-async-proc 'fsvn-async-remain-forms)
-	    ',(mapcar 'car fsvn-var-alist)
-	    fsvn-async-proc))))))
+	 (fsvn-async-executor 
+	  (process-get fsvn-async-proc 'fsvn-async-remain-forms)
+	  ',(mapcar 'car fsvn-var-alist)
+	  fsvn-async-proc)))))
 
 (defun fsvn-async-create-filter (fsvn-original-actor fsvn-var-alist)
   "Create process sentinel/filter FSVN-ORIGINAL-ACTOR that executed in FSVN-VAR-ALIST"

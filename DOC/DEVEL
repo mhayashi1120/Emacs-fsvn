@@ -22,6 +22,7 @@ Commit changed files in this working copy.
 Create tag to Release-0.m.n
 Check absolute path of release files in Web pages.
    Search by current released version string.
+Delete previous release files.
 
 *** TODO 1.n.o or later
 
@@ -35,8 +36,4 @@ Commit changed files in this working copy.
 Create tag Release-m.n.o (ex Release-1.0.1) from BR-m.x (ex BR-1.x) HEAD
 Check absolute path of release files in Web pages.
    Search by current released version string.
-
-
-
-
-
+Delete previous release files.
