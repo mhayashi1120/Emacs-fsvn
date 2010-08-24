@@ -80,6 +80,7 @@
 	  (define-key map "=" 'fsvn-log-list-diff-generic)
 	  (define-key map "e" 'fsvn-log-list-ediff-generic)
 	  (define-key map "w" 'fsvn-log-list-diff-with-wc)
+	  (define-key map "p" 'fsvn-log-list-create-patch-generic)
 
 	  map)))
 
@@ -107,6 +108,7 @@
 	  (define-key map "\C-c\C-o" 'fsvn-log-switch-to-message)
 	  (define-key map "\C-c\C-q" 'fsvn-log-list-quit)
 	  (define-key map "\C-c\C-r" 'fsvn-log-list-edit-revprop)
+	  (define-key map "\C-c\C-t" 'fsvn-log-list-revert-to-revision)
 	  (define-key map "\C-m" 'fsvn-log-list-show-details)
 	  (define-key map "\C-n" 'fsvn-log-list-next-line)
 	  (define-key map "\C-p" 'fsvn-log-list-previous-line)
@@ -436,6 +438,14 @@ Keybindings:
       (error "Error occur while saving remote file"))
     (fsvn-ediff-files tmpfile1 tmpfile2)))
 
+(defun fsvn-log-list-create-patch-region (patch-file)
+  "Create PATCH-FILE in region terminated point as from and to revision.
+from is marked point, to is current point."
+  (let* ((region (fsvn-log-list-region-revision t))
+	 (from-urlrev (car region))
+	 (to-urlrev (cdr region)))
+    (fsvn-diff-create-patch patch-file from-urlrev to-urlrev)))
+
 (defun fsvn-log-list-region-revision (&optional as-is)
   (let ((path fsvn-log-list-target-path)
 	(root fsvn-buffer-repos-root)
@@ -727,6 +737,7 @@ Otherwise diff at point revision with working copy file or directory.
     (fsvn-log-list-diff-with-wc args))))
 
 (defun fsvn-log-list-ediff-generic ()
+  "Act like `fsvn-log-list-diff-generic' except directory."
   (interactive)
   (when fsvn-logview-target-directory-p
     (error "Cannot execute ediff.  This log is targeting to directory"))
@@ -755,6 +766,22 @@ Otherwise diff at point revision with working copy file or directory.
 	 (tmpfile (fsvn-ediff-make-temp-file urlrev)))
     (when (fsvn-save-file urlrev tmpfile t)
       (fsvn-ediff-files tmpfile file))))
+
+(defun fsvn-log-list-create-patch-generic (patch-file)
+  "Create patch act like `fsvn-log-list-diff-generic'"
+  (interactive (fsvn-cmd-read-patch-file))
+  (cond
+   (mark-active
+    (fsvn-log-list-create-patch-region patch-file))
+   ((fsvn-url-repository-p fsvn-logview-target-urlrev)
+    (error "This buffer has non working copy"))
+   (t
+    (fsvn-log-create-patch-wc patch-file))))
+
+(defun fsvn-log-create-patch-wc (patch-file)
+  (let ((rev (fsvn-log-list-point-revision))
+	(local-file (fsvn-file-relative fsvn-logview-target-urlrev default-directory)))
+    (fsvn-diff-create-patch patch-file (list "--revision" rev) local-file)))
 
 (defun fsvn-log-list-previous-log ()
   "Diff between current revision at point and previous (-1) revision."
@@ -851,6 +878,15 @@ see `fsvn-log-list-isearch-text'"
   (interactive (fsvn-log-list-cmd-read-merged-import))
   (let ((dest-url (fsvn-log-list-repository-url)))
     (fsvn-merged-import-with-log src-url revision-range dest-url)))
+
+(defun fsvn-log-list-revert-to-revision (urlrev local-file)
+  "LOCAL-FILE is reverted to URLREV.
+LOCAL-FILE is completely replaced by URLREV."
+  (interactive (fsvn-log-list-cmd-read-revert-to-revision))
+  (fsvn-async-let ((urlrev urlrev)
+		   (local-file local-file))
+    (fsvn-popup-start-process "delete" (list local-file))
+    (fsvn-popup-start-copy/move-process "copy" (list urlrev) local-file)))
 
 
 
@@ -1356,6 +1392,7 @@ Keybindings:
      ["Diww with wc" fsvn-log-list-diff-with-wc t]
      ["Ediff with wc" fsvn-log-list-ediff-with-wc t]
      ["Ediff" fsvn-log-list-ediff-generic t]
+     ["Patch" fsvn-log-list-create-patch-generic t]
      )
     ("Search"
      ["ISearch and Jump" fsvn-log-list-isearch-text t]
@@ -1365,6 +1402,7 @@ Keybindings:
      ["Copy to wc" fsvn-log-list-copy-urlrev t]
      ["Edit Revision Property" fsvn-log-list-edit-revprop t]
      ["Import with Merge" fsvn-log-list-merged-import t]
+     ["Revert" fsvn-log-list-revert-to-revision t]
      )
     ))
 

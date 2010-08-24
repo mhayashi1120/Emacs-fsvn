@@ -15,10 +15,6 @@
 Google code problem
 can access to read-only, but cannot commit access.
 
-** Replacing status 
- when commit "Replacing some-filename"
- when move file R mark
-
 * browse-mode
 ** sometime happens apply: Wrong number of arguments: max, 0
    or async process?

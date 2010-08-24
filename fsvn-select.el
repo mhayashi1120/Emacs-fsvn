@@ -334,7 +334,7 @@ Keybindings:
   (let* ((status (fsvn-status-get-status entry))
 	 (status1 (fsvn-status-get-status-1 entry))
 	 (status2 (fsvn-status-get-status-2 entry))
-	 (mark (or (memq status1 '(?A ?M ?D)) (memq status2 '(?M))))
+	 (mark (or (memq status1 '(?R ?A ?M ?D)) (memq status2 '(?M))))
 	 (filename (fsvn-select-file-filename entry))
 	 cell buffer-read-only)
     (fsvn-select-file-buffer!status entry)

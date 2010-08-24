@@ -1692,17 +1692,10 @@ PATH is each executed path."
      (setq src-file (fsvn-read-file-name "Properties copy from: " nil nil t))
      (list src-file dest-file arg))))
 
-(defun fsvn-browse-cmd-read-create-patch-path ()
-  (let* ((patch (fsvn-read-file-name "Patch file: ")))
-    (when (file-exists-p patch)
-      (unless (y-or-n-p "File exists. Overwrite? ")
-	(signal 'quit nil)))
-    (list patch)))
-
 (defun fsvn-browse-cmd-read-create-patch-selected ()
   (fsvn-browse-cmd-wc-only
    (let* ((files (fsvn-browse-cmd-selected-urls))
-	  (patch (car (fsvn-browse-cmd-read-create-patch-path))))
+	  (patch (car (fsvn-cmd-read-patch-file))))
     (list files patch))))
 
 ;; * fsvn-browse-mode interactive commands
@@ -2100,16 +2093,6 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive (fsvn-browse-cmd-read-branch/tag "tags"))
   (fsvn-browse-copy-this-in-repository urlrev tag-url args))
 
-;;TODO
-;; (defun fsvn-browse-copy-path-in-repository (to-url &optional args)
-;;   "Execute `copy' for repository file corresponding current directory.
-;; Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
-
-;; This makes faster copy than in working copy.
-;; "
-;;   (interactive)
-;;   (fsvn-browse-copy-this-in-repository (fsvn-browse-current-repository-url) to-url args))
-
 (defun fsvn-browse-copy-this-in-repository (from-url to-url &optional args)
   "Execute `copy' for repository file corresponding local file.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
@@ -2364,21 +2347,13 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
 
 (defun fsvn-browse-create-patch-path (patch-file)
   "Create PATCH-FILE for current directory."
-  (interactive (fsvn-browse-cmd-read-create-patch-path))
+  (interactive (fsvn-cmd-read-patch-file))
   (fsvn-browse-create-patch-selected (list default-directory) patch-file))
 
 (defun fsvn-browse-create-patch-selected (files patch-file)
   "Create PATCH-FILE for for selected FILES."
   (interactive (fsvn-browse-cmd-read-create-patch-selected))
-  (let ((file (fsvn-expand-file patch-file))
-	proc)
-    (write-region "" nil file)
-    (setq proc (fsvn-start-process nil "diff" (mapcar 'fsvn-file-relative files)))
-    (set-process-sentinel proc (lambda (proc event) 
-				 (message "Patch was created.")))
-    (set-process-filter proc `(lambda (proc event)
-				(write-region event nil ,file t)))
-    proc))
+  (fsvn-diff-create-patch patch-file (mapcar 'fsvn-file-relative files)))
 
 
 

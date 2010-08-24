@@ -12,9 +12,32 @@
 
 ;; blame/prase/annotate minor-mode
 (global-set-key "\C-xvG" 'fsvn-blame-minor-mode)
+
 ;; Import current directory to selected repository.
 (global-set-key "\C-xvI" 'fsvn-import)
+
 ;; Checkout from selected repository.
 (global-set-key "\C-xvO" 'fsvn-checkout)
+
 ;; Remove result buffers
 (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
+
+;; Execute svn command.
+(global-set-key "\C-xv!" 'fsvn-command)
+
+;; Cycle result buffers.
+(global-set-key "\C-xv," 'fsvn-backward-popup-result-buffer)
+(global-set-key "\C-xv." 'fsvn-forward-popup-result-buffer)
+
+;; Commit current buffer.
+(global-set-key "\C-xvV" 'fsvn-vc-commit)
+
+;; Show log current buffer file.
+(global-set-key "\C-xvL" 'fsvn-vc-print-log)
+
+;; Show process list.
+(global-set-key "\C-xvP" 'fsvn-process-list)
+
+;; Toggle debugging.
+(global-set-key "\C-xvZ" 'fsvn-debug-toggle)
+

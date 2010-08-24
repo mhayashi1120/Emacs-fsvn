@@ -246,6 +246,10 @@ To show and see result.
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c") "http://a/b/c/")
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c/") "http://a/b/c/")
 
+(fsvn-test-equal 
+ (fsvn-complete-reading-split-arguments "-R \"white - space.txt\" -r 10:20")
+ '("-R" "white - space.txt" "-r" "10:20"))
+
 ;; fsvn-file-name-root-p
 ;; fsvn-file-name-nondirectory
 ;; fsvn-expand-file

@@ -56,7 +56,8 @@
 
 (setq fsvn-blame-subwindow-font-lock-keywords
       (list
-       (list "^\\(\\(?:Revision\\|Date\\|Author\\):\\) \\(.*\\)" '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+       (list "^\\(\\(?:Revision\\|Date\\|Author\\):\\) \\(.*\\)" 
+	     '(1 fsvn-header-key-face) '(2 fsvn-header-face))
        ))
 
 (defun fsvn-blame-subwindow-mode ()
@@ -74,21 +75,43 @@ Keybindings:
   (setq mode-name "Fsvn Blame Control")
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-blame-subwindow-buffer-local-variables)
-  ;;FIXME too late fontify.
+  ;;FIXME too slow fontify.
   (font-lock-fontify-buffer))
 
 (defun fsvn-blame-subwindow-insert-message (line string)
   (with-current-buffer (fsvn-blame-get-subwindow-buffer)
-    (let (buffer-read-only remain)
-      (if line
-	  (progn
-	    (goto-char (point-min))
-	    (setq remain (forward-line line))
-	    (insert (make-string remain ?\n))
-	    (delete-region (point) (save-excursion (forward-line 1) (point))))
-	(erase-buffer))
-      (insert string ?\n))
-    (set-buffer-modified-p nil)))
+    (let ((new-list (copy-sequence fsvn-blame-subwindow-message-list))
+	  point)
+      (cond
+       ((null line)
+	(if string
+	    (fsvn-blame-subwindow-redraw-message (split-string string "\n"))
+	  (fsvn-blame-subwindow-redraw-message nil)))
+       (t
+	(when (<= (length new-list) line)
+	  (setq new-list (append new-list (make-list (1+ (- line (length new-list))) nil))))
+	(when (setq point (nthcdr line new-list))
+	  (setcar point string))
+	(fsvn-blame-subwindow-redraw-message new-list))))))
+
+(defvar fsvn-blame-subwindow-message-list nil)
+
+(defun fsvn-blame-subwindow-redraw-message (list)
+  (with-current-buffer (fsvn-blame-get-subwindow-buffer)
+    (unless (equal list fsvn-blame-subwindow-message-list)
+      (save-excursion
+	(let (buffer-read-only)
+	  (erase-buffer)
+	  (goto-char (point-min))
+	  (mapc
+	   (lambda (msg)
+	     (delete-region (line-beginning-position) (line-end-position))
+	     (when msg
+	       (insert msg))
+	     (insert "\n"))
+	   list)))
+      (setq fsvn-blame-subwindow-message-list list)
+      (set-buffer-modified-p nil))))
 
 (defconst fsvn-blame-minor-buffer-local-variables
   '(
@@ -99,6 +122,7 @@ Keybindings:
     (fsvn-blame-log-data)
     (kill-buffer-hook . kill-buffer-hook)
     (fsvn-blame-spent-time . (cons (float-time) nil))
+    (fsvn-blame-subwindow-message-list)
     ))
 
 (defvar fsvn-blame-minor-mode nil)
@@ -188,7 +212,8 @@ Keybindings: none
 		 ((null data)
 		  (if (null (fsvn-blame-get-processes target-buffer))
 		      (fsvn-blame-subwindow-insert-message nil "Process exited.")
-		    (fsvn-blame-subwindow-insert-message 0 (format "Spent %d seconds." (- (float-time) start)))))
+		    (fsvn-blame-subwindow-insert-message 
+		     0 (format "Spent %d seconds." (- (float-time) start)))))
 		 ((or (null overlay)
 		      (null (setq rev (overlay-get overlay 'fsvn-blame-revision))))
 		  (erase-buffer)
@@ -200,7 +225,8 @@ Keybindings: none
 		  (let ((entry (fsvn-logs-find-logentry data rev))
 			msg date)
 		    (setq msg (fsvn-xml-log->logentry=>msg$ entry))
-		    (setq date (format-time-string fsvn-generic-datetime-format (fsvn-xml-log->logentry=>date$ entry)))
+		    (setq date (format-time-string fsvn-generic-datetime-format 
+						   (fsvn-xml-log->logentry=>date$ entry)))
 		    (insert (format "Revision: %d\n" rev))
 		    (insert (format "Author: %s\n" (fsvn-xml-log->logentry=>author$ entry)))
 		    (insert (format "Date: %s\n" date))
@@ -271,7 +297,9 @@ Keybindings: none
 	   ;; line added in wc
 	   ((assq wc-line diff-alist)
 	    (when flg
-	      (fsvn-blame-create-overlay-internal prev-end (save-excursion (forward-line -1) (point)) prev-rev face-alist)
+	      (fsvn-blame-create-overlay-internal 
+	       prev-end
+	       (save-excursion (forward-line -1) (point)) prev-rev face-alist)
 	      (setq flg nil))
 	    (setq prev-end (point)))
 	   (t
@@ -363,7 +391,7 @@ Keybindings: none
 	 (process-put p 'fsvn-blame-file-buffer buffer)
 	 (process-put p 'fsvn-blame-process-name name)
 	 (process-put p 'fsvn-blame-process-line line)
-	 (fsvn-blame-subwindow-insert-message line (format "%s Received %d" name 0))))
+	 (fsvn-blame-subwindow-insert-message line (format "%s Received %d bytes" name 0))))
      (list (list blame-proc "Blame" 1) (list log-proc "Log" 2)))
     (set-process-sentinel log-proc
 			  (fsvn-blame-create-process-sentinel
@@ -398,7 +426,7 @@ Keybindings: none
     (let ((size (buffer-size (process-buffer proc)))
 	  (name (process-get proc 'fsvn-blame-process-name))
 	  (line (process-get proc 'fsvn-blame-process-line)))
-      (fsvn-blame-subwindow-insert-message line (format "%s Received %d." name size)))))
+      (fsvn-blame-subwindow-insert-message line (format "%s Received %d bytes." name size)))))
 
 (defun fsvn-blame-merge-and-activate ()
   (cond
