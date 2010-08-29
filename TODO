@@ -106,6 +106,8 @@ revision range and log base url
 
 proplist --recursive
 
+** propedit and not changed value but want to apply recursively
+
 * diff
 ** ediff directory
 ** diff directory

@@ -1248,6 +1248,7 @@ PATH is each executed path."
 	     (fsvn-message-edit-prepared-buffer))
     (fsvn-parasite-commit-setup-window t)
     (unless (y-or-n-p "Log edit buffer already prepared. Discard it? ")
+      ;; Want to quit signal. But quit signal cannot display messages.
       (error "Type C-c C-q for Quit Edit.")))
   (let* ((unsaved (fsvn-files-unsaved-buffers files))
 	 (browse-buffer (current-buffer))
