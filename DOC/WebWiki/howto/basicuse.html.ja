@@ -97,7 +97,7 @@
 		  <td>C-c C-k</td><td>メッセージの編集内容を破棄する</td>
 		</tr>
 		<tr>
-		  <td>C-c C-o</td><td>バッファを切り替える</td>
+		  <td>C-c C-o</td><td>関係するバッファに切り替える</td>
 		</tr>
 		<tr>
 		  <td>&#61; &#61;</td><td>対象ファイルがバージョン管理下にある場合に diff を実行する (`fsvn-select-file-mode' のみ)</td>
