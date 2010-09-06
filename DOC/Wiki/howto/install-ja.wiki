@@ -30,12 +30,10 @@
 ** .emacs の設定
 ----
 =(require 'fsvn)=
-
 ----
 ** .emacs の設定 (Option)
 ----
 [[http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&root=fsvn][dot.sample.ja]]
-
 ----
 ** わからないことは
 ----
