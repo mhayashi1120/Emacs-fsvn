@@ -484,7 +484,7 @@ Keybindings:
 
 (defun fsvn-select-file-do-delete-this (file)
   (interactive (list (fsvn-expand-file (fsvn-current-filename))))
-  (when (or (not (interactive-p))
+  (when (or (not (fsvn-interactive-p))
 	    (fsvn-confirm-prompt 'fsvn-select-file-do-delete-this "Delete this file? "))
     (if (fsvn-file-exact-directory-p file)
 	(fsvn-delete-directory file)
@@ -500,7 +500,7 @@ This is usefull for missing file (marked `!')
   (interactive (list (fsvn-expand-file (fsvn-current-filename)) 
 		     (when current-prefix-arg
 		       (fsvn-read-svn-subcommand-args "delete" t nil))))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  (fsvn-confirm-prompt 'fsvn-select-file-delete-this "Svn: Delete this file? "))
       (progn
 	(fsvn-popup-call-process "delete" args (list file))

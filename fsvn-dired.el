@@ -229,7 +229,7 @@ This function suppress this behavior."
 (defun fsvn-dired-do-load (files)
   "Act like `dired-do-load'. But not equals of this."
   (interactive (fsvn-dired-cmd-selected-files))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  (fsvn-browse-dired-confirm files 'load))
       (progn
 	(mapc 'load-file files)
@@ -239,7 +239,7 @@ This function suppress this behavior."
 (defun fsvn-dired-do-byte-compile (files)
   "Act like `dired-do-byte-compile'. But not equals of this."
   (interactive (fsvn-dired-cmd-selected-files))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  (fsvn-browse-dired-confirm files 'byte-compile))
       (progn
 	(mapc
@@ -296,7 +296,7 @@ This function suppress this behavior."
 		   (error "Cannot operate on `.'"))
 		 (list files)))
   (if (and files
-	   (or (not (interactive-p))
+	   (or (not (fsvn-interactive-p))
 	       (fsvn-browse-dired-confirm files 'delete dired-deletion-confirmer)))
       (progn
 	(mapc

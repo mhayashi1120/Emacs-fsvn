@@ -33,7 +33,11 @@
 (defcustom fsvn-svn-command "svn"
   "*Subversion command. Must be set before loading this file.
 If are problems while executing this command, check `exec-path' or PATH environment variable.
-Otherwise set absolute path."
+Otherwise set absolute path.
+
+After change this variable, will not take effect immediately. 
+Please call `fsvn-initialize-loading' function.
+"
   :group 'fsvn
   :type  '(choice
 	   string
@@ -42,7 +46,11 @@ Otherwise set absolute path."
 (defcustom fsvn-svnadmin-command "svnadmin"
   "*Subversion Administrator command. Must be set before loading this file.
 If are problems while executing this command, check `exec-path' or PATH environment variable.
-Otherwise set absolute path."
+Otherwise set absolute path.
+
+After change this variable, will not take effect immediately. 
+Please call `fsvn-initialize-loading' function.
+"
   :group 'fsvn
   :type  '(choice
 	   string

@@ -4,3 +4,9 @@
 ** First of all
 ----
 TODO
+
+
+----
+** For more information.
+----
+[[qa-en.wiki][Q and A]]

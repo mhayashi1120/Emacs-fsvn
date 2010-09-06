@@ -1,3 +1,7 @@
+2010-08-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fsvn-open-repository
+
 2010-08-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: completing read command argument quoted string.

@@ -20,3 +20,8 @@
 ** .emacs (Option)
 ----
 [[http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn][dot.sample]]
+
+----
+** For more information.
+----
+[[qa-en.wiki][Q and A]]

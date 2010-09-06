@@ -41,3 +41,6 @@
 ;; Toggle debugging.
 (global-set-key "\C-xvZ" 'fsvn-debug-toggle)
 
+;; Inhibit displaying prompt when `svn update' (C-c C-u).
+(setq fsvn-no-confirm
+      '(fsvn-browse-update-path))

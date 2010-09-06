@@ -293,6 +293,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (run-mode-hooks 'fsvn-message-edit-mode-hook))
     (fsvn-parasite-setup-message-edit-window)))
 
+(defun fsvn-open-repository (urlrev)
+  "Open URLREV by repository browser."
+  (interactive (list (fsvn-completing-read-urlrev)))
+  (fsvn-browse-switch-directory-buffer urlrev))
+
 (defun fsvn-debug-toggle (&optional arg no-msg)
   "Toggle debug output enable/disable.
 

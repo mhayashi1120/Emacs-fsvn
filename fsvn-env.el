@@ -59,6 +59,17 @@ Save selected window, not contain point."
        (when (window-live-p RETURN-WINDOW) 
 	 (select-window RETURN-WINDOW)))))
 
+(cond
+ ((= emacs-major-version 21)
+  (defmacro fsvn-interactive-p ()
+    `(interactive-p)))
+ ((= emacs-major-version 22)
+  (defmacro fsvn-interactive-p ()
+    `(called-interactively-p)))
+ (t
+  (defmacro fsvn-interactive-p ()
+    `(called-interactively-p 'any))))
+
 (defun fsvn-cycle-next (list item)
   (let ((found (member item list)))
     (cond
