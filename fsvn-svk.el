@@ -19,6 +19,7 @@
 
 (defvar process-environment)
 (defvar system-type)
+(defvar server-process)
 
 
 

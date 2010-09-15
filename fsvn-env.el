@@ -15,6 +15,9 @@
 
 
 
+(defvar emacs-major-version)
+(defvar emacs-version)
+
 (defconst fsvn-space-char ?\040)
 
 (defcustom fsvn-home-directory
@@ -63,9 +66,12 @@ Save selected window, not contain point."
  ((= emacs-major-version 21)
   (defmacro fsvn-interactive-p ()
     `(interactive-p)))
- ((= emacs-major-version 22)
-  (defmacro fsvn-interactive-p ()
-    `(called-interactively-p)))
+ ((memq emacs-major-version '(22 23))
+  (if (version<= emacs-version "23.1")
+      (defmacro fsvn-interactive-p ()
+	`(called-interactively-p))
+    (defmacro fsvn-interactive-p ()
+      `(called-interactively-p 'any))))
  (t
   (defmacro fsvn-interactive-p ()
     `(called-interactively-p 'any))))
@@ -354,6 +360,15 @@ Use %% to put a single % into the output.
     (setq next-first (float-time (encode-time 0 0 0 1 next-month next-year)))
     (setq last-day (seconds-to-time (1- next-first)))
     (string-to-number (format-time-string "%d" last-day))))
+
+
+
+(defun fsvn-vc-mode-p ()
+  "Is vc-svn active?"
+  (defvar vc-mode)
+  (and (boundp 'vc-mode)
+       (stringp vc-mode)
+       (string-match "^ SVN" vc-mode)))
 
 
 

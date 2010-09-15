@@ -19,6 +19,10 @@
 (require 'fsvn-magic)
 (require 'fsvn-ui)
 (require 'fsvn-cmd)
+(require 'fsvn-env)
+(require 'fsvn-minibuf)
+(require 'fsvn-fs)
+(require 'fsvn-logview)
 
 
 
@@ -34,7 +38,11 @@
 (defconst fsvn-advised-alist
   '((dired around fsvn-dired-mode)
     (dired-goto-file around fsvn-dired-goto-file-ad)
-    (after-find-file around fsvn-after-find-file)))
+    (after-find-file around fsvn-after-find-file)
+    (vc-find-file-hook after fsvn-ui-fancy-vc-find-file-hook)
+    (vc-after-save after fsvn-ui-fancy-vc-after-save)
+    (ediff-refresh-mode-lines around fsvn-ui-fancy-ediff-modeline-fixup)
+    ))
 
 ;; global command
 (defun fsvn-cleanup-log-message ()

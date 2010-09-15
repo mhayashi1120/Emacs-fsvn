@@ -1,3 +1,7 @@
+2010-09-15  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fancy modeline (from psvn.el)
+
 2010-08-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: fsvn-open-repository

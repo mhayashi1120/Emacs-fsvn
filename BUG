@@ -82,3 +82,5 @@ in the first place not works
 
 ** fsvn-svk-browse-create
 in windows fsvn-async-let not works.
+** advice problems
+I didn't know well about ad-activate and ad-deactivate. ad-update ????
