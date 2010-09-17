@@ -519,6 +519,12 @@ static char * data[] = {
   "vc-find-file-hook advice for synchronizing psvn with vc-svn interface"
   (fsvn-ui-fancy-redraw))
 
+(defadvice vc-find-file-hook (after fsvn-ui-fancy-vc-find-file-hook-revert disable)
+  "Add hook to `revert-buffer'"
+  ;; `revert-buffer-function' is not considered.
+  ;; Almost case, that variable is used in non text editing modes.
+  (add-hook 'after-revert-hook 'fsvn-ui-fancy-redraw nil t))
+
 (defadvice vc-after-save (after fsvn-ui-fancy-vc-after-save disable)
   "vc-after-save advice for synchronizing psvn when saving buffer"
   (fsvn-ui-fancy-redraw))
@@ -541,21 +547,18 @@ static char * data[] = {
   (when (and buffer-file-name (fsvn-vc-mode-p))
     (fsvn-ui-fancy-update-state-mark
      (fsvn-ui-fancy-interpret-state-mode-color
-      (vc-svn-state buffer-file-name)))))
+      (let ((status (fsvn-get-file-status buffer-file-name)))
+	(fsvn-xml-status->target->entry=>wc-status.item status))))))
 
-(defun fsvn-ui-fancy-interpret-state-mode-color (stat)
+(defun fsvn-ui-fancy-interpret-state-mode-color (val)
   "Interpret vc-svn-state symbol to mode line color"
   (cond
-   ((eq stat 'edited)
+   ((memq val '(modified added deleted replaced))
     "tomato")
-   ((eq stat 'up-to-date)
-    "GreenYellow")
-   ;; what is missing here??
-   ;; ('unknown  "gray"        )
-   ;; ('added    "blue"        )
-   ;; ('deleted  "red"         )
-   ;; ('unmerged "purple"      )
-   (t "red")))
+   ((memq val '(conflicted incomplete))
+    "red")
+   (t 
+    "GreenYellow")))
 
 
 

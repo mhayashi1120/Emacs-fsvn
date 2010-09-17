@@ -270,32 +270,6 @@ How to send a bug report:
 
 
 
-(defadvice vc-find-file-hook (after fsvn-ui-fancy-vc-find-file-hook-dev disable)
-  "TODO dev"
-  (if revert-buffer-function
-      (progn
-	(let ((advice (ad-make-advice 'fsvn-ui-fancy-revert-buffer nil t 
-				      `(advice lambda (&rest dummy) 
-					       (fsvn-ui-fancy-redraw)))))
-	  (ad-add-advice revert-buffer-function advice 'around nil)
-	  (ad-enable-advice revert-buffer-function 'around 'fsvn-ui-fancy-revert-buffer)
-	  (ad-update revert-buffer-function)))
-    (add-hook 'after-revert-hook 'fsvn-ui-fancy-redraw nil t)))
-
-(defun fsvn-ui-fancy-remove-all-advices ()
-  (mapcar
-   (lambda (x)
-     (let ((func (intern (car x))))
-       (when (memq 'fsvn-ui-fancy-vc-find-file-hook-dev (ad-get-cache-class-id func 'around))
-	 (ad-disable-advice func 'around 'fsvn-ui-fancy-vc-find-file-hook-dev)
-	 (ad-update func))))
-   ad-advised-functions))
-
-(ad-enable-advice 'vc-find-file-hook 'after 'fsvn-ui-fancy-vc-find-file-hook-dev)
-(ad-update 'vc-find-file-hook)
-
-
-
 (defmacro fsvn-test-buffer-has (buffer regexp)
   `(with-current-buffer ,buffer
      (save-excursion

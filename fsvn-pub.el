@@ -40,6 +40,7 @@
     (dired-goto-file around fsvn-dired-goto-file-ad)
     (after-find-file around fsvn-after-find-file)
     (vc-find-file-hook after fsvn-ui-fancy-vc-find-file-hook)
+    (vc-find-file-hook after fsvn-ui-fancy-vc-find-file-hook-revert)
     (vc-after-save after fsvn-ui-fancy-vc-after-save)
     (ediff-refresh-mode-lines around fsvn-ui-fancy-ediff-modeline-fixup)
     ))
