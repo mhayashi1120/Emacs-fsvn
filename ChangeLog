@@ -1,5 +1,7 @@
 2010-09-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Release: 0.9.6
+
 	* Add: fsvn-browse-create-patch-path bound to `= P'
 	       fsvn-browse-create-patch-selected bound to `= p'
 
