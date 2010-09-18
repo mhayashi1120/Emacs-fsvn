@@ -156,6 +156,8 @@
 	  (define-key map "=" 'fsvn-browse-diff-this)
 	  (define-key map "l" 'fsvn-browse-diff-local)
 	  (define-key map "e" 'fsvn-browse-ediff-this)
+	  (define-key map "p" 'fsvn-browse-create-patch-selected)
+	  (define-key map "P" 'fsvn-browse-create-patch-path)
 	  map)))
 
 (defvar fsvn-browse-often-use-map nil)
