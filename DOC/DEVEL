@@ -22,7 +22,7 @@ Commit changed files in this working copy.
 Create tag to Release-0.m.n
 Check absolute path of release files in Web pages.
    Search by current released version string.
-Delete previous release files.
+Delete previous release files. (after a while)
 
 *** TODO 1.n.o or later
 
