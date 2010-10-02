@@ -553,8 +553,10 @@ static char * data[] = {
 (defun fsvn-ui-fancy-interpret-state-mode-color (val)
   "Interpret vc-svn-state symbol to mode line color"
   (cond
-   ((memq val '(modified added deleted replaced))
+   ((memq val '(modified deleted replaced))
     "tomato")
+   ((memq val '(added))
+    "yellow")
    ((memq val '(conflicted incomplete))
     "red")
    (t 

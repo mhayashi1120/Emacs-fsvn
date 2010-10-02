@@ -1,3 +1,21 @@
+2010-10-02  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: complete url and complete argument.
+
+	* Add: Show CopyFrom path in log-sibling-mode.
+
+	* Add: fsvn-log-list-propview-this bound to `z p'
+
+	* Add: fsvn-log-sibling-propview-this bound to `z p'
+
+	* Fix: completing-read-url
+
+	* Change: fsvn-open-log-view-mode -> fsvn-open-logview-mode
+
+2010-09-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Multiple Emacs process cleanup using files in temp directory.
+
 2010-09-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Release: 0.9.6

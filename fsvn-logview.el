@@ -121,12 +121,12 @@
 	  (define-key map "u" 'fsvn-log-list-mark-unmark)
 	  (define-key map "v" 'fsvn-log-list-toggle-details)
 	  (define-key map "w" 'fsvn-log-list-copy-urlrev)
+	  (define-key map "zp" 'fsvn-log-list-propview-this)
 	  
 	  (define-key map "g" 'revert-buffer)
 
 	  ;;todo not implement
 	  ;; 	(define-key map "U" 'fsvn-log-list-mark-unmark-all)
-	  ;; 	(define-key map "z\C-p" 'fsvn-log-list-open-propview)
 
 	  map)))
 
@@ -271,7 +271,7 @@ Keybindings:
      (lambda (entry)
        (setq fsvn-log-list-all-entries (delq entry fsvn-log-list-all-entries)))
      fsvn-log-list-entries)
-    (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p range)
+    (fsvn-open-logview-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p range)
     (when rev
       (fsvn-log-list-goto-revision rev))))
 
@@ -622,7 +622,7 @@ from is marked point, to is current point."
 (defun fsvn-log-list-cmd-read-save-this ()
   (when fsvn-logview-target-directory-p
     (error "\"%s\" is directory." fsvn-logview-target-urlrev))
-  (let* ((urlrev fsvn-logview-target-urlrev) ;;BUG consider using urlrev
+  (let* ((urlrev fsvn-logview-target-urlrev)
 	 (rev (fsvn-log-list-point-revision))
 	 (file (fsvn-log-read-save-file (fsvn-urlrev-url urlrev) rev)))
     (list urlrev file rev)))
@@ -650,14 +650,22 @@ from is marked point, to is current point."
 
 ;; * fsvn-log-list-mode interactive commands
 
+(defun fsvn-log-list-propview-this (urlrev)
+  "Execute `proplist' by `fsvn-proplist-mode' for point URLREV"
+  (interactive (fsvn-log-list-cmd-read-urlrev))
+  (fsvn-open-propview-mode fsvn-buffer-repos-root 
+			   urlrev
+			   fsvn-logview-target-directory-p
+			   default-directory))
+
 (defun fsvn-log-list-reload-with-change-limit (count)
   (interactive (fsvn-log-list-cmd-read-reload-with-change-limit))
   ;;todo consider rev-range arg
-  (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p nil count))
+  (fsvn-open-logview-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p nil count))
 
 (defun fsvn-log-list-reload-with-revision (&optional range)
   (interactive (fsvn-log-list-cmd-read-reload-with-revision))
-  (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p range t))
+  (fsvn-open-logview-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p range t))
 
 (defun fsvn-log-list-save-this (urlrev file revision)
   "Save current point REVISION to FILE."
@@ -790,7 +798,7 @@ Otherwise diff at point revision with working copy file or directory.
 	new-range)
     (setq new-range
 	  (cons (1- (cdr range)) nil))
-    (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p new-range)))
+    (fsvn-open-logview-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p new-range)))
 
 (defun fsvn-log-list-next-log ()
   (interactive)
@@ -798,7 +806,7 @@ Otherwise diff at point revision with working copy file or directory.
 	new-range)
     (setq new-range
 	  (cons nil (1+ (car range))))
-    (fsvn-open-log-view-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p new-range)))
+    (fsvn-open-logview-mode fsvn-logview-target-urlrev fsvn-logview-target-directory-p new-range)))
 
 (defun fsvn-log-list-toggle-details ()
   (interactive)
@@ -926,6 +934,8 @@ LOCAL-FILE is completely replaced by URLREV."
 	  (define-key map "n" 'fsvn-log-sibling-next-line)
 	  (define-key map "p" 'fsvn-log-sibling-previous-line)
 	  (define-key map "zl" 'fsvn-log-sibling-log-this)
+	  (define-key map "zp" 'fsvn-log-sibling-propview-this)
+
 	  map)))
 
 (defcustom fsvn-log-sibling-mode-hook nil
@@ -948,6 +958,8 @@ LOCAL-FILE is completely replaced by URLREV."
     (fsvn-log-sibling-logentry)
     (fsvn-log-sibling-revision)
     (fsvn-log-sibling-font-lock-keywords)
+
+    (post-command-hook . '(fsvn-log-sibling-show-details))
     ))
 
 (defvar fsvn-log-sibling-target-path nil)
@@ -1039,6 +1051,11 @@ Keybindings:
 	(setq url (fsvn-expand-url path fsvn-buffer-repos-root))
 	(fsvn-url-urlrev url rev))))))
 
+(defun fsvn-log-sibling-point-entry ()
+  (let ((path (fsvn-log-sibling-point-path)))
+    (when path
+      (fsvn-log-sibling-find-path path))))
+
 (defun fsvn-log-sibling-target-urlrev ()
   (with-current-buffer fsvn-log-source-buffer
     fsvn-logview-target-urlrev))
@@ -1053,6 +1070,25 @@ Keybindings:
 	  (string-lessp 
 	   (fsvn-xml-log->logentry->paths->path$ p1)
 	   (fsvn-xml-log->logentry->paths->path$ p2)))))
+
+(defun fsvn-log-sibling-find-path (path)
+  (catch 'found
+    (mapc
+     (lambda (entry)
+       (when (string= (fsvn-xml-log->logentry->paths->path$ entry) path)
+	 (throw 'found entry)))
+     (fsvn-xml-log->logentry->paths fsvn-log-sibling-logentry))
+    nil))
+
+(defun fsvn-log-sibling-show-details ()
+  (let ((entry (fsvn-log-sibling-point-entry))
+	(message-log-max))
+    (if (and entry
+	     (not (string= (fsvn-xml-log->logentry->path.copyfrom-path entry) "")))
+	(message "Copy from %s@%s" 
+		 (fsvn-xml-log->logentry->path.copyfrom-path entry)
+		 (fsvn-xml-log->logentry->paths->path.copyfrom-rev entry))
+      (message nil))))
 
 (defun fsvn-log-sibling-cmd-read-copy-file ()
   (let ((from (fsvn-log-sibling-point-urlrev))
@@ -1104,6 +1140,13 @@ Keybindings:
     (setq file (fsvn-log-read-save-file url rev))
     (list (fsvn-url-urlrev url rev) file)))
 
+(defun fsvn-log-sibling-cmd-read-propview-this ()
+  (let ((status (fsvn-log-sibling-point-status))
+	(urlrev (fsvn-log-sibling-cmd-this-urlrev)))
+    (when (memq status '(?D))
+      (error "Unable show properties on this line"))
+    (list urlrev)))
+
 ;; * fsvn-log-sibling-mode interactive commands
 
 (defun fsvn-log-sibling-next-line (&optional arg)
@@ -1121,7 +1164,7 @@ Keybindings:
   (interactive (fsvn-log-sibling-cmd-read-this-urlrev))
   (let* ((urlrev (fsvn-log-sibling-point-urlrev))
 	 (info (fsvn-get-info-entry urlrev)))
-    (fsvn-open-log-view-mode urlrev (eq (fsvn-xml-info->entry.kind info) 'dir))))
+    (fsvn-open-logview-mode urlrev (eq (fsvn-xml-info->entry.kind info) 'dir))))
 
 (defun fsvn-log-sibling-save-this (urlrev file)
   "Save current point URL to local file."
@@ -1164,6 +1207,15 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-log-sibling-cmd-read-copy-file))
   (fsvn-popup-start-copy/move-process "copy" (list src-urlrev) dest-file args))
+
+(defun fsvn-log-sibling-propview-this (urlrev)
+  "Execute `proplist' by `fsvn-proplist-mode' for point URLREV"
+  (interactive (fsvn-log-sibling-cmd-read-propview-this))
+  (let ((info (fsvn-get-info-entry urlrev)))
+    (fsvn-open-propview-mode fsvn-buffer-repos-root 
+			     urlrev
+			     (eq (fsvn-xml-info->entry.kind info) 'dir)
+			     default-directory)))
 
 
 
@@ -1386,6 +1438,7 @@ Keybindings:
      ["Save" fsvn-log-list-save-this t]
      ["Show Details" fsvn-log-list-show-details t]
      ["Toggle Details" fsvn-log-list-toggle-details t]
+     ["Properties" fsvn-log-list-propview-this t]
      )
     ("Diff"
      ["Diff" fsvn-log-list-diff-generic t]
@@ -1424,6 +1477,7 @@ Keybindings:
      ["Open Directory" fsvn-log-sibling-open-this-directory t]
      ["Open" fsvn-log-sibling-open-this t]
      ["Save" fsvn-log-sibling-save-this t]
+     ["Properties" fsvn-log-sibling-propview-this t]
      )
     ("Diff"
      ["Diff Previous" fsvn-log-sibling-diff-previous t]

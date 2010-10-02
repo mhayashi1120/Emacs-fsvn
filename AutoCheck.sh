@@ -6,6 +6,8 @@
 makefile=Makefile.tmp
 cfgfile=MAKE-CFG.el.tmp
 
+# TODO Emacs 22 not works fine.
+
 function check ()
 {
 	bin_dir=${1%/}
@@ -37,6 +39,7 @@ function check ()
 	cat > ${cfgfile} <<EOF
 (setq fsvn-svn-command "${svn_command}")
 (setq fsvn-svnadmin-command "${svnadmin_command}")
+(setq fsvn-home-directory "~/tmp/$(date +%Y%m%d%H%M%S)")
 EOF
 
 	rm -f ${makefile}

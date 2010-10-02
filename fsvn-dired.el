@@ -186,7 +186,7 @@ This function suppress this behavior."
 		  (dired-move-to-filename))
 	(when (and (setq temp (fsvn-dired-get-filename nil t))
 		   (or get-dot-file
-		       (not (string-match "/\\.\\.?\\'" temp))))
+		       (not (string-match "/\\.\\.?$" temp))))
 	  (setq ret (cons temp ret)))
 	(forward-line 1)))
     (nreverse ret)))
@@ -202,7 +202,7 @@ This function suppress this behavior."
 	(when (and (looking-at regexp)
 		   (setq temp (fsvn-dired-get-filename))
 		   (or get-dot-file
-		       (not (string-match "/\\.\\.?\\'" temp))))
+		       (not (string-match "/\\.\\.?$" temp))))
 	  (setq ret (cons temp ret)))
 	(forward-line 1)))
     ret))

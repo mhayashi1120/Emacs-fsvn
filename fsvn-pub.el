@@ -419,7 +419,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (error "Buffer is not associated with a file"))
   (unless (fsvn-meta-file-registered-p buffer-file-name)
     (error "Buffer file is not under versioned"))
-  (fsvn-open-log-view-mode buffer-file-name nil))
+  (fsvn-open-logview-mode buffer-file-name nil))
 
 (defun fsvn-vc-commit (&optional arg)
   "Prepare `commit' buffer for buffer file."
@@ -528,7 +528,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
        (buffer-list))
       nil)))
 
-(defun fsvn-open-log-view-mode (urlrev directory-p &optional rev-range count)
+(defun fsvn-open-logview-mode (urlrev directory-p &optional rev-range count)
   "Open URLREV log buffer.
 Argument REV-RANGE revision range cons cell `(start . end)'
 Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings.
@@ -584,6 +584,28 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
       (switch-to-buffer buffer)
       (fsvn-log-list-setup-window)))
   (run-mode-hooks 'fsvn-log-list-mode-hook))
+
+
+
+(defun fsvn-open-propview-mode (root urlrev directory-p working-dir)
+  (let ((win-configure (current-window-configuration)))
+    ;; for proplist mode
+    (with-current-buffer (fsvn-proplist-get-buffer)
+      (fsvn-proplist-mode)
+      (setq fsvn-buffer-repos-root root)
+      (setq fsvn-propview-target-urlrev urlrev)
+      (setq fsvn-propview-target-directory-p directory-p)
+      (setq fsvn-previous-window-configuration win-configure)
+      (setq fsvn-proplist-target-mode 'properties)
+      (fsvn-set-default-directory working-dir)
+      (fsvn-proplist-setup-window)
+      (setq fsvn-default-window-configuration (current-window-configuration))
+      (setq buffer-read-only t)
+      (fsvn-proplist-draw-list urlrev)
+      (fsvn-proplist-goto-first-property)
+      (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
+      (run-mode-hooks 'fsvn-proplist-mode-hook))
+    (switch-to-buffer (fsvn-proplist-get-buffer))))
 
 
 

@@ -116,11 +116,11 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (read-from-minibuffer "Changelist Name: " nil nil nil 'fsvn-read-changelist-history))
 
 (defun fsvn-read-resolve-accept-arg ()
-  (let ((args (cdr (fsvn-reading-subcommand fsvn-svn-subcommand-arguments-alist "resolve" t)))
+  (let ((args (cdr (fsvn-complete-reading-subcommand fsvn-svn-subcommand-arguments-alist "resolve" t)))
 	completions ret)
     (unless args
       (error "svn `resolve' not supported."))
-    (setq completions (fsvn-subcommand-create-completions '("--accept") nil args))
+    (setq completions (fsvn-complete-subcommand-create-completions '("--accept") nil args))
     (setq ret (completing-read "Resolve `--accept' arg: " completions nil 'no nil nil ))
     (when (string= ret "")
       (error "Accept arg must be selected"))
@@ -136,81 +136,17 @@ The value of DEFAULT is not a number, allow to enter a nil value."
     (fsvn-url-urlrev url rev)))
 
 
-;; completing read utility
-
-;; todo refactor fsvn-completion-window-show
-(defun fsvn-completion-window-control (string collections)
-  (let ((list (all-completions string collections)))
-    (if (= (length list) 1)
-	(fsvn-completion-window-delete)
-      (fsvn-completion-window-show list))))
-
-(defun fsvn-completing-file-name (url)
-  (when (string-match "/\\([^/]+/?\\)$" url)
-    (match-string 1 url)))
-
-(defun fsvn-processing-filename (string)
-  (if (string-match "/\\([^/]+\\)$" string)
-      (match-string 1 string)
-    ""))
-
-(defconst fsvn-completion-buffer " *Fsvn completion*")
-
-(defvar fsvn-completion-saved-configuration nil)
-(defvar fsvn-completion-saved-applicant nil)
-
-(defun fsvn-completion-window-show (list)
-  (unless fsvn-completion-saved-configuration
-    (setq fsvn-completion-saved-configuration (current-window-configuration)))
-  (let (win)
-    (if (and list (equal fsvn-completion-saved-applicant list)
-	     (setq win (get-buffer-window fsvn-completion-buffer)))
-	(save-selected-window
-	  (select-window win)
-	  (condition-case err
-	      (scroll-up)
-	    (end-of-buffer (progn (goto-char (point-min))))))
-      (with-output-to-temp-buffer fsvn-completion-buffer
-	(display-completion-list list))
-      (setq fsvn-completion-saved-applicant list))))
-
-(defun fsvn-completion-window-delete ()
-  (when (and fsvn-completion-saved-configuration
-	     (window-configuration-p fsvn-completion-saved-configuration))
-    (set-window-configuration fsvn-completion-saved-configuration)
-    (setq fsvn-completion-saved-configuration nil
-	  fsvn-completion-saved-applicant nil)))
-
-
-(defun fsvn-completing-create-collection (list)
-  (mapcar
-   (lambda (x)
-     (cons
-      (cond
-       ((numberp x)
-	(number-to-string x))
-       ((stringp x)
-	x)
-       (t
-	(error "Not supported")))
-      nil))
-   list))
-
-(defun fsvn-completing-non-word-class ()
-  (concat "^" fsvn-completing-word-class))
 
 (defvar fsvn-revision-read-history nil)
-
 (defvar fsvn-completing-revision-map nil)
-(defvar fsvn-completing-word-class " \n\t")
 (defvar fsvn-completing-revision-urlrev nil)
 
 (unless fsvn-completing-revision-map
   (setq fsvn-completing-revision-map
 	(let ((map (copy-keymap minibuffer-local-map)))
 
-	  (define-key map "\C-i" 'fsvn-completing-revision)
-	  (define-key map " " 'fsvn-completing-revision)
+	  (define-key map "\C-i" 'fsvn-complete-revision-action)
+	  (define-key map " " 'fsvn-complete-revision-action)
 
 	  map)))
 
@@ -243,54 +179,10 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 	      (fsvn-revision-number-p value))
 	  (throw 'done value)))))))
 
-(defun fsvn-completing-revision ()
-  (interactive)
-  (let ((value (fsvn-completing-current-value)))
-    (cond
-     ((and fsvn-completing-revision-urlrev 
-	   (string= "" value) 
-	   (eq last-command 'fsvn-completing-revision))
-      (let (urlrev)
-	(setq urlrev (fsvn-electric-select-log fsvn-completing-revision-urlrev))
-	(when urlrev
-	  (insert (fsvn-get-revision-string (fsvn-urlrev-revision urlrev))))))
-     ((string-match "^[0-9]+$" value)
-      ;; do nothing
-      )
-     ((string-match "^{" value)
-      ;; do nothing
-      )
-     (t
-      (fsvn-completing-revision-symbol value)))
-    (when (and fsvn-completing-revision-urlrev (string= (fsvn-completing-current-value) ""))
-      (fsvn-complete-reading-temp-message " [Type again]"))))
-
-(defcustom fsvn-completing-max-year 2099
-  "*"
-  :group 'fsvn
-  :type 'integer)
-
-(defun fsvn-completing-revision-symbol (value)
-  (let ((comp (try-completion (upcase value) fsvn-revision-string-list)))
-    (cond
-     ((eq comp t))
-     ((and (stringp comp) (> (length comp) 0))
-      (delete-char (- (length value)))
-      (insert comp))
-     (t
-      (fsvn-completion-window-control value fsvn-revision-string-list)))))
-
 (defun fsvn-completing-read-revision-range (current)
   (let* ((from (fsvn-completing-read-revision "Revision From: " (cdr current)))
 	 (to (fsvn-completing-read-revision (format "Revision %s -> Revision To: " from) (car current))))
     (cons from to)))
-
-(defun fsvn-completing-current-value ()
-  ""
-  (let ((point (point)))
-    (save-excursion
-      (skip-chars-backward (fsvn-completing-non-word-class))
-      (buffer-substring (point) point))))
 
 
 
@@ -300,8 +192,10 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 (unless fsvn-completing-repository-map
   (setq fsvn-completing-repository-map
 	(let ((map (copy-keymap minibuffer-local-map)))
-	  (define-key map "\C-i" 'fsvn-completing-url)
-	  (define-key map " " 'fsvn-completing-url)
+
+	  (define-key map "\C-i" 'fsvn-complete-url-action)
+	  (define-key map " " 'fsvn-complete-url-action)
+
 	  map)))
 
 (defvar fsvn-completing-repository-only-repos nil)
@@ -323,201 +217,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (fsvn-url-string-to-urlrev (fsvn-completing-read-url prompt default only-repository)))
 
 (defun fsvn-completing-read-url-initialize ()
-  (setq fsvn-completion-repository-cache nil))
-
-(defun fsvn-completing-url ()
-  (interactive)
-  ;;todo contains space char filename
-  (skip-chars-forward "^/ \n\t")
-  (let ((value (fsvn-completing-current-value)))
-    (cond
-     ((or (string= value "") (try-completion value fsvn-svn-url-scheme-list))
-      (fsvn-completing-repos-scheme))
-     ((or fsvn-completing-repository-only-repos
-	  (fsvn-completing-url-repository-p value))
-      (fsvn-completing-repository-url))
-     ((fsvn-url-local-p value)
-      (fsvn-completing-local-file))
-     (t
-      (fsvn-completing-non-applicant)))))
-
-(defun fsvn-completing-repos-scheme ()
-  (let* ((contents (fsvn-completing-current-value))
-	 comp)
-    (setq comp (try-completion contents fsvn-svn-url-scheme-segment-list))
-    (unless (string= comp "")
-      (fsvn-completing-url-clear-segment)
-      (if (stringp comp)
-	  (insert comp)
-	(insert contents)))
-    (fsvn-completion-window-control contents fsvn-svn-url-scheme-list)))
-
-(defun fsvn-completing-repository-url ()
-  (let* ((value (fsvn-completing-current-value)))
-    ;; todo when file:// then complete local directory.
-    (cond
-     ((fsvn-completing-url-local-repository-p value)
-      (fsvn-completing-local-file))
-     ((eq (char-before) ?:)
-      (fsvn-completing-repos-root))
-     ((fsvn-completing-url-host-segment-p value)
-      (fsvn-completing-repos-root))
-     (t
-      (fsvn-completing-repos-file)))))
-
-(defun fsvn-completing-repos-root ()
-  ;;todo gathered in buffers -> file cache. which one.
-  (let ((value (fsvn-completing-current-value))
-	(applicant (fsvn-gather-root))
-	comp)
-    (fsvn-completion-window-control value applicant)
-    (when (and (setq comp (try-completion value applicant))
-	       (stringp comp))
-      (fsvn-completing-url-clear-sentence)
-      (insert comp))))
-
-(defun fsvn-completing-repos-file ()
-  (let* ((value (fsvn-completing-current-value))
-	 (name (fsvn-processing-filename value))
-	 (dirname (fsvn-completing-previous-segment value))
-	 applicant comp)
-    (setq applicant (fsvn-completing-repos-alist dirname))
-    (fsvn-completion-window-control name applicant)
-    (when (and (setq comp (try-completion name applicant))
-	       (stringp comp))
-      (fsvn-completing-url-clear-segment)
-      (insert comp))))
-
-(defun fsvn-completing-local-file ()
-  (let ((init (fsvn-completing-current-value)))
-    (when (fsvn-completing-url-clear-segment)
-      (insert (fsvn-file-name-nondirectory init)))
-    (let* ((value (fsvn-completing-current-value))
-	   (name (fsvn-processing-filename value))
-	   (dirname (fsvn-completing-local-file-previous-segment value))
-	   (regexp (and (string= "" name) (concat "^" (regexp-quote name))))
-	   applicant comp)
-      (setq applicant (fsvn-completing-dir-files dirname regexp))
-      (fsvn-completion-window-control name applicant)
-      (when (setq comp (try-completion name applicant))
-	(fsvn-completing-url-clear-segment)
-	(if (stringp comp)
-	    (insert comp)
-	  (insert name))))))
-
-(defun fsvn-completing-non-applicant ()
-  "No applicant as local directory."
-  (let ((init (fsvn-completing-current-value)))
-    (fsvn-completing-url-clear-segment)
-    (insert (fsvn-expand-file init))
-    (let (applicant comp)
-      (setq applicant (fsvn-completing-dir-files default-directory (concat "^" (regexp-quote init))))
-      (fsvn-completion-window-control init applicant)
-      (when (setq comp (try-completion init applicant))
-	(fsvn-completing-url-clear-segment)
-	(insert comp)))))
-
-(defun fsvn-completing-dir-files (dir &optional match)
-  (let ((name))
-    (mapcar
-     (lambda (file)
-       (setq name
-	     (if (eq t (car (file-attributes file)))
-		 (concat file "/")
-	       file))
-       (fsvn-completing-file-name name))
-     (directory-files dir t (or match dired-re-no-dot)))))
-
-(defun fsvn-completing-url-clear-sentence ()
-  (let ((start (fsvn-completing-url-start-sentence))
-	(end (fsvn-completing-url-end-sentence)))
-    (if (= start end)
-	nil
-      (delete-region start end)
-      t)))
-  
-(defun fsvn-completing-url-start-sentence ()
-  (save-excursion 
-    (skip-chars-backward (fsvn-completing-non-word-class))
-    (point)))
-
-(defun fsvn-completing-url-end-sentence ()
-  (save-excursion 
-    (skip-chars-forward (fsvn-completing-non-word-class))
-    (point)))
-
-(defun fsvn-completing-url-clear-segment ()
-  (let ((start (fsvn-completing-url-start-segment))
-	(end (fsvn-completing-url-end-segment)))
-    (if (= start end)
-	nil
-      (delete-region start end)
-      t)))
-
-(defun fsvn-completing-url-start-segment ()
-  (save-excursion 
-    (skip-chars-backward "^/ \t\n")
-    (point)))
-
-(defun fsvn-completing-url-end-segment ()
-  (save-excursion 
-    (skip-chars-forward "^/ \t\n")
-    (point)))
-
-(defun fsvn-completing-local-file-previous-segment (string)
-  (cond
-   ((string-match "^file:///\\([a-zA-Z]:.*\\)/[^/]*$" string)
-    (match-string 1 string))
-   ((string-match "^file:///\\([a-zA-Z]:\\)" string)
-    (match-string 1 string))
-   (t
-    (fsvn-completing-previous-segment string))))
-
-(defun fsvn-completing-previous-segment (string)
-  (cond
-   ((fsvn-file-name-root-p string)
-    string)
-   ((string-match "^\\(.*\\)/$" string)
-    (match-string 1 string))
-   ((string-match "^\\(.*\\)/[^/]+$" string)
-    (match-string 1 string))))
-
-(defun fsvn-completing-url-host-segment-p (contents)
-  (let ((regexp (concat "^" (regexp-opt (fsvn-delete "file" fsvn-svn-url-scheme-list) t) ":/+\\([^/]+\\)?$")))
-    (string-match regexp contents)))
-
-(defun fsvn-completing-url-local-repository-p (contents)
-  (let ((regexp "^file:///"))
-    (when (string-match regexp contents)
-      (not (fsvn-any-startswith (fsvn-gather-root) contents)))))
-
-(defvar fsvn-completion-repository-cache nil)
-
-(defun fsvn-completing-repos-alist (url)
-  (let ((dir (fsvn-urlrev-url (directory-file-name url)))
-	tmp)
-    (unless (fsvn-string-assoc dir fsvn-completion-repository-cache)
-      (setq tmp
-	    (mapcar
-	     (lambda (entry)
-	       (let ((name (fsvn-xml-lists->list->entry=>name$ entry)))
-		 ;;todo
-		 (setq name (replace-regexp-in-string " " "%20" name))
-		 (cons
-		  (if (eq (fsvn-xml-lists->list->entry.kind entry) 'dir)
-		      (concat name "/")
-		    name)
-		  nil)))
-	     ;; append HEAD probablly svn bug of parse url.
-	     (fsvn-get-ls (fsvn-url-urlrev dir "HEAD"))))
-      (setq fsvn-completion-repository-cache
-	    (cons
-	     (cons dir tmp)
-	     fsvn-completion-repository-cache)))
-    (cdr (fsvn-string-assoc dir fsvn-completion-repository-cache))))
-
-(defun fsvn-completing-url-repository-p (url)
-  (string-match (concat "^" (regexp-opt fsvn-svn-url-scheme-list) ":") url))
+  (setq fsvn-complete-completion-repository-cache nil))
 
 
 
@@ -529,11 +229,40 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 	(let ((map (copy-keymap minibuffer-local-map)))
 
 	  (define-key map " "    'self-insert-command)
-	  (define-key map "\C-i" 'fsvn-subcommand-args-completion)
+	  (define-key map "\C-i" 'fsvn-complete-subcommand-args-action)
+
 	  map)))
 
-(defvar fsvn-reading-subcommand nil)
-(defun fsvn-reading-subcommand (alist subcommand non-global)
+(defun fsvn-read-subcommand-args (subcommand &optional non-global &rest default-args)
+  (setq fsvn-complete-completion-saved-configuration nil)
+  (setq default-args (fsvn-flatten-command-args default-args))
+  (unless fsvn-complete-reading-subcommand
+    (error "Subcommand %s not found" subcommand))
+  (unwind-protect
+      (fsvn-complete-subcommand-expand-arguments
+       (read-from-minibuffer (format "Args for `%s' " subcommand)
+			     (mapconcat 'identity default-args " ")
+			     fsvn-read-subcommand-args-map))
+    (setq fsvn-complete-completion-saved-configuration nil)
+    (setq fsvn-complete-reading-subcommand nil)))
+
+(defun fsvn-read-svn-subcommand-args (subcommand &optional non-global &rest default-args)
+  (setq fsvn-complete-reading-subcommand
+	(fsvn-complete-reading-subcommand fsvn-svn-subcommand-arguments-alist subcommand non-global))
+  (apply 'fsvn-read-subcommand-args subcommand non-global default-args))
+
+(defun fsvn-read-svnadmin-subcommand-args (subcommand &rest default-args)
+  (setq fsvn-complete-reading-subcommand
+	(fsvn-complete-reading-subcommand fsvn-svnadmin-subcommand-arguments-alist subcommand nil))
+  (apply 'fsvn-read-subcommand-args subcommand nil default-args))
+
+
+;;
+;; completing read utility
+;;
+
+(defvar fsvn-complete-reading-subcommand nil)
+(defun fsvn-complete-reading-subcommand (alist subcommand non-global)
   (let ((tmp (cdr (copy-sequence (assoc subcommand alist))))
 	ret)
     (setq ret tmp)
@@ -547,96 +276,366 @@ The value of DEFAULT is not a number, allow to enter a nil value."
       (setq ret (nreverse ret)))
     (cons subcommand ret)))
 
-(defun fsvn-read-subcommand-args (subcommand &optional non-global &rest default-args)
-  (setq fsvn-completion-saved-configuration nil)
-  (setq default-args (fsvn-flatten-command-args default-args))
-  (unless fsvn-reading-subcommand
-    (error "Subcommand %s not found" subcommand))
-  (unwind-protect
-      (fsvn-complete-reding-expand-arguments
-       (read-from-minibuffer (format "Args for `%s' " subcommand)
-			     (mapconcat 'identity default-args " ")
-			     fsvn-read-subcommand-args-map))
-    (setq fsvn-completion-saved-configuration nil)
-    (setq fsvn-reading-subcommand nil)))
+;; todo refactor fsvn-complete-completion-window-show
+(defun fsvn-complete-completion-window-control (string collections)
+  (let ((list (all-completions string collections)))
+    (if (= (length list) 1)
+	(fsvn-complete-completion-window-delete)
+      (fsvn-complete-completion-window-show list))))
 
-(defun fsvn-read-svn-subcommand-args (subcommand &optional non-global &rest default-args)
-  (setq fsvn-reading-subcommand
-	(fsvn-reading-subcommand fsvn-svn-subcommand-arguments-alist subcommand non-global))
-  (apply 'fsvn-read-subcommand-args subcommand non-global default-args))
+(defconst fsvn-complete-completion-buffer " *Fsvn completion*")
 
-(defun fsvn-read-svnadmin-subcommand-args (subcommand &rest default-args)
-  (setq fsvn-reading-subcommand
-	(fsvn-reading-subcommand fsvn-svnadmin-subcommand-arguments-alist subcommand nil))
-  (apply 'fsvn-read-subcommand-args subcommand nil default-args))
+(defvar fsvn-complete-completion-saved-configuration nil)
+(defvar fsvn-complete-completion-saved-applicant nil)
 
-(defun fsvn-subcommand-args-completion ()
-  (interactive)
-  ;; space == 0x20 or tab == 0x9 or end-of-buffer
-  (unless (memq (char-after) '(#x20 #x9 nil))
-    ;; todo fsvn-complete-reading-argument-syntax
-    (forward-word))
-  (let* ((args (cdr fsvn-reading-subcommand))
-	 (prevs (fsvn-complete-reading-contents (point)))
-	 (curr (fsvn-complete-reading-previous-argument prevs))
-	 (completions (fsvn-subcommand-create-completions prevs curr args))
-	 (applicant (all-completions (or curr "") completions))
-	 (complete (try-completion (or curr "") completions)))
+(defun fsvn-complete-completion-window-show (list)
+  (unless fsvn-complete-completion-saved-configuration
+    (setq fsvn-complete-completion-saved-configuration (current-window-configuration)))
+  (let ((win (get-buffer-window fsvn-complete-completion-buffer)))
     (cond
-     ((= (length applicant) 0)
-      (fsvn-completion-window-show nil))
-     ((= (length applicant) 1)
-      (fsvn-completion-window-delete)
-      (fsvn-complete-reading-previous-delete)
-      (insert (car applicant))
-      (fsvn-complete-reading-temp-message " [Sole Match]"))
-     (complete
-      (fsvn-complete-reading-previous-delete)
-      (insert complete)
-      (fsvn-completion-window-show applicant))
+     ((and win list (equal fsvn-complete-completion-saved-applicant list))
+      (save-selected-window
+	(select-window win)
+	(condition-case err
+	    (scroll-up)
+	  (end-of-buffer (progn (goto-char (point-min)))))))
+     ((or win list)
+      (with-output-to-temp-buffer fsvn-complete-completion-buffer
+	(display-completion-list list)))
      (t
-      (fsvn-completion-window-show applicant)))))
+      (fsvn-display-momentary-message " [No completions here]")))
+    (setq fsvn-complete-completion-saved-applicant list)))
 
-(defun fsvn-complete-reading-temp-message (m)
-  "Show temporary message in minibuffer.
-referenced mew-complete.el"
-  (let ((wait-msec (max (* (length m) 0.05) 0.5))
-	(savemodified (buffer-modified-p))
-	savepoint savemax)
-    (save-excursion
-      (setq savepoint (point))
-      (insert m)
-      (set-buffer-modified-p savemodified)
-      (setq savemax (point)))
-    (let ((inhibit-quit t))
-      (sit-for wait-msec)
-      (delete-region savepoint savemax)
-      (set-buffer-modified-p savemodified)
-      (when quit-flag
-	(setq quit-flag nil)
-	(setq unread-command-events (list 7))))))
+(defun fsvn-complete-completion-window-delete ()
+  (when (and fsvn-complete-completion-saved-configuration
+	     (window-configuration-p fsvn-complete-completion-saved-configuration))
+    (set-window-configuration fsvn-complete-completion-saved-configuration)
+    (setq fsvn-complete-completion-saved-configuration nil
+	  fsvn-complete-completion-saved-applicant nil)))
 
-(defun fsvn-complete-reading-previous-delete ()
+(defvar fsvn-complete-word-class " \n\t")
+(defun fsvn-complete-non-word-class ()
+  (concat "^" fsvn-complete-word-class))
+
+(defun fsvn-complete-revision-action ()
+  (interactive)
+  (let ((value (fsvn-complete-revision-current-value)))
+    (cond
+     ((null value)
+      (fsvn-complete-revision-symbol ""))
+     ((and fsvn-completing-revision-urlrev 
+	   (string= "" value) 
+	   (eq last-command 'fsvn-complete-revision-action))
+      (let (urlrev)
+	(setq urlrev (fsvn-electric-select-log fsvn-completing-revision-urlrev))
+	(when urlrev
+	  (insert (fsvn-get-revision-string (fsvn-urlrev-revision urlrev))))))
+     ((string-match "^[0-9]+$" value)
+      ;; do nothing
+      (fsvn-complete-completion-window-delete)
+      (fsvn-display-momentary-message " [Number context]"))
+     ((string-match "^{" value)
+      ;; do nothing
+      (fsvn-complete-completion-window-delete)
+      (fsvn-display-momentary-message " [Date context]"))
+     (t
+      (fsvn-complete-revision-symbol value)))
+    (when (and fsvn-completing-revision-urlrev 
+	       (string= (fsvn-complete-current-value) ""))
+      (fsvn-display-momentary-message " [Type again]"))))
+
+(defun fsvn-complete-revision-current-value ()
+  (let* ((value (fsvn-complete-current-value))
+	 values)
+    (when value
+      (setq values (split-string value ":"))
+      (or (cadr values)
+	  (car values)))))
+
+(defun fsvn-complete-revision-symbol (value)
+  (let ((comp (try-completion (upcase value) fsvn-revision-string-list)))
+    (cond
+     ((eq comp t))
+     ((and (stringp comp) (> (length comp) 0))
+      (delete-char (- (length value)))
+      (insert comp))
+     (t
+      (fsvn-complete-completion-window-control value fsvn-revision-string-list)))))
+
+(defun fsvn-complete-current-value ()
+  ""
+  (let ((parsed (fsvn-complete-parse-current-values)))
+    (when (caar parsed)
+      (nth (caar parsed) (cdr parsed)))))
+
+(defun fsvn-complete-previous-values ()
+  ""
+  (let ((parsed (fsvn-complete-parse-current-values)))
+    (remove nil (fsvn-take (1+ (cdar parsed)) (cdr parsed)))))
+
+(defun fsvn-complete-parse-current-values ()
+  (let (start end current)
+    (if (minibufferp)
+	(setq start (or (next-single-property-change (point-min) 'read-only) (point-min))
+	      end (point-max))
+      (setq start (line-beginning-position)
+	    end (line-end-position)))
+    (setq current (- (point) start))
+    (fsvn-complete-reading-split-arguments (buffer-substring start end) current)))
+
+(defun fsvn-complete-url-action ()
+  (interactive)
+  ;;todo contains space char filename
+  (skip-chars-forward "^/ \n\t")
+  (let ((value (fsvn-complete-current-value)))
+    (cond
+     ((null value)
+      (fsvn-complete-url-repos-scheme ""))
+     ((or (string= value "") (try-completion value fsvn-svn-url-scheme-list))
+      (fsvn-complete-url-repos-scheme value))
+     ((or fsvn-completing-repository-only-repos
+	  (fsvn-complete-url-repository-p value))
+      (fsvn-complete-url-repository-url value))
+     ((fsvn-url-local-p value)
+      (fsvn-complete-url-local-file value))
+     (t
+      (fsvn-complete-url-no-completions value)))))
+
+(defun fsvn-complete-url-repos-scheme (contents)
+  (let* (comp)
+    (setq comp (try-completion contents fsvn-svn-url-scheme-segment-list))
+    (unless (string= comp "")
+      (fsvn-complete-url-clear-segment)
+      (if (stringp comp)
+	  (insert comp)
+	(insert contents)))
+    (fsvn-complete-completion-window-control contents fsvn-svn-url-scheme-list)))
+
+(defun fsvn-complete-url-repository-url (value)
+  (cond
+   ((fsvn-complete-url-local-repository-p value)
+    (fsvn-complete-url-local-file value))
+   ((eq (char-before) ?:)
+    (fsvn-complete-url-repos-root value))
+   ((fsvn-complete-url-host-segment-p value)
+    (fsvn-complete-url-repos-root value))
+   (t
+    (fsvn-complete-url-repos-file value))))
+
+(defun fsvn-complete-url-repos-root (value)
+  ;;todo gathered in buffers -> file cache. which one.
+  (let ((applicant (fsvn-gather-root))
+	comp)
+    (fsvn-complete-completion-window-control value applicant)
+    (when (and (setq comp (try-completion value applicant))
+	       (stringp comp))
+      (fsvn-complete-url-clear-sentence)
+      (insert comp))))
+
+(defun fsvn-complete-url-repos-file (value)
+  (let* ((name (fsvn-complete-url-filename value))
+	 (dirname (fsvn-complete-url-previous-segment value))
+	 applicant comp)
+    (setq applicant (fsvn-complete-completion-repos-alist dirname))
+    (fsvn-complete-completion-window-control name applicant)
+    (when (and (setq comp (try-completion name applicant))
+	       (stringp comp))
+      (fsvn-complete-url-clear-segment)
+      (insert comp))))
+
+(defun fsvn-complete-url-local-file (init)
+  (when (fsvn-complete-url-clear-segment)
+    (insert (fsvn-file-name-nondirectory init)))
+  (let* ((value (fsvn-complete-current-value))
+	 (name (fsvn-complete-url-filename value))
+	 (dirname (fsvn-complete-url-local-file-previous-segment value))
+	 (regexp (and (string= "" name) (concat "^" (regexp-quote name))))
+	 applicant comp)
+    (setq applicant (fsvn-complete-url-dir-files-completions dirname regexp))
+    (fsvn-complete-completion-window-control name applicant)
+    (when (setq comp (try-completion name applicant))
+      (fsvn-complete-url-clear-segment)
+      (if (stringp comp)
+	  (insert comp)
+	(insert name)))))
+
+(defun fsvn-complete-url-no-completions (init)
+  "No applicant as local directory."
+  (fsvn-complete-url-clear-segment)
+  (insert (fsvn-expand-file init))
+  (let (applicant comp)
+    (setq applicant (fsvn-complete-url-dir-files-completions default-directory (concat "^" (regexp-quote init))))
+    (fsvn-complete-completion-window-control init applicant)
+    (when (setq comp (try-completion init applicant))
+      (fsvn-complete-url-clear-segment)
+      (insert comp))))
+
+(defun fsvn-complete-url-dir-files-completions (dir &optional match)
+  (when (file-directory-p dir)
+    (let (name)
+      (mapcar
+       (lambda (file)
+	 (setq name
+	       (if (eq t (car (file-attributes file)))
+		   (concat file "/")
+		 file))
+	 (fsvn-complete-url-last-segment name))
+       (directory-files dir t (or match dired-re-no-dot))))))
+
+(defun fsvn-complete-url-clear-sentence ()
+  (let ((start (fsvn-complete-url-start-sentence))
+	(end (fsvn-complete-url-end-sentence)))
+    (if (= start end)
+	nil
+      (delete-region start end)
+      t)))
+  
+(defun fsvn-complete-url-start-sentence ()
+  (save-excursion 
+    (skip-chars-backward (fsvn-complete-non-word-class))
+    (point)))
+
+(defun fsvn-complete-url-end-sentence ()
+  (save-excursion 
+    (skip-chars-forward (fsvn-complete-non-word-class))
+    (point)))
+
+(defun fsvn-complete-url-clear-segment ()
+  (let ((start (fsvn-complete-url-start-segment))
+	(end (fsvn-complete-url-end-segment)))
+    (if (= start end)
+	nil
+      (delete-region start end)
+      t)))
+
+(defun fsvn-complete-url-start-segment ()
+  (save-excursion 
+    (skip-chars-backward "^/ \t\n")
+    (point)))
+
+(defun fsvn-complete-url-end-segment ()
+  (save-excursion 
+    (skip-chars-forward "^/ \t\n")
+    (point)))
+
+(defun fsvn-complete-url-local-file-previous-segment (string)
+  (cond
+   ;; for windows
+   ((string-match "^file:///\\([a-zA-Z]:.*\\)/[^/]*$" string)
+    (match-string 1 string))
+   ;; for windows
+   ((string-match "^file:///\\([a-zA-Z]:\\)" string)
+    (match-string 1 string))
+   ((string-match "^file://\\(/.*?\\)[^/]*$" string)
+    (match-string 1 string))
+   ((string-match "^file://\\(/.*?\\)/$" string)
+    (match-string 1 string))
+   (t
+    (fsvn-complete-url-previous-segment string))))
+
+(defun fsvn-complete-url-previous-segment (string)
+  (cond
+   ((fsvn-file-name-root-p string)
+    string)
+   ((string-match "^\\(.*\\)/$" string)
+    (match-string 1 string))
+   ((string-match "^\\(.*\\)/[^/]+$" string)
+    (match-string 1 string))))
+
+(defun fsvn-complete-url-host-segment-p (contents)
+  (let ((regexp (concat "^" (regexp-opt (fsvn-delete "file" fsvn-svn-url-scheme-list) t) ":/+\\([^/]+\\)?$")))
+    (string-match regexp contents)))
+
+(defun fsvn-complete-url-local-repository-p (contents)
+  (let ((regexp "^file:///"))
+    (when (string-match regexp contents)
+      (not (fsvn-any-startswith (fsvn-gather-root) contents)))))
+
+(defun fsvn-complete-url-last-segment (url)
+  (when (string-match "/\\([^/]+/?\\)$" url)
+    (match-string 1 url)))
+
+(defun fsvn-complete-url-filename (string)
+  (if (string-match "/\\([^/]+\\)$" string)
+      (match-string 1 string)
+    ""))
+
+(defvar fsvn-complete-completion-repository-cache nil)
+
+(defun fsvn-complete-completion-repos-alist (url)
+  (let ((dir (fsvn-urlrev-url (directory-file-name url)))
+	tmp)
+    (unless (fsvn-string-assoc dir fsvn-complete-completion-repository-cache)
+      (setq tmp
+	    (mapcar
+	     (lambda (entry)
+	       (let ((name (fsvn-xml-lists->list->entry=>name$ entry)))
+		 ;;todo
+		 (setq name (replace-regexp-in-string " " "%20" name))
+		 (cons
+		  (if (eq (fsvn-xml-lists->list->entry.kind entry) 'dir)
+		      (concat name "/")
+		    name)
+		  nil)))
+	     ;; append HEAD probablly svn bug of parse url.
+	     (fsvn-get-ls (fsvn-url-urlrev dir "HEAD"))))
+      (setq fsvn-complete-completion-repository-cache
+	    (cons
+	     (cons dir tmp)
+	     fsvn-complete-completion-repository-cache)))
+    (cdr (fsvn-string-assoc dir fsvn-complete-completion-repository-cache))))
+
+(defun fsvn-complete-url-repository-p (url)
+  (string-match (concat "^" (regexp-opt fsvn-svn-url-scheme-list) ":") url))
+
+(defun fsvn-complete-subcommand-args-action ()
+  (interactive)
+  (let ((prevs (fsvn-complete-previous-values)))
+    (fsvn-complete-subcommand-forward-word)
+    ;;TODO start arg completion when only start with `-' or valid context in `-'
+    (let* ((args (cdr fsvn-complete-reading-subcommand))
+	   (curr (fsvn-complete-subcommand-previous-argument prevs))
+	   (completions (fsvn-complete-subcommand-create-completions prevs curr args)))
+      (if (and completions (functionp completions))
+	  (funcall completions)
+	(let* ((applicant (all-completions (or curr "") completions))
+	       (complete (try-completion (or curr "") completions)))
+	  (cond
+	   ((= (length applicant) 0)
+	    (fsvn-complete-subcommand-args-no-completions prevs))
+	   ((= (length applicant) 1)
+	    (fsvn-complete-completion-window-delete)
+	    (fsvn-complete-subcommand-previous-delete)
+	    (insert (car applicant))
+	    (fsvn-display-momentary-message " [Sole Match]"))
+	   (complete
+	    (fsvn-complete-subcommand-previous-delete)
+	    (insert complete)
+	    (fsvn-complete-completion-window-show applicant))
+	   (t
+	    (fsvn-complete-completion-window-show applicant))))))))
+
+;;TODO
+(defun fsvn-complete-subcommand-args-no-completions (prevs)
+  (fsvn-complete-completion-window-show nil))
+
+(defun fsvn-complete-subcommand-previous-delete ()
   (let ((end (point))
 	start)
-    (skip-chars-backward (fsvn-completing-non-word-class))
+    (skip-chars-backward (fsvn-complete-non-word-class))
     (setq start (point))
     (delete-region start end)))
 
-(defun fsvn-complete-reading-previous-argument (prevs)
+(defun fsvn-complete-subcommand-previous-argument (prevs)
   (let ((c (char-before)))
     ;; space == 0x20 or tab == 0x9
     (if (memq c '(#x20 #x9))
 	nil
       (car (nreverse (copy-sequence prevs))))))
 
-(defun fsvn-complete-reading-contents (&optional point)
-  (let* ((contents (buffer-substring (point-min) (or point (point-max))))
-	 (start (next-single-property-change 0 'read-only contents)))
-    ;; start means end of propmt string.
-    (unless start
-      (setq start (length contents)))
-    (fsvn-complete-reading-split-arguments (substring contents start))))
+(defun fsvn-complete-subcommand-forward-word ()
+  (let ((string (buffer-substring (point) (line-end-position))))
+    (skip-chars-forward "^\"/ \t\n")))
 
 (defvar fsvn-complete-reading-argument-syntax
   (let ((st (make-syntax-table)))
@@ -646,50 +645,65 @@ referenced mew-complete.el"
     (modify-syntax-entry ?\x09 "-" st)
     st))
 
-(defun fsvn-complete-reding-expand-arguments (string)
+(defun fsvn-complete-subcommand-expand-arguments (string)
   (let (tmp)
-    ;;todo quoted string.
     (mapcar
      (lambda (x)
        (cond
 	((and (string-match "^-[^-]$" x)
-	      (setq tmp (fsvn-subcommand-assoc-argument x (cdr fsvn-reading-subcommand))))
+	      (setq tmp (fsvn-subcommand-assoc-argument x (cdr fsvn-complete-reading-subcommand))))
 	 ;; get long option
 	 (caar tmp))
 	(t
 	 x)))
      (fsvn-complete-reading-split-arguments string))))
 
-(defun fsvn-complete-reading-split-arguments (string)
+(defun fsvn-complete-reading-split-arguments (string &optional cursor)
   (with-temp-buffer
     (let ((st fsvn-complete-reading-argument-syntax)
-	  prev ret)
+	  (index 0)
+	  cursor-index cursor-index2
+	  begin finish ret)
       (set-syntax-table st)
       (insert string)
       (goto-char (point-min))
       (skip-syntax-forward "-")
-      (setq prev (point))
+      (setq begin (point))
       (condition-case err
 	  (while (not (eobp))
 	    (if (= (char-syntax (char-after (point))) ?\")
 		(progn
 		  (forward-char 1)
-		  (setq prev (point))
+		  (setq begin (point))
 		  (skip-syntax-forward "^\"")
-		  (setq ret (cons (buffer-substring prev (point)) ret))
+		  (setq finish (point))
 		  (skip-syntax-forward "\""))
 	      (skip-syntax-forward "^-")
-	      (setq ret (cons (buffer-substring prev (point)) ret)))
+	      (setq finish (point)))
+	    (setq ret (cons (buffer-substring begin finish) ret))
+	    (when cursor
+	      (when (and (<= begin cursor) (< cursor finish))
+		(setq cursor-index index))
+	      (when (and (null cursor-index2) (< cursor (point)))
+		(setq cursor-index2 index)))
 	    (skip-syntax-forward "-")
-	    (setq prev (point)))
+	    (setq index (1+ index))
+	    (setq begin (point)))
 	(scan-error
-	 (setq ret (cons (buffer-substring prev (point-max)) ret))))
-      (nreverse ret))))
+	 (setq ret (cons (buffer-substring begin (point-max)) ret))
+	 (unless cursor-index
+	   (setq cursor-index (1+ index)))))
+      (unless cursor-index2
+	(setq cursor-index2 index))
+      (if cursor
+	  (cons (cons cursor-index cursor-index2) (nreverse ret))
+	(nreverse ret)))))
 
-(defun fsvn-subcommand-create-completions (prevs current all-applicant)
-  (let ((collection (fsvn-subcommand-create-completions-toplevel all-applicant))
-	(next-applicant all-applicant)
-	prev completions item)
+(defun fsvn-complete-subcommand-create-completions (prevs current all-applicant)
+  (let* ((toplevel (fsvn-complete-subcommand-create-completions-toplevel all-applicant))
+	 (collection toplevel)
+	 (next-applicant all-applicant)
+	 prev completions item)
     (while prevs
       (setq prev (car prevs))
       (setq prevs (cdr prevs))
@@ -709,16 +723,30 @@ referenced mew-complete.el"
 	(setq next-applicant (cdr (fsvn-subcommand-assoc-argument item next-applicant)))))
       (cond
        ((null next-applicant)
-	(setq collection (fsvn-subcommand-create-completions-toplevel all-applicant)))
+	(setq collection (fsvn-complete-subcommand-create-completions-toplevel all-applicant)))
+       ((eq next-applicant t)
+	(cond
+	 ((and (member item '("--revision" "-r"))
+	       (or (and (= (length prevs) 1) current)
+		   (and (null prevs) (null current))))
+	  (setq collection 'fsvn-complete-revision-action)
+	  (setq prevs nil))
+	 (t
+	  (setq collection nil))))
        ((atom next-applicant)
 	(setq collection nil))
        (t
-	(setq collection (fsvn-subcommand-create-completions-toplevel next-applicant)))))
-    (when (and (null current) (null next-applicant))
-      (setq collection (fsvn-subcommand-create-completions-toplevel all-applicant)))
+	(setq collection (fsvn-complete-subcommand-create-completions-toplevel next-applicant)))))
+    (cond
+     ((and (eq next-applicant all-applicant)
+	   (or (null current)
+	       (not (string-match "^-" current))))
+      (setq collection 'fsvn-complete-url-action))
+     ((and (null current) (null next-applicant))
+      (setq collection toplevel)))
     collection))
 
-(defun fsvn-subcommand-create-completions-toplevel (applicant)
+(defun fsvn-complete-subcommand-create-completions-toplevel (applicant)
   (cond
    ((null applicant)
     nil)
@@ -739,58 +767,6 @@ referenced mew-complete.el"
 	    (list (car opt) (cdr opt)))))
        applicant)
       (nreverse ret)))))
-
-
-
-;;FIXME
-(defun fsvn-completing-point-string ()
-  (let ((init (point))
-	start end)
-    (cond
-     ((save-excursion
-	(let (quote-type)
-	  (when (fsvn-non-escaped-previous-quoted)
-	    (forward-char 1)
-	    (setq start (point))
-	    (setq quote-type (match-string 0))
-	    (when (fsvn-non-escaped-next-quoted quote-type)
-	      (when (and (>= init start)
-			 (< init (point)))
-		(setq end (1- (point))))))))
-      (buffer-substring start end))
-     ((memq (char-before) `(,fsvn-space-char ?\t ?\" ?\' ?\n))
-      nil)
-     (t
-      (save-excursion
-	(skip-chars-backward (fsvn-completing-non-word-class))
-	(setq start (point))
-	(skip-chars-forward (fsvn-completing-non-word-class))
-	(setq end (point))
-	(buffer-substring start end))))))
-
-(defun fsvn-non-escaped-previous-quoted ()
-  (let ((init (point))
-	c ret)
-    (while (and (re-search-backward "\"\\|'" nil t)
-		(setq ret t)
-		(setq c (char-before))
-		(= c ?\\))
-      (setq ret nil))
-    (unless ret
-      (goto-char init))
-    ret))
-
-(defun fsvn-non-escaped-next-quoted (quote-type)
-  (let ((init (point))
-	c ret)
-    (while (and (re-search-forward (format "%s" quote-type) nil t)
-		(setq ret t)
-		(setq c (char-before (1- (point))))
-		(= c ?\\))
-      (setq ret nil))
-    (unless ret
-      (goto-char init))
-    ret))
 
 
 

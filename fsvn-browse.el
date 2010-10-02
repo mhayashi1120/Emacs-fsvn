@@ -1103,6 +1103,11 @@ PATH is each executed path."
     (message (if (= count 1) "1 file marked."
 	       "%d files marked") count)))
 
+(defun fsvn-browse-point-marked-p (&optional mark)
+  (save-excursion
+    (forward-line 0)
+    (looking-at (concat "^" (char-to-string (or mark fsvn-mark-mark-char))))))
+
 (defun fsvn-browse-gather-marked-files (&optional mark)
   (let* ((marker-char (or mark fsvn-mark-mark-char))
 	 (regex (concat "^" (regexp-quote (char-to-string marker-char))))
@@ -1131,29 +1136,12 @@ PATH is each executed path."
     (nreverse ret)))
 
 (defun fsvn-browse-propview-mode (file directory-p)
-  (let ((win-configure (current-window-configuration))
-	(root fsvn-buffer-repos-root)
+  (let ((root fsvn-buffer-repos-root)
 	(working-dir
 	 (if (fsvn-url-local-p file)
 	     (fsvn-browse-current-directory-url)
 	   (fsvn-browse-current-magic-directory))))
-    ;; for proplist mode
-    (with-current-buffer (fsvn-proplist-get-buffer)
-      (fsvn-proplist-mode)
-      (setq fsvn-buffer-repos-root root)
-      (setq fsvn-propview-target-urlrev file)
-      (setq fsvn-propview-target-directory-p directory-p)
-      (setq fsvn-previous-window-configuration win-configure)
-      (setq fsvn-proplist-target-mode 'properties)
-      (fsvn-set-default-directory working-dir)
-      (fsvn-proplist-setup-window)
-      (setq fsvn-default-window-configuration (current-window-configuration))
-      (setq buffer-read-only t)
-      (fsvn-proplist-draw-list file)
-      (fsvn-proplist-goto-first-property)
-      (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
-      (run-mode-hooks 'fsvn-proplist-mode-hook))
-    (switch-to-buffer (fsvn-proplist-get-buffer))))
+    (fsvn-open-propview-mode root file directory-p working-dir)))
 
 (defun fsvn-browse-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))
@@ -2170,14 +2158,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-logview-this (file-struct)
   "Execute `log' for current file showing by `fsvn-log-list-mode'."
   (interactive (fsvn-browse-cmd-read-this-file-struct))
-  (fsvn-open-log-view-mode
+  (fsvn-open-logview-mode
    (fsvn-struct-browse-file-get-name file-struct)
    (fsvn-struct-browse-file-get-directory-p file-struct)))
 
 (defun fsvn-browse-logview-path ()
   "Execute `log' for current directory showing by `fsvn-log-list-mode'."
   (interactive)
-  (fsvn-open-log-view-mode (fsvn-browse-current-directory-urlrev) t))
+  (fsvn-open-logview-mode (fsvn-browse-current-directory-urlrev) t))
 
 (defun fsvn-browse-propview-this (file)
   "Execute `proplist' by `fsvn-proplist-mode' for point FILE"

@@ -7,8 +7,6 @@
 
 ** cannot treat `@' started file name 
 
-** fsvn-cleanup-temp-directory cleanup under other emacs process
-
 
 ** fsvn-authenticate-repository not works.
 
@@ -46,7 +44,7 @@ log-list has function that edit message and sibling buffers when move line.
 This causes turning off `mark-active'.
 
 
-** fsvn-open-log-view-mode previous window setting makes odd.
+** fsvn-open-logview-mode previous window setting makes odd.
 
 ** fsvn-log-view-mode after C-c C-k then return previous buffer, but previous fsvn-log-message-mode shown.
 

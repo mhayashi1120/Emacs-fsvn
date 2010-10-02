@@ -233,11 +233,6 @@ To show and see result.
 (fsvn-test-equal (file-name-nondirectory "/fsvn@10/a") "a")
 (fsvn-test-equal (file-name-nondirectory "/fsvn@10/a/") "")
 
-;;todo
-;; (fsvn-complete-reading-split-arguments "a 	b c \"abcd")
-;; (fsvn-complete-reading-split-arguments " a 	b c 'abcd' 	")
-;; (fsvn-complete-reading-split-arguments " a")
-
 (let ((url (fsvn-url-urlrev "http://a/b/c" 10))) (fsvn-test-equal (fsvn-magic-parse-file-name (fsvn-magic-create-name url)) url))
 (if (memq system-type '(windows-nt))
     (let ((url "c:/a/b/c")) (fsvn-test-equal (fsvn-magic-parse-file-name (fsvn-magic-create-name url)) url))
@@ -249,6 +244,23 @@ To show and see result.
 (fsvn-test-equal 
  (fsvn-complete-reading-split-arguments "-R \"white - space.txt\" -r 10:20")
  '("-R" "white - space.txt" "-r" "10:20"))
+
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text\"" 0) '((nil . 0) "-R" "text"))
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text\"" 2) '((0 . 0) "-R" "text"))
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text\"" 4) '((nil . 1) "-R" "text"))
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text\"" 5) '((1 . 1) "-R" "text"))
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text\"" 9) '((nil . 1) "-R" "text"))
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text\" " 10) '((nil . 2) "-R" "text"))
+
+;; unbalanced double quote
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text" 0) '((nil . 0) "-R" "text"))
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text" 8) '((1 . 1) "-R" "text"))
+(fsvn-test-equal (fsvn-complete-reading-split-arguments "-R \"text " 9) '((1 . 1) "-R" "text "))
+
+(fsvn-test-equal (fsvn-complete-url-local-file-previous-segment "file:///home") "/")
+(fsvn-test-equal (fsvn-complete-url-local-file-previous-segment "file:///home/") "/home/")
+(fsvn-test-equal (fsvn-complete-url-local-file-previous-segment "file:///home/d") "/home/")
+(fsvn-test-equal (fsvn-complete-url-local-file-previous-segment "file:///") "/")
 
 ;; fsvn-file-name-root-p
 ;; fsvn-file-name-nondirectory
