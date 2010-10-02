@@ -97,7 +97,7 @@
 		  <td>C-c C-k</td><td>メッセージの編集内容を破棄する</td>
 		</tr>
 		<tr>
-		  <td>C-c C-o</td><td>関係するバッファがあれば切り替える</td>
+		  <td>C-c C-o</td><td>関係するバッファに切り替える</td>
 		</tr>
 		<tr>
 		  <td>&#61; &#61;</td><td>対象ファイルがバージョン管理下にある場合に diff を実行する (`fsvn-select-file-mode' のみ)</td>
@@ -183,7 +183,43 @@
 	  </tbody>
 	</table>
 
+	<hr />
+	<h3>`fsvn-process-list-mode' でよく使うコマンド</h3>
+	<hr />
+	<table class="ewiki-table" border="2" cellpadding="5">
+	  <tbody>
+		<tr>
+		  <td>d</td><td>カーソル位置のプロセスに削除用マークをつける</td>
+		</tr>
+		<tr>
+		  <td>m</td><td>カーソル位置のプロセスにマークをつける</td>
+		</tr>
+		<tr>
+		  <td>u</td><td>カーソル位置のプロセスにつけられたマークを外す</td>
+		</tr>
+		<tr>
+		  <td>x</td><td>マークされたプロセスへの操作を実行する</td>
+		</tr>
+		<tr>
+		  <td>C-c C-t</td><td>fsvn の管理下にないプロセスの表示を切り替える</td>
+		</tr>
+		<tr>
+		  <td>C-c C-p</td><td>マークしたプロセスへパスワードを送信する</td>
+		</tr>
+		<tr>
+		  <td>C-m</td><td>カーソル位置のプロセスのバッファを表示する(バッファの操作に注意)</td>
+		</tr>
+		<tr>
+		  <td>C-c C-k</td><td>終了する</td>
+		</tr>
+	  </tbody>
+	</table>
 
+	<hr />
+	<h3>わからないことは</h3>
+	<hr />
+	<a href="qa.html.ja">Q&#32;and&#32;A</a>
+	<p/>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

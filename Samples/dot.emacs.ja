@@ -42,3 +42,6 @@
 ;; debug 情報の出力有無を切り替える。
 (global-set-key "\C-xvZ" 'fsvn-debug-toggle)
 
+;; ディレクトリの `svn update' の呼び出し時に確認プロンプトを表示しない。(C-c C-u)
+(setq fsvn-no-confirm
+      '(fsvn-browse-update-path))

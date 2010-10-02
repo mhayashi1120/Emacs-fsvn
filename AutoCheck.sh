@@ -6,6 +6,8 @@
 makefile=Makefile.tmp
 cfgfile=MAKE-CFG.el.tmp
 
+# TODO Emacs 22 not works fine.
+
 function check ()
 {
 	bin_dir=${1%/}
@@ -37,6 +39,7 @@ function check ()
 	cat > ${cfgfile} <<EOF
 (setq fsvn-svn-command "${svn_command}")
 (setq fsvn-svnadmin-command "${svnadmin_command}")
+(setq fsvn-home-directory "~/tmp/$(date +%Y%m%d%H%M%S)")
 EOF
 
 	rm -f ${makefile}
@@ -60,7 +63,8 @@ EOF
 UNIX_SVN_1_4_BIN=~/src/subversion-dev/inst-1.4.x/bin
 UNIX_SVN_1_5_BIN=~/src/subversion-dev/inst-1.5.x/bin
 UNIX_SVN_1_6_BIN=~/src/subversion-dev/inst-1.6.x/bin
-EMACS_BIN=emacs
+EMACS_22_BIN=emacs-22.3
+EMACS_23_BIN=emacs-23.2
 EMACS_CURRENT_BIN=emacs-current
 
 # for Windows
@@ -74,11 +78,14 @@ NTEMACS23_BIN="/cygdrive/c/usr/local/NTEmacs/23.1/bin/emacs.exe"
 
 if ! uname | grep -q -i cygwin ; then
 	check /usr/bin ${EMACS_BIN} Makefile
-	check ${UNIX_SVN_1_4_BIN} ${EMACS_BIN} Makefile
+	check ${UNIX_SVN_1_4_BIN} ${EMACS_22_BIN} Makefile
+	check ${UNIX_SVN_1_4_BIN} ${EMACS_23_BIN} Makefile
 	check ${UNIX_SVN_1_4_BIN} ${EMACS_CURRENT_BIN} Makefile
-	check ${UNIX_SVN_1_5_BIN} ${EMACS_BIN} Makefile
+	check ${UNIX_SVN_1_5_BIN} ${EMACS_22_BIN} Makefile
+	check ${UNIX_SVN_1_5_BIN} ${EMACS_23_BIN} Makefile
 	check ${UNIX_SVN_1_5_BIN} ${EMACS_CURRENT_BIN} Makefile
-	check ${UNIX_SVN_1_6_BIN} ${EMACS_BIN} Makefile
+	check ${UNIX_SVN_1_6_BIN} ${EMACS_22_BIN} Makefile
+	check ${UNIX_SVN_1_6_BIN} ${EMACS_23_BIN} Makefile
 	check ${UNIX_SVN_1_6_BIN} ${EMACS_CURRENT_BIN} Makefile
 else
 	check ${WIN_SVN_1_4_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32

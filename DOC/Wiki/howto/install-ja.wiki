@@ -1,6 +1,9 @@
 ----
 * インストール
 ----
+
+* 圧縮ファイルをダウンロードした場合
+----
 1. 圧縮ファイルを展開してください。
  =tar xzf fsvn-(version).tar.gz=
 2. `make' コマンドのある環境の場合は fsvn を展開したディレクトリに `cd' して、後述の手順に従ってください。
@@ -12,6 +15,17 @@
     =make install=
 3. `make' コマンドがない環境の場合は &#42;.elファイルを `load-path' の通ったところへコピーしてください。
 
+* fsvn.el をダウンロードした場合
+----
+1. `load-path' の通ったところへ fsvn.el をコピーしてください。
+
+* fsvn.el.gz, fsvn.el.bz2 をダウンロードした場合
+----
+1. 圧縮ファイルを展開してください。
+ =tar xzf fsvn.el.gz=
+2. `load-path' の通ったところへ fsvn.el をコピーしてください。
+3. NTEmacs で動作させる場合は mw32cmp.el のヘッダを読んで必要な物を `load-path' へコピーしてください。
+
 ----
 ** .emacs の設定
 ----
@@ -20,3 +34,7 @@
 ** .emacs の設定 (Option)
 ----
 [[http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&root=fsvn][dot.sample.ja]]
+----
+** わからないことは
+----
+[[qa-ja.wiki][Q and A]]

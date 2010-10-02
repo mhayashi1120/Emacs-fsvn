@@ -1,0 +1,17 @@
+----
+* Question and Answer
+----
+
+Q. fsvn-svn-command や fsvn-svnadmin-command を変更したが反映されない。
+
+A. (fsvn-initialize-loading) を評価してください。
+
+
+Q. 誰が質問したんですか？
+
+A. ほぼ私の脳内です。。。
+
+
+Q. 読んだけど分からない。
+
+A. [[mailto:mhayashi1120@gmail.com][作者まで]]。順次追加します。

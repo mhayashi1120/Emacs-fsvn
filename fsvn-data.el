@@ -289,6 +289,14 @@ This list sorted revision descending.
 (defun fsvn-delete (elt seq)
   (delete elt (copy-sequence seq)))
 
+(defun fsvn-take (count seq)
+  (let ((i 0)
+	ret)
+    (while (< i count)
+      (setq ret (cons (nth i seq) ret))
+      (setq i (1+ i)))
+    (nreverse ret)))
+
 (defun fsvn-find-first (predicate elt list)
   "PREDICATE accept two args like (elt list-each-item). "
   (catch 'found

@@ -24,6 +24,9 @@
 	<h2>インストール</h2>
 	<hr />
 
+	<h2>圧縮ファイルをダウンロードした場合</h2>
+	<hr />
+
 	<ol>
 	  <li>圧縮ファイルを展開してください。
 		<p>
@@ -56,6 +59,31 @@
 	  </li>
 	</ol>
 
+	<h2>fsvn.el をダウンロードした場合</h2>
+	<hr />
+
+	<ol>
+	  <li>`load-path' の通ったところへ fsvn.el をコピーしてください。
+	  </li>
+	</ol>
+
+	<h2>fsvn.el.gz, fsvn.el.bz2 をダウンロードした場合</h2>
+	<hr />
+
+	<ol>
+	  <li>圧縮ファイルを展開してください。
+		<p>
+		  <code>tar xzf fsvn.el.gz</code>
+		</p>
+	  </li>
+
+	  <li>`load-path' の通ったところへ fsvn.el をコピーしてください。
+	  </li>
+
+	  <li>NTEmacs で動作させる場合は mw32cmp.el のヘッダを読んで必要な物を `load-path' へコピーしてください。
+	  </li>
+	</ol>
+
 	<hr />
 	<h3>.emacs の設定</h3>
 	<hr />
@@ -66,6 +94,10 @@
 	<h3>.emacs の設定 (Option)</h3>
 	<hr />
 	<a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&amp;root=fsvn">dot.sample.ja</a>
+	<hr />
+	<h3>わからないことは</h3>
+	<hr />
+	<a href="qa.html.ja">Q&#32;and&#32;A</a>
 	<p/>
 
 	<!-- Google Analytics -->

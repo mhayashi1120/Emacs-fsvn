@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="ja" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-	<meta name="Content-Language" content="en"/>
+	<meta name="Content-Language" content="ja"/>
 	<meta http-equiv="Content-Style-Type" content="text/css"/>
 	<meta http-equiv="Content-Script-Type" content="text/javascript"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -14,62 +14,43 @@
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/sf.jp.theme.css"/>
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
 
-	<title>How to install fsvn.el</title>
+	<title></title>
 
   </head>
   <body>
 	<a href="../index.html">Top</a>
 
 	<hr />
-	<h2>Install</h2>
+	<h2>Question and Answer</h2>
 	<hr />
 
-	<ol>
-	  <li>First of all, unpack archive file
-		<p>
-		  <code>tar xzf fsvn-(version).tar.gz</code>
-		</p>
-	  </li>
-
-	  <li>If you have `make' command, `cd' to the directory where you unpacked fsvn.
-		<ol>
-		  <li>When to use on NTEmacs, read mw32cmp.el header to prepare.
-		  </li>
-
-		  <li>Edit MAKE-CFG.el and Makefile.
-		  </li>
-
-		  <li>Optionally invoke the following command show installed files where to go.
-			<p>
-			  <code>make what-where</code>
-			</p>
-		  </li>
-
-		  <li>Invoke the following command.
-			<p>
-			  <code>make install</code>
-			</p>
-		  </li>
-		</ol>
-	  </li>
-	  <li>If you have no `make' command simply copy &#42;.el files to `load-path' where you want.
-	  </li>
-	</ol>
-
-	<hr />
-	<h3>.emacs</h3>
-	<hr />
 	<p>
-	  <code>(require 'fsvn)</code>
+	  Q. fsvn-svn-command や fsvn-svnadmin-command を変更したが反映されない。
+
 	</p>
-	<hr />
-	<h3>.emacs (Option)</h3>
-	<hr />
-	<a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&amp;root=fsvn">dot.sample</a>
-	<hr />
-	<h3>For more information.</h3>
-	<hr />
-	<a href="qa.html.en">Q&#32;and&#32;A</a>
+
+	<p>
+	  A. (fsvn-initialize-loading) を評価してください。
+
+	</p>
+
+	<p>
+	  Q. 誰が質問したんですか？
+
+	</p>
+
+	<p>
+	  A. ほぼ私の脳内です。。。
+
+	</p>
+
+	<p>
+	  Q. 読んだけど分からない。
+
+	</p>
+
+	<p>
+	  A. <a href="mailto:mhayashi1120%40gmail.com">作者まで</a>。順次追加します。
 	<p/>
 
 	<!-- Google Analytics -->

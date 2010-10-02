@@ -15,6 +15,9 @@
 
 
 
+(defvar emacs-major-version)
+(defvar emacs-version)
+
 (defconst fsvn-space-char ?\040)
 
 (defcustom fsvn-home-directory
@@ -58,6 +61,21 @@ Save selected window, not contain point."
 	   ,@form)
        (when (window-live-p RETURN-WINDOW) 
 	 (select-window RETURN-WINDOW)))))
+
+(cond
+ ((= emacs-major-version 21)
+  (defmacro fsvn-interactive-p ()
+    `(interactive-p)))
+ ((memq emacs-major-version '(22 23))
+  (if (and (version<= emacs-version "23.2")
+	   (not (version= emacs-version "23.2")))
+      (defmacro fsvn-interactive-p ()
+	`(called-interactively-p))
+    (defmacro fsvn-interactive-p ()
+      `(called-interactively-p 'any))))
+ (t
+  (defmacro fsvn-interactive-p ()
+    `(called-interactively-p 'any))))
 
 (defun fsvn-cycle-next (list item)
   (let ((found (member item list)))
@@ -346,6 +364,15 @@ Use %% to put a single % into the output.
 
 
 
+(defun fsvn-vc-mode-p ()
+  "Is vc-svn active?"
+  (defvar vc-mode)
+  (and (boundp 'vc-mode)
+       (stringp vc-mode)
+       (string-match "^ SVN" vc-mode)))
+
+
+
 (defun fsvn-lisp-save (value file)
   (let* ((fullname file)
 	 lisp)
@@ -470,13 +497,16 @@ Use %% to put a single % into the output.
 
 (defun fsvn-cleanup-temp-directory ()
   "Cleanup temporary directory when load this file."
-  (let ((using (fsvn-process-using-temp-files)))
+  (let ((using (fsvn-process-using-temp-files))
+	;; delete only changed two days ago.
+	(time (seconds-to-time (- (float-time) (* 2 24 60 60)))))
     (mapc
      (lambda (file)
        (unless (fsvn-file-member file using)
-	 (if (fsvn-file-exact-directory-p file)
-	     (fsvn-delete-directory file)
-	   (delete-file file))))
+	 (when (time-less-p (nth 5 (file-attributes file)) time)
+	   (if (fsvn-file-exact-directory-p file)
+	       (fsvn-delete-directory file)
+	     (delete-file file)))))
      (directory-files (fsvn-temp-directory) t dired-re-no-dot))))
 
 (defun fsvn-process-using-temp-files ()
@@ -588,6 +618,27 @@ Use %% to put a single % into the output.
 
 (defun fsvn-cache-repository-directory ()
   (fsvn-expand-file "repository" (fsvn-cache-directory)))
+
+
+
+(defun fsvn-display-momentary-message (m)
+  "Show temporary message in minibuffer.
+referenced mew-complete.el"
+  (let ((wait-msec (max (* (length m) 0.05) 0.5))
+	(savemodified (buffer-modified-p))
+	savepoint savemax)
+    (save-excursion
+      (setq savepoint (point))
+      (insert m)
+      (set-buffer-modified-p savemodified)
+      (setq savemax (point)))
+    (let ((inhibit-quit t))
+      (sit-for wait-msec)
+      (delete-region savepoint savemax)
+      (set-buffer-modified-p savemodified)
+      (when quit-flag
+	(setq quit-flag nil)
+	(setq unread-command-events (list 7))))))
 
 
 

@@ -29,6 +29,8 @@
 	("^basicuse-en.wiki.html$" . "howto/basicuse.html.en")
 	("^install-ja.wiki.html$" . "howto/install.html.ja")
 	("^install-en.wiki.html$" . "howto/install.html.en")
+	("^qa-ja.wiki.html$" . "howto/qa.html.ja")
+	("^qa-en.wiki.html$" . "howto/qa.html.en")
 	))
 
 (defconst fsvn-publish-publishing-directory

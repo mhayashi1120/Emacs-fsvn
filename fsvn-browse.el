@@ -156,6 +156,8 @@
 	  (define-key map "=" 'fsvn-browse-diff-this)
 	  (define-key map "l" 'fsvn-browse-diff-local)
 	  (define-key map "e" 'fsvn-browse-ediff-this)
+	  (define-key map "p" 'fsvn-browse-create-patch-selected)
+	  (define-key map "P" 'fsvn-browse-create-patch-path)
 	  map)))
 
 (defvar fsvn-browse-often-use-map nil)
@@ -1101,6 +1103,11 @@ PATH is each executed path."
     (message (if (= count 1) "1 file marked."
 	       "%d files marked") count)))
 
+(defun fsvn-browse-point-marked-p (&optional mark)
+  (save-excursion
+    (forward-line 0)
+    (looking-at (concat "^" (char-to-string (or mark fsvn-mark-mark-char))))))
+
 (defun fsvn-browse-gather-marked-files (&optional mark)
   (let* ((marker-char (or mark fsvn-mark-mark-char))
 	 (regex (concat "^" (regexp-quote (char-to-string marker-char))))
@@ -1129,29 +1136,12 @@ PATH is each executed path."
     (nreverse ret)))
 
 (defun fsvn-browse-propview-mode (file directory-p)
-  (let ((win-configure (current-window-configuration))
-	(root fsvn-buffer-repos-root)
+  (let ((root fsvn-buffer-repos-root)
 	(working-dir
 	 (if (fsvn-url-local-p file)
 	     (fsvn-browse-current-directory-url)
 	   (fsvn-browse-current-magic-directory))))
-    ;; for proplist mode
-    (with-current-buffer (fsvn-proplist-get-buffer)
-      (fsvn-proplist-mode)
-      (setq fsvn-buffer-repos-root root)
-      (setq fsvn-propview-target-urlrev file)
-      (setq fsvn-propview-target-directory-p directory-p)
-      (setq fsvn-previous-window-configuration win-configure)
-      (setq fsvn-proplist-target-mode 'properties)
-      (fsvn-set-default-directory working-dir)
-      (fsvn-proplist-setup-window)
-      (setq fsvn-default-window-configuration (current-window-configuration))
-      (setq buffer-read-only t)
-      (fsvn-proplist-draw-list file)
-      (fsvn-proplist-goto-first-property)
-      (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
-      (run-mode-hooks 'fsvn-proplist-mode-hook))
-    (switch-to-buffer (fsvn-proplist-get-buffer))))
+    (fsvn-open-propview-mode root file directory-p working-dir)))
 
 (defun fsvn-browse-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))
@@ -1248,6 +1238,7 @@ PATH is each executed path."
 	     (fsvn-message-edit-prepared-buffer))
     (fsvn-parasite-commit-setup-window t)
     (unless (y-or-n-p "Log edit buffer already prepared. Discard it? ")
+      ;; Want to quit signal. But quit signal cannot display messages.
       (error "Type C-c C-q for Quit Edit.")))
   (let* ((unsaved (fsvn-files-unsaved-buffers files))
 	 (browse-buffer (current-buffer))
@@ -1827,7 +1818,7 @@ PATH is each executed path."
 
 (defun fsvn-browse-cleanup-path (&optional args)
   (interactive (fsvn-browse-cmd-read-wc-path-with-args "cleanup" fsvn-default-args-cleanup))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-confirm-prompt 'fsvn-browse-cleanup-path "Svn: Cleanup directory? "))
       (let ((buffer (fsvn-make-temp-buffer))
@@ -1854,7 +1845,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-wc-selected-with-args "update" fsvn-default-args-update))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-update-selected))
       (let ((proc (fsvn-popup-start-process "update" args files)))
@@ -1867,7 +1858,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-wc-path-with-args "update" fsvn-default-args-update))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-confirm-prompt 'fsvn-browse-update-path "Svn: Update current directory? "))
       (let ((proc (fsvn-popup-start-process "update" args)))
@@ -1887,7 +1878,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-wc-selected-with-args "resolved" fsvn-default-args-resolved))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-resolved-selected))
       (fsvn-parse-result-instant-sentinel
@@ -1905,7 +1896,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
    ((and (not (fsvn-wc-files-only-non-recursive-p files))
 	 (member "--non-recursive" args))
     (fsvn-browse-add-file-select files args))
-   ((or (not (interactive-p))
+   ((or (not (fsvn-interactive-p))
 	current-prefix-arg
 	(fsvn-browse-dired-confirm files 'fsvn-browse-add-selected))
     (fsvn-parse-result-instant-sentinel
@@ -1924,7 +1915,7 @@ In the repository buffer, confirm buffer will be shown.
   (cond
    (fsvn-browse-repos-p
     (fsvn-browse-delete-message-edit files args))
-   ((or (not (interactive-p))
+   ((or (not (fsvn-interactive-p))
 	current-prefix-arg
 	(fsvn-browse-dired-confirm files 'fsvn-browse-delete-selected))
     (fsvn-parse-result-instant-sentinel
@@ -1942,7 +1933,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (cond
    ((member "--message" args)
     (fsvn-browse-lock-message-edit files args))
-   ((or (not (interactive-p))
+   ((or (not (fsvn-interactive-p))
 	current-prefix-arg
 	(fsvn-browse-dired-confirm files 'fsvn-browse-lock-selected))
     (fsvn-parse-result-cmd-lock
@@ -1955,7 +1946,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-url-selected-with-args "unlock" fsvn-default-args-unlock))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-unlock-selected))
       (fsvn-parse-result-cmd-unlock
@@ -1974,7 +1965,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-export-path))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-confirm-prompt 'fsvn-browse-export-path "Svn: Export current directory? "))
       (fsvn-popup-start-process "export" args (fsvn-browse-current-directory-urlrev) to-dir)
@@ -1982,14 +1973,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-browse-add-changelist-selected (name files)
   (interactive (fsvn-browse-cmd-read-add-changelist-selected))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-add-changelist-selected))
       (fsvn-popup-start-process "changelist" name files)
     (message "(No svn Changelist performed)")))
 
 (defun fsvn-browse-remove-changelist-selected (files)
   (interactive (fsvn-browse-cmd-read-wc-selected))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-remove-changelist-selected))
       (fsvn-popup-start-process "changelist" "--remove" files)
     (message "(No svn Changelist performed)")))
@@ -2111,7 +2102,7 @@ This makes faster copy than in working copy.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-wc-selected-with-args "revert" fsvn-default-args-revert))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-revert-selected))
       (fsvn-parse-result-instant-sentinel
@@ -2124,7 +2115,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-browse-cmd-read-wc-path-with-args "revert" fsvn-default-args-revert))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  current-prefix-arg
 	  (fsvn-confirm-prompt 'fsvn-browse-revert-path "Svn: Revert current directory? "))
       (fsvn-parse-result-instant-sentinel
@@ -2167,14 +2158,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-logview-this (file-struct)
   "Execute `log' for current file showing by `fsvn-log-list-mode'."
   (interactive (fsvn-browse-cmd-read-this-file-struct))
-  (fsvn-open-log-view-mode
+  (fsvn-open-logview-mode
    (fsvn-struct-browse-file-get-name file-struct)
    (fsvn-struct-browse-file-get-directory-p file-struct)))
 
 (defun fsvn-browse-logview-path ()
   "Execute `log' for current directory showing by `fsvn-log-list-mode'."
   (interactive)
-  (fsvn-open-log-view-mode (fsvn-browse-current-directory-urlrev) t))
+  (fsvn-open-logview-mode (fsvn-browse-current-directory-urlrev) t))
 
 (defun fsvn-browse-propview-this (file)
   "Execute `proplist' by `fsvn-proplist-mode' for point FILE"
@@ -2212,7 +2203,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-prop-add-svn:ignore-selected (files)
   "Ignore point FILE by using `svn:ignore' property."
   (interactive (fsvn-browse-cmd-read-wc-selected))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-prop-add-svn:ignore-selected))
       (mapc
        (lambda (cell)
@@ -2223,7 +2214,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-prop-toggle-svn:needs-lock-selected (files)
   "Toggle `svn:needs-lock' property value."
   (interactive (fsvn-browse-cmd-read-url-selected))
-  (if (or (not (interactive-p))
+  (if (or (not (fsvn-interactive-p))
 	  (fsvn-browse-dired-confirm files 'fsvn-browse-prop-toggle-svn:needs-lock-selected))
       (mapc
        (lambda (file)

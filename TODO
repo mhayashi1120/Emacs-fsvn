@@ -14,8 +14,6 @@
 
 ** file-select, message-edit can kill-buffer when commiting.
 
-** interactive-p -> called-interactively-p
-
 ** Bugreport
 
 ** about SVN_SSH
@@ -31,6 +29,10 @@ buffer name start with ` ' (space)
 ** to configure ex: C-c C-u
 
 ** search log diff and message
+
+** describe doc about process-list 
+enable send password
+freezing processes.
 
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
@@ -97,7 +99,6 @@ revision range and log base url
  call tortoise viewer (Windows)
 ** logview-mode diff with non visible revision.
 
-** show copy-from
 
 ** log-sibling return to specific revision file. (use magic file name)
 * prop-mode
@@ -105,6 +106,8 @@ revision range and log base url
 ** prop-recursive-mode
 
 proplist --recursive
+
+** propedit and not changed value but want to apply recursively
 
 * diff
 ** ediff directory

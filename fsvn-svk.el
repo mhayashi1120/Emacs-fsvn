@@ -19,6 +19,7 @@
 
 (defvar process-environment)
 (defvar system-type)
+(defvar server-process)
 
 
 
@@ -327,7 +328,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-browse-push ()
   "Push working copy repository -> mirroring repository -> mirrored repository."
   (interactive)
-  (when (interactive-p)
+  (when (fsvn-interactive-p)
     (fsvn-svk-confirm 'fsvn-svk-browse-push))
   (fsvn-svk-browse-check-exec)
   (let ((buffer (fsvn-popup-result-create-buffer))
@@ -341,7 +342,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-browse-pull ()
   "Pull mirroring repository -> working copy repository."
   (interactive)
-  (when (interactive-p)
+  (when (fsvn-interactive-p)
     (fsvn-svk-confirm 'fsvn-svk-browse-pull))
   (fsvn-svk-browse-check-exec)
   (let ((buffer (fsvn-popup-result-create-buffer))
@@ -355,7 +356,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-browse-resync ()
   "Synchronize mirroring repository <-> mirrored repository."
   (interactive)
-  (when (interactive-p)
+  (when (fsvn-interactive-p)
     (fsvn-svk-confirm 'fsvn-svk-browse-resync))
   (fsvn-svk-browse-check-exec)
   (let ((buffer (fsvn-popup-result-create-buffer))
