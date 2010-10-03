@@ -54,6 +54,9 @@ This causes turning off `mark-active'.
 
 revert forcely.
 
+** fsvn-log-sibling-ediff-previous
+for directory
+
 * popup-result-mode
 
 ** sometime running process exists but hide mode-line process running

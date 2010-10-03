@@ -207,6 +207,9 @@
 	(concat url "@" (fsvn-string-put-property tmp 'fsvn-revision-property t)))
     url))
 
+(defun fsvn-url-urlrev-p (string)
+  (next-single-property-change 0 'fsvn-revision-property string))
+
 (defun fsvn-urlrev-url (urlrev)
   "Remove revision string from URL."
   (car (fsvn-urlrev-parse urlrev)))

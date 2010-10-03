@@ -431,64 +431,7 @@ Keybindings:
 
 (defun fsvn-log-list-ediff-with-region ()
   (let* ((revs (fsvn-log-list-region-revision)))
-    (fsvn-log-list-ediff (car revs) (cdr revs))))
-
-(defun fsvn-log-list-ediff (urlrev1 urlrev2)
-  (if fsvn-logview-target-directory-p
-      (fsvn-log-list-ediff-directories urlrev1 urlrev2)
-    (fsvn-log-list-ediff-files urlrev1 urlrev2)))
-
-(defun fsvn-log-list-ediff-prepare-file (urlrev)
-  (if (fsvn-url-local-p urlrev)
-      urlrev
-    (let ((file (fsvn-ediff-make-temp-file urlrev)))
-      (unless (fsvn-save-file urlrev file t)
-	(error "Error occur while saving remote file"))
-      file)))
-
-(defun fsvn-log-list-ediff-files (urlrev1 urlrev2)
-  (let ((file1 (fsvn-log-list-ediff-prepare-file urlrev1))
-	(file2 (fsvn-log-list-ediff-prepare-file urlrev2)))
-    (fsvn-ediff-files file1 file2)))
-
-(defun fsvn-log-list-ediff-directories (urlrev1 urlrev2)
-  (cond
-   ((and (fsvn-url-repository-p urlrev1)
-	 (fsvn-url-repository-p urlrev2))
-    (fsvn-async-let ((export-dir1 (fsvn-ediff-make-temp-directory urlrev1))
-		     (export-dir2 (fsvn-ediff-make-temp-directory urlrev2))
-		     (buffer (fsvn-make-temp-buffer))
-		     (urlrev2 urlrev2))
-      (fsvn-start-command "export" buffer "--force" urlrev1 export-dir1)
-      (fsvn-start-command "export" buffer "--force" urlrev2 export-dir2)
-      (kill-buffer buffer)
-      (when (y-or-n-p "Execute ediff? ")
-	(fsvn-ediff-directories export-dir1 export-dir2))))
-   ((and (fsvn-url-repository-p urlrev1)
-	 (fsvn-url-local-p urlrev2))
-    (let* ((export-dir (fsvn-ediff-make-temp-directory urlrev1))
-	   (buffer (fsvn-make-temp-buffer))
-	   (proc (fsvn-start-command "export" buffer "--force" urlrev1 export-dir))
-	   (sentinel (fsvn-ediff-directories-create-sentinel export-dir urlrev2 buffer)))
-      (set-process-sentinel proc sentinel)))
-   ((and (fsvn-url-local-p urlrev1)
-	 (fsvn-url-repository-p urlrev2))
-    (let* ((export-dir (fsvn-ediff-make-temp-directory urlrev2))
-	   (buffer (fsvn-make-temp-buffer))
-	   (proc (fsvn-start-command "export" buffer "--force" urlrev2 export-dir))
-	   (sentinel (fsvn-ediff-directories-create-sentinel urlrev1 export-dir buffer)))
-      (set-process-sentinel proc sentinel)))
-   (t
-    (fsvn-ediff-directory urlrev1 urlrev2)))
-  t)
-
-(defun fsvn-ediff-directories-create-sentinel (dir1 dir2 buffer)
-  `(lambda (p e)
-     (fsvn-process-exit-handler p e
-       (kill-buffer ,buffer)
-       (let ((inhibit-quit t))
-	 (when (y-or-n-p "Execute ediff? ")
-	   (fsvn-ediff-directories ,dir1 ,dir2))))))
+    (fsvn-ediff-between-urlrevs (car revs) (cdr revs) fsvn-logview-target-directory-p)))
 
 (defun fsvn-log-list-create-patch-region (patch-file)
   "Create PATCH-FILE in region terminated point as from and to revision.
@@ -817,7 +760,9 @@ Otherwise diff at point revision with working copy file or directory.
 (defun fsvn-log-list-ediff-with-base ()
   "Ediff between current revision at point and log starting point."
   (interactive)
-  (fsvn-log-list-ediff fsvn-logview-target-urlrev (fsvn-log-list-point-urlrev)))
+  (let ((urlrev1 fsvn-logview-target-urlrev)
+	(urlrev2 (fsvn-log-list-point-urlrev)))
+    (fsvn-ediff-between-urlrevs urlrev1 urlrev2 fsvn-logview-target-directory-p)))
 
 (defun fsvn-log-list-create-patch-generic (patch-file)
   "Create patch act like `fsvn-log-list-diff-generic'"

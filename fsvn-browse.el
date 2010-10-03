@@ -2249,13 +2249,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   "Ediff for point FILE."
   (interactive (fsvn-browse-cmd-read-wc-this-file))
   (fsvn-browse-wc-only
-   (when (file-directory-p file)
-     (error "\"%s\" is directory" file))
    (let* ((urlrev (fsvn-url-urlrev file "BASE"))
-	  (tmpfile (fsvn-ediff-make-temp-file urlrev)))
-     (unless (fsvn-save-file urlrev tmpfile t)
-       (error "Save file failed"))
-     (fsvn-ediff-files tmpfile file))))
+	  (directory-p (file-directory-p file)))
+     (fsvn-ediff-between-urlrevs urlrev file directory-p))))
 
 (defun fsvn-browse-diff-local (file)
   "Same as `dired-diff'."
