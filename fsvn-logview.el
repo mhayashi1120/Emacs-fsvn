@@ -1173,12 +1173,8 @@ Keybindings:
   "Ediff with previous version."
   (interactive)
   (fsvn-log-sibling-diffable
-   (let* ((file1 (fsvn-ediff-make-temp-file URLREV))
-	  (file2 (fsvn-ediff-make-temp-file PREV-URLREV)))
-     (unless (and (fsvn-save-file URLREV file1 t)
-		  (fsvn-save-file PREV-URLREV file2 t))
-       (error "Error occur while saving remote file"))
-     (fsvn-ediff-files file1 file2))))
+   ;;BUG about directory-p
+   (fsvn-ediff-between-urlrevs URLREV PREV-URLREV nil)))
 
 (defun fsvn-log-sibling-open-this (filename)
   "Open guessed working copy file."

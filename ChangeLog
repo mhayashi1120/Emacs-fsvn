@@ -1,5 +1,7 @@
 2010-10-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Add: fsvn-browse-ediff-path bound to `= E'
+
 	* Change: fsvn-log-list-ediff-with-wc -> fsvn-log-list-ediff-with-base
 
 	* Improvement: Enable can ediff directory in log-list-mode (But is not well designed)

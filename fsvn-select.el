@@ -447,9 +447,8 @@ Keybindings:
 (defun fsvn-select-file-ediff-base (file)
   (interactive (fsvn-select-file-command-file))
   (let* ((urlrev (fsvn-url-urlrev file "BASE"))
-	 (tmpfile (fsvn-ediff-make-temp-file urlrev)))
-    (when (fsvn-save-file urlrev tmpfile t)
-      (fsvn-ediff-files tmpfile file))))
+	 (directory-p (file-directory-p file)))
+    (fsvn-ediff-between-urlrevs urlrev file directory-p)))
 
 (defun fsvn-select-file-mark ()
   (interactive)

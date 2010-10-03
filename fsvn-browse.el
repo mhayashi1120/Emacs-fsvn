@@ -156,6 +156,7 @@
 	  (define-key map "=" 'fsvn-browse-diff-this)
 	  (define-key map "l" 'fsvn-browse-diff-local)
 	  (define-key map "e" 'fsvn-browse-ediff-this)
+	  (define-key map "E" 'fsvn-browse-ediff-path)
 	  (define-key map "p" 'fsvn-browse-create-patch-selected)
 	  (define-key map "P" 'fsvn-browse-create-patch-path)
 	  map)))
@@ -2253,6 +2254,13 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	  (directory-p (file-directory-p file)))
      (fsvn-ediff-between-urlrevs urlrev file directory-p))))
 
+(defun fsvn-browse-ediff-path ()
+  "Ediff for current directory."
+  (interactive)
+  (fsvn-browse-wc-only
+   (let* ((urlrev (fsvn-url-urlrev default-directory "BASE")))
+     (fsvn-ediff-between-urlrevs urlrev default-directory t))))
+
 (defun fsvn-browse-diff-local (file)
   "Same as `dired-diff'."
   (interactive (fsvn-browse-cmd-read-wc-this-file))
@@ -2355,6 +2363,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      ["Cleanup" fsvn-browse-cleanup-path t]
      ["Commit" fsvn-browse-commit-path t]
      ["Export" fsvn-browse-export-path t]
+     ["Ediff" fsvn-browse-ediff-path t]
      ["Info" fsvn-browse-info-path t]
      ["Log" fsvn-browse-logview-path t]
      ["Merge" fsvn-browse-merge-path t]

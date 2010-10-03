@@ -204,7 +204,8 @@
 (defun fsvn-url-urlrev (url rev)
   (if rev
       (let ((tmp (fsvn-get-revision-string rev)))
-	(concat url "@" (fsvn-string-put-property tmp 'fsvn-revision-property t)))
+	(concat (fsvn-url-directory-file-name url) "@" 
+		(fsvn-string-put-property tmp 'fsvn-revision-property t)))
     url))
 
 (defun fsvn-url-urlrev-p (string)
