@@ -36,11 +36,8 @@
 	 (hook '(fsvn-ediff-startup-hooks)))
     (ediff-files file1 file2 hook)))
 
-(defun fsvn-ediff-guessed-mode (file1 file2)
-  "Currently used only FILE2. FILE1 is dummy."
-  (let ((real-name (fsvn-urlrev-url file2)))
-    (when real-name
-      (assoc-default real-name auto-mode-alist 'string-match))))
+(defun fsvn-ediff-directories (dir1 dir2)
+  (ediff-directories dir1 dir2 nil))
 
 (defun fsvn-ediff-startup-hooks ()
   (let ((func `(lambda () (fsvn-ediff-exit-hook ',fsvn-ediff-previous-configuration))))
@@ -58,11 +55,24 @@
    (list (fsvn-struct-ediff-config-get-file1 prev-config)
 	 (fsvn-struct-ediff-config-get-file2 prev-config))))
 
-(defun fsvn-ediff-make-temp-file (url)
-  (let* ((file (fsvn-expand-file (fsvn-url-ediff-filename url) (fsvn-ediff-directory))))
-    ;; FIXME multiple emacs process.
+(defun fsvn-ediff-hash-directory (urlrev)
+  (let ((dir (fsvn-expand-file (md5 (fsvn-urlrev-dirname urlrev)) (fsvn-ediff-directory))))
+    (unless (file-directory-p dir)
+      (make-directory dir t))
+    dir))
+
+(defun fsvn-ediff-make-temp-file (urlrev)
+  (let* ((topdir (fsvn-ediff-hash-directory urlrev))
+	 (file (fsvn-expand-file (fsvn-url-ediff-filename urlrev) topdir)))
     (write-region (point-min) (point-min) file nil 'no-msg)
     file))
+
+(defun fsvn-ediff-make-temp-directory (urlrev)
+  (let* ((topdir (fsvn-ediff-hash-directory urlrev))
+	 (dir (fsvn-expand-file (fsvn-url-ediff-filename urlrev) topdir)))
+    (unless (file-directory-p dir)
+      (make-directory dir t))
+    dir))
 
 ;; subcommand `diff' utility
 
