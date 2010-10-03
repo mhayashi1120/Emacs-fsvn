@@ -1,3 +1,11 @@
+2010-10-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: fsvn-log-list-ediff-with-wc -> fsvn-log-list-ediff-with-base
+
+	* Improvement: Enable can ediff directory in log-list-mode (But is not well designed)
+
+	* Improvement: enable save directory in log-list-mode
+
 2010-10-02  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Improvement: complete url and complete argument.

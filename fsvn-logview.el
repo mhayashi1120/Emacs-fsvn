@@ -430,13 +430,65 @@ Keybindings:
     (fsvn-diff-start-process diff-args args)))
 
 (defun fsvn-log-list-ediff-with-region ()
-  (let* ((revs (fsvn-log-list-region-revision))
-	 (tmpfile1 (fsvn-ediff-make-temp-file (car revs)))
-	 (tmpfile2 (fsvn-ediff-make-temp-file (cdr revs))))
-    (unless (and (fsvn-save-file (cdr revs) tmpfile1 t)
-		 (fsvn-save-file (car revs) tmpfile2 t))
-      (error "Error occur while saving remote file"))
-    (fsvn-ediff-files tmpfile1 tmpfile2)))
+  (let* ((revs (fsvn-log-list-region-revision)))
+    (fsvn-log-list-ediff (car revs) (cdr revs))))
+
+(defun fsvn-log-list-ediff (urlrev1 urlrev2)
+  (if fsvn-logview-target-directory-p
+      (fsvn-log-list-ediff-directories urlrev1 urlrev2)
+    (fsvn-log-list-ediff-files urlrev1 urlrev2)))
+
+(defun fsvn-log-list-ediff-prepare-file (urlrev)
+  (if (fsvn-url-local-p urlrev)
+      urlrev
+    (let ((file (fsvn-ediff-make-temp-file urlrev)))
+      (unless (fsvn-save-file urlrev file t)
+	(error "Error occur while saving remote file"))
+      file)))
+
+(defun fsvn-log-list-ediff-files (urlrev1 urlrev2)
+  (let ((file1 (fsvn-log-list-ediff-prepare-file urlrev1))
+	(file2 (fsvn-log-list-ediff-prepare-file urlrev2)))
+    (fsvn-ediff-files file1 file2)))
+
+(defun fsvn-log-list-ediff-directories (urlrev1 urlrev2)
+  (cond
+   ((and (fsvn-url-repository-p urlrev1)
+	 (fsvn-url-repository-p urlrev2))
+    (fsvn-async-let ((export-dir1 (fsvn-ediff-make-temp-directory urlrev1))
+		     (export-dir2 (fsvn-ediff-make-temp-directory urlrev2))
+		     (buffer (fsvn-make-temp-buffer))
+		     (urlrev2 urlrev2))
+      (fsvn-start-command "export" buffer "--force" urlrev1 export-dir1)
+      (fsvn-start-command "export" buffer "--force" urlrev2 export-dir2)
+      (kill-buffer buffer)
+      (when (y-or-n-p "Execute ediff? ")
+	(fsvn-ediff-directories export-dir1 export-dir2))))
+   ((and (fsvn-url-repository-p urlrev1)
+	 (fsvn-url-local-p urlrev2))
+    (let* ((export-dir (fsvn-ediff-make-temp-directory urlrev1))
+	   (buffer (fsvn-make-temp-buffer))
+	   (proc (fsvn-start-command "export" buffer "--force" urlrev1 export-dir))
+	   (sentinel (fsvn-ediff-directories-create-sentinel export-dir urlrev2 buffer)))
+      (set-process-sentinel proc sentinel)))
+   ((and (fsvn-url-local-p urlrev1)
+	 (fsvn-url-repository-p urlrev2))
+    (let* ((export-dir (fsvn-ediff-make-temp-directory urlrev2))
+	   (buffer (fsvn-make-temp-buffer))
+	   (proc (fsvn-start-command "export" buffer "--force" urlrev2 export-dir))
+	   (sentinel (fsvn-ediff-directories-create-sentinel urlrev1 export-dir buffer)))
+      (set-process-sentinel proc sentinel)))
+   (t
+    (fsvn-ediff-directory urlrev1 urlrev2)))
+  t)
+
+(defun fsvn-ediff-directories-create-sentinel (dir1 dir2 buffer)
+  `(lambda (p e)
+     (fsvn-process-exit-handler p e
+       (kill-buffer ,buffer)
+       (let ((inhibit-quit t))
+	 (when (y-or-n-p "Execute ediff? ")
+	   (fsvn-ediff-directories ,dir1 ,dir2))))))
 
 (defun fsvn-log-list-create-patch-region (patch-file)
   "Create PATCH-FILE in region terminated point as from and to revision.
@@ -620,8 +672,6 @@ from is marked point, to is current point."
   (list (fsvn-log-list-cmd-revision)))
 
 (defun fsvn-log-list-cmd-read-save-this ()
-  (when fsvn-logview-target-directory-p
-    (error "\"%s\" is directory." fsvn-logview-target-urlrev))
   (let* ((urlrev fsvn-logview-target-urlrev)
 	 (rev (fsvn-log-list-point-revision))
 	 (file (fsvn-log-read-save-file (fsvn-urlrev-url urlrev) rev)))
@@ -747,15 +797,13 @@ Otherwise diff at point revision with working copy file or directory.
 (defun fsvn-log-list-ediff-generic ()
   "Act like `fsvn-log-list-diff-generic' except directory."
   (interactive)
-  (when fsvn-logview-target-directory-p
-    (error "Cannot execute ediff.  This log is targeting to directory"))
   (cond
    (mark-active
     (fsvn-log-list-ediff-with-region))
    ((fsvn-url-repository-p fsvn-logview-target-urlrev)
     (error "This buffer has non working copy"))
    (t
-    (fsvn-log-list-ediff-with-wc))))
+    (fsvn-log-list-ediff-with-base))))
 
 (defun fsvn-log-list-diff-with-wc (&optional args)
   "Diff between current revision at point and log starting point."
@@ -766,14 +814,10 @@ Otherwise diff at point revision with working copy file or directory.
     (setq diff-args (list "--revision" rev file))
     (fsvn-diff-start-process diff-args args)))
 
-(defun fsvn-log-list-ediff-with-wc ()
+(defun fsvn-log-list-ediff-with-base ()
   "Ediff between current revision at point and log starting point."
   (interactive)
-  (let* ((file fsvn-logview-target-urlrev)
-	 (urlrev (fsvn-log-list-point-urlrev))
-	 (tmpfile (fsvn-ediff-make-temp-file urlrev)))
-    (when (fsvn-save-file urlrev tmpfile t)
-      (fsvn-ediff-files tmpfile file))))
+  (fsvn-log-list-ediff fsvn-logview-target-urlrev (fsvn-log-list-point-urlrev)))
 
 (defun fsvn-log-list-create-patch-generic (patch-file)
   "Create patch act like `fsvn-log-list-diff-generic'"
@@ -1443,7 +1487,7 @@ Keybindings:
     ("Diff"
      ["Diff" fsvn-log-list-diff-generic t]
      ["Diww with wc" fsvn-log-list-diff-with-wc t]
-     ["Ediff with wc" fsvn-log-list-ediff-with-wc t]
+     ["Ediff with base" fsvn-log-list-ediff-with-base t]
      ["Ediff" fsvn-log-list-ediff-generic t]
      ["Patch" fsvn-log-list-create-patch-generic t]
      )

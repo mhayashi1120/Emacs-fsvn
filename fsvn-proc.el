@@ -247,8 +247,8 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
        ,@form)))
 
 (defmacro fsvn-process-exit-handler (proc event &rest form)
-  `(when (eq (process-status proc) 'exit)
-     (fsvn-process-event-handler proc event
+  `(when (eq (process-status ,proc) 'exit)
+     (fsvn-process-event-handler ,proc ,event
        ,@form)))
 
 (defun fsvn-flatten-command-args (list)

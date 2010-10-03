@@ -279,6 +279,32 @@ How to send a bug report:
 
 
 
+
+;; background gardian
+;; status `preparing' `prepared' `invoking'?? `done'
+
+(defvar fsvn-gardian-timer nil)
+
+(defun fsvn-gardian-invoke ()
+  )
+
+(defvar fsvn-gardian-registered-alist nil)
+
+(defun fsvn-gardian-register (name)
+  (unless fsvn-gardian-timer
+    (setq fsvn-gardian-timer)))
+
+(defun fsvn-gardian-mode ()
+  )
+
+(defun fsvn-gardian-draw-list ()
+  (mapc
+   (lambda (item)
+     )
+   fsvn-gardian-registered-alist))
+
+
+
 (provide 'fsvn-dev)
 
 ;;; fsvn-dev.el ends here

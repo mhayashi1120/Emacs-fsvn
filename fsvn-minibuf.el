@@ -592,7 +592,6 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (interactive)
   (let ((prevs (fsvn-complete-previous-values)))
     (fsvn-complete-subcommand-forward-word)
-    ;;TODO start arg completion when only start with `-' or valid context in `-'
     (let* ((args (cdr fsvn-complete-reading-subcommand))
 	   (curr (fsvn-complete-subcommand-previous-argument prevs))
 	   (completions (fsvn-complete-subcommand-create-completions prevs curr args)))
@@ -602,7 +601,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 	       (complete (try-completion (or curr "") completions)))
 	  (cond
 	   ((= (length applicant) 0)
-	    (fsvn-complete-subcommand-args-no-completions prevs))
+	    (fsvn-complete-completion-window-show nil))
 	   ((= (length applicant) 1)
 	    (fsvn-complete-completion-window-delete)
 	    (fsvn-complete-subcommand-previous-delete)
@@ -614,10 +613,6 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 	    (fsvn-complete-completion-window-show applicant))
 	   (t
 	    (fsvn-complete-completion-window-show applicant))))))))
-
-;;TODO
-(defun fsvn-complete-subcommand-args-no-completions (prevs)
-  (fsvn-complete-completion-window-show nil))
 
 (defun fsvn-complete-subcommand-previous-delete ()
   (let ((end (point))
