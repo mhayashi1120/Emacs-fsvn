@@ -79,6 +79,7 @@
 
 	  (define-key map "=" 'fsvn-log-list-diff-generic)
 	  (define-key map "e" 'fsvn-log-list-ediff-generic)
+	  (define-key map "l" 'fsvn-log-list-ediff-local)
 	  (define-key map "w" 'fsvn-log-list-diff-with-wc)
 	  (define-key map "p" 'fsvn-log-list-create-patch-generic)
 
@@ -641,6 +642,12 @@ from is marked point, to is current point."
      (setq to (fsvn-completing-read-revision "Revision to: " nil nil url))
      (list url (cons from to)))))
 
+(defun fsvn-logview-cmd-read-ediff-local ()
+  (let (local-file args)
+    (setq local-file (fsvn-read-file-name "File: "))
+    (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
+    (list local-file args)))
+
 ;; * fsvn-log-list-mode interactive commands
 
 (defun fsvn-log-list-propview-this (urlrev)
@@ -884,6 +891,15 @@ LOCAL-FILE is completely replaced by URLREV."
 		   (local-file local-file))
     (fsvn-popup-start-process "delete" (list local-file))
     (fsvn-popup-start-copy/move-process "copy" (list urlrev) local-file)))
+
+(defun fsvn-log-list-ediff-local (local-file &optional args)
+  "Diff current revision at point with LOCAL-FILE.
+
+LOCAL-FILE can be any file in local file system.
+"
+  (interactive (fsvn-logview-cmd-read-ediff-local))
+  (let ((urlrev (fsvn-log-list-point-urlrev)))
+    (fsvn-ediff-between-urlrevs urlrev local-file args)))
 
 
 

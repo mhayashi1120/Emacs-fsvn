@@ -1,6 +1,8 @@
 2010-10-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
-	* Add: fsvn-browse-ediff-path bound to `= E'
+	* Add: fsvn-log-list-ediff-local bound to `= l' in log-list-mode
+
+	* Add: fsvn-browse-ediff-path bound to `= E' in browse-mode
 
 	* Change: fsvn-log-list-ediff-with-wc -> fsvn-log-list-ediff-with-base
 
