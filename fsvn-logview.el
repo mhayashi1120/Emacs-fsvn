@@ -1009,7 +1009,7 @@ Keybindings:
 	(let* ((info (fsvn-get-info-entry default-directory))
 	       ;;todo big bug. fsvn-xml-info->entry=>url$ contains space url is encoded.
 	       (current (fsvn-xml-info->entry=>url$ info))
-	       (filename (fsvn-url-relative-name current url)))
+	       (filename (fsvn-url-relative-name url current)))
 	  (when (file-exists-p filename)
 	    (fsvn-expand-file filename)))))))
 
@@ -1391,7 +1391,7 @@ Keybindings:
 	(setq fsvn-electric-done-function 'fsvn-electric-select-log-done)
 	(font-lock-mode 1)
 	(font-lock-fontify-buffer)))
-    (fsvn-electric-line-select buffer)))
+    (fsvn-electric-line-select buffer nil)))
 
 (defun fsvn-electric-select-log-done ()
   (fsvn-log-list-point-urlrev))

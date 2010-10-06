@@ -41,6 +41,11 @@
 	 (apply 'call-process fsvn-svnadmin-command-internal nil buffer nil subcommand real-args)
        (fsvn-debug buffer)))))
 
+(defun fsvn-admin-call-command-discard (subcommand buffer &rest args)
+  (unless (= (apply 'fsvn-admin-call-command subcommand buffer args) 0)
+    (signal 'fsvn-command-error (list subcommand args (buffer-string))))
+  t)
+
 (defun fsvn-admin-create-repository (dir &optional args)
   "Create repository to current directory."
   (interactive (list (fsvn-expand-file default-directory)

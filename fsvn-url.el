@@ -132,14 +132,24 @@
     (when (string-match "\\([^/]+\\)$" tmp)
       (match-string 1 tmp))))
 
-(defun fsvn-url-relative-name (base-url url)
-  (cond
-   ((string= (directory-file-name base-url) (directory-file-name url))
-    ".")
-   ((string-match (concat "^" (regexp-quote (fsvn-url-as-directory base-url)) "\\(.*\\)") url)
-    (match-string 1 url))
-   (t
-    url)))
+(defun fsvn-url-relative-name (full-url base-url)
+  (let ((base (split-string (fsvn-url-directory-file-name base-url) "/"))
+	(full (split-string full-url "/"))
+	ret)
+    (cond
+     ((not (equal (car base) (car full)))
+      full-url)
+     (t
+      (while (and base full
+		  (equal (car base) (car full)))
+	(setq base (cdr base)
+	      full (cdr full)))
+      (setq ret (append 
+		 (make-list (length base) "..") 
+		 full))
+      (if (null ret)
+	  "./"
+	(mapconcat 'identity ret "/"))))))
 
 (defun fsvn-urlrev-directory-file-name (urlrev)
   (let ((urlobj (fsvn-urlrev-parse urlrev)))
@@ -276,8 +286,10 @@
 	    (fsvn-get-revision-string revision)
 	    (when ext (concat "." ext)))))
 
-(defun fsvn-file-name-as-repository (file)
-  (concat "file:///" file))
+(defun fsvn-directory-name-as-repository (directory)
+  (if (string-match "^/" directory)
+      (concat "file://" directory)
+    (concat "file:///" directory)))
 
 (if (memq system-type '(windows-nt))
     (defun fsvn-file-absolute-name (file)

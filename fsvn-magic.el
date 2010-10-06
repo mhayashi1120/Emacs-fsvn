@@ -206,7 +206,7 @@ FIXME Does Emacs have list like this? "
 		    (if dirp ?d fsvn-space-char)
 		    (fsvn-magic-ls-revision entry)
 		    (fsvn-magic-ls-author-column entry)
-		    (fsvn-browse-file-size-text (fsvn-safe-xml-lists->list->entry=>size$ entry))
+		    (fsvn-generic-format-file-size (fsvn-safe-xml-lists->list->entry=>size$ entry))
 		    (format-time-string fsvn-generic-datetime-format (fsvn-magic-xml-list/info-entry=>commit=date entry))
 		    filename
 		    )))

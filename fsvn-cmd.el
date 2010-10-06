@@ -348,6 +348,15 @@ FILES accept a file as string."
       (fsvn-set-propset file propname "*")
     (fsvn-set-propdel file propname)))
 
+(defun fsvn-update-directory (dir)
+  (let ((default-directory (file-name-as-directory dir)))
+    (with-temp-buffer
+      (fsvn-call-command "update" (current-buffer))
+      (goto-char (point-max))
+      (unless (re-search-forward "^At revision \\([0-9]+\\)." nil t)
+	(error "Not found"))
+      (string-to-number (match-string 1)))))
+
 
 
 (defcustom fsvn-import-with-log-message-format
@@ -498,7 +507,7 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 	      (urlrev (fsvn-url-urlrev url rev))
 	      relative-name file)
 	 (when (fsvn-url-descendant-p src-url url)
-	   (setq relative-name (fsvn-url-relative-name src-url url))
+	   (setq relative-name (fsvn-url-relative-name url src-url))
 	   (setq file (fsvn-expand-file relative-name))
 	   (unless (file-exists-p file)
 	     (unless (file-directory-p (file-name-directory file))

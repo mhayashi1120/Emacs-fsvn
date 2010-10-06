@@ -95,9 +95,10 @@
 	  (define-key map "D" 'fsvn-select-file-do-delete-this)
 	  (define-key map "w" 'fsvn-select-file-copy-filename)
 	  
-	  ;; TODO add
 	  (define-key map "zd" 'fsvn-select-file-delete-this)
 
+	  ;; TODO
+	  ;; (define-key map "za" 'fsvn-select-file-add-this)
 	  ;;TODO commit
 	  (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
 	  (define-key map "=" fsvn-select-file-diff-map)

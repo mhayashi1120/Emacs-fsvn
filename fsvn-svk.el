@@ -103,7 +103,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-depotmap-url ()
   (let ((dir (fsvn-svk-depotmap-directory)))
     (when dir
-      (fsvn-file-name-as-repository dir))))
+      (fsvn-directory-name-as-repository dir))))
 
 (defun fsvn-svk-depotpath-url (depotpath)
   (when (string-match "^//\\(.*\\)" depotpath)

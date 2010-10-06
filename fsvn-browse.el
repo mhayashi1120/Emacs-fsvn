@@ -368,17 +368,6 @@ Keybindings:
      buf-name op-symbol file-list (or confirmer 'y-or-n-p)
      (format prompt (dired-mark-prompt t file-list)))))
 
-(defun fsvn-browse-file-size-text (size)
-  (fsvn-string-lpad
-   (cond
-    ((< size 1000000)
-     (number-to-string size))
-    ((< size 1000000000.0)
-     (format "%0.1fM" (/ size 1000000.0)))
-    (t
-     (format "%0.1fG" (/ size 1000000000.0))))
-   fsvn-browse-ls-size-length))
-
 (defun fsvn-browse-status-draw-status (target=cl)
   ;; todo cl not have path
   (let* ((path (fsvn-xml-status->target.path target=cl))
@@ -568,8 +557,10 @@ STATUS `t' means force to add entry."
 		    (if dirp ?d fsvn-space-char)
 		    (fsvn-browse-ls-revision entry)
 		    (fsvn-browse-ls-author-column entry)
-		    (fsvn-browse-file-size-text (fsvn-safe-xml-lists->list->entry=>size$ entry))
-		    (format-time-string fsvn-generic-datetime-format (fsvn-xml-lists->list->entry=>commit=>date$ entry))
+		    (fsvn-generic-format-file-size 
+		     (fsvn-safe-xml-lists->list->entry=>size$ entry) fsvn-browse-ls-size-length)
+		    (format-time-string fsvn-generic-datetime-format 
+					(fsvn-xml-lists->list->entry=>commit=>date$ entry))
 		    filename))))
 
 (defun fsvn-browse-ls-insert-wc-entry (filename &optional status-entry)
@@ -591,7 +582,7 @@ STATUS `t' means force to add entry."
 		    "."
 		    (fsvn-browse-status-revision status-entry)
 		    (fsvn-browse-status-wc-author-column status-entry)
-		    (fsvn-browse-file-size-text size)
+		    (fsvn-generic-format-file-size size fsvn-browse-ls-size-length)
 		    (format-time-string fsvn-generic-datetime-format time)
 		    filename
 		    ))))
@@ -864,8 +855,8 @@ PATH is each executed path."
     (setq start (point)
 	  end (1- (next-single-property-change (point) 'fsvn-filename nil (line-end-position))))
     (delete-region start end)
-    (fsvn-browse-file-size-text size)
-    (insert (fsvn-browse-file-size-text size) " "
+    (fsvn-generic-format-file-size size fsvn-browse-ls-size-length)
+    (insert (fsvn-generic-format-file-size size fsvn-browse-ls-size-length) " "
 	    (format-time-string fsvn-generic-datetime-format time))
     (set-buffer-modified-p nil)))
 
@@ -1519,35 +1510,31 @@ PATH is each executed path."
     (list (fsvn-struct-browse-file-make :name name :directory-p dirp))))
 
 (defun fsvn-browse-cmd-read-copy-this ()
-  (let ((from (fsvn-browse-cmd-this-urlrev))
-	to args)
-    (setq to (fsvn-read-file-under-versioned "Copy To: " from))
-    (setq args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy))
+  (let* ((from (fsvn-browse-cmd-this-urlrev))
+	 (prompt (format "Copy `%s' -> " (fsvn-url-filename from)))
+	 (to (fsvn-read-file-under-versioned prompt from))
+	 (args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy)))
     (list from to args)))
 
 (defun fsvn-browse-cmd-read-copy-selected ()
-  (let ((files (fsvn-browse-cmd-selected-urlrevs))
-	dir args)
-    (setq dir 
-	  (fsvn-browse-dired-confirm files 'fsvn-browse-copy-selected 'fsvn-read-versioned-directory))
-    (setq args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy))
+  (let* ((files (fsvn-browse-cmd-selected-urlrevs))
+	 (dir (fsvn-browse-dired-confirm files 'fsvn-browse-copy-selected 'fsvn-read-versioned-directory))
+	 (args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy)))
     (list files dir args)))
 
 (defun fsvn-browse-cmd-read-move-this ()
   (fsvn-browse-cmd-wc-only
-   (let ((from (fsvn-browse-cmd-this-wc-file))
-	 to args)
-     (setq to (fsvn-read-file-under-versioned "Move To: " from))
-     (setq args (fsvn-cmd-read-subcommand-args "move" fsvn-default-args-move))
+   (let* ((from (fsvn-browse-cmd-this-wc-file))
+	  (prompt (format "Move `%s' -> " (fsvn-url-filename from)))
+	  (to (fsvn-read-file-under-versioned prompt from))
+	  (args (fsvn-cmd-read-subcommand-args "move" fsvn-default-args-move)))
      (list from to args))))
 
 (defun fsvn-browse-cmd-read-move-selected ()
   (fsvn-browse-cmd-wc-only
-   (let ((files (fsvn-browse-cmd-selected-urls))
-	 dir args)
-     (setq dir 
-	   (fsvn-browse-dired-confirm files 'fsvn-browse-move-selected 'fsvn-read-versioned-directory))
-     (setq args (fsvn-cmd-read-subcommand-args "move" fsvn-default-args-move))
+   (let* ((files (fsvn-browse-cmd-selected-urls))
+	  (dir (fsvn-browse-dired-confirm files 'fsvn-browse-move-selected 'fsvn-read-versioned-directory))
+	  (args (fsvn-cmd-read-subcommand-args "move" fsvn-default-args-move)))
      (list files dir args))))
 
 (defun fsvn-browse-cmd-read-copy-this-in-repository ()
@@ -2258,8 +2245,8 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   "Ediff for current directory."
   (interactive)
   (fsvn-browse-wc-only
-   (let* ((urlrev (fsvn-url-urlrev default-directory "BASE")))
-     (fsvn-ediff-between-urlrevs urlrev default-directory t))))
+   (let* ((urlrev (fsvn-url-urlrev (fsvn-browse-current-directory-url) "BASE")))
+     (fsvn-ediff-between-urlrevs urlrev (fsvn-browse-current-directory-url) t))))
 
 (defun fsvn-browse-diff-local (file)
   "Same as `dired-diff'."
@@ -2343,7 +2330,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
 (defun fsvn-browse-create-patch-path (patch-file)
   "Create PATCH-FILE for current directory."
   (interactive (fsvn-cmd-read-patch-file))
-  (fsvn-browse-create-patch-selected (list default-directory) patch-file))
+  (fsvn-browse-create-patch-selected (list (fsvn-browse-current-directory-url)) patch-file))
 
 (defun fsvn-browse-create-patch-selected (files patch-file)
   "Create PATCH-FILE for for selected FILES."

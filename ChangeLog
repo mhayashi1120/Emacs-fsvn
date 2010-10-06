@@ -1,4 +1,16 @@
+2010-10-07  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: easymenu (message-edit, popup, process-list)
+
+2010-10-06  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: fsvn-command-error promote to error-condition
+
+	* Change: fsvn-file-name-as-repository -> fsvn-directory-name-as-repository
+
 2010-10-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: fsvn-popup-copy-process-sentinel -> fsvn-popup-copy/move-process-sentinel
 
 	* Add: fsvn-log-list-ediff-local bound to `= l' in log-list-mode
 

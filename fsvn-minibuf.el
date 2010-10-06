@@ -139,7 +139,6 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 
 (defvar fsvn-revision-read-history nil)
 (defvar fsvn-completing-revision-map nil)
-(defvar fsvn-completing-revision-urlrev nil)
 
 (unless fsvn-completing-revision-map
   (setq fsvn-completing-revision-map
@@ -156,7 +155,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (setq default (or default "HEAD"))
   (catch 'done
     (let ((value (when initial (fsvn-get-revision-string initial)))
-	  (fsvn-completing-revision-urlrev complete-url)
+	  (fsvn-complete-processing-revision-urlrev complete-url)
 	  completions)
       (while t
 	(setq value
@@ -241,7 +240,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (unwind-protect
       (fsvn-complete-subcommand-expand-arguments
        (read-from-minibuffer (format "Args for `%s' " subcommand)
-			     (mapconcat 'identity default-args " ")
+			     (fsvn-command-args-to-command-line default-args)
 			     fsvn-read-subcommand-args-map))
     (setq fsvn-complete-completion-saved-configuration nil)
     (setq fsvn-complete-reading-subcommand nil)))
@@ -255,6 +254,17 @@ The value of DEFAULT is not a number, allow to enter a nil value."
   (setq fsvn-complete-reading-subcommand
 	(fsvn-complete-reading-subcommand fsvn-svnadmin-subcommand-arguments-alist subcommand nil))
   (apply 'fsvn-read-subcommand-args subcommand nil default-args))
+
+(defun fsvn-command-args-to-command-line (args)
+  (mapconcat 
+   (lambda (arg)
+     (cond
+      ((string-match "[ \t]" arg)
+       (concat "\"" arg "\""))
+      (t
+       arg)))
+   default-args
+   " "))
 
 
 ;;
@@ -317,19 +327,20 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 (defun fsvn-complete-non-word-class ()
   (concat "^" fsvn-complete-word-class))
 
+(defvar fsvn-complete-processing-revision-urlrev nil)
+
 (defun fsvn-complete-revision-action ()
   (interactive)
   (let ((value (fsvn-complete-revision-current-value)))
     (cond
-     ((null value)
-      (fsvn-complete-revision-symbol ""))
-     ((and fsvn-completing-revision-urlrev 
-	   (string= "" value) 
-	   (eq last-command 'fsvn-complete-revision-action))
-      (let (urlrev)
-	(setq urlrev (fsvn-electric-select-log fsvn-completing-revision-urlrev))
-	(when urlrev
-	  (insert (fsvn-get-revision-string (fsvn-urlrev-revision urlrev))))))
+     ((or (null value) (string= "" value))
+      (if (or (null fsvn-complete-processing-revision-urlrev)
+	      (not (eq last-command 'fsvn-complete-revision-action)))
+	  (fsvn-complete-revision-symbol "")
+	(let (urlrev)
+	  (setq urlrev (fsvn-electric-select-log fsvn-complete-processing-revision-urlrev))
+	  (when urlrev
+	    (insert (fsvn-get-revision-string (fsvn-urlrev-revision urlrev)))))))
      ((string-match "^[0-9]+$" value)
       ;; do nothing
       (fsvn-complete-completion-window-delete)
@@ -340,7 +351,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
       (fsvn-display-momentary-message " [Date context]"))
      (t
       (fsvn-complete-revision-symbol value)))
-    (when (and fsvn-completing-revision-urlrev 
+    (when (and fsvn-complete-processing-revision-urlrev 
 	       (string= (fsvn-complete-current-value) ""))
       (fsvn-display-momentary-message " [Type again]"))))
 

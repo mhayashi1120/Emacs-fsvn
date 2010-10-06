@@ -622,7 +622,7 @@ Use %% to put a single % into the output.
 
 
 (defun fsvn-display-momentary-message (m)
-  "Show temporary message in minibuffer.
+  "Show temporary message to current point.
 referenced mew-complete.el"
   (let ((wait-msec (max (* (length m) 0.05) 0.5))
 	(savemodified (buffer-modified-p))
@@ -674,6 +674,10 @@ referenced mew-complete.el"
 
 
 
+(put 'fsvn-command-error 'error-conditions '(fsvn-command-error error))
+(put 'fsvn-command-error 'error-message "Executing error.")
+
+
 
 (put 'fsvn-loop 'lisp-indent-function 1)
 (put 'fsvn-defstruct 'lisp-indent-function 1)
