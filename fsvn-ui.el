@@ -253,21 +253,26 @@ This is what the do-commands look for, and what the mark-commands store.")
 	(let ((map (make-keymap)))
 	  (fillarray (car (cdr map)) 'undefined)
 
-	  (define-key map "\C-c" nil)
-	  (define-key map "\e" nil)
-
-	  (define-key map "\C-c\C-c" 'fsvn-electric-line-select-quit)
-	  (define-key map "\C-]" 'fsvn-electric-line-select-quit)
-	  (define-key map "q" 'fsvn-electric-line-select-quit)
 	  (define-key map " " 'fsvn-electric-line-select-select)
+	  (define-key map "*" 'fsvn-electric-line-mark)
+	  (define-key map "?" 'Helper-describe-bindings)
+	  (define-key map "U" 'fsvn-electric-line-unmark-all)
+	  (define-key map "\C-]" 'fsvn-electric-line-select-quit)
+	  (define-key map "\C-c" nil)
+	  (define-key map "\C-c\C-c" 'fsvn-electric-line-select-quit)
 	  (define-key map "\C-m" 'fsvn-electric-line-select-select)
 	  (define-key map "\C-n" 'fsvn-electric-next-line)
 	  (define-key map "\C-p" 'fsvn-electric-previous-line)
 	  (define-key map "\C-u" 'universal-argument)
+	  (define-key map "\C-v" 'fsvn-electric-scroll-up)
+	  (define-key map "\e" nil)
+	  (define-key map "\ev" 'fsvn-electric-scroll-down)
+	  (define-key map "m" 'fsvn-electric-line-mark)
 	  (define-key map "n" 'fsvn-electric-next-line)
 	  (define-key map "p" 'fsvn-electric-previous-line)
-	  (define-key map "\C-v" 'fsvn-electric-scroll-up)
-	  (define-key map "\ev" 'fsvn-electric-scroll-down)
+	  (define-key map "q" 'fsvn-electric-line-select-quit)
+	  (define-key map "u" 'fsvn-electric-line-unmark)
+
 	  map)))
 
 (defvar fsvn-electric-line-alist nil)
@@ -275,6 +280,8 @@ This is what the do-commands look for, and what the mark-commands store.")
 (defvar fsvn-electric-end-point nil)
 (defvar fsvn-electric-done-function nil)
 (defvar fsvn-electric-next-data-function nil)
+(defvar fsvn-electric-mark-function nil)
+(defvar fsvn-electric-unmark-function nil)
 
 (defconst fsvn-electric-line-select-buffer-local-variables
   '(
@@ -282,6 +289,8 @@ This is what the do-commands look for, and what the mark-commands store.")
     (fsvn-electric-start-point)
     (fsvn-electric-end-point)
     (fsvn-electric-done-function)
+    (fsvn-electric-mark-function)
+    (fsvn-electric-unmark-function)
     (fsvn-electric-next-data-function)
     (truncate-lines)
     ))
@@ -294,11 +303,13 @@ This is what the do-commands look for, and what the mark-commands store.")
 (define-minor-mode fsvn-electric-line-select-mode
   "
 Keybindings:
-\\{fsvn-electric-line-select-mode-map"
+\\{fsvn-electric-line-select-mode-map}
+
+"
   nil " (Electric)" fsvn-electric-line-select-mode-map
   (fsvn-make-buffer-variables-internal fsvn-electric-line-select-buffer-local-variables))
 
-(defun fsvn-electric-line-select (buffer)
+(defun fsvn-electric-line-select (buffer prompt)
   (let (select message-log-max)
     (save-window-excursion
       (Electric-pop-up-window buffer)
@@ -308,7 +319,7 @@ Keybindings:
 	    (fsvn-electric-line-select-buffer-update-highlight)
 	    (setq select
 		  (catch 'fsvn-electric-buffer-menu-select
-		    (message "->")
+		    (message (or prompt "->"))
 		    (when (eq (setq unread-command-events (list (read-event))) ?\s)
 		      (setq unread-command-events nil)
 		      (throw 'fsvn-electric-buffer-menu-select nil))
@@ -326,11 +337,11 @@ Keybindings:
 				     first
 				   start-point))
 		      (Electric-command-loop 'fsvn-electric-buffer-menu-select
-					     nil
+					     prompt
 					     t
 					     'fsvn-electric-line-select-buffer-menu-looper
 					     (cons first-form last-form))))))
-	(message "")))
+	(message nil)))
     select))
 
 (defun fsvn-electric-line-select-buffer-menu-looper (state condition)
@@ -379,6 +390,36 @@ Keybindings:
   (interactive)
   (throw 'fsvn-electric-buffer-menu-select (funcall fsvn-electric-done-function)))
 
+(defun fsvn-electric-line-mark ()
+  (interactive)
+  (if (null fsvn-electric-mark-function)
+      (undefined)
+    (funcall fsvn-electric-mark-function)
+    (fsvn-electric-line-update-fontify)
+    (fsvn-electric-next-line)))
+
+(defun fsvn-electric-line-unmark ()
+  (interactive)
+  (if (null fsvn-electric-unmark-function)
+      (undefined)
+    (funcall fsvn-electric-unmark-function)
+    (fsvn-electric-line-update-fontify)
+    (fsvn-electric-next-line)))
+
+(defun fsvn-electric-line-unmark-all ()
+  (interactive)
+  (if (null fsvn-electric-unmark-function)
+      (undefined)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(funcall fsvn-electric-unmark-function)
+	(fsvn-electric-next-line)))
+    (font-lock-fontify-buffer)))
+
+(defun fsvn-electric-line-update-fontify ()
+  (font-lock-fontify-region (line-beginning-position) (line-end-position)))
+
 (defmacro fsvn-electric-scroll (scroller error next-pos)
   `(condition-case nil
        (prog1
@@ -419,34 +460,168 @@ Keybindings:
 
 (defconst fsvn-electric-select-file-list-buffer-name " *Fsvn Electric* ")
 
-(defun fsvn-electric-select-file (base-directory files)
-  (let ((buffer (get-buffer-create fsvn-electric-select-file-list-buffer-name)))
-    (with-current-buffer buffer
-      (set (make-local-variable 'font-lock-defaults)
-	   '(dired-font-lock-keywords t nil nil beginning-of-line))
-      (let ((ls-lisp-filesize-d-fmt "%10d")
-	    ls-lisp-use-insert-directory-program buffer-read-only)
-	(erase-buffer)
-	(fsvn-electric-line-select-mode 1)
-	(setq default-directory (file-name-as-directory base-directory))
-	(setq fsvn-electric-done-function 'fsvn-electric-select-file-done)
-	(mapc
-	 (lambda (file)
-	   (insert "  ")
-	   (insert-directory file "-ald"))
-	 files)
-	(setq fsvn-electric-line-alist (mapcar (lambda (f) (cons f nil)) files)))
-      (font-lock-mode 1)
-      (font-lock-fontify-buffer)
-      (run-mode-hooks 'fsvn-electric-line-select-mode-hook))
-    (fsvn-electric-line-select buffer)))
+(defvar fsvn-electric-select-file-font-lock-keywords
+  (list
+   (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
+	 '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-marked-face)))
+   (list "^..d"
+	 '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-directory-face)))
+   (list "^..l"
+	 '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-symlink-face)))
+   ))
+
+
+(defun fsvn-electric-select-files (base-directory alist &optional prompt)
+  "ALIST is displaying information about files.
+
+Elements of the alist are:
+0. File name.
+1. Mark or not.
+2. Message after insert file name.
+3. Rest of data.
+"
+  (let ((specialize-prompt
+	 (concat prompt
+		 (substitute-command-keys (concat
+					   "\\<fsvn-electric-line-select-mode-map>"
+					   "Type \\[fsvn-electric-line-mark] to mark, "
+					   "\\[fsvn-electric-line-unmark] to unmark, "
+					   "\\[fsvn-electric-line-select-select] to finish.")))))
+    (fsvn-electric-fs-prepare-list base-directory specialize-prompt
+      (fsvn-electric-select-files-insert base-directory alist)
+      (setq fsvn-electric-done-function 'fsvn-electric-select-files-done)
+      (setq fsvn-electric-mark-function 'fsvn-electric-select-files-mark)
+      (setq fsvn-electric-unmark-function 'fsvn-electric-select-files-unmark)
+      (setq fsvn-electric-line-alist alist))))
+
+(defun fsvn-electric-select-file (base-directory files &optional prompt)
+  (let ((specialize-prompt
+	 (concat prompt
+		 (substitute-command-keys (concat
+					   "\\<fsvn-electric-line-select-mode-map>"
+					   "Type \\[fsvn-electric-line-select-select] to finish.")))))
+    (fsvn-electric-fs-prepare-list base-directory specialize-prompt
+      (fsvn-electric-select-file-insert base-directory files)
+      (setq fsvn-electric-done-function 'fsvn-electric-select-file-done)
+      (setq fsvn-electric-line-alist
+	    (mapcar (lambda (f) (cons f nil)) files)))))
+
+(defun fsvn-electric-select-pre-match ()
+  (let ((points (fsvn-points-of-filename)))
+    (when points
+      (goto-char (car points))
+      (cdr points))))
+
+(defun fsvn-electric-select-file-insert (base-directory files)
+  (let (buffer-read-only)
+    (mapc
+     (lambda (file)
+       (fsvn-electric-select-file-insert-line base-directory file))
+     files)))
+
+(defmacro fsvn-electric-fs-prepare-list (base-directory prompt &rest form)
+  `(let ((buffer (get-buffer-create fsvn-electric-select-file-list-buffer-name)))
+     (with-current-buffer buffer
+       (set (make-local-variable 'font-lock-defaults)
+	    '(fsvn-electric-select-file-font-lock-keywords t nil nil beginning-of-line))
+       (let (buffer-read-only)
+	 (erase-buffer)
+	 (fsvn-electric-line-select-mode 1)
+	 (setq default-directory (file-name-as-directory ,base-directory))
+	 ,@form)
+       (font-lock-mode 1)
+       (font-lock-fontify-buffer)
+       (run-mode-hooks 'fsvn-electric-line-select-mode-hook))
+     (fsvn-electric-line-select buffer ,prompt)))
+
+(defun fsvn-electric-select-file-current-name ()
+  (let ((filename (fsvn-current-filename)))
+    (fsvn-expand-file filename)))
 
 (defun fsvn-electric-select-file-done ()
-  (let (p1 p2 filename)
-    (setq p1 (dired-move-to-filename))
-    (setq p2 (dired-move-to-end-of-filename))
-    (setq filename (buffer-substring-no-properties p1 p2))
-    (fsvn-expand-file filename)))
+  (fsvn-electric-select-file-current-name))
+
+(defun fsvn-electric-select-file-insert-line (base-directory file)
+  (insert (fsvn-electric-select-file-format base-directory file))
+  (insert "\n"))
+
+(defun fsvn-electric-select-files-insert (base-directory file-alist)
+  (let (buffer-read-only)
+    (mapc
+     (lambda (file)
+       (fsvn-electric-select-files-insert-line base-directory file))
+     file-alist)))
+
+(defun fsvn-electric-select-file-format (base-directory file)
+  (let ((attr (file-attributes file)))
+    (format "  %s %s %s %s"
+	    (nth 8 attr)
+	    (fsvn-generic-format-file-size (nth 7 attr))
+	    (format-time-string fsvn-generic-datetime-format (nth 5 attr))
+	    (propertize (fsvn-url-relative-name file base-directory) 'fsvn-filename t))))
+
+(defun fsvn-electric-select-files-insert-line (base-directory file-info)
+  (let* ((file (nth 0 file-info))
+	 (mark (nth 1 file-info))
+	 (msg (nth 2 file-info)))
+    (insert (fsvn-electric-select-file-format base-directory file))
+    (when msg
+      (insert " : ")
+      (insert msg))
+    (when mark
+      (fsvn-electric-select-files-mark))
+    (insert "\n")))
+
+(defun fsvn-electric-select-files-switch-mark (mark-char)
+  (save-excursion
+    (let ((inhibit-read-only t)
+	  buffer-read-only)
+      (when (fsvn-move-to-filename)
+	(forward-line 0)
+	(delete-char 1)
+	(insert mark-char)))))
+
+(defun fsvn-electric-select-files-done ()
+  (let ((inhibit-quit) ;; for safe
+	(regexp (concat "^" (char-to-string fsvn-mark-mark-char)))
+	name tmp ret)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(when (looking-at regexp)
+	  (when (setq tmp (fsvn-electric-select-files-current-item))
+	    (setq ret (cons tmp ret))))
+	(forward-line 1)))
+    (cond
+     (ret
+      (nreverse ret))
+     ((setq tmp (fsvn-electric-select-files-current-item))
+      (list tmp))
+     (t
+      nil))))
+
+(defun fsvn-electric-select-files-current-item ()
+  (let ((name (fsvn-electric-select-file-current-name)))
+    (assoc name fsvn-electric-line-alist)))
+
+(defun fsvn-electric-select-files-mark ()
+  (fsvn-electric-select-files-switch-mark fsvn-mark-mark-char))
+
+(defun fsvn-electric-select-files-unmark ()
+  (fsvn-electric-select-files-switch-mark ?\s))
+
+
+
+(defun fsvn-generic-format-file-size (size &optional length)
+  (fsvn-string-lpad
+   (cond
+    ((< size 1000000)
+     (number-to-string size))
+    ((< size 1000000000.0)
+     (format "%0.1fM" (/ size 1000000.0)))
+    (t
+     (format "%0.1fG" (/ size 1000000000.0))))
+   (or length 10)))
 
 
 
@@ -570,6 +745,8 @@ static char * data[] = {
      ,var))
 
 
+
+(put 'fsvn-electric-fs-prepare-list 'lisp-indent-function 2)
 
 (provide 'fsvn-ui)
 

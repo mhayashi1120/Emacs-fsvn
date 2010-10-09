@@ -374,48 +374,6 @@
 
 
 
-;; (defadvice call-process 
-;;   (before mw32cmp-call-process-argument-editing 
-;; 	  (program &optional infile buffer display &rest args) disable)
-;;   (let ((ret (mw32cmp-argument-editing program args)))
-;;     (setq program (car ret)
-;; 	  args (cdr ret))))
-
-;; (defadvice call-process-region
-;;   (before mw32cmp-call-process-region-argument-editing 
-;; 	  (start end program &optional delete buffer display &rest args) disable)
-;;   (let ((ret (mw32cmp-argument-editing program args)))
-;;     (setq program (car ret)
-;; 	  args (cdr ret))))
-
-;; (defadvice start-process 
-;;   (before mw32cmp-start-process-argument-editing 
-;; 	  (name buffer program &rest program-args) disable)
-;;   (let ((ret (mw32cmp-argument-editing program program-args)))
-;;     (setq program (car ret)
-;; 	  program-args (cdr ret))))
-
-;; (defun mw32cmp-argument-editing (program raw-args)
-;;   (let (command edited editor args
-;; 		edited-command edited-arg)
-;;     (if (setq command (executable-find program))
-;; 	(progn
-;; 	  (setq editor (find-process-argument-editing-function command))
-;; 	  (when editor
-;; 	    (setq edited (funcall editor (cons command raw-args)))
-;; 	    (if (consp edited)
-;; 		(progn
-;; 		  (setq edited-command (car edited)
-;; 			edited-arg  (cdr edited)))
-;; 	      ;; FIXME if command contains space
-;; 	      (when (string-match "^[ \t]*\"?\\([^ \t\"]+\\)\"?\\(?:[ \t]+\\(.*\\)\\)?" edited)
-;; 		(setq edited-command (match-string 1 edited)
-;; 		      edited-arg  (match-string 2 edited)))))
-;; 	  (cons edited-command (if (listp edited-arg) edited-arg (list edited-arg))))
-;;       (cons program raw-args))))
-
-;; (setq default-process-argument-editing-function 'identity)
-
 (provide 'mw32cmp)
 
 ;;; mw32cmp.el ends here

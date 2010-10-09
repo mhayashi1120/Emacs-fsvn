@@ -210,6 +210,22 @@ Keybindings:
 
 
 
+(defconst fsvn-message-edit-mode-menu-spec
+  '("fsvn"
+    ["Restore Window" fsvn-restore-default-window-setting t]
+    ["Next Message in History" fsvn-message-edit-next-message t]
+    ["Previous Message in History" fsvn-message-edit-previous-message t]
+    ["Search Message Forward" fsvn-message-edit-re-search-message-forward t]
+    ["Search Message Backward" fsvn-message-edit-re-search-message-backward t]
+    ))
+
+(easy-menu-define fsvn-message-edit-mode-menu
+  fsvn-message-edit-mode-map
+  "Menu used in Fsvn Log Message Edit mode."
+  fsvn-message-edit-mode-menu-spec)
+
+
+
 (provide 'fsvn-msgedit)
 
 ;;; fsvn-msgedit.el ends here

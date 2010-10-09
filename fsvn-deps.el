@@ -23,6 +23,10 @@
 
 (defconst fsvn-svn-status-length 7)
 
+;; FIXME space started filename. and fsvn-svn-status-length problem
+(defconst fsvn-svn-status-versioned-regexp "^\\([^?][A-Z+!?~ ]\\{5,6\\}\\) \\([^ ].+\\)\n")
+(defconst fsvn-svn-status-unversioned-regexp "^\\([?][ ]\\{5,6\\}\\) \\([^ ].+\\)\n")
+
 
 
 (defvar fsvn-svn-common-coding-system 'utf-8
@@ -58,6 +62,10 @@ Please call `fsvn-initialize-loading' function.
 
 (defvar fsvn-svn-command-internal nil)
 (defvar fsvn-svnadmin-command-internal nil)
+
+;; svnsync is optional implements.
+;; So won't prepare custom variable.
+(defvar fsvn-svnsync-command-internal nil)
 
 (defmacro fsvn-deps-process-environment (&rest form)
   `(let ((process-environment (copy-sequence process-environment)))
@@ -238,7 +246,9 @@ Please call `fsvn-initialize-loading' function.
     (list fsvn-svnadmin-command
 	  'fsvn-svnadmin-subcommand-completion-alist
 	  'fsvn-svnadmin-subcommand-arguments-alist
-	  (concat "svnadmin-" fsvn-svn-version))))) ;; version is guessed as `svn'
+	  (concat "svnadmin-" fsvn-svn-version)))) ;; version is guessed as `svn'
+  (setq fsvn-svnsync-command-internal
+	(fsvn-svn-command-sibling-find "svnsync")))
 
 
 (defun fsvn-subcommand-argument-list (command subcommand)
@@ -351,6 +361,10 @@ Please call `fsvn-initialize-loading' function.
 (defun fsvn-svn-subcommand-list-of (argument)
   "Return subcommand list that accept ARGUMENT. "
   (fsvn-subcommand-list-of fsvn-svn-subcommand-arguments-alist argument))
+
+(defun fsvn-svn-command-sibling-find (command)
+  (let ((dir (fsvn-file-name-directory (executable-find fsvn-svn-command-internal))))
+    (executable-find (fsvn-expand-file command dir))))
 
 
 ;; revision definition

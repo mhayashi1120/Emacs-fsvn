@@ -95,9 +95,10 @@
 	  (define-key map "D" 'fsvn-select-file-do-delete-this)
 	  (define-key map "w" 'fsvn-select-file-copy-filename)
 	  
-	  ;; TODO add
 	  (define-key map "zd" 'fsvn-select-file-delete-this)
 
+	  ;; TODO
+	  ;; (define-key map "za" 'fsvn-select-file-add-this)
 	  ;;TODO commit
 	  (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
 	  (define-key map "=" fsvn-select-file-diff-map)
@@ -447,9 +448,8 @@ Keybindings:
 (defun fsvn-select-file-ediff-base (file)
   (interactive (fsvn-select-file-command-file))
   (let* ((urlrev (fsvn-url-urlrev file "BASE"))
-	 (tmpfile (fsvn-ediff-make-temp-file urlrev)))
-    (when (fsvn-save-file urlrev tmpfile t)
-      (fsvn-ediff-files tmpfile file))))
+	 (directory-p (file-directory-p file)))
+    (fsvn-ediff-between-urlrevs urlrev file directory-p)))
 
 (defun fsvn-select-file-mark ()
   (interactive)

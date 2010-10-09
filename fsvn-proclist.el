@@ -433,8 +433,35 @@ Keybindings:
 
 
 
-(put 'fsvn-process-list-retrieve-mark 'lisp-indent-function 1)
+(defconst fsvn-process-list-mode-menu-spec
+  '("fsvn"
+    ("General"
+     ["Next" fsvn-process-list-next-process t]
+     ["Prev" fsvn-process-list-previous-process t]
+     ["Quit" fsvn-process-list-quit t]
+     )
+    ("Mark"
+     ["Execute Delete Mark" fsvn-process-list-mark-execute t]
+     ["Unmark" fsvn-process-list-unmark t]
+     ["Unmark All" fsvn-process-list-unmark-all t]
+     ["Put Delete Mark" fsvn-process-list-put-delete t]
+     ["Put Mark" fsvn-process-list-put-mark t]
+     )
+    ("Misc"
+     ["Send Password to Marked" fsvn-process-list-send-password-selected t]
+     ["Show Process Buffer" fsvn-process-list-show-buffer t]
+     ["Toggle Visibility All Processes" fsvn-process-list-toggle-show-all t]
+     )
+    ))
 
+(easy-menu-define fsvn-process-list-mode-menu
+  fsvn-process-list-mode-map
+  "Menu used in Fsvn Processes mode."
+  fsvn-process-list-mode-menu-spec)
+
+
+
+(put 'fsvn-process-list-retrieve-mark 'lisp-indent-function 1)
 
 (provide 'fsvn-proclist)
 

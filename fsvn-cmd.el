@@ -89,6 +89,10 @@
       (when (= (apply 'fsvn-call-command "list" t args) 0)
 	(fsvn-xml-parse-lists-entries)))))
 
+(defun fsvn-get-uuid (url)
+  (let ((info (fsvn-get-info-entry url)))
+    (fsvn-xml-info->entry=>repository=>uuid$ info)))
+
 (defun fsvn-get-root (url)
   (let ((info (fsvn-get-info-entry url)))
     (fsvn-xml-info->entry=>repository=>root$ info)))
@@ -348,6 +352,17 @@ FILES accept a file as string."
       (fsvn-set-propset file propname "*")
     (fsvn-set-propdel file propname)))
 
+(defun fsvn-update-directory (dir &optional revision)
+  (let ((default-directory (file-name-as-directory dir)))
+    (with-temp-buffer
+      (fsvn-call-command "update" (current-buffer)
+			 (when revision 
+			   (list "--revision" revision)))
+      (goto-char (point-max))
+      (unless (re-search-backward "^At revision \\([0-9]+\\)." nil t)
+	(error "Not found"))
+      (string-to-number (match-string 1)))))
+
 
 
 (defcustom fsvn-import-with-log-message-format
@@ -436,57 +451,71 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
     (message "Getting log...")
     (setq log-entries (fsvn-get-file-logs src-url rev-range))
     (message "Creating temporary working copy...")
-    (if src-directoryp
-	(progn
-	  (setq dest-wc (fsvn-get-temporary-wc dest-url t))
-	  (setq merging-file dest-wc))
-      (setq dest-wc (fsvn-get-temporary-wc (fsvn-url-dirname dest-url)))
-      (setq merging-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc)))
+    (cond
+     (src-directoryp
+      (setq dest-wc 
+	    (if (fsvn-url-local-p dest-url) 
+		dest-url
+	      (fsvn-get-temporary-wc dest-url t)))
+      (setq merging-file dest-wc))
+     (t
+      (setq dest-wc 
+	    (if (fsvn-url-local-p dest-url)
+		dest-url
+	      (fsvn-get-temporary-wc (fsvn-url-dirname dest-url))))
+      (setq merging-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc))))
     (setq buffer (fsvn-browse-wc-noselect dest-wc))
     (fsvn-buffer-popup-as-information popup-buffer)
-    (catch 'conflicted
-      (unwind-protect
-	  (progn
-	    (set-buffer buffer)
-	    (mapc
-	     (lambda (entry)
-	       (let* ((rev (fsvn-xml-log->logentry.revision entry))
-		      (path (fsvn-logs-chain-find log-entries rev src-path))
-		      (url (fsvn-expand-url path src-root))
-		      (urlrev (fsvn-url-urlrev url rev))
-		      (log-message (fsvn-import-with-log-formatted-message url entry))
-		      message status-entries add-files)
-		 (setq message (fsvn-merged-import-create-log-message log-message))
-		 (message "Merging %s at %d..." url rev)
-		 (cond
-		  (src-directoryp
-		   (setq add-files (fsvn-merged-import-export-non-tree-files src-root src-url entry))
-		   (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "-c" rev urlrev merging-file))
-		  ((file-exists-p merging-file)
-		   (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "-c" rev urlrev merging-file))
-		  (t
-		   (fsvn-call-command-discard "export" "--force" urlrev merging-file)
-		   (fsvn-call-command-display "add" popup-buffer merging-file)))
-		 (when (fsvn-status-conflict-exists-p merging-file)
-		   (setq conflict-urlrev urlrev)
-		   (throw 'conflicted t))
-		 (mapc
-		  (lambda (file)
-		    (fsvn-call-command-display "add" popup-buffer file))
-		  add-files)
-		 (fsvn-call-command-display "commit" 
-					    popup-buffer
-					    (if message 
-						(list "--file" message)
-					      (list "--message" "")))
-		 (fsvn-call-command-discard "update")))
-	     log-entries)
-	    (message "Successfully finished merging."))
-	(if conflict-urlrev
-	    (progn
-	      (switch-to-buffer buffer)
-	      (error "Conflicted when merging %s. Resolve commit it" conflict-urlrev))
-	  (kill-buffer buffer))))))
+    (setq conflict-urlrev
+	  (catch 'conflicted
+	    (unwind-protect
+		(with-current-buffer buffer
+		  (fsvn-merged-import-with-log-entries 
+		   log-entries src-root 
+		   src-url src-path src-directoryp merging-file popup-buffer)
+		  (message "Successfully finished merging rev.%s to rev.%s." (car rev-range) (cdr rev-range))
+		  nil)
+	      (kill-buffer buffer))))
+    (when conflict-urlrev
+      (setq buffer (fsvn-browse-wc-noselect dest-wc))
+      (switch-to-buffer buffer)
+      (error "Conflicted when merging %s. Resolve commit it" conflict-urlrev))))
+
+(defun fsvn-merged-import-with-log-entries (log-entries src-root src-url src-path src-directoryp merging-file popup-buffer)
+  (mapc
+   (lambda (entry)
+     (let* ((rev (fsvn-xml-log->logentry.revision entry))
+	    (path (fsvn-logs-chain-find log-entries rev src-path))
+	    (url (fsvn-expand-url path src-root))
+	    (urlrev (fsvn-url-urlrev url rev))
+	    (log-message (fsvn-import-with-log-formatted-message url entry))
+	    message status-entries add-files)
+       (setq message (fsvn-merged-import-create-log-message log-message))
+       (message "Merging %s at %d..." url rev)
+       (cond
+	(src-directoryp
+	 (setq add-files (fsvn-merged-import-export-non-tree-files src-root src-url entry))
+	 (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
+	((file-exists-p merging-file)
+	 (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
+	(t
+	 (fsvn-call-command-discard "export" "--force" urlrev merging-file)
+	 (fsvn-call-command-display "add" popup-buffer merging-file)))
+       (when (fsvn-status-conflict-exists-p merging-file)
+	 (throw 'conflicted urlrev))
+       (mapc
+	(lambda (file)
+	  (fsvn-call-command-display "add" popup-buffer file))
+	add-files)
+       (fsvn-call-command-display "commit" 
+				  popup-buffer
+				  (if message 
+				      (list "--file" message)
+				    (list "--message" "")))
+       (fsvn-call-command-discard "update")
+       ;; redisplay buffer
+       (revert-buffer nil t)))
+     log-entries))
 
 (defun fsvn-merged-import-export-non-tree-files (src-root src-url entry)
   (let ((rev (fsvn-xml-log->logentry.revision entry))
@@ -498,7 +527,7 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 	      (urlrev (fsvn-url-urlrev url rev))
 	      relative-name file)
 	 (when (fsvn-url-descendant-p src-url url)
-	   (setq relative-name (fsvn-url-relative-name src-url url))
+	   (setq relative-name (fsvn-url-relative-name url src-url))
 	   (setq file (fsvn-expand-file relative-name))
 	   (unless (file-exists-p file)
 	     (unless (file-directory-p (file-name-directory file))
@@ -540,6 +569,15 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 	   (throw 'conflicted t)))
        status-entries)
       nil)))
+
+(defun fsvn-status-unversioned-files (directory)
+  (with-temp-buffer
+    (let (ret)
+      (fsvn-call-command "status" (current-buffer) directory)
+      (goto-char (point-min))
+      (while (re-search-forward fsvn-svn-status-unversioned-regexp nil t)
+	(setq ret (cons (fsvn-expand-file (match-string 2)) ret)))
+      (nreverse ret))))
 
 
 
@@ -717,7 +755,7 @@ Argument FILES ."
 	  file status)
       (insert event)
       (goto-char start)
-      (while (re-search-forward "^\\([^?][A-Z+!?~ ]\\{5,6\\}\\) \\([^ ].+\\)\n" nil t)
+      (while (re-search-forward fsvn-svn-status-versioned-regexp nil t)
 	(setq status (match-string 1)
 	      file (match-string 2))
 	(setq fsvn-recursive-status-parsed 

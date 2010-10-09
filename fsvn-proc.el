@@ -241,6 +241,12 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
 	    (funcall func)))))
     ret))
 
+(defun fsvn-async-invoke (strategies)
+  (eval
+   (append
+    (list 'fsvn-async-let ())
+    strategies)))
+
 (defmacro fsvn-process-event-handler (proc event &rest form)
   `(with-current-buffer (process-buffer ,proc)
      (save-excursion

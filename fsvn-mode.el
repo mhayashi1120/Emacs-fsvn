@@ -277,22 +277,26 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (defun fsvn-current-filename ()
   "File name of current point.  only filename not include path."
-  (save-excursion
-    (when (fsvn-move-to-filename)
-      (buffer-substring-no-properties
-       (point)
-       (line-end-position)))))
+  (let ((points (fsvn-points-of-filename)))
+    (when points
+      (buffer-substring-no-properties (car points) (cdr points)))))
 
 (defun fsvn-move-to-filename ()
   "Move to filename."
-  (let ((eol (line-end-position)))
-    (beginning-of-line)
-    (let ((change (next-single-property-change (point) 'fsvn-filename nil eol)))
-      (cond
-       ((and change (< change eol))
-	(goto-char change))
-       ((re-search-forward directory-listing-before-filename-regexp eol t)
-	(goto-char (match-end 0)))))))
+  (forward-line 0)
+  (let ((points (fsvn-points-of-filename)))
+    (when points
+      (goto-char (car points)))))
+
+(defun fsvn-points-of-filename ()
+  (let* ((bol (line-beginning-position))
+	 (eol (line-end-position))
+	 (start (next-single-property-change bol 'fsvn-filename nil eol))
+	 end)
+    (when start
+      (setq end (next-single-property-change start 'fsvn-filename nil eol))
+      (when (and end (< start end))
+	(cons start end)))))
 
 
 

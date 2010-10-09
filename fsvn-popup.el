@@ -97,6 +97,7 @@ Keybindings:
 ;; * fsvn-popup-result-mode interactive commands
 
 (defun fsvn-popup-result-send-string ()
+  "Insert newline and send string if at end-of-buffer."
   (interactive)
   (insert "\n")
   (when (eobp)
@@ -129,10 +130,13 @@ Keybindings:
 
 
 
+(defvar fsvn-popup-start-process-buffer nil
+  "As external arguments. Sequential command execute.")
+
 (defun fsvn-popup-start-process (subcommand &rest args)
   "SUBCOMMAND svn command.
 ARGS is svn subcommand args."
-  (let ((buffer (fsvn-popup-result-create-buffer))
+  (let ((buffer (or fsvn-popup-start-process-buffer (fsvn-popup-result-create-buffer)))
 	proc)
     (setq proc (fsvn-start-command-display subcommand buffer args))
     (set-process-sentinel proc 'fsvn-popup-general-process-sentinel)
@@ -188,7 +192,7 @@ Argument DESTINATION target directory.
 Optional argument ARGS svn command arguments."
   (let (proc)
     (setq proc (fsvn-popup-start-process command args files destination))
-    (fsvn-process-add-sentinel proc 'fsvn-popup-copy-process-sentinel)
+    (fsvn-process-add-sentinel proc 'fsvn-popup-copy/move-process-sentinel)
     proc))
 
 (defun fsvn-popup-process-filter-in-buffer (proc event)
@@ -208,10 +212,24 @@ Optional argument ARGS svn command arguments."
     (when (local-variable-p 'fsvn-popup-result-process)
       (setq fsvn-popup-result-process nil))))
 
-(defun fsvn-popup-copy-process-sentinel (proc event)
+(defun fsvn-popup-copy/move-process-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (fsvn-parse-result-cmd-add (current-buffer))
     (fsvn-parse-result-cmd-delete (current-buffer))))
+
+
+
+(defconst fsvn-popup-result-mode-menu-spec
+  '("fsvn"
+     ["Kill running process" fsvn-popup-result-kill-process t]
+     ["Send password" fsvn-popup-result-send-password t]
+     ["Send input string to process" fsvn-popup-result-send-string t]
+    ))
+
+(easy-menu-define fsvn-popup-result-mode-menu
+  fsvn-popup-result-mode-map
+  "Menu used in Fsvn Result mode."
+  fsvn-popup-result-mode-menu-spec)
 
 
 
