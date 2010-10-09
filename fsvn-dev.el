@@ -36,8 +36,17 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   :group 'fsvn
   :type 'integer)
 
+(defun fsvn-browse-file-name-parent-directory (file max-level)
+  (let ((tmp (fsvn-file-name-directory (directory-file-name file)))
+	(i 0))
+    (while (and (fsvn-directory-under-versioned-p (fsvn-file-name-directory tmp))
+		(< i max-level))
+      (setq tmp (fsvn-file-name-directory tmp))
+      (setq i (1+ i)))
+    tmp))
+
 (defun fsvn-browse-search-guessed-moved-files (file file-versioned-p)
-  (let ((dir (fsvn-file-name-parent-directory file fsvn-browse-guessed-moved-parent-threshold)))
+  (let ((dir (fsvn-browse-file-name-parent-directory file fsvn-browse-guessed-moved-parent-threshold)))
     (fsvn-mapitem
      (lambda (f)
        (let ((versioned (fsvn-meta-file-registered-p f)))
@@ -50,10 +59,10 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (fsvn-search-same-name-files dir file (+ fsvn-browse-guessed-moved-parent-threshold 2)))))
 
 ;;TODO change electric-select-file to be able to show message
-(defun fsvn-browse-cmd-read-move/copy-file ()
-  (fsvn-browse-cmd-wc-only
-   (let (files
-	 src-file dest-file
+(defun fsvn-browse-cmd-read-search-move/copy-file ()
+  ;; (fsvn-browse-cmd-wc-only
+   (let ((target-file (fsvn-browse-cmd-this-wc-file))
+	 files src-file dest-file
 	 target-versioned-p alist)
      (setq target-versioned-p (fsvn-meta-file-registered-p target-file))
      (if target-versioned-p
@@ -65,10 +74,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	   (setq dest-file (car files))
 	 (setq src-file (car files)))
        (setq alist (cons (cons src-file dest-file) alist))
-       (setq files (cdr files))))))
+       (setq files (cdr files)))
+     alist))
 
 (defun fsvn-browse-search-moved/copied-file (src-file dest-file copy-p)
-  (interactive (fsvn-browse-cmd-read-wc-this-file))
+  (interactive (fsvn-browse-cmd-read-search-move/copy-file))
   (fsvn-browse-wc-only
    (if copy-p
        (fsvn-browse-safe-copy-this src-file dest-file)
@@ -96,7 +106,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	  (lambda (item)
 	    (list 'fsvn-popup-start-copy/move-process "move" (car item) (cdr item) args))
 	  alist)))
-    (fsvn-async-invoke-strategy strategies)))
+    (fsvn-async-invoke strategies)))
 
 (defun fsvn-browse-smart-copy-this (alist &optional args)
   "Execute `copy' for point file.
@@ -109,7 +119,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 	  (lambda (item)
 	    (list 'fsvn-popup-start-copy/move-process "copy" (car item) (cdr item) args))
 	  alist)))
-    (fsvn-async-invoke-strategy strategies)))
+    (fsvn-async-invoke strategies)))
 
 (defun fsvn-browse-cmd-read-smart-copy/move-this (from copy-p)
   (let* ((subcommand (if copy-p "copy" "move"))
@@ -318,22 +328,48 @@ How to send a bug report:
   "Repository directory."
   (fsvn-expand-file "repository" (fsvn-cache-directory)))
 
-(defun fsvn-cache-repository-create (uuid max-revision)
+(defun fsvn-cache-uuid-repository (uuid)
   (let* ((repos (expand-file-name uuid (fsvn-cache-repository-directory)))
 	 (url (fsvn-directory-name-as-repository repos)))
-    (unless (file-directory-p repos)
+    (unless (and (file-directory-p repos)
+		 (> (length (directory-files repos nil dired-re-no-dot)) 0))
       (make-directory repos t)
       ;;TODO local password???
       (fsvn-admin-call-command-discard "create" nil repos)
-      (fsvn-admin-call-command-discard "setuuid" nil repos uuid))
-    (let* ((wc (fsvn-get-temporary-wc url t))
-	   (default-directory (file-name-as-directory wc))
-	   (rev (1+ (fsvn-update-directory default-directory))))
-      (while (<= rev max-revision)
-	(fsvn-call-command-discard "propset" nil "fsvn:cache:empty" rev default-directory)
-	(message "Commiting revision %s..." rev)
-	(fsvn-call-command-discard "commit" nil "--message" "")
-	(setq rev (1+ rev))))))
+      (fsvn-admin-call-command-discard "setuuid" nil repos uuid)
+      (fsvn-admin-create-empty-hook repos "pre-revprop-change"))
+    url))
+
+(defun fsvn-cache-enable-p ()
+  (and fsvn-svnsync-command-internal
+       (executable-find fsvn-svnsync-command-internal)))
+
+(defun fsvn-cache-initialize-repository (root)
+  (let* ((uuid (fsvn-get-uuid root))
+	 (url (fsvn-cache-uuid-repository uuid))
+	 (info (fsvn-get-info-entry url)))
+    (unless (and info (> (fsvn-xml-info->entry.revision info) 0))
+      ;; No costed execute. sync process.
+      (with-temp-buffer
+	(unless (= (call-process fsvn-svnsync-command-internal nil (current-buffer) nil "initialize" url root) 0)
+	  (signal 'fsvn-command-error (cons (buffer-string) nil)))))
+    url))
+
+(defun fsvn-cache-mirror (root)
+  (let* ((url (fsvn-cache-initialize-repository root))
+	 (buffer (fsvn-make-temp-buffer))
+	 proc)
+    (fsvn-process-environment
+     (setq proc (start-process "fsvn" buffer fsvn-svnsync-command-internal "synchronize" url)))
+    (set-process-sentinel proc 
+			  (lambda (p e)
+			    (fsvn-process-exit-handler p e
+			      (kill-buffer (process-buffer p)))))
+    (set-process-filter proc (lambda (p e)))
+    proc))
+
+(defun fsvn-cache-start-command (subcommand buffer &rest args)
+  (apply 'fsvn-start-command subcommand buffer args))
 
 
 

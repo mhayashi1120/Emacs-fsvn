@@ -46,6 +46,12 @@
     (signal 'fsvn-command-error (list subcommand args (buffer-string))))
   t)
 
+(defun fsvn-admin-create-empty-hook (repos name)
+  (let* ((hookdir (fsvn-expand-file "hooks" repos))
+	 (hook (fsvn-expand-file name hookdir)))
+    (write-region "#!/bin/sh\n\nexit 0\n" nil hook nil 'no-msg)
+    (set-file-modes hook ?\744)))
+
 (defun fsvn-admin-create-repository (dir &optional args)
   "Create repository to current directory."
   (interactive (list (fsvn-expand-file default-directory)

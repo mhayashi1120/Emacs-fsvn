@@ -241,7 +241,7 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
 	    (funcall func)))))
     ret))
 
-(defun fsvn-async-invoke-strategy (strategies)
+(defun fsvn-async-invoke (strategies)
   (eval
    (append
     (list 'fsvn-async-let ())

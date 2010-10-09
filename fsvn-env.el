@@ -497,17 +497,20 @@ Use %% to put a single % into the output.
 
 (defun fsvn-cleanup-temp-directory ()
   "Cleanup temporary directory when load this file."
-  (let ((using (fsvn-process-using-temp-files))
-	;; delete only changed two days ago.
-	(time (seconds-to-time (- (float-time) (* 2 24 60 60)))))
+  (fsvn-expire-files-in-temp-directory (fsvn-temp-directory))
+  (fsvn-expire-files-in-temp-directory (fsvn-ediff-directory))
+  nil)
+
+(defun fsvn-expire-files-in-temp-directory (directory)
+  ;; only expires 5 days later after changed
+  (let ((time (seconds-to-time (- (float-time) (* 5 24 60 60)))))
     (mapc
      (lambda (file)
-       (unless (fsvn-file-member file using)
-	 (when (time-less-p (nth 5 (file-attributes file)) time)
-	   (if (fsvn-file-exact-directory-p file)
-	       (fsvn-delete-directory file)
-	     (delete-file file)))))
-     (directory-files (fsvn-temp-directory) t dired-re-no-dot))))
+       (when (time-less-p (nth 5 (file-attributes file)) time)
+	 (if (fsvn-file-exact-directory-p file)
+	     (fsvn-delete-directory file)
+	   (delete-file file))))
+     (directory-files directory t dired-re-no-dot))))
 
 (defun fsvn-process-using-temp-files ()
   (let (ret)

@@ -1,4 +1,14 @@
+2010-10-08  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: expire temp files 2 days -> 5 days
+
+	* Change: expire ediff files
+
 2010-10-07  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fsvn-svnsync-command-internal
+
+	* Improvement: fsvn-merged-import-with-log accept local destination.
 
 	* Add: easymenu (message-edit, popup, process-list)
 

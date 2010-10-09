@@ -534,9 +534,7 @@ Argument REV-RANGE revision range cons cell `(start . end)'
 Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings.
 "
   (let ((root (or (and fsvn-buffer-repos-root
-		       (string-match 
-			(concat "^" (regexp-quote fsvn-buffer-repos-root))
-			urlrev)
+		       (fsvn-url-contains-p fsvn-buffer-repos-root urlrev)
 		       fsvn-buffer-repos-root)
 		  (fsvn-get-root urlrev)))
 	entries buffer win-config prev-entries)

@@ -74,7 +74,7 @@
       (make-directory dir t))
     dir))
 
-(defun fsvn-ediff-prepare-file (urlrev)
+(defun fsvn-ediff-prepared-file (urlrev)
   (if (fsvn-url-urlrev-p urlrev)
       (let ((file (fsvn-ediff-make-temp-file urlrev)))
 	(unless (fsvn-save-file urlrev file t)
@@ -88,10 +88,11 @@
     (fsvn-ediff-urlrev-files urlrev1 urlrev2)))
 
 (defun fsvn-ediff-urlrev-files (urlrev1 urlrev2)
-  (let ((file1 (fsvn-ediff-prepare-file urlrev1))
-	(file2 (fsvn-ediff-prepare-file urlrev2)))
+  (let ((file1 (fsvn-ediff-prepared-file urlrev1))
+	(file2 (fsvn-ediff-prepared-file urlrev2)))
     (fsvn-ediff-files file1 file2)))
 
+;;FIXME not well designed
 (defun fsvn-ediff-urlrev-directories (urlrev1 urlrev2)
   (cond
    ((and (fsvn-url-urlrev-p urlrev1)

@@ -34,6 +34,10 @@ buffer name start with ` ' (space)
 enable send password
 freezing processes.
 
+** complete args fsvn-browse-* interactive
+
+inhibit path completion.
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 

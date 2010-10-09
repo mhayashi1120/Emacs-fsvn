@@ -210,7 +210,6 @@
 	(concat (match-string 1 url) (match-string 4 url))
       url)))
 
-;;TODO rev is optional?
 (defun fsvn-url-urlrev (url rev)
   (if rev
       (let ((tmp (fsvn-get-revision-string rev)))
@@ -260,7 +259,7 @@
     (error "Error while parsing filename"))))
 
 (defun fsvn-file-name-parent-directory (file level)
-  (let ((tmp (directory-file-name file))
+  (let ((tmp (fsvn-file-name-directory (directory-file-name file)))
 	(i 0))
     (while (< i level)
       (setq tmp (fsvn-file-name-directory tmp))
