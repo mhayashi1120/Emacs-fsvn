@@ -18,8 +18,6 @@
 (defvar minibuffer-local-map)
 (defvar last-command)
 (defvar this-command)
-(defvar quit-flag)
-(defvar unread-command-events)
 
 
 
