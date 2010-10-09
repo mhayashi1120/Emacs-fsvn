@@ -473,7 +473,7 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 		  (fsvn-merged-import-with-log-entries 
 		   log-entries src-root 
 		   src-url src-path src-directoryp merging-file popup-buffer)
-		  (message "Successfully finished merging rev.%d to rev.%d." (car rev-range) (cdr rev-range))
+		  (message "Successfully finished merging rev.%s to rev.%s." (car rev-range) (cdr rev-range))
 		  nil)
 	      (kill-buffer buffer))))
     (when conflict-urlrev
