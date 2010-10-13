@@ -215,7 +215,7 @@ Please call `fsvn-initialize-loading' function.
 	   (error "Svn command must be 1.4.x or later")))))))
 
 (defun fsvn-build-subcommand (&optional force)
-  (mapcar
+  (mapc
    (lambda (x)
      (let ((command (nth 0 x))
 	   (subcommand-var (nth 1 x))

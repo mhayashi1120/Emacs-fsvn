@@ -159,7 +159,7 @@ To show and see result.
   ;; (testcover-start "fsvn-ui.el")
   )
 
-(fsvn-test-equal (fsvn-flatten-command-args '("a" 1 nil ("b" 2))) '("a" "1" "b" "2"))
+(fsvn-test-equal (fsvn-command-args-canonicalize '("a" 1 nil ("b" 2))) '("a" "1" "b" "2"))
 
 (fsvn-test-equal (fsvn-expand-url "c" "http://a/b") "http://a/b/c")
 (fsvn-test-equal (fsvn-expand-url "c" "http://a/b/..") "http://a/c")
@@ -248,6 +248,11 @@ To show and see result.
 
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c") "http://a/b/c/")
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c/") "http://a/b/c/")
+
+(fsvn-test-equal (fsvn-url-escape-revision-mark "svn://localhost/hoge@HEAD") "svn://localhost/hoge@HEAD@")
+(fsvn-test-equal (fsvn-url-escape-revision-mark "svn://localhost/hoge@HEAD@") "svn://localhost/hoge@HEAD@@")
+(fsvn-test-equal (fsvn-url-escape-revision-mark (fsvn-url-urlrev "svn://localhost/hoge" "HEAD")) "svn://localhost/hoge@HEAD")
+
 
 (fsvn-test-equal 
  (fsvn-complete-reading-split-arguments "-R \"white - space.txt\" -r 10:20")
@@ -561,7 +566,7 @@ To show and see result.
     (fsvn-test-sit-for)
     (fsvn-browse-commit-path)
     (fsvn-test-sit-for)
-    (fsvn-parasite-commit-quit)
+    (fsvn-parasite-quit)
     (fsvn-test-sit-for)
     )))
 

@@ -20,28 +20,32 @@
     (error "Not arrowed operation in this major-mode `%s'" major-mode)))
 
 (defmacro fsvn-parasite-in-select-file (&rest form)
-  `(let ((BUFFER (fsvn-select-file-prepared-buffer)))
+  `(let ((BUFFER (if (eq major-mode 'fsvn-select-file-mode) 
+		     (current-buffer)
+		   fsvn-message-edit-file-select-buffer)))
      (unless BUFFER
-       (error "File Select buffer not found"))
+       (error "File Select buffer is not found"))
      (with-current-buffer BUFFER
        ,@form)))
 
 (defmacro fsvn-parasite-in-message-edit (&rest form)
-  `(let ((BUFFER (fsvn-message-edit-prepared-buffer)))
+  `(let ((BUFFER (if (eq major-mode 'fsvn-message-edit-mode)
+		     (current-buffer)
+		   fsvn-select-file-msgedit-buffer)))
      (unless BUFFER
-       (error "Message Edit buffer not found"))
+       (error "Message Edit buffer is not found"))
      (with-current-buffer BUFFER
        ,@form)))
 
 (defun fsvn-parasite-make-buffer-variables (variables)
   (fsvn-make-buffer-variables-internal variables))
 
-(defmacro fsvn-parasite-cleanup-buffers (&rest buffer-form)
-  `(mapc
-    (lambda (b)
+(defun fsvn-parasite-cleanup-buffers (buffers)
+  (mapc
+   (lambda (b)
      (when (and b (buffer-live-p b))
        (kill-buffer b)))
-    (list ,@buffer-form)))
+   buffers))
 
 (defun fsvn-parasite-quit-message-edit ()
   (interactive)
@@ -49,13 +53,12 @@
    (fsvn-parasite-cleanup-message-edit)))
 
 (defun fsvn-parasite-cleanup-message-edit ()
-  (fsvn-parasite-cleanup-buffers
-   (fsvn-select-file-prepared-buffer)))
+  (fsvn-parasite-cleanup-buffers (fsvn-parasite-related-buffers)))
 
-(defun fsvn-parasite-setup-message-edit-window ()
+(defun fsvn-parasite-setup-message-edit-window (msgedit-buffer)
   (delete-other-windows)
   (let ((win (split-window)))
-    (set-window-buffer win (fsvn-message-edit-get-buffer))
+    (set-window-buffer win msgedit-buffer)
     (set-frame-selected-window (selected-frame) win))
   (fsvn-parasite-show-brief-help))
 
@@ -63,6 +66,18 @@
 
 (defun fsvn-parasite-show-brief-help ()
   (message (substitute-command-keys (funcall fsvn-parasite-brief-help-function))))
+
+(defun fsvn-parasite-related-buffers ()
+  (remove nil (list 
+	       fsvn-select-file-msgedit-buffer
+	       fsvn-message-edit-file-select-buffer
+	       (current-buffer))))
+
+(defun fsvn-parasite-quit ()
+  (interactive)
+  (fsvn-restore-window-buffer 
+   (fsvn-parasite-cleanup-buffers
+    (fsvn-parasite-related-buffers))))
 
 
 
@@ -76,8 +91,8 @@
 
 	  (define-key map "\C-c\C-c" 'fsvn-parasite-commit-execute)
 	  (define-key map "\C-c\C-o" 'fsvn-parasite-commit-cycle-window)
-	  (define-key map "\C-c\C-q" 'fsvn-parasite-commit-quit)
-	  (define-key map "\C-c\C-k" 'fsvn-parasite-commit-quit)
+	  (define-key map "\C-c\C-q" 'fsvn-parasite-quit)
+	  (define-key map "\C-c\C-k" 'fsvn-parasite-quit)
 	  (define-key map "\C-c\en" 'fsvn-parasite-commit-toggle-no-unlock)
 	  (define-key map "\C-c\ek" 'fsvn-parasite-commit-toggle-keep-changelist)
 
@@ -138,7 +153,7 @@ Keybindings:
 
 (defun fsvn-parasite-commit-brief-help ()
   (concat "Type \\[fsvn-parasite-commit-execute] to commit edit, "
-	  "\\[fsvn-parasite-commit-quit] to quit edit, "
+	  "\\[fsvn-parasite-quit] to quit edit, "
 	  "\\[fsvn-parasite-commit-cycle-window] to cycle window."))
 
 (defun fsvn-parasite-commit-internal (arg-files arg-buffer)
@@ -149,31 +164,31 @@ Keybindings:
 		   (output-size (buffer-size arg-buffer))
 		   (files arg-files)
 		   (buffer arg-buffer)
-		   proc
-		   locked locked-targets
-		   unversioned unversiond-targets)
+		   (buffers (fsvn-parasite-related-buffers))
+		   proc locked unversioned)
+    (setq locked (fsvn-parasite-commit-choice-just-locked files))
     (setq unversioned (fsvn-parasite-commit-choice-unversioned files))
     (when (> (length unversioned) 0)
-      (setq unversiond-targets (fsvn-make-targets-file unversioned))
-      (prog1
-	  (setq proc (fsvn-start-command-display "add" buffer "--targets" unversiond-targets "--non-recursive"))
-	(set-process-sentinel proc (lambda (proc event)
-				     (fsvn-process-exit-handler proc event
-				       (fsvn-parse-result-cmd-add buffer output-size)
-				       (goto-char (point-max))
-				       (insert "\n")
-				       (setq output-size (buffer-size (current-buffer))))))))
-    (unless no-unlock
-      (when (setq locked (fsvn-parasite-commit-choice-just-locked files))
-	(setq locked-targets (fsvn-make-targets-file locked))
+      (let ((unversiond-targets (fsvn-make-targets-file unversioned)))
 	(prog1
-	    (setq proc (fsvn-start-command-display "unlock" buffer "--targets" locked-targets))
+	    (setq proc (fsvn-start-command-display "add" buffer "--targets" unversiond-targets "--non-recursive"))
 	  (set-process-sentinel proc (lambda (proc event)
 				       (fsvn-process-exit-handler proc event
-					 (fsvn-parse-result-cmd-unlock buffer output-size)
+					 (fsvn-parse-result-cmd-add buffer output-size)
 					 (goto-char (point-max))
 					 (insert "\n")
 					 (setq output-size (buffer-size (current-buffer)))))))))
+    (unless no-unlock
+      (when locked
+	(let ((locked-targets (fsvn-make-targets-file locked)))
+	  (prog1
+	      (setq proc (fsvn-start-command-display "unlock" buffer "--targets" locked-targets))
+	    (set-process-sentinel proc (lambda (proc event)
+					 (fsvn-process-exit-handler proc event
+					   (fsvn-parse-result-cmd-unlock buffer output-size)
+					   (goto-char (point-max))
+					   (insert "\n")
+					   (setq output-size (buffer-size (current-buffer))))))))))
     (prog1
 	(setq proc (fsvn-start-command-display "commit" buffer
 				       "--targets" targets
@@ -182,6 +197,7 @@ Keybindings:
 					 (list "--message" ""))
 				       "--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 				       args))
+      (process-put proc 'fsvn-parasite-cleanup-buffers buffers)
       (set-process-sentinel proc 'fsvn-parasite-commit-sentinel)
       (set-process-filter proc 'fsvn-popup-process-filter-in-buffer))
     (process-put proc 'fsvn-process-start-point output-size)))
@@ -191,12 +207,7 @@ Keybindings:
     (when (= (process-exit-status proc) 0)
       (let ((output-size (process-get proc 'fsvn-process-start-point)))
 	(fsvn-parse-result-cmd-commit (current-buffer) output-size)
-	(let ((lst (list (fsvn-message-edit-get-buffer) (fsvn-select-file-get-buffer))))
-	  (mapc
-	   (lambda (x)
-	     (when (and x (bufferp x) (buffer-live-p x))
-	       (kill-buffer x)))
-	   lst)))
+	(fsvn-parasite-cleanup-buffers (process-get proc 'fsvn-parasite-cleanup-buffers)))
       (run-hooks 'fsvn-parasite-commit-after-commit-hook)
       (fsvn-run-recursive-status (fsvn-find-most-top-buffer-directory default-directory)))))
 
@@ -217,11 +228,6 @@ Keybindings:
   (fsvn-parasite-in-select-file 
    (fsvn-select-file-choice-just-locked files)))
 
-(defun fsvn-parasite-commit-cleanup-buffers ()
-  (fsvn-parasite-cleanup-buffers 
-   (fsvn-select-file-prepared-buffer)
-   (fsvn-message-edit-prepared-buffer)))
-
 (defun fsvn-parasite-commit-set-subcommand-args (args)
   (when (member "--no-unlock" args)
     (fsvn-parasite-commit-toggle-no-unlock t))
@@ -229,11 +235,9 @@ Keybindings:
     (fsvn-parasite-commit-toggle-keep-changelist t))
   (setq fsvn-parasite-commit-subcommand-args args))
 
-(defun fsvn-parasite-commit-setup-window (&optional no-msg)
+(defun fsvn-parasite-commit-setup-window (log fselect &optional no-msg)
   (delete-other-windows)
-  (let* ((log (fsvn-message-edit-get-buffer))
-	 (fselect (fsvn-select-file-get-buffer))
-	 (log-win (split-window))
+  (let* ((log-win (split-window))
 	 (fselect-win (selected-window))
 	 (root fsvn-buffer-repos-root)
 	 sel-buffer sel-window)
@@ -273,16 +277,11 @@ Keybindings:
 
 (defun fsvn-parasite-commit-cycle-window ()
   (interactive)
-  (let ((mode major-mode))
-    (fsvn-restore-default-window-setting)
-    (if (eq mode 'fsvn-select-file-mode)
-	(fsvn-switch-buffer-window (fsvn-message-edit-prepared-buffer))
-      (fsvn-switch-buffer-window (fsvn-select-file-prepared-buffer)))))
-
-(defun fsvn-parasite-commit-quit ()
-  (interactive)
-  (fsvn-restore-window-buffer 
-   (fsvn-parasite-commit-cleanup-buffers)))
+  (let ((mode major-mode)
+	(buffers (remove (current-buffer) (fsvn-parasite-related-buffers))))
+    (when buffers
+      (fsvn-restore-default-window-setting)
+      (fsvn-switch-buffer-window (car buffers)))))
 
 (defun fsvn-parasite-commit-toggle-no-unlock (&optional arg)
   (interactive "P")
@@ -345,6 +344,7 @@ Keybindings:
 		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 		fsvn-parasite-delete-subcommand-args
 		fsvn-parasite-delete-target-files))
+    (process-put proc 'fsvn-parasite-cleanup-buffers (fsvn-parasite-related-buffers))
     (set-process-sentinel proc 'fsvn-parasite-delete-sentinel)
     (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
@@ -352,10 +352,9 @@ Keybindings:
 (defun fsvn-parasite-delete-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (when (= (process-exit-status proc) 0)
-      (let ((x (fsvn-message-edit-prepared-buffer)))
-	(fsvn-parse-result-cmd-delete (current-buffer))
-	(when (and x (bufferp x) (buffer-live-p x))
-	  (kill-buffer x))))))
+      (fsvn-parse-result-cmd-delete (current-buffer))
+      (fsvn-parasite-cleanup-buffers 
+       (process-get proc 'fsvn-parasite-cleanup-buffers)))))
 
 (defun fsvn-parasite-delete-brief-help ()
   (concat "Type \\[fsvn-parasite-delete-execute] to delete files and commit, "
@@ -423,6 +422,7 @@ Keybindings:
 		fsvn-parasite-import-subcommand-args
 		fsvn-parasite-import-target-path
 		fsvn-parasite-import-target-url))
+    (process-put proc 'fsvn-parasite-cleanup-buffers (fsvn-parasite-related-buffers))
     (set-process-sentinel proc 'fsvn-parasite-import-sentinel)
     (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
@@ -430,7 +430,7 @@ Keybindings:
 (defun fsvn-parasite-import-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (when (= (process-exit-status proc) 0)
-      (kill-buffer (fsvn-message-edit-get-buffer))
+      (fsvn-parasite-cleanup-buffers (process-get proc 'fsvn-parasite-cleanup-buffers))
       (run-hooks 'fsvn-parasite-commit-after-commit-hook))))
 
 (defun fsvn-parasite-import-brief-help ()
@@ -492,6 +492,7 @@ Keybindings:
 		  (list "--message" ""))
 		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 		fsvn-parasite-mkdir-target-directory))
+    (process-put proc 'fsvn-parasite-cleanup-buffers (fsvn-parasite-related-buffers))
     (set-process-sentinel proc 'fsvn-parasite-mkdir-sentinel)
     (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
@@ -499,7 +500,7 @@ Keybindings:
 (defun fsvn-parasite-mkdir-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (when (= (process-exit-status proc) 0)
-      (kill-buffer (fsvn-message-edit-get-buffer))
+      (fsvn-parasite-cleanup-buffers (process-get proc 'fsvn-parasite-cleanup-buffers))
       (run-hooks 'fsvn-parasite-commit-after-commit-hook))))
 
 (defun fsvn-parasite-mkdir-brief-help ()
@@ -568,6 +569,7 @@ Keybindings:
 		  (list "--message" ""))
 		"--encoding" (fsvn-coding-system-name fsvn-message-edit-file-encoding)
 		fsvn-parasite-lock-subcommand-args fsvn-parasite-lock-target-files))
+    (process-put proc 'fsvn-parasite-cleanup-buffers (fsvn-parasite-related-buffers))
     (set-process-sentinel proc 'fsvn-parasite-lock-sentinel)
     (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
@@ -576,7 +578,7 @@ Keybindings:
   (fsvn-process-exit-handler proc event
     (when (= (process-exit-status proc) 0)
       (fsvn-parse-result-cmd-lock (current-buffer))
-      (kill-buffer (fsvn-message-edit-get-buffer)))))
+      (fsvn-parasite-cleanup-buffers (process-get proc 'fsvn-parasite-cleanup-buffers)))))
 
 (defun fsvn-parasite-lock-set-subcommand-args (args)
   (when (member "--message" args)
@@ -645,6 +647,7 @@ Keybindings:
 		fsvn-parasite-copy-subcommand-args
 		fsvn-parasite-copy-from-files
 		fsvn-parasite-copy-destination))
+    (process-put proc 'fsvn-parasite-cleanup-buffers (fsvn-parasite-related-buffers))
     (set-process-sentinel proc 'fsvn-parasite-copy-sentinel)
     (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     proc))
@@ -652,7 +655,7 @@ Keybindings:
 (defun fsvn-parasite-copy-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (when (= (process-exit-status proc) 0)
-      (kill-buffer (fsvn-message-edit-get-buffer))
+      (fsvn-parasite-cleanup-buffers (process-get proc 'fsvn-parasite-cleanup-buffers))
       (run-hooks 'fsvn-parasite-commit-after-commit-hook))))
 
 (defun fsvn-parasite-copy-brief-help ()
@@ -684,8 +687,8 @@ Keybindings:
 	(let ((map (make-sparse-keymap)))
 
 	  (define-key map "\C-c\C-c" 'fsvn-parasite-add-execute)
-	  (define-key map "\C-c\C-q" 'fsvn-parasite-add-quit)
-	  (define-key map "\C-c\C-k" 'fsvn-parasite-add-quit)
+	  (define-key map "\C-c\C-q" 'fsvn-parasite-quit)
+	  (define-key map "\C-c\C-k" 'fsvn-parasite-quit)
 
 	  map)))
 
@@ -716,18 +719,13 @@ Keybindings:
   (fsvn-select-file-draw-applicant files "Add marked files below." "No Unknown files.")
   (setq fsvn-parasite-add-target-files files))
 
-(defun fsvn-parasite-add-cleanup-buffer ()
-  (fsvn-parasite-cleanup-buffers
-   (fsvn-select-file-prepared-buffer)))
-
 (defun fsvn-parasite-add-brief-help ()
   (concat "Type \\[fsvn-parasite-add-execute] to add files, "
-	  "\\[fsvn-parasite-add-quit] to quit edit."))
+	  "\\[fsvn-parasite-quit] to quit edit."))
 
-(defun fsvn-parasite-add-setup-window ()
+(defun fsvn-parasite-add-setup-window (select)
   (delete-other-windows)
-  (let* ((select (fsvn-select-file-get-buffer))
-	 (file-win (selected-window)))
+  (let* ((file-win (selected-window)))
     (set-window-buffer file-win select)
     (set-frame-selected-window (selected-frame) file-win)
     (fsvn-set-buffer-local-variable
@@ -740,6 +738,7 @@ Keybindings:
   (interactive)
   (let ((files (fsvn-select-file-gather-marked-files))
 	(dir default-directory)
+	(source (current-buffer))
 	buffer targets)
     (if (= (length files) 0)
 	(message "No file to be added.")
@@ -750,12 +749,7 @@ Keybindings:
        (fsvn-parse-result-cmd-add buffer))
       (fsvn-buffer-popup-as-information buffer)
       (fsvn-run-recursive-status (fsvn-find-most-top-buffer-directory dir))
-      (kill-buffer (fsvn-select-file-get-buffer)))))
-
-(defun fsvn-parasite-add-quit ()
-  (interactive)
-  (fsvn-restore-window-buffer 
-   (fsvn-parasite-add-cleanup-buffer)))
+      (kill-buffer source))))
 
 
 

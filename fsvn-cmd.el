@@ -629,7 +629,8 @@ Argument FILES ."
       (let ((coding-system-for-write (fsvn-file-name-coding-system)))
 	(mapc
 	 (lambda (f)
-	   (insert (funcall fsvn-targets-file-converter f) "\n"))
+	   (let ((file (fsvn-url-escape-revision-mark f)))
+	     (insert (funcall fsvn-targets-file-converter file) "\n")))
 	 files)
 	(write-region (point-min) (point-max) tmpfile nil 'no-msg)))
     tmpfile))

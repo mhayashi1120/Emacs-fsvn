@@ -18,8 +18,6 @@
 (defvar minibuffer-local-map)
 (defvar last-command)
 (defvar this-command)
-(defvar quit-flag)
-(defvar unread-command-events)
 
 
 
@@ -234,7 +232,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
 
 (defun fsvn-read-subcommand-args (subcommand &optional non-global &rest default-args)
   (setq fsvn-complete-completion-saved-configuration nil)
-  (setq default-args (fsvn-flatten-command-args default-args))
+  (setq default-args (fsvn-command-args-canonicalize default-args))
   (unless fsvn-complete-reading-subcommand
     (error "Subcommand %s not found" subcommand))
   (unwind-protect
@@ -263,7 +261,7 @@ The value of DEFAULT is not a number, allow to enter a nil value."
        (concat "\"" arg "\""))
       (t
        arg)))
-   default-args
+   args
    " "))
 
 

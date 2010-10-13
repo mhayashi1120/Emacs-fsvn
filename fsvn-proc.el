@@ -38,7 +38,7 @@
 
 (defun fsvn-start-process (buffer &rest args)
   (fsvn-process-environment
-   (let* ((real-args (fsvn-flatten-command-args args))
+   (let* ((real-args (fsvn-command-args-canonicalize args))
 	  (coding-system-for-read (fsvn-process-coding-system real-args)))
      (fsvn-debug real-args)
      (apply 'start-process "fsvn" buffer fsvn-svn-command-internal real-args))))
@@ -59,7 +59,7 @@ This is synchronous call, so cannot handle password prompt. Append --non-interac
 explicitly in calling function.
 "
   (fsvn-process-environment
-   (let* ((real-args (fsvn-flatten-command-args args))
+   (let* ((real-args (fsvn-command-args-canonicalize args))
 	  (coding-system-for-read (fsvn-process-coding-system real-args)))
      (when (and (bufferp buffer) (> (buffer-size buffer) 0))
        (with-current-buffer buffer
@@ -257,15 +257,17 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
      (fsvn-process-event-handler ,proc ,event
        ,@form)))
 
-(defun fsvn-flatten-command-args (list)
+(defun fsvn-command-args-canonicalize (list)
   (let (ret)
     (mapc
      (lambda (x)
        (cond
 	((null x))
 	((listp x)
-	 (setq ret (append (nreverse (fsvn-flatten-command-args x)) ret)))
+	 (setq ret (append (nreverse (fsvn-command-args-canonicalize x)) ret)))
 	((stringp x)
+	 (when (fsvn-url-p x)
+	   (setq x (fsvn-url-escape-revision-mark x)))
 	 (cond
 	  ((fsvn-url-repository-p x)
 	   (setq ret (cons (fsvn-url-encode-string x) ret)))
@@ -284,10 +286,10 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
     (nreverse ret)))
 
 (defun fsvn-build-command-string (subcommand &rest args)
-  (let ((real-args (fsvn-flatten-command-args args)))
+  (let ((real-args (fsvn-command-args-canonicalize args)))
     (mapconcat
      (lambda (x)
-       (if (string-match " " x)
+       (if (or (string= "" x) (string-match " " x))
 	   (concat "\"" x "\"")
 	 x))
      (append (list fsvn-svn-command-internal subcommand) real-args)

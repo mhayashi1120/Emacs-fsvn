@@ -17,6 +17,8 @@
 
 (defvar emacs-major-version)
 (defvar emacs-version)
+(defvar quit-flag)
+(defvar unread-command-events)
 
 (defconst fsvn-space-char ?\040)
 

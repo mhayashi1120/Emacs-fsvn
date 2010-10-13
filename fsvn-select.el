@@ -34,6 +34,7 @@
     (fsvn-buffer-repos-root)
     (font-lock-defaults . '(fsvn-select-file-font-lock-keywords t nil nil beginning-of-line))
 
+    (fsvn-select-file-msgedit-buffer)
     ;; BUG only works commit
     (revert-buffer-function . 'fsvn-select-file-revert-buffer)
     ))
@@ -46,7 +47,7 @@
 
 (defvar fsvn-select-file-files-status nil
   "Optional")
-
+(defvar fsvn-select-file-msgedit-buffer nil)
 (defvar fsvn-select-file-draw-list-function nil)
 
 (defvar fsvn-select-file-font-lock-keywords nil)
@@ -134,11 +135,8 @@ Keybindings:
   (font-lock-mode 1)
   (font-lock-fontify-buffer))
 
-(defun fsvn-select-file-prepared-buffer ()
-  (fsvn-sole-major-mode 'fsvn-select-file-mode))
-
-(defun fsvn-select-file-get-buffer ()
-  (get-buffer-create fsvn-select-file-buffer-name))
+(defun fsvn-select-file-generate-buffer ()
+  (generate-new-buffer fsvn-select-file-buffer-name))
 
 (defun fsvn-select-file-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))

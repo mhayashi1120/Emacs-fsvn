@@ -29,13 +29,13 @@
 
 (defun fsvn-admin-start-command (subcommand buffer &rest args)
   (fsvn-process-environment
-   (let ((real-args (fsvn-flatten-command-args args)))
+   (let ((real-args (fsvn-command-args-canonicalize args)))
      (fsvn-debug real-args)
      (apply 'start-process "fsvn admin" buffer fsvn-svnadmin-command-internal subcommand real-args))))
 
 (defun fsvn-admin-call-command (subcommand buffer &rest args)
   (fsvn-process-environment
-   (let ((real-args (fsvn-flatten-command-args args)))
+   (let ((real-args (fsvn-command-args-canonicalize args)))
      (fsvn-debug real-args)
      (prog1
 	 (apply 'call-process fsvn-svnadmin-command-internal nil buffer nil subcommand real-args)

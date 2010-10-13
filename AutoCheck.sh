@@ -6,8 +6,6 @@
 makefile=Makefile.tmp
 cfgfile=MAKE-CFG.el.tmp
 
-# TODO Emacs 22 not works fine.
-
 function check ()
 {
 	bin_dir=${1%/}

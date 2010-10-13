@@ -62,6 +62,11 @@ SomeFile.Designer.cs -> AnyFile.Designer.cs
 SomeFile.cs          -> AnyFile.cs
 
 
+** fsvn-select/ fsvn-msgedit generate-buffer function
+
+generate to get change buffer name to commit target filename?
+
+
 * select-file-mode
 ** symbolic link
 
@@ -82,7 +87,7 @@ SomeFile.cs          -> AnyFile.cs
 
 
 * General (refactor)
-** fsvn-flatten-command-args move to more critical point.
+** fsvn-command-args-canonicalize move to more critical point.
 ** fsvn-url-encode-string more critical point.
 ** case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
 ** fsvn-magic-* inspect how to implements.

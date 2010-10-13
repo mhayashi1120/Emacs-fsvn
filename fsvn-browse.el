@@ -263,8 +263,7 @@
 	  (suppress-keymap map)
 	  (fsvn-readonly-mode-keymap map)
 
-	  ;; todo see dired-mode-map
-	  (define-key map " " 'scroll-up)
+	  (define-key map " " 'fsvn-browse-next-file)
 	  (define-key map "%" (make-sparse-keymap))
 	  (define-key map "%d" 'fsvn-browse-mark-delete-regexp)
 	  (define-key map "%m" 'fsvn-browse-mark-file-regexp)
@@ -274,7 +273,6 @@
 	  (define-key map "\C-m" 'fsvn-browse-file-this)
 	  (define-key map "\C-n" 'fsvn-browse-next-file)
 	  (define-key map "\C-p" 'fsvn-browse-previous-file)
-	  (define-key map "\d" 'scroll-down)
 	  (define-key map "^" 'fsvn-browse-up-directory)
 	  (define-key map "d" 'fsvn-browse-mark-file-delete)
 	  (define-key map "g" 'revert-buffer)
@@ -710,6 +708,15 @@ PATH is each executed path."
   (or (assq 'fsvn-browse-buffer-files-status-process mode-line-process)
       (setq mode-line-process
 	    (append fsvn-browse-mode-line-process mode-line-process))))
+
+(defun fsvn-browse-check-unsave-buffer (files)
+  (let ((unsaved (fsvn-files-unsaved-buffers files)))
+    (when (and unsaved (fsvn-browse-dired-confirm unsaved 'fsvn-unsaved))
+      (mapc
+       (lambda (buffer)
+	 (with-current-buffer buffer
+	   (save-buffer)))
+       unsaved))))
 
 (defun fsvn-browse-goto-directory (directory)
   (let ((saved (point)))
@@ -1190,10 +1197,10 @@ PATH is each executed path."
      old-files)
     t))
 
-(defmacro fsvn-browse-open-message-edit (&rest form)
+(defmacro fsvn-browse-open-message-edit (buffer &rest form)
   `(let ((ROOT fsvn-buffer-repos-root)
 	 (WIN-CONFIGURE (current-window-configuration)))
-     (with-current-buffer (fsvn-message-edit-get-buffer)
+     (with-current-buffer ,buffer
        (fsvn-message-edit-mode)
        (setq fsvn-previous-window-configuration WIN-CONFIGURE)
        (setq fsvn-buffer-repos-root ROOT)
@@ -1201,19 +1208,17 @@ PATH is each executed path."
        (run-mode-hooks 'fsvn-message-edit-mode-hook))))
 
 (defmacro fsvn-browse-quick-message-edit (&rest form)
-  `(fsvn-browse-open-message-edit
-    ,@form
-    (fsvn-parasite-setup-message-edit-window)))
+  `(let ((buffer (fsvn-message-edit-generate-buffer)))
+     (fsvn-browse-open-message-edit buffer
+       ,@form
+       (fsvn-parasite-setup-message-edit-window buffer))))
 
 (defun fsvn-browse-add-file-select (files args)
-  (when (and (fsvn-select-file-prepared-buffer)
-	     (not (y-or-n-p "File select buffer already prepared.  Discard it? ")))
-    (error "Kill `%s' Buffer manually" fsvn-select-file-buffer-name))
   (let* ((win-configure (current-window-configuration))
 	 (root fsvn-buffer-repos-root)
+	 (select-buffer (fsvn-select-file-generate-buffer))
 	 win)
-    (fsvn-parasite-add-cleanup-buffer)
-    (with-current-buffer (fsvn-select-file-get-buffer)
+    (with-current-buffer select-buffer
       (fsvn-select-file-mode)
       (setq fsvn-previous-window-configuration win-configure)
       (fsvn-parasite-add-mode 1)
@@ -1223,45 +1228,34 @@ PATH is each executed path."
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
       (run-mode-hooks 'fsvn-select-file-mode-hook))
-    (fsvn-parasite-add-setup-window)))
+    (fsvn-parasite-add-setup-window select-buffer)))
 
 (defun fsvn-browse-commit-mode (files args)
-  (when (and (fsvn-select-file-prepared-buffer)
-	     (fsvn-message-edit-prepared-buffer))
-    (fsvn-parasite-commit-setup-window t)
-    (unless (y-or-n-p "Log edit buffer already prepared. Discard it? ")
-      ;; Want to quit signal. But quit signal cannot display messages.
-      (error "Type C-c C-q for Quit Edit.")))
-  (let* ((unsaved (fsvn-files-unsaved-buffers files))
-	 (browse-buffer (current-buffer))
+  (let* ((browse-buffer (current-buffer))
 	 (win-configure (current-window-configuration))
 	 (root fsvn-buffer-repos-root)
+	 (select-buffer (fsvn-select-file-generate-buffer))
+	 (msgedit-buffer (fsvn-message-edit-generate-buffer))
 	 win)
-    ;; todo consider confirm argument to interactive arg
-    (when (and unsaved (fsvn-browse-dired-confirm unsaved 'fsvn-unsaved))
-      (mapc
-       (lambda (buffer)
-	 (with-current-buffer buffer
-	   (save-buffer)))
-       unsaved))
-    (fsvn-parasite-commit-cleanup-buffers)
     ;; fsvn-message-edit-mode prior than fsvn-select-file-mode
-    (with-current-buffer (fsvn-select-file-get-buffer)
+    (with-current-buffer select-buffer
       (fsvn-select-file-mode)
       (setq fsvn-previous-window-configuration win-configure)
       (setq fsvn-select-file-draw-list-function 'fsvn-parasite-commit-draw-list)
+      (setq fsvn-select-file-msgedit-buffer msgedit-buffer)
       (fsvn-parasite-commit-mode 1)
       (fsvn-select-file-draw-root root)
       (fsvn-parasite-commit-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
       (run-mode-hooks 'fsvn-select-file-mode-hook))
-    (fsvn-browse-open-message-edit
-     (fsvn-parasite-commit-mode 1)
-     (fsvn-parasite-commit-set-subcommand-args args)
+    (fsvn-browse-open-message-edit msgedit-buffer
+      (setq fsvn-message-edit-file-select-buffer select-buffer)
+      (fsvn-parasite-commit-mode 1)
+      (fsvn-parasite-commit-set-subcommand-args args)
      (when (fsvn-config-tortoise-property-use root)
        (fsvn-tortoise-commit-initialize)))
-    (fsvn-parasite-commit-setup-window)))
+    (fsvn-parasite-commit-setup-window msgedit-buffer select-buffer)))
 
 (defun fsvn-browse-delete-message-edit (files args)
   (fsvn-browse-quick-message-edit
@@ -1500,6 +1494,19 @@ PATH is each executed path."
 (defun fsvn-browse-cmd-read-wc-path-with-args (subcommand &optional default-args)
   (fsvn-browse-cmd-wc-only
    (let ((args (fsvn-cmd-read-subcommand-args subcommand default-args)))
+     (list args))))
+
+(defun fsvn-browse-cmd-read-commit-selected ()
+  (fsvn-browse-cmd-wc-only
+   (let* ((files (fsvn-browse-cmd-selected-urls))
+	  (args (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
+     (fsvn-browse-check-unsave-buffer files)
+     (list files args))))
+
+(defun fsvn-browse-cmd-read-commit-path ()
+  (fsvn-browse-cmd-wc-only
+   (let ((args (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
+     (fsvn-browse-check-unsave-buffer (list (fsvn-browse-current-path)))
      (list args))))
 
 ;; specific read function
@@ -1794,14 +1801,14 @@ PATH is each executed path."
 (defun fsvn-browse-commit-selected (files &optional args)
   "Prepare `commit' buffer for selected FILES.
 "
-  (interactive (fsvn-browse-cmd-read-wc-selected-with-args "commit" fsvn-default-args-commit))
+  (interactive (fsvn-browse-cmd-read-commit-selected))
   (run-hook-with-args 'fsvn-browse-before-commit-hook files)
   (fsvn-browse-commit-mode files args))
 
 (defun fsvn-browse-commit-path (&optional args)
   "Prepare `commit' buffer for changing files in this directory.
 "
-  (interactive (fsvn-browse-cmd-read-wc-path-with-args "commit" fsvn-default-args-commit))
+  (interactive (fsvn-browse-cmd-read-commit-path))
   (fsvn-browse-commit-selected (list (fsvn-browse-current-path)) args))
 
 (defun fsvn-browse-cleanup-path (&optional args)
@@ -2432,6 +2439,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
 
 (put 'fsvn-browse-each-file 'lisp-indent-function 2)
 (put 'fsvn-browse-with-move-status 'lisp-indent-function 2)
+(put 'fsvn-browse-open-message-edit 'lisp-indent-function 1)
 
 (provide 'fsvn-browse)
 
