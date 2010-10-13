@@ -146,7 +146,7 @@
       (set-process-sentinel proc (lambda (proc event))))))
 
 (defun fsvn-diff-get-buffer (diff-args)
-  (let ((args (fsvn-flatten-command-args diff-args))
+  (let ((args (fsvn-command-args-canonicalize diff-args))
 	buffer)
     (catch 'found
       (mapc
@@ -161,7 +161,7 @@
 (defun fsvn-diff-setup-mode (buffer args)
   (with-current-buffer buffer
     (diff-mode)
-    (let ((real-args (fsvn-flatten-command-args args)))
+    (let ((real-args (fsvn-command-args-canonicalize args)))
       (set (make-local-variable 'fsvn-popup-result-buffer-p) t)
       (set (make-local-variable 'fsvn-diff-buffer-subcommand-args) real-args))))
 

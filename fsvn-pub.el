@@ -206,14 +206,16 @@ Optional argument REVISION means point of URLREV log chain."
 (defun fsvn-cleanup-result-buffer ()
   (fsvn-cleanup-buffer fsvn-popup-result-buffer-p))
 
+(defvar fsvn-password-prompt-accessible-p t)
+
 (defvar fsvn-authenticate-no-prompt nil)
 
 (defun fsvn-authenticate-repository (repository)
   "Authenticate by `svn' to REPOSITORY."
   (interactive (list (fsvn-completing-read-url "Authenticate URL: " nil t)))
-  (if (eq system-type 'windows-nt)
-      ;;TODO FIXME not works prompt on windows.
-      (fsvn-win-start-external-terminal (executable-find fsvn-svn-command-internal) "info" repository)
+  (if (not fsvn-password-prompt-accessible-p)
+      ;;TODO FIXME not works prompt on windows binary.
+      (funcall 'fsvn-win-authenticate-repository repository)
     (let ((buffer (fsvn-make-temp-buffer))
 	  (coding-system-for-write 'unix)
 	  proc)
@@ -288,10 +290,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive (fsvn-cmd-read-import-args))
   (let ((root (fsvn-get-root-upward url))
 	(browse-buffer (current-buffer))
-	(win-configure (current-window-configuration)))
+	(win-configure (current-window-configuration))
+	(msgedit-buffer (fsvn-message-edit-generate-buffer)))
     (unless root
       (error "Unable to get root repository"))
-    (with-current-buffer (fsvn-message-edit-get-buffer)
+    (with-current-buffer msgedit-buffer
       (fsvn-message-edit-mode)
       (setq fsvn-buffer-repos-root root)
       (fsvn-parasite-import-mode 1)
@@ -300,7 +303,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (setq fsvn-parasite-import-subcommand-args args)
       (setq fsvn-previous-window-configuration win-configure)
       (run-mode-hooks 'fsvn-message-edit-mode-hook))
-    (fsvn-parasite-setup-message-edit-window)))
+    (fsvn-parasite-setup-message-edit-window msgedit-buffer)))
 
 (defun fsvn-open-repository (urlrev)
   "Open URLREV by repository browser."
@@ -436,6 +439,8 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
+(defvar fsvn-initialize-function nil)
+
 (defun fsvn-initialize-loading ()
   (fsvn-set-command-information)
   (unless (file-directory-p fsvn-home-directory)
@@ -448,6 +453,8 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
    fsvn-temp-directory-dirs)
   (fsvn-cleanup-temp-directory)
   (fsvn-build-subcommand)
+  (when fsvn-initialize-function
+    (funcall fsvn-initialize-function))
   (fsvn-toggle-feature t 'no-msg))
 
 (defun fsvn-toggle-command-boolean (optional-arg current-value)

@@ -27,6 +27,7 @@
 (defconst fsvn-message-edit-buffer-name "Fsvn Log Message")
 (defconst fsvn-message-edit-buffer-local-variables
   '(
+    (fsvn-message-edit-file-select-buffer)
     (fsvn-message-edit-last-message)
     (fsvn-buffer-repos-root)
     ))
@@ -34,6 +35,7 @@
 (defvar fsvn-message-edit-file-encoding fsvn-svn-common-coding-system)
 
 (defvar fsvn-message-edit-last-message nil)
+(defvar fsvn-message-edit-file-select-buffer nil)
 (defvar fsvn-message-edit-mode-map nil)
 (unless fsvn-message-edit-mode-map
   (setq fsvn-message-edit-mode-map
@@ -74,11 +76,8 @@ Keybindings:
   (fsvn-make-buffer-variables fsvn-message-edit-buffer-local-variables)
   (erase-buffer))
 
-(defun fsvn-message-edit-prepared-buffer ()
-  (fsvn-sole-major-mode 'fsvn-message-edit-mode))
-
-(defun fsvn-message-edit-get-buffer ()
-  (get-buffer-create fsvn-message-edit-buffer-name))
+(defun fsvn-message-edit-generate-buffer ()
+  (generate-new-buffer fsvn-message-edit-buffer-name))
 
 (defun fsvn-message-edit-insert-log-file (file)
   (let ((start (point-marker))

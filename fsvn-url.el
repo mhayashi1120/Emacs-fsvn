@@ -20,7 +20,7 @@
 
 
 (defconst fsvn-url-encoding fsvn-svn-common-coding-system)
-(defconst fsvn-url-with-revision-regexp "^\\(.*\\)@\\([^@]+\\)$")
+(defconst fsvn-url-with-revision-regexp "^\\(.*\\)@\\([^@]+\\)\\(@*\\)$")
 
 ;; url utility
 
@@ -34,7 +34,8 @@
       url)))
 
 (defun fsvn-url-escape-revision-mark (url)
-  (if (string-match fsvn-url-with-revision-regexp url)
+  (if (and (not (fsvn-url-urlrev-p url)) 
+	   (string-match fsvn-url-with-revision-regexp url))
       (concat url "@")
     url))
 
@@ -55,7 +56,6 @@
   (let ((obj (fsvn-url-string-parse url-string)))
     (fsvn-url-urlrev (car obj) (cdr obj))))
 
-;; todo `@' contained file name escaped by following `@'
 (defun fsvn-url-encode-string (urlrev)
   (let* ((urlobj (fsvn-urlrev-parse urlrev))
 	 (url (car urlobj))
@@ -171,6 +171,11 @@
 ;; (defun fsvn-urlrev-read-only-p (urlrev)
 ;;   (if (fsvn-url-repository-p urlrev)
 ;;       (not (string-match "@\\(HEAD\\)$" urlrev))))
+
+(defun fsvn-url-p (string)
+  (or (fsvn-url-repository-p string)
+      (file-name-absolute-p string)
+      (not (fsvn-magic-file-name-absolute-p string))))
 
 (defun fsvn-url-repository-p (url)
   (string-match (concat "^" (regexp-opt fsvn-svn-url-scheme-segment-list)) url))

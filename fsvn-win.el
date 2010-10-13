@@ -141,17 +141,21 @@
 (defconst fsvn-cygwin-registory-root-key
   "HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions")
 
+(defvar fsvn-cygwin-drive-prefix-dir nil)
 (defun fsvn-cygwin-drive-prefix-dir ()
   (car (fsvn-cygwin-registry-get "Cygwin\\mounts v2" "cygdrive prefix")))
 
+(defvar fsvn-cygwin-installed-folder nil)
 (defun fsvn-cygwin-installed-folder ()
   (car (fsvn-cygwin-registry-get "Cygwin\\mounts v2\\/" "native")))
 
+(defvar fsvn-cygwin-installed-dir nil)
 (defun fsvn-cygwin-installed-dir ()
   (let ((fold (fsvn-cygwin-installed-folder)))
     (and fold
 	 (file-name-as-directory (dos-to-unix-filename fold)))))
 
+(defvar fsvn-cygwin-guessed-installed nil)
 (defun fsvn-cygwin-guessed-installed ()
   (condition-case err
       (progn
@@ -171,11 +175,19 @@
 	(mw32-registry-get form name))
     (error nil)))
 
+(defvar fsvn-cygwin-svn-p nil)
+(defun fsvn-cygwin-svn-p ()
+  (let ((command (executable-find fsvn-svn-command-internal))
+	(cygdir (fsvn-cygwin-installed-dir)))
+    (and command
+	 cygdir
+	 (string-match (concat "^" (regexp-quote cygdir)) command))))
+
 (defun fsvn-cygwin-expand-path (name &optional default)
-  (let ((inst-dir (fsvn-cygwin-installed-dir))
+  (let ((inst-dir fsvn-cygwin-installed-dir)
 	(expanded (expand-file-name name default)))
     (cond
-     ((not (fsvn-cygwin-guessed-installed))
+     ((not fsvn-cygwin-guessed-installed)
       expanded)
      ((string-match (concat "^" (regexp-quote inst-dir)) expanded)
       (concat "/" (substring expanded (match-end 0))))
@@ -183,11 +195,11 @@
       (let* ((file (expand-file-name name default))
 	     (drive (substring file 0 1))
 	     (name (substring file 2)))
-	(concat (file-name-as-directory (fsvn-cygwin-drive-prefix-dir)) drive name))))))
+	(concat (file-name-as-directory fsvn-cygwin-drive-prefix-dir) drive name))))))
 
 (defun fsvn-cygwin-to-emacs-path (path)
-  (let ((prefix (fsvn-cygwin-drive-prefix-dir))
-	(installed (fsvn-cygwin-installed-folder)))
+  (let ((prefix fsvn-cygwin-drive-prefix-dir)
+	(installed fsvn-cygwin-installed-folder))
     (cond
      ((string-match (format "^\\(%s\\)/\\([a-zA-Z]\\)/\\(.*\\)" (regexp-quote prefix)) path)
       (format "%s:/%s" (match-string 2 path) (match-string 3 path)))
@@ -196,22 +208,33 @@
      (t
       path))))
 
-(defun fsvn-cygwin-svn-p ()
-  (let ((command (executable-find fsvn-svn-command-internal))
-	(cygdir (fsvn-cygwin-installed-dir)))
-    (and command
-	 cygdir
-	 (string-match (concat "^" (regexp-quote cygdir)) command))))
-
 ;; cygwin svn `--targets' arg accept only cygpath
 (defun fsvn-win-targets-file-converter (x)
-  (if (fsvn-cygwin-svn-p)
-      (fsvn-cygwin-expand-path x)
-    x))
+  (fsvn-cygwin-expand-path x))
 
-(setq fsvn-targets-file-converter 'fsvn-win-targets-file-converter)
+(defun fsvn-win-initialize-loading ()
+  (setq fsvn-cygwin-svn-p (fsvn-cygwin-svn-p))
+  (cond
+   (fsvn-cygwin-svn-p
+    (setq fsvn-cygwin-installed-folder (fsvn-cygwin-installed-folder)
+	  fsvn-cygwin-guessed-installed (fsvn-cygwin-guessed-installed)
+	  fsvn-cygwin-installed-dir (fsvn-cygwin-installed-dir)
+	  fsvn-cygwin-drive-prefix-dir (fsvn-cygwin-drive-prefix-dir)
+	  fsvn-targets-file-converter 'fsvn-win-targets-file-converter
+	  fsvn-password-prompt-accessible-p t))
+   (t
+    (setq fsvn-targets-file-converter nil
+	  fsvn-password-prompt-accessible-p nil))))
+
+(setq fsvn-initialize-function 'fsvn-win-initialize-loading)
 
 
+
+(defun fsvn-win-enable-password-prompt ()
+  fsvn-cygwin-svn-p)
+
+(defun fsvn-win-authenticate-repository (repository)
+  (fsvn-win-start-external-terminal fsvn-svn-command-internal "info" repository))
 
 ;; extra
 
@@ -246,7 +269,7 @@
 ;; TODO NTEmacs has no fiber.exe
 (defun fsvn-win-start-external-terminal (&rest args)
   (let ((tmpfile (fsvn-make-temp-file))
-	(command (mapconcat 'identity (cons "/C" (fsvn-flatten-command-args args)) " "))
+	(command (mapconcat 'identity (cons "/C" (fsvn-command-args-canonicalize args)) " "))
 	batfile)
     (with-temp-buffer
       (insert (unix-to-dos-filename (executable-find "cmd.exe")) " " command "\n")

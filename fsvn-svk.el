@@ -196,7 +196,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 
 (defun fsvn-svk-call-command (subcommand buffer &rest args)
   (fsvn-svk-process-environment
-   (let ((real-args (fsvn-flatten-command-args args))
+   (let ((real-args (fsvn-command-args-canonicalize args))
 	 command internal-args script)
      (if (null fsvn-svk-perl-command)
 	 (setq command fsvn-svk-script
@@ -209,7 +209,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 
 (defun fsvn-svk-start-command (subcommand buffer &rest args)
   (fsvn-svk-process-environment
-   (let ((real-args (fsvn-flatten-command-args args))
+   (let ((real-args (fsvn-command-args-canonicalize args))
 	 internal-args proc script)
      (setq internal-args 
 	   (if (null fsvn-svk-perl-command)
