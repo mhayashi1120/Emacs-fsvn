@@ -266,11 +266,6 @@ Keybindings:
       (when (string-match regexp f)
 	(fsvn-select-file-point-put-mark-internal mark)))))
 
-(defun fsvn-select-file-status-before-commit (files)
-  (with-temp-buffer
-    (when (= (fsvn-call-command "status" t "--xml" files) 0)
-      (fsvn-xml-parse-status))))
-
 (defun fsvn-select-file-draw-root (root)
   (let (buffer-read-only)
     (save-excursion
@@ -295,7 +290,7 @@ Keybindings:
       (mapc
        (lambda (target)
 	 (fsvn-select-file-draw-target target))
-       (fsvn-select-file-status-before-commit files))
+       (fsvn-get-files-status files))
       (save-excursion
 	(setq point (point))
 	(goto-char (point-min))

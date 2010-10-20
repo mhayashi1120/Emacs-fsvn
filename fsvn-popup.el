@@ -203,6 +203,7 @@ Optional argument ARGS svn command arguments."
 	(setq keep-point (point))
 	(goto-char (point-max)))
       (insert event)
+      (fsvn-parse-result-if-auth-prompt proc)
       (setq fsvn-popup-result-end-of-output (point-marker))
       (when keep-point
 	(goto-char keep-point)))))

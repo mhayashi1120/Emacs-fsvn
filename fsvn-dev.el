@@ -86,123 +86,6 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
-(defun fsvn-browse-cmd-read-smart-copy-this ()
-  (fsvn-browse-cmd-read-smart-copy/move-this 
-   (fsvn-browse-cmd-this-urlrev) t))
-
-(defun fsvn-browse-cmd-read-smart-move-this ()
-  (fsvn-browse-cmd-wc-only
-   (fsvn-browse-cmd-read-smart-copy/move-this 
-    (fsvn-browse-cmd-this-wc-file) nil)))
-
-(defun fsvn-browse-smart-move-this (alist &optional args)
-  "Execute `move' for point file.
-If that file indicate multiple files, electric prompt these files.
-Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
-"
-  (interactive (fsvn-browse-cmd-read-smart-move-this))
-  (let ((strategies
-	 (mapcar
-	  (lambda (item)
-	    (list 'fsvn-popup-start-copy/move-process "move" (car item) (cdr item) args))
-	  alist)))
-    (fsvn-async-invoke strategies)))
-
-(defun fsvn-browse-smart-copy-this (alist &optional args)
-  "Execute `copy' for point file.
-If that file indicate multiple files, electric prompt these files.
-Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
-"
-  (interactive (fsvn-browse-cmd-read-smart-copy-this))
-  (let ((strategies
-	 (mapcar
-	  (lambda (item)
-	    (list 'fsvn-popup-start-copy/move-process "copy" (car item) (cdr item) args))
-	  alist)))
-    (fsvn-async-invoke strategies)))
-
-(defun fsvn-browse-cmd-read-smart-copy/move-this (from copy-p)
-  (let* ((subcommand (if copy-p "copy" "move"))
-	 (default-args (if copy-p 
-			   fsvn-default-args-copy
-			  fsvn-default-args-move))
-	 (from (fsvn-browse-cmd-this-urlrev))
-	 (prompt (format "%s `%s' -> " (capitalize subcommand) (fsvn-url-filename from)))
-	 (to (fsvn-read-file-under-versioned prompt from))
-	 (args (fsvn-cmd-read-subcommand-args subcommand default-args))
-	 (alist (fsvn-smart-move/copy-file-alist from to))
-	 (directory (fsvn-browse-current-directory-url))
-	 (prompt (format "Select %s files. "
-			 (if copy-p "copying" "moving")))
-	 selected)
-    (when (> (length alist) 1)
-      (setq selected (fsvn-electric-select-files 
-		      directory
-		      (mapcar
-		       (lambda (item)
-			 (list (car item) 
-			       t
-			       (format "%s to %s" 
-				       (capitalize subcommand)
-				       (fsvn-url-relative-name (cdr item) directory))
-			       (cdr item)))
-		       alist)
-		      prompt))
-      (setq alist (mapcar 
-		   (lambda (item) 
-		     (cons (nth 0 item) (nth 3 item)))
-		   selected)))
-    (list alist args)))
-
-(defun fsvn-file-name-changed-prefix (src-file dest-file)
-  (let* ((src-name (fsvn-file-name-nondirectory src-file))
-	 (dest-name (fsvn-file-name-nondirectory dest-file))
-	 (src-list (reverse (string-to-list src-name)))
-	 (dest-list (reverse (string-to-list dest-name)))
-	 src-diff dest-diff same)
-    (while (and src-list dest-list 
-		(= (car src-list) (car dest-list)))
-      (setq same (cons (car src-list) same))
-      (setq src-list (cdr src-list)
-	    dest-list (cdr dest-list)))
-    (setq src-diff (nreverse src-list))
-    (setq dest-diff (nreverse dest-list))
-    ;; Match to `.'
-    (if (string-match "^\\([^.]+\\)\\." (concat same))
-	(let ((rest (match-string 1 (concat same))))
-	  (cons (concat src-diff rest) (concat dest-diff rest)))
-      (cons (concat src-diff) (concat dest-diff)))))
-
-(defun fsvn-smart-move/copy-file-alist (src-file dest-file)
-  (let ((prefix (fsvn-file-name-changed-prefix src-file dest-file))
-	(src-dir (fsvn-file-name-directory src-file))
-	(dest-dir (fsvn-file-name-directory dest-file))
-	regexp src-files)
-    ;;TODO check under versiond or not
-    (setq src-files 
-	  (fsvn-mapitem
-	   (lambda (file)
-	     (when (fsvn-meta-file-registered-p file)
-	       file))
-	   (directory-files src-dir t (concat "^" (regexp-quote (car prefix))))))
-    (setq regexp (concat "^" (regexp-quote (car prefix)) "\\(.*\\)$"))
-    (mapcar
-     (lambda (src-file)
-       (let ((src-name (fsvn-file-name-nondirectory src-file))
-	     dest-name)
-	 (unless (string-match regexp src-name)
-	   (error "Assertion failed. File name is not matched"))
-	 (setq dest-name (concat (cdr prefix) (match-string 1 src-name)))
-	 (cons src-file (fsvn-expand-file dest-name dest-dir))))
-     src-files)))
-
-;;TODO
-;; ("File At Point"
-;;  ["Smart Copy" fsvn-browse-smart-copy-this t]
-;;  ["Smart Move" fsvn-browse-smart-move-this t]
-
-
-
 
 ;; testing
 
@@ -328,13 +211,19 @@ How to send a bug report:
   "Repository directory."
   (fsvn-expand-file "repository" (fsvn-cache-directory)))
 
+(defun fsvn-cache-repository-uuid-directory (uuid)
+  (fsvn-expand-file (downcase uuid) (fsvn-cache-repository-directory)))
+
+(defun fsvn-cache-repository-exists-p (uuid)
+  (let ((repos (fsvn-cache-repository-uuid-directory uuid)))
+    (file-directory-p repos)))
+
 (defun fsvn-cache-uuid-repository (uuid)
-  (let* ((repos (expand-file-name uuid (fsvn-cache-repository-directory)))
+  (let* ((repos (fsvn-cache-repository-uuid-directory uuid))
 	 (url (fsvn-directory-name-as-repository repos)))
     (unless (and (file-directory-p repos)
 		 (> (length (directory-files repos nil dired-re-no-dot)) 0))
       (make-directory repos t)
-      ;;TODO local password???
       (fsvn-admin-call-command-discard "create" nil repos)
       (fsvn-admin-call-command-discard "setuuid" nil repos uuid)
       (fsvn-admin-create-empty-hook repos "pre-revprop-change"))
@@ -344,23 +233,26 @@ How to send a bug report:
   (and fsvn-svnsync-command-internal
        (executable-find fsvn-svnsync-command-internal)))
 
-(defun fsvn-cache-initialize-repository (root)
-  (let* ((uuid (fsvn-get-uuid root))
-	 (url (fsvn-cache-uuid-repository uuid))
-	 (info (fsvn-get-info-entry url)))
+(defun fsvn-cache-initialize-repository (url &optional root uuid)
+  (unless (and root uuid)
+    (let* ((info (fsvn-get-info-entry url)))
+      (setq uuid (fsvn-xml-info->entry=>repository=>uuid$ info)
+	    root (fsvn-xml-info->entry=>repository=>root$ info))))
+  (let* ((cached-url (fsvn-cache-uuid-repository uuid))
+	 (info (fsvn-get-info-entry cached-url)))
     (unless (and info (> (fsvn-xml-info->entry.revision info) 0))
       ;; No costed execute. sync process.
       (with-temp-buffer
-	(unless (= (call-process fsvn-svnsync-command-internal nil (current-buffer) nil "initialize" url root) 0)
+	(unless (= (call-process fsvn-svnsync-command-internal nil (current-buffer) nil "initialize" cached-url root) 0)
 	  (signal 'fsvn-command-error (cons (buffer-string) nil)))))
-    url))
+    cached-url))
 
-(defun fsvn-cache-mirror (root)
-  (let* ((url (fsvn-cache-initialize-repository root))
+(defun fsvn-cache-mirror-start (url &optional root uuid)
+  (let* ((cached-url (fsvn-cache-initialize-repository url root uuid))
 	 (buffer (fsvn-make-temp-buffer))
 	 proc)
     (fsvn-process-environment
-     (setq proc (start-process "fsvn" buffer fsvn-svnsync-command-internal "synchronize" url)))
+     (setq proc (start-process "fsvn" buffer fsvn-svnsync-command-internal "synchronize" cached-url)))
     (set-process-sentinel proc 
 			  (lambda (p e)
 			    (fsvn-process-exit-handler p e
@@ -370,6 +262,12 @@ How to send a bug report:
 
 (defun fsvn-cache-start-command (subcommand buffer &rest args)
   (apply 'fsvn-start-command subcommand buffer args))
+
+
+
+;;TODO git -> svn
+;; change svn:date revprop
+;; this means can sort to svn:date in log-list
 
 
 
