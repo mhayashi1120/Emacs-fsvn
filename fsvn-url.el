@@ -327,6 +327,25 @@
 	 list)
 	nil)))
 
+(defun fsvn-file-name-changed-prefix (src-file dest-file)
+  (let* ((src-name (fsvn-file-name-nondirectory src-file))
+	 (dest-name (fsvn-file-name-nondirectory dest-file))
+	 (src-list (reverse (string-to-list src-name)))
+	 (dest-list (reverse (string-to-list dest-name)))
+	 src-diff dest-diff same)
+    (while (and src-list dest-list 
+		(= (car src-list) (car dest-list)))
+      (setq same (cons (car src-list) same))
+      (setq src-list (cdr src-list)
+	    dest-list (cdr dest-list)))
+    (setq src-diff (nreverse src-list))
+    (setq dest-diff (nreverse dest-list))
+    ;; Match to `.'
+    (if (string-match "^\\([^.]+\\)\\." (concat same))
+	(let ((rest (match-string 1 (concat same))))
+	  (cons (concat src-diff rest) (concat dest-diff rest)))
+      (cons (concat src-diff) (concat dest-diff)))))
+
 
 
 (provide 'fsvn-url)

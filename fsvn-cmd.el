@@ -142,6 +142,11 @@
 	(setq entries (fsvn-xml-status->entries (fsvn-xml-parse-status)))
 	(fsvn-find-status-entry entries file)))))
 
+(defun fsvn-get-files-status (files)
+  (with-temp-buffer
+    (when (= (fsvn-call-command "status" t "--xml" files) 0)
+      (fsvn-xml-parse-status))))
+
 (defun fsvn-get-directory-status (directory)
   (with-temp-buffer
     (let ((args (list "--xml" directory)))
@@ -616,7 +621,7 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
      (terminal-coding-system)
      (fsvn-prop-file-coding-system propname))))
 
-(defvar fsvn-targets-file-converter 'identity
+(defvar fsvn-targets-file-converter nil
   "File name converter for function `--targets' argument.
 Default value is `identity'
 Usefull for cygwin version `svn'")
@@ -630,7 +635,7 @@ Argument FILES ."
 	(mapc
 	 (lambda (f)
 	   (let ((file (fsvn-url-escape-revision-mark f)))
-	     (insert (funcall fsvn-targets-file-converter file) "\n")))
+	     (insert (funcall (or fsvn-targets-file-converter 'identity) file) "\n")))
 	 files)
 	(write-region (point-min) (point-max) tmpfile nil 'no-msg)))
     tmpfile))

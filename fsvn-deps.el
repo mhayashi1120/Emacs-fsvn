@@ -774,6 +774,22 @@ $"
 			     (,parser (current-buffer)))))
   proc)
 
+(defun fsvn-parse-result-if-auth-prompt (proc)
+  (let (string)
+    (save-excursion
+      (forward-line 0)
+      (cond
+       ((looking-at "^Username: ")
+	(setq string (read-from-minibuffer "Username: ")))
+       ((looking-at "^\\(?:Password\\|Passphrase\\) for '[^']*': ")
+	(setq string (read-passwd (match-string 0))))
+       ((looking-at "^Store \\(?:password\\|passphrase\\) unencrypted")
+	(setq string (if (y-or-n-p "Store password unencrypted? ") "yes" "no")))))
+    (when string
+      (process-send-string proc (concat string "\n"))
+      (insert "\n")
+      t)))
+
 
 
 ;; * subcommand `update' utility.

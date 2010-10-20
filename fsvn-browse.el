@@ -214,6 +214,8 @@
 	  (define-key map "\C-r" 'fsvn-browse-resolved-selected)
 	  (define-key map "\C-bm" 'fsvn-browse-safe-move-this)
 	  (define-key map "\C-bc" 'fsvn-browse-safe-copy-this)
+	  (define-key map "\C-b\C-m" 'fsvn-browse-smart-move-this)
+	  (define-key map "\C-b\C-c" 'fsvn-browse-smart-copy-this)
 
 	  ;; C-v map to fsvn-browse-often-use-map
 	  (define-key map "\C-vc" 'fsvn-browse-copy-this)
@@ -703,6 +705,28 @@ PATH is each executed path."
 	(message "Cleanup process finished.")
       (message "Cleanup process failed."))
     (kill-buffer (current-buffer))))
+
+(defun fsvn-smart-move/copy-file-alist (src-file dest-file)
+  (let ((prefix (fsvn-file-name-changed-prefix src-file dest-file))
+	(src-dir (fsvn-file-name-directory src-file))
+	(dest-dir (fsvn-file-name-directory dest-file))
+	regexp src-files)
+    (setq src-files 
+	  (fsvn-mapitem
+	   (lambda (file)
+	     (when (fsvn-meta-file-registered-p file)
+	       file))
+	   (directory-files src-dir t (concat "^" (regexp-quote (car prefix))))))
+    (setq regexp (concat "^" (regexp-quote (car prefix)) "\\(.*\\)$"))
+    (mapcar
+     (lambda (src-file)
+       (let ((src-name (fsvn-file-name-nondirectory src-file))
+	     dest-name)
+	 (unless (string-match regexp src-name)
+	   (error "Assertion failed. File name is not matched"))
+	 (setq dest-name (concat (cdr prefix) (match-string 1 src-name)))
+	 (cons src-file (fsvn-expand-file dest-name dest-dir))))
+     src-files)))
 
 (defun fsvn-browse-setup-mode-line ()
   (or (assq 'fsvn-browse-buffer-files-status-process mode-line-process)
@@ -1509,6 +1533,48 @@ PATH is each executed path."
      (fsvn-browse-check-unsave-buffer (list (fsvn-browse-current-path)))
      (list args))))
 
+(defun fsvn-browse-cmd-read-smart-copy-this ()
+  (fsvn-browse-cmd-read-smart-copy/move-this 
+   (fsvn-browse-cmd-this-urlrev) t))
+
+(defun fsvn-browse-cmd-read-smart-move-this ()
+  (fsvn-browse-cmd-wc-only
+   (fsvn-browse-cmd-read-smart-copy/move-this 
+    (fsvn-browse-cmd-this-wc-file) nil)))
+
+(defun fsvn-browse-cmd-read-smart-copy/move-this (from copy-p)
+  (let* ((subcommand (if copy-p "copy" "move"))
+	 (default-args (if copy-p 
+			   fsvn-default-args-copy
+			  fsvn-default-args-move))
+	 (from (fsvn-browse-cmd-this-urlrev))
+	 (prompt (format "%s `%s' -> " (capitalize subcommand) (fsvn-url-filename from)))
+	 (to (fsvn-read-file-under-versioned prompt from))
+	 (args (fsvn-cmd-read-subcommand-args subcommand default-args))
+	 (alist (fsvn-smart-move/copy-file-alist from to))
+	 (directory (fsvn-browse-current-directory-url))
+	 (prompt (format "Select %s files. "
+			 (if copy-p "copying" "moving")))
+	 selected)
+    (when (> (length alist) 1)
+      (setq selected (fsvn-electric-select-files 
+		      directory
+		      (mapcar
+		       (lambda (item)
+			 (list (car item) 
+			       t
+			       (format "%s to %s" 
+				       (capitalize subcommand)
+				       (fsvn-url-relative-name (cdr item) directory))
+			       (cdr item)))
+		       alist)
+		      prompt))
+      (setq alist (mapcar 
+		   (lambda (item) 
+		     (cons (nth 0 item) (nth 3 item)))
+		   selected)))
+    (list alist args)))
+
 ;; specific read function
 
 (defun fsvn-browse-cmd-read-this-file-struct ()
@@ -2065,6 +2131,32 @@ This is useful for integrating other source management.
 	 (t
 	  (rename-file tmpfile dest-file t)))))))
 
+(defun fsvn-browse-smart-move-this (alist &optional args)
+  "Execute `move' for point file.
+If that file indicate multiple files, electric prompt these files.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-smart-move-this))
+  (let ((strategies
+	 (mapcar
+	  (lambda (item)
+	    (list 'fsvn-popup-start-copy/move-process "move" (car item) (cdr item) args))
+	  alist)))
+    (fsvn-async-invoke strategies)))
+
+(defun fsvn-browse-smart-copy-this (alist &optional args)
+  "Execute `copy' for point file.
+If that file indicate multiple files, electric prompt these files.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-smart-copy-this))
+  (let ((strategies
+	 (mapcar
+	  (lambda (item)
+	    (list 'fsvn-popup-start-copy/move-process "copy" (car item) (cdr item) args))
+	  alist)))
+    (fsvn-async-invoke strategies)))
+
 (defun fsvn-browse-create-branch (urlrev branch-url &optional args)
   "Create branch executing `copy'.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
@@ -2406,6 +2498,8 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      ["Proplist" fsvn-browse-propview-this t]
      ["Safe Copy" fsvn-browse-safe-copy-this t]
      ["Safe Move" fsvn-browse-safe-move-this t]
+     ["Smart Copy" fsvn-browse-smart-copy-this t]
+     ["Smart Move" fsvn-browse-smart-move-this t]
      )
     ("Repository"
      ["Browser" fsvn-browse-open-repository t]

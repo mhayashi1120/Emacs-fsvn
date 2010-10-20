@@ -208,7 +208,7 @@ Optional argument REVISION means point of URLREV log chain."
 
 (defvar fsvn-password-prompt-accessible-p t)
 
-(defvar fsvn-authenticate-no-prompt nil)
+(defvar fsvn-authenticate-password-prompt-shown nil)
 
 (defun fsvn-authenticate-repository (repository)
   "Authenticate by `svn' to REPOSITORY."
@@ -219,7 +219,7 @@ Optional argument REVISION means point of URLREV log chain."
     (let ((buffer (fsvn-make-temp-buffer))
 	  (coding-system-for-write 'unix)
 	  proc)
-      (setq fsvn-authenticate-no-prompt t)
+      (setq fsvn-authenticate-password-prompt-shown nil)
       (setq proc (fsvn-start-command "info" buffer repository))
       (set-process-sentinel proc 'fsvn-authenticate-sentinel)
       (set-process-filter proc 'fsvn-authenticate-filter)
@@ -230,26 +230,11 @@ Optional argument REVISION means point of URLREV log chain."
 
 (defun fsvn-authenticate-filter (proc event)
   (fsvn-process-event-handler proc event
-    (let (sended)
-      (goto-char (point-max))
-      (insert event)
-      (save-excursion
-	(forward-line 0)
-	(cond
-	 ((looking-at "^Username: ")
-	  (setq fsvn-authenticate-no-prompt nil)
-	  (let (user)
-	    (setq user (read-from-minibuffer "Username: "))
-	    (process-send-string proc (concat user "\n"))
-	    (setq sended t)))
-	 ((looking-at "^Password for '[^']*': ")
-	  (setq fsvn-authenticate-no-prompt nil)
-	  (let (pass)
-	    (setq pass (read-passwd (match-string 0)))
-	    (process-send-string proc (concat pass "\n"))
-	    (setq sended t)))))
-      (when sended
-	(insert "\n")))))
+    (goto-char (point-max))
+    (insert event)
+    (let ((prompt (fsvn-parse-result-if-auth-prompt proc)))
+      (when prompt
+	(setq fsvn-authenticate-password-prompt-shown t)))))
 
 (defun fsvn-authenticate-sentinel (proc event)
   (fsvn-process-exit-handler proc event
@@ -257,7 +242,7 @@ Optional argument REVISION means point of URLREV log chain."
     (cond
      ((/= (process-exit-status proc) 0)
       (message "Failed authenticate."))
-     (fsvn-authenticate-no-prompt
+     ((not fsvn-authenticate-password-prompt-shown)
       (message "Already authenticated."))
      (t
       (message "Authenticated.")))))
