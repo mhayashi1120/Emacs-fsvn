@@ -376,27 +376,19 @@ Use %% to put a single % into the output.
 
 
 (defun fsvn-lisp-save (value file)
-  (let* ((fullname file)
-	 lisp)
+  (let ((lisp (copy-sequence value)))
     (with-temp-buffer
-      (erase-buffer)
-      (setq lisp (copy-sequence value))
       (pp lisp (current-buffer))
       (let ((coding-system-for-write 'utf-8))
-	(write-region (point-min) (point-max) fullname nil 'no-msg)))))
+	(write-region (point-min) (point-max) file nil 'no-msg)))))
 
 (defun fsvn-lisp-load (file)
-  (let* ((fullname file)
-	 lisp)
-    (with-temp-buffer
-      (setq lisp
-	    (condition-case nil
-		(progn
-		  (let ((coding-system-for-read 'utf-8))
-		    (insert-file-contents fullname))
-		  (read (current-buffer)))
-	      (error ()))))
-    lisp))
+  (condition-case nil
+      (with-temp-buffer
+	(let ((coding-system-for-read 'utf-8))
+	  (insert-file-contents file))
+	(read (current-buffer)))
+    (error ())))
 
 
 

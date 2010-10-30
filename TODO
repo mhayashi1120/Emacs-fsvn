@@ -110,6 +110,9 @@ revision range and log base url
 
 
 ** log-sibling return to specific revision file. (use magic file name)
+** patch
+property is changed created patch wrong??
+
 * prop-mode
 
 ** prop-recursive-mode
@@ -144,6 +147,16 @@ proplist --recursive
 
 
 ** git
+
+
+*** like `git stash'
+
+
+stash id is stash date {yyyyMMddHHmmss}
+
+md5 is directory by directory-file-name.
+
+~/.fsvn/stash/{md5 of directory name}/{yyyyMMddHHmmss}
 
 * svk
 

@@ -86,7 +86,113 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
+(defun fsvn-browse-stash-path ()
+  (interactive)
+  )
 
+(defun fsvn-browse-stash-pop-path ()
+  (interactive)
+  )
+
+(defun fsvn-stash-pop-read-time (directory)
+  (let ((times (mapcar 
+		(lambda (tm) 
+		  (cons (format-time-string "%Y-%m-%d %H:%M:%S" tm) nil))
+		(fsvn-stash-pop-directory-times directory))))
+    (completing-read "TODO: " times)))
+
+(defun fsvn-stash-pop (directory &optional time)
+  (let* ((stashdir (fsvn-stash-pop-directory directory time)))
+    (unless stashdir
+      (error "No stashed directory"))
+    ;;TODO copy stashdir to directory
+    (fsvn-delete-directory stashdir)
+    (when (file-directory-p stashdir)
+      ;; delete if empty
+      (unless (directory-files stashdir nil dired-re-no-dot)
+	(delete-directory stashdir)))))
+
+(defun fsvn-stash-push (directory)
+  (let* ((stashdir (fsvn-stash-pushing-directory directory))
+	 (stashdirs (fsvn-stash-pushing-directories stashdir)))
+    (unless (file-directory-p stashdir)
+      (make-directory stashdir t))
+    ;;TODO copy changed file and .svn
+    (fsvn-copy-directory directory (car stashdirs))))
+
+(defun fsvn-stash-pushing-directories (stashdir &optional time)
+  (list 
+   (fsvn-expand-file "files" stashdir) 
+   (fsvn-expand-file "status" stashdir)))
+
+(defun fsvn-stash-pushing-directory (directory &optional time)
+  (let* ((stashdir (fsvn-expand-file (format-time-string "%s" time) 
+				     (fsvn-stash-hash-directory directory))))
+    stashdir))
+
+(defun fsvn-stash-pop-directory (directory &optional time)
+  (let ((dir
+	 (if time
+	     (fsvn-stash-pushing-directory directory time)
+	   (car (fsvn-stash-pop-directories directory)))))
+    (when (and dir (file-exists-p dir))
+      dir)))
+
+(defun fsvn-stash-pop-directories (directory)
+  (let* ((dir (fsvn-stash-hash-directory directory))
+	 (files (directory-files dir nil dired-re-no-dot)))
+    (mapcar
+     (lambda (sec)
+       (fsvn-expand-file (format "%d" sec) dir))
+     (sort
+      (remove nil
+	      (mapcar 
+	       (lambda (name) 
+		 (when (string-match "^[0-9]+$" name)
+		   (string-to-number name)))
+	       files))
+      '>))))
+
+(defun fsvn-stash-pop-directory-times (directory)
+  (mapcar
+   (lambda (file)
+     (let ((sec (string-to-number (fsvn-file-name-nondirectory file))))
+       (seconds-to-time sec)))
+   (fsvn-stash-pop-directories directory)))
+
+(defun fsvn-stash-hash-directory (directory)
+  (let ((dir (directory-file-name directory)))
+    (fsvn-expand-file (md5 dir) (fsvn-stash-directory))))
+
+(defun fsvn-stash-directory ()
+  "Backup directory."
+  (fsvn-expand-file "stash" fsvn-home-directory))
+
+(defun fsvn-copy-file-tree (base-directory src-files dest-directory &optional ok-if-exists)
+  (let ((files
+	 (mapcar
+	  (lambda (src)
+	    ;;TODO check traversal
+	    (fsvn-file-relative src base-directory))
+	  src-files)))
+    (mapc
+     (lambda (file)
+       (let* ((src (fsvn-expand-file file base-directory))
+	      (dest (fsvn-expand-file file dest-directory))
+	      (dir (fsvn-file-name-directory2 dest)))
+	 (unless (file-directory-p dir)
+	   (make-directory dir t))
+	 (copy-file src dest ok-if-exists t)))
+     files)
+    nil))
+
+
+;;TODO stash delete and other svn status
+
+;;TODO
+;;(add-to-list 'fsvn-temp-directory-dirs "stash")
+
+
 ;; testing
 
 (defconst fsvn-xml-accessor-prefix "fsvn-xml-")

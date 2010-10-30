@@ -578,7 +578,8 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 (defun fsvn-status-unversioned-files (directory)
   (with-temp-buffer
     (let (ret)
-      (fsvn-call-command "status" (current-buffer) directory)
+      (unless (= (fsvn-call-command "status" (current-buffer) directory) 0)
+	(signal 'fsvn-command-error nil))
       (goto-char (point-min))
       (while (re-search-forward fsvn-svn-status-unversioned-regexp nil t)
 	(setq ret (cons (fsvn-expand-file (match-string 2)) ret)))

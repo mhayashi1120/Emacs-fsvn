@@ -21,6 +21,8 @@ a lot of process makes this error?
 
 ** Sometimes repeat revret-buffer destroy buffer format.
 
+** switch with --relocate arg
+
 * select-file-mode
 
 ** freezing several minutes when commit a lot of files.
