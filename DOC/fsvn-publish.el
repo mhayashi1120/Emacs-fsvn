@@ -24,7 +24,7 @@
 (defun fsvn-publish-content-lang (html)
   (let ((regexp "\\.html\\.\\(..\\)$"))
     (string-match regexp html)
-    (match-string 1 published)))
+    (match-string 1 html)))
 
 (defun fsvn-publish-html-file (piki)
   (let ((path (relative-file-name piki fsvn-publish-wiki-directory)))
@@ -54,13 +54,36 @@
   (interactive)
   (let* ((coding-system-for-read 'utf-8-unix)
 	 (coding-system-for-write 'utf-8-unix)
-	 (template (expand-file-name "template.htm" fsvn-publish-template-directory)))
+	 (template (expand-file-name "template.htm" fsvn-publish-template-directory))
+	 (message-log-max))
     (with-temp-buffer
       (mapc
        (lambda (piki)
 	 (let ((html (fsvn-publish-html-file piki)))
-	   (shell-command (format "piki %s %s > %s" template piki html))))
-       (fsvn-publish-files)))))
+	   (shell-command (format "piki %s %s > %s" template piki html))
+	   (message nil)
+	   (fsvn-publish-prepare-lang html)))
+       (fsvn-publish-files)))
+    (message "Wiki files are published.")))
+
+(defun fsvn-publish-prepare-lang (html)
+  (let ((lang (fsvn-publish-content-lang html)))
+    (with-temp-buffer
+      (insert-file-contents html)
+      (fsvn-publish-replace-in-buffer 
+       "[ \t]*<meta name=\"Content-Language\" content=\"\\(\\)\""
+       1 lang)
+      (fsvn-publish-replace-in-buffer 
+       "[ \t]*<html lang=\"\\(\\)\""
+       1 lang)
+      (write-region (point-min) (point-max) html nil 'no-msg))))
+
+(defun fsvn-publish-replace-in-buffer (regexp subexp new-text)
+  (save-excursion
+    (goto-char (point-min))
+    (unless (re-search-forward regexp nil t)
+      (error "Error! No string is matched"))
+    (replace-match new-text nil nil nil subexp)))
 
 (provide 'fsvn-publish)
 
