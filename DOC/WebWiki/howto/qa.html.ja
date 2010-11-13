@@ -32,6 +32,12 @@
 svn+ssh を使う場合は可能な限り ssh-agent を使ってください。Windows で putty を使う場合は pageant です。</p>
 </div>
 </div>
+<div id="q-general-0001">
+<dl>
+<dt>Q. バッファがたくさんできて欝陶しい。</dt>
+<dd>A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)</dd>
+</dl>
+</div>
 <div id="q-prop-0001">
 <dl>
 <dt>Q. 再帰的に `propset' 実行するときは？</dt>

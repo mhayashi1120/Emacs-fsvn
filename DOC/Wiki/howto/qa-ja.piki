@@ -10,6 +10,12 @@
 }
 }
 
+# General question
+{Q-general-0001
+? Q. バッファがたくさんできて欝陶しい。
+! A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)
+}
+
 # Property question
 {Q-prop-0001
 ? Q. 再帰的に `propset' 実行するときは？
