@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-	<meta name="Content-Language" content="ja"/>
+	<meta name="Content-Language" content=""/>
 	<meta http-equiv="Content-Style-Type" content="text/css"/>
 	<meta http-equiv="Content-Script-Type" content="text/javascript"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -13,45 +13,69 @@
 	<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/ie6styles.net.css"><![endif]-->
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/sf.jp.theme.css"/>
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
+	<link rel="stylesheet" href="default.css" media="all" />
 
-	<title></title>
+	<title>Question and Answer</title>
 
   </head>
   <body>
 	<a href="../index.html">Top</a>
 
-	<hr />
-	<h2>Question and Answer</h2>
-	<hr />
-
-	<p>
-	  Q. fsvn-svn-command や fsvn-svnadmin-command を変更したが反映されない。
-
-	</p>
-
-	<p>
-	  A. (fsvn-initialize-loading) を評価してください。
-
-	</p>
-
-	<p>
-	  Q. 誰が質問したんですか？
-
-	</p>
-
-	<p>
-	  A. ほぼ私の脳内です。。。
-
-	</p>
-
-	<p>
-	  Q. 読んだけど分からない。
-
-	</p>
-
-	<p>
-	  A. <a href="mailto:mhayashi1120%40gmail.com">作者まで</a>。順次追加します。
-	<p/>
+<h1>Question and Answer</h1>
+<div id="q-auth-0001">
+<dl>
+<dt>Q. パスワード確認ですべてが止まってしまう。どうやって認証すればいいのか？</dt>
+<dd>A. M-x fsvn-authenticate-repository</dd>
+</dl>
+<div class="dd-note">
+<p>svn コマンドにパスワード情報をキャッシュするように伝えます。
+svn+ssh を使う場合は可能な限り ssh-agent を使ってください。Windows で putty を使う場合は pageant です。</p>
+</div>
+</div>
+<div id="q-prop-0001">
+<dl>
+<dt>Q. 再帰的に `propset' 実行するときは？</dt>
+<dd>A. プロパティを編集中に M-x fsvn-propedit-toggle-recursive (or type C-c C-r)</dd>
+</dl>
+</div>
+<div id="q-config-0001">
+<dl>
+<dt>Q. fsvn-svn-command や fsvn-svnadmin-command を変更したが反映されない。</dt>
+<dd>A. M-x fsvn-initialize-loading</dd>
+</dl>
+</div>
+<div id="q-svk-0001">
+<dl>
+<dt>Q. svk の使い方は？</dt>
+<dd>A. 設定サンプルです。</dd>
+</dl>
+<pre>
+(require 'fsvn-svk)
+(setq fsvn-svk-perl-command &quot;c:/usr/local/svk/bin/perl&quot;)
+(setq fsvn-svk-script &quot;c:/usr/local/svk/bin/svk&quot;)
+</pre>
+<div class="dd-note">
+<p>* TODO Windows の perl.exe だと正しくプロンプトを扱えない。</p>
+</div>
+</div>
+<div id="q-svnadmin-0001">
+<dl>
+<dt>Q. How to create repository</dt>
+<dd>A. M-x fsvn-admin-create-repository to create repository if default-directory have no files.</dd>
+</dl>
+</div>
+<div id="q-about-0001">
+<dl>
+<dt>Q. 誰が質問したんですか？</dt>
+<dd>A. ほぼ私の脳内です。。。</dd>
+</dl>
+</div>
+<div id="q-about-0002">
+<dl>
+<dt>Q. 読んだけど分からない。不具合がある。</dt>
+<dd>A. <a href="mailto:mhayashi1120@gmail.com">作者まで</a>。順次追加します。</dd>
+</dl>
+</div>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

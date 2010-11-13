@@ -1,0 +1,55 @@
+* Question and Answer
+
+# Authenticate question
+{Q-auth-0001
+? Q. パスワード確認ですべてが止まってしまう。どうやって認証すればいいのか？
+! A. M-x fsvn-authenticate-repository
+{dd-note
+  svn コマンドにパスワード情報をキャッシュするように伝えます。
+  svn+ssh を使う場合は可能な限り ssh-agent を使ってください。Windows で putty を使う場合は pageant です。
+}
+}
+
+# Property question
+{Q-prop-0001
+? Q. 再帰的に `propset' 実行するときは？
+! A. プロパティを編集中に M-x fsvn-propedit-toggle-recursive (or type C-c C-r)
+}
+
+# Configuration question
+{Q-config-0001
+? Q. fsvn-svn-command や fsvn-svnadmin-command を変更したが反映されない。
+! A. M-x fsvn-initialize-loading
+}
+
+# svk question
+{Q-svk-0001
+? Q. svk の使い方は？
+! A. 設定サンプルです。
+>|
+(require 'fsvn-svk)
+(setq fsvn-svk-perl-command "c:/usr/local/svk/bin/perl")
+(setq fsvn-svk-script "c:/usr/local/svk/bin/svk")
+|<
+
+{dd-note
+ * TODO Windows の perl.exe だと正しくプロンプトを扱えない。
+}
+}
+
+# svnadmin question
+{Q-svnadmin-0001
+? Q. How to create repository
+! A. M-x fsvn-admin-create-repository to create repository if default-directory have no files.
+}
+
+# Misc question
+{Q-about-0001
+? Q. 誰が質問したんですか？
+! A. ほぼ私の脳内です。。。
+}
+
+{Q-about-0002
+? Q. 読んだけど分からない。不具合がある。
+! A. ["作者まで" mailto:mhayashi1120@gmail.com]。順次追加します。
+}

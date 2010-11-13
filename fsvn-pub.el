@@ -409,24 +409,43 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (error "Buffer file is not under versioned"))
   (fsvn-open-logview-mode buffer-file-name nil))
 
-(defun fsvn-vc-commit (&optional arg)
+(defun fsvn-vc-commit (&optional args)
   "Prepare `commit' buffer for buffer file."
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
+  (fsvn-vc-check-before-commit)
+  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory)))
+    (unless fsvn-buffer-repos-root
+      (error "Buffer file is not under versioned"))
+    (fsvn-browse-commit-mode (list buffer-file-name) args)))
+
+(defun fsvn-vc-commit-non-query (args)
+  "Execute `commit' with no query. "
+  (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
+  (fsvn-vc-check-before-commit)
+  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory)))
+    (unless fsvn-buffer-repos-root
+      (error "Buffer file is not under versioned"))
+    (unless (member "--message" args)
+      (setq args (append args '("--message" ""))))
+    (with-temp-buffer
+      (unless (= (fsvn-call-command "commit" (current-buffer) buffer-file-name args) 0)
+	(error "Commit failed %s" (buffer-string))))
+    (fsvn-ui-fancy-redraw)
+    (message "Successfuly finished `commit'.")))
+
+(defun fsvn-vc-check-before-commit ()
   (unless buffer-file-name
     (error "Buffer is not associated with a file"))
   (when (and (buffer-modified-p)
 	     (y-or-n-p "Buffer modified. Save? "))
-    (save-buffer nil))
-  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory)))
-    (unless fsvn-buffer-repos-root
-      (error "Buffer file is not under versioned"))
-    (fsvn-browse-commit-mode (list buffer-file-name) arg)))
+    (save-buffer nil))  )
 
 
 
 (defvar fsvn-initialize-function nil)
 
 (defun fsvn-initialize-loading ()
+  (interactive)
   (fsvn-set-command-information)
   (unless (file-directory-p fsvn-home-directory)
     (make-directory fsvn-home-directory t))

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-	<meta name="Content-Language" content="en"/>
+	<meta name="Content-Language" content=""/>
 	<meta http-equiv="Content-Style-Type" content="text/css"/>
 	<meta http-equiv="Content-Script-Type" content="text/javascript"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -13,64 +13,39 @@
 	<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/ie6styles.net.css"><![endif]-->
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/sf.jp.theme.css"/>
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
+	<link rel="stylesheet" href="default.css" media="all" />
 
-	<title>How to install fsvn.el</title>
+	<title>Install</title>
 
   </head>
   <body>
 	<a href="../index.html">Top</a>
 
-	<hr />
-	<h2>Install</h2>
-	<hr />
-
-	<ol>
-	  <li>First of all, unpack archive file
-		<p>
-		  <code>tar xzf fsvn-(version).tar.gz</code>
-		</p>
-	  </li>
-
-	  <li>If you have `make' command, `cd' to the directory where you unpacked fsvn.
-		<ol>
-		  <li>When to use on NTEmacs, read mw32cmp.el header to prepare.
-		  </li>
-
-		  <li>Edit MAKE-CFG.el and Makefile.
-		  </li>
-
-		  <li>Optionally invoke the following command show installed files where to go.
-			<p>
-			  <code>make what-where</code>
-			</p>
-		  </li>
-
-		  <li>Invoke the following command.
-			<p>
-			  <code>make install</code>
-			</p>
-		  </li>
-		</ol>
-	  </li>
-	  <li>If you have no `make' command simply copy &#42;.el files to `load-path' where you want.
-	  </li>
-	</ol>
-
-	<hr />
-	<h3>.emacs</h3>
-	<hr />
-	<p>
-	  <code>(require 'fsvn)</code>
-	</p>
-	<hr />
-	<h3>.emacs (Option)</h3>
-	<hr />
-	<a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&amp;root=fsvn">dot.sample</a>
-	<hr />
-	<h3>For more information.</h3>
-	<hr />
-	<a href="qa.html.en">Q&#32;and&#32;A</a>
-	<p/>
+<h1>Install</h1>
+<h3>. First of all, unpack archive file</h3>
+<pre>
+tar xzf fsvn-(version).tar.gz
+</pre>
+<h3>If you have `make' command, `cd' to the directory where you unpacked fsvn.</h3>
+<h4>When to use on NTEmacs, read mw32cmp.el header to prepare.</h4>
+<h4>Edit MAKE-CFG.el and Makefile.</h4>
+<h4>Optionally invoke the following command show installed files where to go.</h4>
+<pre>
+make what-where
+</pre>
+<h4>Invoke the following command.</h4>
+<pre>
+make install
+</pre>
+<h3>If you have no `make' command simply copy *.el files to `load-path' where you want.</h3>
+<h2>.emacs</h2>
+<pre>
+(require 'fsvn)
+</pre>
+<h2>.emacs (Option)</h2>
+<p><a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn">dot.sample</a></p>
+<h2>For more information.</h2>
+<p><a href="qa.html.en">Q and A</a></p>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

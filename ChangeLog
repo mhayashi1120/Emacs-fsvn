@@ -1,3 +1,7 @@
+2010-11-13  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fsvn-vc-commit-non-query
+
 2010-10-19  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: fsvn-browse-smart-move-this bound to `C-c C-b C-m'

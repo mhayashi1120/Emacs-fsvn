@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-	<meta name="Content-Language" content="en"/>
+	<meta name="Content-Language" content=""/>
 	<meta http-equiv="Content-Style-Type" content="text/css"/>
 	<meta http-equiv="Content-Script-Type" content="text/javascript"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -13,24 +13,19 @@
 	<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/ie6styles.net.css"><![endif]-->
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/sf.jp.theme.css"/>
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
+	<link rel="stylesheet" href="default.css" media="all" />
 
-	<title>How to use fsvn.el</title>
+	<title>Basic use of fsvn.el</title>
 
   </head>
   <body>
 	<a href="../index.html">Top</a>
 
-	<hr />
-	<h2>Basic use of fsvn.el</h2>
-	<hr />
-	<h3>First of all</h3>
-	<hr />
-	TODO
-	<hr />
-	<h3>For more information.</h3>
-	<hr />
-	<a href="qa.html.en">Q&#32;and&#32;A</a>
-	<p/>
+<h1>Basic use of fsvn.el</h1>
+<h2>First of all</h2>
+<p>TODO</p>
+<h2>For more information.</h2>
+<p><a href="qa.html.en">Q and A</a></p>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

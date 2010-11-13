@@ -15,47 +15,13 @@
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
 	<link rel="stylesheet" href="default.css" media="all" />
 
-	<title>インストール</title>
+	<title>$title</title>
 
   </head>
   <body>
 	<a href="../index.html">Top</a>
 
-<h1>インストール</h1>
-<h2>圧縮ファイルをダウンロードした場合</h2>
-<h3>圧縮ファイルを展開してください。</h3>
-<pre>
-tar xzf fsvn-(version).tar.gz
-</pre>
-<h3>`make' コマンドのある環境の場合は fsvn を展開したディレクトリに `cd' して、後述の手順に従ってください。</h3>
-<h4>NTEmacs で動作させる場合は mw32cmp.el のヘッダを読んで準備をしてください。</h4>
-<h4>MAKE-CFG と Makefile をエディタで編集してください。</h4>
-<h4>ファイルがどこにインストールされるか確認する場合は以下のコマンドを実行してください。</h4>
-<pre>
-make what-where
-</pre>
-<h4>以下のコマンドを実行してインストールを終了してください。</h4>
-<pre>
-make install
-</pre>
-<h3>`make' コマンドがない環境の場合は *.elファイルを `load-path' の通ったところへコピーしてください。</h3>
-<h2>fsvn.el をダウンロードした場合</h2>
-<h3>`load-path' の通ったところへ fsvn.el をコピーしてください。</h3>
-<h2>fsvn.el.gz, fsvn.el.bz2 をダウンロードした場合</h2>
-<h3>圧縮ファイルを展開してください。</h3>
-<pre>
-tar xzf fsvn.el.gz
-</pre>
-<h3>`load-path' の通ったところへ fsvn.el をコピーしてください。</h3>
-<h3>NTEmacs で動作させる場合は mw32cmp.el のヘッダを読んで必要な物を `load-path' へコピーしてください。</h3>
-<h2>.emacs の設定</h2>
-<pre>
-(require 'fsvn)
-</pre>
-<h2>.emacs の設定 (Option)</h2>
-<p><a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&root=fsvn">dot.sample.ja</a></p>
-<h2>わからないことは</h2>
-<p><a href="qa.html.ja">Q and A</a></p>
+$body
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

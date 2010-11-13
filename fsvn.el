@@ -63,32 +63,10 @@
 ;; * http://svn.meadowy.org/Meadow/trunk/
 
 ;; NOTE:
-;; Q.  How to execute `propset' recursively?
-;; A.  M-x fsvn-propedit-toggle-recursive (or type C-c C-r)
-
-;; Q.  How to authorize repository.  Password prompt stop everything.
-;; A.  M-x fsvn-authenticate-repository
-;;    This makes svn to cache password.
-;;    If possible, to use ssh-agent program when access by svn+ssh protcol.
-;;    TODO: password authenticate only when commit.
-;;          How to send password for stopping processes.
 
 ;; Q. TODO
 ;; A. TODO
 ;; (setenv "SVN_SSH" "ssh -q")
-
-;; Q.  How to use svk in windows.
-;; A.  Sample of settings.
-;;    (require 'fsvn-svk)
-;;    (setq fsvn-svk-perl-command "c:/usr/local/svk/bin/perl")
-;;    (setq fsvn-svk-script "c:/usr/local/svk/bin/svk")
-;;    
-;;   Windows native perl.exe displays propmt but not works in Emacs sub process.
-;;
-
-;; Q.  How to create repository
-;; A.  M-x fsvn-admin-create-repository
-;;    to create repository if default-directory have no files.
 
 ;; Q.  How to use in NTEmacs
 ;; A.  TODO

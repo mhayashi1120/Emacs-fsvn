@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-	<meta name="Content-Language" content="en"/>
+	<meta name="Content-Language" content=""/>
 	<meta http-equiv="Content-Style-Type" content="text/css"/>
 	<meta http-equiv="Content-Script-Type" content="text/javascript"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -13,45 +13,69 @@
 	<!--[if lte IE 6]><link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/ie6styles.net.css"><![endif]-->
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/sf.jp.theme.css"/>
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
+	<link rel="stylesheet" href="default.css" media="all" />
 
-	<title></title>
+	<title>Question and Answer</title>
 
   </head>
   <body>
 	<a href="../index.html">Top</a>
 
-	<hr />
-	<h2>Question and Answer</h2>
-	<hr />
-
-	<p>
-	  Q. Change fsvn-svn-command, fsvn-svnadmin-command but no effect.
-
-	</p>
-
-	<p>
-	  A. Evaluate (fsvn-initialize-loading)
-
-	</p>
-
-	<p>
-	  Q. Who did these questions?
-
-	</p>
-
-	<p>
-	  A. In my brain.
-
-	</p>
-
-	<p>
-	  Q. In spite of reading this document, I can't understand.
-
-	</p>
-
-	<p>
-	  A. <a href="mailto:mhayashi1120%40gmail.com">Send&#32;mail&#32;to&#32;author</a> Will be added new QA.
-	<p/>
+<h1>Question and Answer</h1>
+<div id="q-auth-0001">
+<dl>
+<dt>Q. How to authorize repository. Password prompt stop everything.</dt>
+<dd>A. M-x fsvn-authenticate-repository</dd>
+</dl>
+<div class="dd-note">
+<p>This makes svn to cache password.
+If possible, to use ssh-agent program when access by svn+ssh protcol. If using windows and putty, should be pageant.</p>
+</div>
+</div>
+<div id="q-prop-0001">
+<dl>
+<dt>Q. How to execute `propset' recursively?</dt>
+<dd>A. In propedit-mode M-x fsvn-propedit-toggle-recursive (or type C-c C-r)</dd>
+</dl>
+</div>
+<div id="q-config-0001">
+<dl>
+<dt>Q. Change fsvn-svn-command, fsvn-svnadmin-command but no effect.</dt>
+<dd>A. M-x fsvn-initialize-loading</dd>
+</dl>
+</div>
+<div id="q-svk-0001">
+<dl>
+<dt>Q. How to use svk in windows.</dt>
+<dd>A. Sample of settings.</dd>
+</dl>
+<pre>
+(require 'fsvn-svk)
+(setq fsvn-svk-perl-command &quot;c:/usr/local/svk/bin/perl&quot;)
+(setq fsvn-svk-script &quot;c:/usr/local/svk/bin/svk&quot;)
+</pre>
+<div class="dd-note">
+<p>* TODO Windows native perl.exe displays propmt but not works in Emacs process.</p>
+</div>
+</div>
+<div id="q-svnadmin-0001">
+<dl>
+<dt>Q. How to create repository</dt>
+<dd>A. M-x fsvn-admin-create-repository to create repository if default-directory have no files.</dd>
+</dl>
+</div>
+<div id="q-about-0001">
+<dl>
+<dt>Q. Who did these questions?</dt>
+<dd>A. In my brain.</dd>
+</dl>
+</div>
+<div id="q-about-0002">
+<dl>
+<dt>Q. In spite of reading this document, I can't understand. Or there is bug.</dt>
+<dd>A. <a href="mailto:mhayashi1120@gmail.com">Send mail to author</a> Will be added new QA.</dd>
+</dl>
+</div>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

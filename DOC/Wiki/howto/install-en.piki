@@ -1,0 +1,38 @@
+* Install
+
+***. First of all, unpack archive file
+
+>|
+tar xzf fsvn-(version).tar.gz
+|<
+
+*** If you have `make' command, `cd' to the directory where you unpacked fsvn.
+**** When to use on NTEmacs, read mw32cmp.el header to prepare.
+**** Edit MAKE-CFG.el and Makefile.
+**** Optionally invoke the following command show installed files where to go.
+
+>|
+make what-where
+|<
+
+**** Invoke the following command.
+
+>|
+make install
+|<
+
+*** If you have no `make' command simply copy *.el files to `load-path' where you want.
+
+** .emacs
+
+>|
+(require 'fsvn)
+|<
+
+** .emacs (Option)
+
+[dot.sample http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn]
+
+** For more information.
+
+["Q and A" qa.html.en]
