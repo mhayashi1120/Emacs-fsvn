@@ -437,7 +437,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (unless (= (fsvn-call-command "commit" (current-buffer) file args) 0)
 	(error "Commit failed %s" (buffer-string))))
     (fsvn-ui-fancy-redraw)
-    (message "Successfuly finished `commit'.")))
+    (message "Successfuly finished.")))
 
 (defun fsvn-vc-check-before-commit ()
   (unless buffer-file-name
