@@ -1,5 +1,8 @@
 * Question and Answer
 
+****** この説明は ["このキー設定" http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&root=fsvn] を行ったことを前提にしています。
+
+
 # Authenticate question
 {Q-auth-0001
 ? Q. パスワード確認ですべてが止まってしまう。どうやって認証すればいいのか？
@@ -13,7 +16,22 @@
 # General question
 {Q-general-0001
 ? Q. バッファがたくさんできて欝陶しい。
-! A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)
+! A. M-x fsvn-global-cleanup-buffer (or type C-x v M-c)
+}
+
+{Q-general-0002
+? Q. dired を使いたい。
+! A. C-c C-d (or M-x fsvn-dired-toggle-browser)
+}
+
+{Q-general-0003
+? Q. dired から fsvn に切り変えたい。
+! A. C-c C-d (or M-x fsvn-dired-toggle-browser)
+}
+
+{Q-general-0004
+? Q. fsvn の機能を off にしたい。
+! A. M-x fsvn-toggle-feature
 }
 
 # Property question

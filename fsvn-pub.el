@@ -410,7 +410,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (fsvn-open-logview-mode buffer-file-name nil))
 
 (defun fsvn-vc-commit (&optional args)
-  "Prepare `commit' buffer for buffer file."
+  "Prepare `commit' buffer for buffer file.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
   (fsvn-vc-check-before-commit)
   (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory)))
@@ -418,17 +420,21 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (error "Buffer file is not under versioned"))
     (fsvn-browse-commit-mode (list buffer-file-name) args)))
 
-(defun fsvn-vc-commit-non-query (args)
-  "Execute `commit' with no query. "
+(defun fsvn-vc-commit-non-query (&optional args)
+  "Execute `commit' for editing file.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
   (fsvn-vc-check-before-commit)
-  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory)))
-    (unless fsvn-buffer-repos-root
+  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory))
+	(file buffer-file-name))
+    (unless (and fsvn-buffer-repos-root
+		 (not (fsvn-file-unversioned-p file)))
       (error "Buffer file is not under versioned"))
     (unless (member "--message" args)
       (setq args (append args '("--message" ""))))
     (with-temp-buffer
-      (unless (= (fsvn-call-command "commit" (current-buffer) buffer-file-name args) 0)
+      (unless (= (fsvn-call-command "commit" (current-buffer) file args) 0)
 	(error "Commit failed %s" (buffer-string))))
     (fsvn-ui-fancy-redraw)
     (message "Successfuly finished `commit'.")))
@@ -438,7 +444,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (error "Buffer is not associated with a file"))
   (when (and (buffer-modified-p)
 	     (y-or-n-p "Buffer modified. Save? "))
-    (save-buffer nil))  )
+    (save-buffer nil)))
 
 
 

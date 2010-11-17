@@ -22,6 +22,7 @@
 	<a href="../index.html">Top</a>
 
 <h1>Question and Answer</h1>
+<h6>この説明は <a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&root=fsvn">このキー設定</a> を行ったことを前提にしています。</h6>
 <div id="q-auth-0001">
 <dl>
 <dt>Q. パスワード確認ですべてが止まってしまう。どうやって認証すればいいのか？</dt>
@@ -35,7 +36,25 @@ svn+ssh を使う場合は可能な限り ssh-agent を使ってください。W
 <div id="q-general-0001">
 <dl>
 <dt>Q. バッファがたくさんできて欝陶しい。</dt>
-<dd>A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)</dd>
+<dd>A. M-x fsvn-global-cleanup-buffer (or type C-x v M-c)</dd>
+</dl>
+</div>
+<div id="q-general-0002">
+<dl>
+<dt>Q. dired を使いたい。</dt>
+<dd>A. C-c C-d (or M-x fsvn-dired-toggle-browser)</dd>
+</dl>
+</div>
+<div id="q-general-0003">
+<dl>
+<dt>Q. dired から fsvn に切り変えたい。</dt>
+<dd>A. C-c C-d (or M-x fsvn-dired-toggle-browser)</dd>
+</dl>
+</div>
+<div id="q-general-0004">
+<dl>
+<dt>Q. fsvn の機能を off にしたい。</dt>
+<dd>A. M-x fsvn-toggle-feature</dd>
 </dl>
 </div>
 <div id="q-prop-0001">

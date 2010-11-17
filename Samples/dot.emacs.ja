@@ -33,6 +33,9 @@
 ;; 現在のバッファの commit 準備をする
 (global-set-key "\C-xvV" 'fsvn-vc-commit)
 
+;; 現在のバッファを commit する
+(global-set-key "\C-xvN" 'fsvn-vc-commit-non-query)
+
 ;; 現在のバッファのログを表示する
 (global-set-key "\C-xvL" 'fsvn-vc-print-log)
 

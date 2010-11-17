@@ -22,6 +22,7 @@
 	<a href="../index.html">Top</a>
 
 <h1>Question and Answer</h1>
+<h6>This description based on <a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn">sample key settings</a>.</h6>
 <div id="q-auth-0001">
 <dl>
 <dt>Q. How to authorize repository. Password prompt stop everything.</dt>
@@ -36,6 +37,24 @@ If possible, to use ssh-agent program when access by svn+ssh protcol. If using w
 <dl>
 <dt>Q. A lot of buffer are too noisy.</dt>
 <dd>A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)</dd>
+</dl>
+</div>
+<div id="q-general-0002">
+<dl>
+<dt>Q. How to switch fsvn to dired?</dt>
+<dd>A. C-c C-d (or M-x fsvn-dired-toggle-browser)</dd>
+</dl>
+</div>
+<div id="q-general-0003">
+<dl>
+<dt>Q. How to switch dired to fsvn?</dt>
+<dd>A. C-c C-d (or M-x fsvn-dired-toggle-browser)</dd>
+</dl>
+</div>
+<div id="q-general-0004">
+<dl>
+<dt>Q. How to disable fsvn feature?</dt>
+<dd>A. M-x fsvn-toggle-feature</dd>
 </dl>
 </div>
 <div id="q-prop-0001">

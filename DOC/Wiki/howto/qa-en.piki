@@ -1,5 +1,7 @@
 * Question and Answer
 
+****** This description based on ["sample key settings" http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn].
+
 # Authenticate question
 {Q-auth-0001
 ? Q. How to authorize repository.  Password prompt stop everything.
@@ -14,6 +16,21 @@
 {Q-general-0001
 ? Q. A lot of buffer are too noisy.
 ! A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)
+}
+
+{Q-general-0002
+? Q. How to switch fsvn to dired?
+! A. C-c C-d (or M-x fsvn-dired-toggle-browser)
+}
+
+{Q-general-0003
+? Q. How to switch dired to fsvn?
+! A. C-c C-d (or M-x fsvn-dired-toggle-browser)
+}
+
+{Q-general-0004
+? Q. How to disable fsvn feature?
+! A. M-x fsvn-toggle-feature
 }
 
 # Property question

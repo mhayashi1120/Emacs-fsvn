@@ -222,6 +222,12 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
 	   nil)))
      (fsvn-xml-blame->target->entries blame))))
 
+(defun fsvn-file-unversioned-p (file)
+  (let ((entry (fsvn-get-file-status file)))
+    (unless entry
+      (signal 'fsvn-command-error '("Unable get status")))
+    (eq (fsvn-xml-status->target->entry=>wc-status.item entry) 'unversioned)))
+
 (defun fsvn-get-prop-svn:needs-lock (file)
   (fsvn-get-boolean-prop-value file "svn:needs-lock"))
 

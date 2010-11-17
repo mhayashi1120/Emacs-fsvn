@@ -56,6 +56,7 @@
 ;; * fsvn-log-list-mode (Log list)
 ;; * fsvn-log-sibling-mode (`fsvn-log-list-mode' subwindow revision changed file list)
 ;; * fsvn-log-message-mode (`fsvn-log-list-mode' subwindow revision log message)
+;; * fsvn-process-list-mode (Process list view)
 
 ;; see repositories below
 ;; * http://svn.apache.org/repos/asf/subversion/trunk/
@@ -71,13 +72,6 @@
 ;; Q.  How to use in NTEmacs
 ;; A.  TODO
 ;;    fiber.exe patch
-
-;;;;;;;;;; DO following sometimes ;;;;;;;;;;;;;;;;;;;
-;; elint with Emacs command line option -q
-;; fsvn-test Emacs command line option -q
-;; checkdoc (?)
-;; checkdoc-message-text
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; Coding
 
@@ -131,6 +125,7 @@
 ;; (global-set-key "\C-xvP" 'fsvn-process-list)
 ;; (global-set-key "\C-xvZ" 'fsvn-debug-toggle)
 ;; (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
+;; (global-set-key "\C-xvN" 'fsvn-vc-commit-non-query)
 
 ;; 4. TODO this is old
 ;;    Emacs 22 unicode conversion is wrong.
