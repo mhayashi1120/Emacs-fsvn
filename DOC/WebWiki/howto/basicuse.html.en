@@ -23,7 +23,213 @@
 
 <h1>Basic use of fsvn.el</h1>
 <h2>First of all</h2>
-<p>TODO</p>
+<p>Must have cache a password to svn command, when you need to authorize repository.</p>
+<pre>
+M-x fsvn-authenticate-repository
+</pre>
+<p>input repository url and password.</p>
+<h2>Often use command in `fsvn-browse-mode'</h2>
+<table>
+<tr>
+<td>z U (C-c C-u)</td>
+<td>Update current directory (update)</td>
+</tr>
+<tr>
+<td>z a</td>
+<td>Add cursor file or marked files (add)</td>
+</tr>
+<tr>
+<td>z d</td>
+<td>Mark as delete for cursor file or marked files (delete)</td>
+</tr>
+<tr>
+<td>z c</td>
+<td>Prepare commit buffer for cursor file or marked files `fsvn-select-file-mode' (commit)</td>
+</tr>
+<tr>
+<td>z C (C-c C-c)</td>
+<td>Prepare commit buffer for current directory `fsvn-select-file-mode' (commit)</td>
+</tr>
+<tr>
+<td>z L</td>
+<td>Prepare `fsvn-log-view-mode' buffer for current directory (log)</td>
+</tr>
+<tr>
+<td>z l</td>
+<td>Prepare `fsvn-log-view-mode' buffer for cursor file (log)</td>
+</tr>
+<tr>
+<td>z p</td>
+<td>Prepare `fsvn-proplist-mode' buffer for cursor file (proplist)</td>
+</tr>
+<tr>
+<td>C-c C-v C-c</td>
+<td>Copy cursor file or marked files (copy)</td>
+</tr>
+<tr>
+<td>C-c C-m C-m</td>
+<td>Move cursor file or marked files (move)</td>
+</tr>
+<tr>
+<td>C-c C-v c</td>
+<td>Copy cursor file (copy)</td>
+</tr>
+<tr>
+<td>C-c C-m m</td>
+<td>Move cursor file (move)</td>
+</tr>
+<tr>
+<td>C-c C-v r</td>
+<td>Revert cursor file or marked files (revert)</td>
+</tr>
+<tr>
+<td>z k</td>
+<td>Lock cursor file or marked files (lock)</td>
+</tr>
+<tr>
+<td>z K</td>
+<td>Unlock cursor file or marked files (unlock)</td>
+</tr>
+<tr>
+<td>C-c C-d</td>
+<td>Switch to `dired-mode'</td>
+</tr>
+</table>
+<h2>Often use command in `fsvn-message-edit-mode', `fsvn-select-file-mode' (when commit)</h2>
+<table>
+<tr>
+<td>C-c C-c</td>
+<td>Finish edit and commit</td>
+</tr>
+<tr>
+<td>C-c C-k</td>
+<td>Discard all edit</td>
+</tr>
+<tr>
+<td>C-c C-o</td>
+<td>Switch related buffer if exists</td>
+</tr>
+<tr>
+<td>= =</td>
+<td>Execute diff if cursor file is under subversion (Only `fsvn-select-file-mode')</td>
+</tr>
+<tr>
+<td>= e</td>
+<td>Same as `= =' but using ediff</td>
+</tr>
+</table>
+<h2>Often use command in `fsvn-log-view-mode'</h2>
+<table>
+<tr>
+<td>= =</td>
+<td>Execute diff working copy. When region activated, diff with region terminated point revision</td>
+</tr>
+<tr>
+<td>= e</td>
+<td>Same as `= =' but using ediff</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>Backward to log</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>Forward to log</td>
+</tr>
+<tr>
+<td>C-c C-k</td>
+<td>Finish log</td>
+</tr>
+</table>
+<h2>Often use command in `fsvn-proplist-mode'</h2>
+<table>
+<tr>
+<td>C-m</td>
+<td>Display cursor property value</td>
+</tr>
+<tr>
+<td>a</td>
+<td>Add svn property</td>
+</tr>
+<tr>
+<td>d</td>
+<td>Mark as delete to cursor property</td>
+</tr>
+<tr>
+<td>e</td>
+<td>Edit cursor property</td>
+</tr>
+<tr>
+<td>r</td>
+<td>Mark as recursive to cursor property</td>
+</tr>
+<tr>
+<td>u</td>
+<td>Unmark cursor property</td>
+</tr>
+<tr>
+<td>x</td>
+<td>Execute all marks</td>
+</tr>
+<tr>
+<td>C-c C-k</td>
+<td>Finish property list</td>
+</tr>
+</table>
+<h2>Often use command in `fsvn-propedit-mode'</h2>
+<table>
+<tr>
+<td>C-c C-c</td>
+<td>Save editing</td>
+</tr>
+<tr>
+<td>C-c C-k</td>
+<td>Discard editing</td>
+</tr>
+<tr>
+<td>C-c C-o</td>
+<td>Move to `fsvn-proplist-mode' buffer</td>
+</tr>
+<tr>
+<td>C-c C-r</td>
+<td>Mark to buffer as recursive</td>
+</tr>
+</table>
+<h2>Often use command in `fsvn-process-list-mode'</h2>
+<table>
+<tr>
+<td>d</td>
+<td>Mark as delete to cursor process</td>
+</tr>
+<tr>
+<td>m</td>
+<td>Mark to cursor process</td>
+</tr>
+<tr>
+<td>u</td>
+<td>Unmark cursor process</td>
+</tr>
+<tr>
+<td>x</td>
+<td>Execute delete mark</td>
+</tr>
+<tr>
+<td>C-c C-t</td>
+<td>Display all emacs sub processes</td>
+</tr>
+<tr>
+<td>C-c C-p</td>
+<td>Send password to marked files</td>
+</tr>
+<tr>
+<td>C-m</td>
+<td>Display process buffer (Careful to edit</td>
+</tr>
+<tr>
+<td>C-c C-k</td>
+<td>Finish listing</td>
+</tr>
+</table>
 <h2>For more information.</h2>
 <p><a href="qa.html.en">Q and A</a></p>
 
