@@ -25,25 +25,25 @@
     ;;todo change to with-current-buffer
     (save-excursion
       (let ((debug (get-buffer-create fsvn-debug-buffer))
-	    (message (car messages))
-	    prev)
-	;; this is `call-process' argument...
-	(when (eq message t)
-	  (setq message (current-buffer)))
-	(cond
-	 ((bufferp message)
-	  (set-buffer message)
-	  (append-to-buffer debug (point-min) (point-max)))
-	 ((stringp message)
-	  (set-buffer debug)
-	  (goto-char (point-max))
-	  (insert message)
-	  (insert "\n"))
-	 (t
-	  (set-buffer debug)
-	  (goto-char (point-max))
-	  (pp message (current-buffer))
-	  (insert "\n"))))))
+            (message (car messages))
+            prev)
+        ;; this is `call-process' argument...
+        (when (eq message t)
+          (setq message (current-buffer)))
+        (cond
+         ((bufferp message)
+          (set-buffer message)
+          (append-to-buffer debug (point-min) (point-max)))
+         ((stringp message)
+          (set-buffer debug)
+          (goto-char (point-max))
+          (insert message)
+          (insert "\n"))
+         (t
+          (set-buffer debug)
+          (goto-char (point-max))
+          (pp message (current-buffer))
+          (insert "\n"))))))
    (t
     (mapc 'fsvn-debug messages))))
 
@@ -53,14 +53,14 @@
    (lambda (x)
      (when (string-match "^fsvn" (symbol-name x))
        (when (fboundp x)
-	 (fset x nil))
+         (fset x nil))
        (when (boundp x)
-	 ;; don't change custom value.
-	 (cond
-	  ((null (default-value x))
-	   (makunbound x))
-	  ((not (equal (symbol-value x) (default-value x)))
-	   (set x (default-value x)))))))
+         ;; don't change custom value.
+         (cond
+          ((null (default-value x))
+           (makunbound x))
+          ((not (equal (symbol-value x) (default-value x)))
+           (set x (default-value x)))))))
    obarray))
 
 (provide 'fsvn-debug)

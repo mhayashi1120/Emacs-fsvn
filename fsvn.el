@@ -31,7 +31,7 @@
 ;;  Have following advantages of other Emacs svn client.
 ;;  * tsvn:*, bugtraq:* like property supported. (or will be supported)
 ;;  * Using `svn help' output for completing read.
-;;  * Fast in huge working copy by asynchronous process.
+;;  * Fast in huge working copy by background process.
 ;;  * Has repository browser.
 ;;  * Has visualize blame/annotate/praise minor-mode.
 ;;  * Has svk support
@@ -42,9 +42,10 @@
 ;;  * A little user help.
 
 ;; This package is tested on following environment.
-;;      Meadow (based Emacs 22.1) on Windows.  svn 1.6.x
-;;      Emacs (23.2) on GNU/Linux (Debian).  svn 1.6.x
-;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.6.x
+;;      Meadow (based Emacs 22.2) on Windows.  svn 1.5.x - 1.7.x
+;;      NTEmacs (based Emacs 23.1) on Windows.  svn 1.5.x - 1.7.x
+;;      Emacs (23.2) on GNU/Linux (Debian).  svn svn 1.5.x - 1.7.x
+;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.7.x
 
 ;; major-mode and brief description
 ;; * fsvn-browse-mode (dired like interface)
@@ -109,9 +110,9 @@
 ;;  (setq fsvn-help-locale "ja")
 ;;  (setq fsvn-repository-alist
 ;;       '(
-;; 	("svn://localhost"
-;; 	 )
-;; 	))
+;;      ("svn://localhost"
+;;       )
+;;      ))
 
 ;; 3. global key bindings (option)
 ;; (global-set-key "\C-xv!" 'fsvn-command)
@@ -135,24 +136,24 @@
 ;;   http://www.pqrs.org/tekezo/emacs/doc/wide-character/index.html
 ;;
 ;;   (utf-translate-cjk-set-unicode-range
-;;    '((#x00a2 . #x00a3)			; Cent Sign, Pound Sign
-;;      (#x00a7 . #x00a8)			; Section Sign, Diaeresis
-;;      (#x00ac . #x00ac)			; Not Sign
-;;      (#x00b0 . #x00b1)			; Degree Sign, Plus-Minus Sign
-;;      (#x00b4 . #x00b4)			; Acute Accent
-;;      (#x00b6 . #x00b6)			; Pilcrow Sign
-;;      (#x00d7 . #x00d7)			; Multiplication Sign
-;;      (#X00f7 . #x00f7)			; Division Sign
-;;      (#x0370 . #x03ff)			; Greek And Coptic
-;;      (#x0400 . #x04FF)			; Cyrillic
-;;      (#x2000 . #x206F)			; General Punctuation
-;;      (#x2100 . #x214F)			; Letterlike Symbols
-;;      (#x2190 . #x21FF)			; Arrows
-;;      (#x2200 . #x22FF)			; Mathematical Operators
-;;      (#x2300 . #x23FF)			; Miscellaneous Technical
-;;      (#x2500 . #x257F)			; Box Drawing
-;;      (#x25A0 . #x25FF)			; Geometric Shapes
-;;      (#x2600 . #x26FF)			; Miscellaneous Symbols
+;;    '((#x00a2 . #x00a3)                       ; Cent Sign, Pound Sign
+;;      (#x00a7 . #x00a8)                       ; Section Sign, Diaeresis
+;;      (#x00ac . #x00ac)                       ; Not Sign
+;;      (#x00b0 . #x00b1)                       ; Degree Sign, Plus-Minus Sign
+;;      (#x00b4 . #x00b4)                       ; Acute Accent
+;;      (#x00b6 . #x00b6)                       ; Pilcrow Sign
+;;      (#x00d7 . #x00d7)                       ; Multiplication Sign
+;;      (#X00f7 . #x00f7)                       ; Division Sign
+;;      (#x0370 . #x03ff)                       ; Greek And Coptic
+;;      (#x0400 . #x04FF)                       ; Cyrillic
+;;      (#x2000 . #x206F)                       ; General Punctuation
+;;      (#x2100 . #x214F)                       ; Letterlike Symbols
+;;      (#x2190 . #x21FF)                       ; Arrows
+;;      (#x2200 . #x22FF)                       ; Mathematical Operators
+;;      (#x2300 . #x23FF)                       ; Miscellaneous Technical
+;;      (#x2500 . #x257F)                       ; Box Drawing
+;;      (#x25A0 . #x25FF)                       ; Geometric Shapes
+;;      (#x2600 . #x26FF)                       ; Miscellaneous Symbols
 ;;      (#x2e80 . #xd7a3) (#xff00 . #xffef))))
 ;;    
 ;;    TODO: Circle number, Fullwidth Tilde

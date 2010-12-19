@@ -30,7 +30,7 @@
 
 (defconst fsvn-magic-file-name-regexp
   (let ((top "\\`/fsvn")
-	tmp)
+        tmp)
     (concat top "@" "\\(" "HEAD" "\\|" "[0-9]+" "\\|" fsvn-revision-date-regexp "\\)" "/")))
 
 (defconst fsvn-magic-handler-alist
@@ -100,42 +100,42 @@
 (defconst fsvn-magic-version-dependent-functions
   '(
     (22 add-name-to-file copy-file delete-directory delete-file
-	diff-latest-backup-file directory-file-name directory-files
-	dired-call-process dired-compress-file dired-uncache
-	expand-file-name file-accessible-directory-p file-attributes
-	file-directory-p file-executable-p file-exists-p
-	file-local-copy file-modes file-name-all-completions
-	file-name-as-directory file-name-completion
-	file-name-directory file-name-nondirectory
-	file-name-sans-versions file-newer-than-file-p
-	file-ownership-preserved-p file-readable-p file-regular-p
-	file-symlink-p file-truename file-writable-p
-	find-backup-file-name get-file-buffer insert-directory
-	insert-file-contents load make-directory make-symbolic-link
-	rename-file set-file-modes set-visited-file-modtime
-	shell-command unhandled-file-name-directory vc-registered
-	verify-visited-file-modtime write-region )
+        diff-latest-backup-file directory-file-name directory-files
+        dired-call-process dired-compress-file dired-uncache
+        expand-file-name file-accessible-directory-p file-attributes
+        file-directory-p file-executable-p file-exists-p
+        file-local-copy file-modes file-name-all-completions
+        file-name-as-directory file-name-completion
+        file-name-directory file-name-nondirectory
+        file-name-sans-versions file-newer-than-file-p
+        file-ownership-preserved-p file-readable-p file-regular-p
+        file-symlink-p file-truename file-writable-p
+        find-backup-file-name get-file-buffer insert-directory
+        insert-file-contents load make-directory make-symbolic-link
+        rename-file set-file-modes set-visited-file-modtime
+        shell-command unhandled-file-name-directory vc-registered
+        verify-visited-file-modtime write-region )
 
     (23 access-file add-name-to-file byte-compiler-base-file-name
-	copy-file delete-directory delete-file
-	diff-latest-backup-file directory-file-name directory-files
-	directory-files-and-attributes dired-compress-file
-	dired-uncache expand-file-name file-accessible-directory-p
-	file-attributes file-directory-p file-executable-p
-	file-exists-p file-local-copy file-modes
-	file-name-all-completions file-name-as-directory
-	file-name-completion file-name-directory
-	file-name-nondirectory file-name-sans-versions
-	file-newer-than-file-p file-ownership-preserved-p
-	file-readable-p file-regular-p file-remote-p file-symlink-p
-	file-truename file-writable-p find-backup-file-name
-	find-file-noselect get-file-buffer insert-directory
-	insert-file-contents load make-auto-save-file-name
-	make-directory make-directory-internal make-symbolic-link
-	process-file rename-file set-file-modes set-file-times
-	set-visited-file-modtime shell-command start-file-process
-	substitute-in-file-name unhandled-file-name-directory
-	vc-registered verify-visited-file-modtime write-region ))
+        copy-file delete-directory delete-file
+        diff-latest-backup-file directory-file-name directory-files
+        directory-files-and-attributes dired-compress-file
+        dired-uncache expand-file-name file-accessible-directory-p
+        file-attributes file-directory-p file-executable-p
+        file-exists-p file-local-copy file-modes
+        file-name-all-completions file-name-as-directory
+        file-name-completion file-name-directory
+        file-name-nondirectory file-name-sans-versions
+        file-newer-than-file-p file-ownership-preserved-p
+        file-readable-p file-regular-p file-remote-p file-symlink-p
+        file-truename file-writable-p find-backup-file-name
+        find-file-noselect get-file-buffer insert-directory
+        insert-file-contents load make-auto-save-file-name
+        make-directory make-directory-internal make-symbolic-link
+        process-file rename-file set-file-modes set-file-times
+        set-visited-file-modtime shell-command start-file-process
+        substitute-in-file-name unhandled-file-name-directory
+        vc-registered verify-visited-file-modtime write-region ))
   "For the time being make it.
 FIXME Does Emacs have list like this? "
   )
@@ -169,11 +169,11 @@ FIXME Does Emacs have list like this? "
     (cond
      ((and handler (functionp (cdr handler)))
       (prog1
-	  (apply (cdr handler) args)
-	(when (memq operation fsvn-magic-modify-repository-functions)
-	  ;;FIXME
-	  (setq fsvn-magic-cache nil))
-	))
+          (apply (cdr handler) args)
+        (when (memq operation fsvn-magic-modify-repository-functions)
+          ;;FIXME
+          (setq fsvn-magic-cache nil))
+        ))
      (t
       ;; default handler
       (apply 'fsvn-magic-file-call-underlying operation args)))))
@@ -182,34 +182,34 @@ FIXME Does Emacs have list like this? "
   ;;FIXME other args
   (let* ((url (fsvn-magic-parse-file-name file)))
     (if full-directory-p
-	(progn
-	  (insert (format "URL: %s\n" url))
-	  (insert "\n")
-	  (cond
-	   ((file-directory-p file)
-	    (mapc
-	     (lambda (x)
-	       (fsvn-magic-insert-directory-entry x))
-	     (fsvn-magic-get-ls url)))
-	   (t
-	    (let ((entry (fsvn-magic-get-ls-entry url)))
-	      (when entry
-		(fsvn-magic-insert-directory-entry entry)))))
-	  nil)
+        (progn
+          (insert (format "URL: %s\n" url))
+          (insert "\n")
+          (cond
+           ((file-directory-p file)
+            (mapc
+             (lambda (x)
+               (fsvn-magic-insert-directory-entry x))
+             (fsvn-magic-get-ls url)))
+           (t
+            (let ((entry (fsvn-magic-get-ls-entry url)))
+              (when entry
+                (fsvn-magic-insert-directory-entry entry)))))
+          nil)
       (fsvn-magic-insert-directory-entry (fsvn-magic-get-list/info-entry url)))))
 
 (defun fsvn-magic-insert-directory-entry (entry)
   (let ((dirp (eq (fsvn-magic-xml-list/info-entry.kind entry) 'dir))
-	(filename (fsvn-magic-xml-list/info-entry=name entry)))
+        (filename (fsvn-magic-xml-list/info-entry=name entry)))
     (fsvn-set-filename-property filename)
     (insert (format "  %c %s %s %s %s %s\n"
-		    (if dirp ?d fsvn-space-char)
-		    (fsvn-magic-ls-revision entry)
-		    (fsvn-magic-ls-author-column entry)
-		    (fsvn-generic-format-file-size (fsvn-safe-xml-lists->list->entry=>size$ entry))
-		    (format-time-string fsvn-generic-datetime-format (fsvn-magic-xml-list/info-entry=>commit=date entry))
-		    filename
-		    )))
+                    (if dirp ?d fsvn-space-char)
+                    (fsvn-magic-ls-revision entry)
+                    (fsvn-magic-ls-author-column entry)
+                    (fsvn-generic-format-file-size (fsvn-safe-xml-lists->list->entry=>size$ entry))
+                    (format-time-string fsvn-generic-datetime-format (fsvn-magic-xml-list/info-entry=>commit=date entry))
+                    filename
+                    )))
   (save-excursion
     (forward-line -1)
     (delete-char 2)))
@@ -225,9 +225,9 @@ FIXME Does Emacs have list like this? "
 (defun fsvn-magic-insert-file-contents (filename &optional visit begin end replace)
   (barf-if-buffer-read-only)
   (let* ((urlrev (fsvn-magic-parse-file-name filename))
-	 (tmpfile (fsvn-make-temp-file))
-	 (dest (current-buffer))
-	 ret)
+         (tmpfile (fsvn-make-temp-file))
+         (dest (current-buffer))
+         ret)
     (when visit
       (setq buffer-file-name filename)
       (set-visited-file-modtime)
@@ -243,10 +243,10 @@ FIXME Does Emacs have list like this? "
 
 (defun fsvn-magic-file-call-underlying (operation &rest args)
   (let* ((inhibit-file-name-handlers
-	  (cons 'fsvn-magic-file-name-handler
-		(and (eq inhibit-file-name-operation operation)
-		     inhibit-file-name-handlers)))
-	 (inhibit-file-name-operation operation))
+          (cons 'fsvn-magic-file-name-handler
+                (and (eq inhibit-file-name-operation operation)
+                     inhibit-file-name-handlers)))
+         (inhibit-file-name-operation operation))
     (apply operation args)))
 
 (defmacro fsvn-magic-current-name (func)
@@ -269,14 +269,14 @@ FIXME Does Emacs have list like this? "
 
 (defmacro fsvn-magic-each-directory-entry (directory ls-var &rest form)
   `(let ((DIR (fsvn-magic-parse-file-name ,directory))
-	 LIST RET TMP)
+         LIST RET TMP)
      (when (fsvn-magic-file-directory-p ,directory)
        (setq LIST (fsvn-magic-get-ls DIR))
        (mapc
-	(lambda (,ls-var)
-	  (when (setq TMP (progn ,@form))
-	    (setq RET (cons TMP RET))))
-	LIST)
+        (lambda (,ls-var)
+          (when (setq TMP (progn ,@form))
+            (setq RET (cons TMP RET))))
+        LIST)
        (nreverse RET))))
 
 (defun fsvn-magic-create-remote-name (repos-urlrev)
@@ -309,14 +309,14 @@ FIXME Does Emacs have list like this? "
    ((string-match fsvn-magic-file-name-regexp file)
     ;;FIXME dirty
     (let* ((rev (match-string 1 file))
-	   (ret (replace-match "" nil nil file))
-	   absolute-path segment-list)
+           (ret (replace-match "" nil nil file))
+           absolute-path segment-list)
       (setq segment-list (split-string ret "/"))
       (setq absolute-path (fsvn-magic-parse-file-name-absolute-path (car segment-list) (cdr segment-list)))
       (fsvn-url-urlrev (concat (fsvn-svn-url-scheme-segment (car segment-list)) absolute-path) rev)))
    ((and (not (file-name-absolute-p file))
-	 default-directory
-	 (string-match fsvn-magic-file-name-regexp default-directory))
+         default-directory
+         (string-match fsvn-magic-file-name-regexp default-directory))
     (fsvn-magic-parse-file-name (fsvn-magic-expand-file-name file default-directory)))
    (t
     file)))
@@ -334,14 +334,14 @@ FIXME Does Emacs have list like this? "
 
 (defun fsvn-magic-expand-file-name (file &optional directory)
   (if (and (file-name-absolute-p file)
-	   (not (fsvn-magic-file-name-absolute-p file)))
+           (not (fsvn-magic-file-name-absolute-p file)))
       (fsvn-magic-file-call-underlying 'expand-file-name file directory)
     (let ((lst
-	   (if (fsvn-magic-file-name-absolute-p file)
-	       (fsvn-magic-split-file-name file)
-	     (nconc
-	      (fsvn-magic-split-file-name (directory-file-name (or directory default-directory)))
-	      (fsvn-magic-split-file-name file)))))
+           (if (fsvn-magic-file-name-absolute-p file)
+               (fsvn-magic-split-file-name file)
+             (nconc
+              (fsvn-magic-split-file-name (directory-file-name (or directory default-directory)))
+              (fsvn-magic-split-file-name file)))))
       (fsvn-url-concat-split-path lst))))
 
 (defun fsvn-magic-file-directory-p (filename)
@@ -370,28 +370,28 @@ FIXME Does Emacs have list like this? "
 (defun fsvn-magic-verify-visited-file-modtime (buf)
   (with-current-buffer buf
     (let* ((urlrev (fsvn-magic-parse-file-name buffer-file-name))
-	   (rev (fsvn-urlrev-revision urlrev))
-	   ls)
+           (rev (fsvn-urlrev-revision urlrev))
+           ls)
       (cond
        ((null buffer-file-name))
        ((not (string= rev "HEAD")))
        ((not (consp (visited-file-modtime))))
        ((setq ls (fsvn-magic-get-ls-entry urlrev))
-	(time-less-p (visited-file-modtime) (fsvn-xml-lists->list->entry=>commit=>date$ ls)))
+        (time-less-p (visited-file-modtime) (fsvn-xml-lists->list->entry=>commit=>date$ ls)))
        (t
-	nil)))))
+        nil)))))
 
 (defun fsvn-magic-file-modes (filename)
   (let* ((file (fsvn-magic-parse-file-name filename))
-	 (entry (fsvn-magic-get-list/info-entry file))
-	 (bit 0)
-	 exec)
+         (entry (fsvn-magic-get-list/info-entry file))
+         (bit 0)
+         exec)
     (when entry
       (setq exec (fsvn-get-boolean-prop-value file "svn:executable"))
       (unless exec
-	(setq exec (eq (fsvn-magic-xml-list/info-entry.kind entry) 'dir)))
+        (setq exec (eq (fsvn-magic-xml-list/info-entry.kind entry) 'dir)))
       (when exec
-	(setq bit (+ bit 1)))
+        (setq bit (+ bit 1)))
       (setq bit (+ bit 6))
       ;;todo group and other bit must be weaker than owner
       (logior (lsh bit 6) (logxor (string-to-number "700" 8) (default-file-modes))))))
@@ -413,7 +413,7 @@ FIXME Does Emacs have list like this? "
 
 (defun fsvn-magic-file-attributes (filename &optional id-format)
   (let* ((file (fsvn-magic-parse-file-name filename))
-	 (info (fsvn-magic-get-info-entry file)))
+         (info (fsvn-magic-get-info-entry file)))
     (when info
       (list
        ;; 0. t for directory, string (name linked to) for symbolic link, or nil.
@@ -422,12 +422,12 @@ FIXME Does Emacs have list like this? "
        (length (fsvn-magic-directory-files filename))
        ;; 2. GID
        (if (or (null id-format) (eq id-format 'integer))
-	   0
-	 (fsvn-xml-info->entry=>commit=>author$ info))
+           0
+         (fsvn-xml-info->entry=>commit=>author$ info))
        ;; 3. UID
        (if (or (null id-format) (eq id-format 'integer))
-	   0
-	 (fsvn-xml-info->entry=>commit=>author$ info))
+           0
+         (fsvn-xml-info->entry=>commit=>author$ info))
        ;; 4. Last access time
        (current-time)
        ;; 5. Last modification time
@@ -436,9 +436,9 @@ FIXME Does Emacs have list like this? "
        (fsvn-xml-info->entry=>commit=>date$ info)
        ;; 7. Size in bytes.
        (if (eq (fsvn-xml-info->entry.kind info) 'dir)
-	   0
-	 (let ((ls (fsvn-magic-get-ls-entry file)))
-	   (fsvn-safe-xml-lists->list->entry=>size$ ls)))
+           0
+         (let ((ls (fsvn-magic-get-ls-entry file)))
+           (fsvn-safe-xml-lists->list->entry=>size$ ls)))
        ;; todo 8. File modes FIXME to String
        (default-file-modes)
        ;; todo 9. t iff file's gid would change if file were deleted and recreated.
@@ -450,18 +450,18 @@ FIXME Does Emacs have list like this? "
 
 (defun fsvn-magic-file-symlink-p (filename)
   (let* ((file (fsvn-magic-parse-file-name filename))
-	 (parent (file-name-directory (directory-file-name file)))
-	 (name (fsvn-urlrev-filename file))
-	 (pinfo (fsvn-magic-get-info-entry parent))
-	 value values)
+         (parent (file-name-directory (directory-file-name file)))
+         (name (fsvn-urlrev-filename file))
+         (pinfo (fsvn-magic-get-info-entry parent))
+         value values)
     (when (setq value (fsvn-get-propget parent "svn:externals"))
       (catch 'found
-	(mapc
-	 (lambda (item)
-	   (when (string= (cdr item) name)
-	     (throw 'found (car item))))
-	 (fsvn-svn:externals-parse-value pinfo value))
-	nil))))
+        (mapc
+         (lambda (item)
+           (when (string= (cdr item) name)
+             (throw 'found (car item))))
+         (fsvn-svn:externals-parse-value pinfo value))
+        nil))))
 
 (defun fsvn-magic-file-truename (filename)
   filename)
@@ -471,10 +471,10 @@ FIXME Does Emacs have list like this? "
   (fsvn-magic-each-directory-entry directory entry
     (let ((name (fsvn-xml-lists->list->entry=>name$ entry)))
       (when (or (null match)
-		(string-match match name))
-	(if full
-	    (fsvn-magic-expand-file-name name directory)
-	  name)))))
+                (string-match match name))
+        (if full
+            (fsvn-magic-expand-file-name name directory)
+          name)))))
 
 (defun fsvn-magic-directory-files-and-attributes (directory &optional full match nosort id-format)
   (let (fullname)
@@ -482,32 +482,32 @@ FIXME Does Emacs have list like this? "
      (lambda (file)
        (setq fullname (fsvn-magic-expand-file-name file directory))
        (cons
-	(if full fullname file)
-	(fsvn-magic-file-attributes fullname id-format)))
+        (if full fullname file)
+        (fsvn-magic-file-attributes fullname id-format)))
      (fsvn-magic-directory-files directory nil match nosort))))
 
 (defun fsvn-magic-write-region (start end filename &optional append visit lockname mustbenew)
   (let ((url (fsvn-magic-parse-file-as-writable filename))
-	(tmpfile (fsvn-make-temp-file)))
+        (tmpfile (fsvn-make-temp-file)))
     (if (fsvn-magic-file-exists-p filename)
-	(progn
-	  (unless (fsvn-save-file url tmpfile t)
-	    (signal 'fsvn-command-error (list "Error while saving file. " url)))
-	  (write-region start end tmpfile append 'no-msg)
-	  (fsvn-asap-modify-url-from-file tmpfile url))
+        (progn
+          (unless (fsvn-save-file url tmpfile t)
+            (signal 'fsvn-command-error (list "Error while saving file. " url)))
+          (write-region start end tmpfile append 'no-msg)
+          (fsvn-asap-modify-url-from-file tmpfile url))
       (write-region start end tmpfile append 'no-msg nil mustbenew)
       (fsvn-asap-add-file tmpfile (fsvn-url-dirname url) (fsvn-file-name-nondirectory url)))
     ;; overwrite this
     (setq last-coding-system-used buffer-file-coding-system)
     (when (or (memq visit '(t nil)) (stringp visit))
       (if append
-	  (message "Added to %s" filename)
-	(message "Wrote %s" filename))))
+          (message "Added to %s" filename)
+        (message "Wrote %s" filename))))
   nil)
 
 (defun fsvn-magic-delete-directory (directory)
   (let* ((dir (fsvn-magic-parse-file-name directory))
-	 (entry (fsvn-magic-get-list/info-entry dir)))
+         (entry (fsvn-magic-get-list/info-entry dir)))
     (unless entry
       (signal 'file-error (list "No such directory." directory)))
     (unless (eq (fsvn-magic-xml-list/info-entry.kind entry) 'dir)
@@ -515,20 +515,20 @@ FIXME Does Emacs have list like this? "
     (unless (= (length (fsvn-magic-get-ls dir)) 0)
       (signal 'file-error (list "Removing svn directory" "directory not empty" dir)))
     (fsvn-call-command-discard "delete"
-			       "--message" (fsvn-config-magic-remote-commit-message dir)
-			       dir)))
+                               "--message" (fsvn-config-magic-remote-commit-message dir)
+                               dir)))
 
 (defun fsvn-magic-delete-file (filename)
   (let* ((file (fsvn-magic-parse-file-name filename))
-	 (entry (fsvn-magic-get-list/info-entry file)))
+         (entry (fsvn-magic-get-list/info-entry file)))
     (unless entry
       (signal 'file-error (list "No such file." file)))
     (unless (eq (fsvn-magic-xml-list/info-entry.kind entry) 'file)
       (signal 'file-error (list "Removing svn file." file)))
     (let ((file (fsvn-magic-parse-file-name filename)))
       (fsvn-call-command-discard "delete"
-				 "--message" (fsvn-config-magic-remote-commit-message file)
-				 file))))
+                                 "--message" (fsvn-config-magic-remote-commit-message file)
+                                 file))))
 
 ;; FIXME error occur move and copy
 ;;    svn: Moves between the working copy and the repository are not supported
@@ -544,69 +544,69 @@ local (wc) -> remote (same repository) : svn copy
 local (non-wc) -> remote : svn add -> svn commit
 "
   (let ((from (fsvn-magic-parse-file-name file))
-	(to (fsvn-magic-parse-file-name newname))
-	from-entry)
+        (to (fsvn-magic-parse-file-name newname))
+        from-entry)
     (if (fsvn-url-repository-p from)
-	(cond
-	 ((fsvn-url-repository-p to)
-	  (setq to (fsvn-urlrev-url to))
-	  (fsvn-call-command-discard "copy" from to
-				     "--message" (fsvn-config-magic-remote-commit-message to)))
-	 ((fsvn-file-versioned-directory-p to)
-	  (fsvn-call-command-discard "copy" from to))
-	 (t
-	  (when (and (not ok-if-already-exists)
-		     (file-exists-p to))
-	    (signal 'file-already-exists (list "File already exists." to)))
-	  (when keep-time
-	    (unless (setq from-entry (fsvn-magic-get-list/info-entry from))
-	      (signal 'file-error (list "Copying svn file." from to))))
-	  (unless (fsvn-save-file from to 'no-msg)
-	    (signal 'file-error (list "Copying svn file." from to)))
-	  (when from-entry
-	    (set-file-times to (fsvn-magic-xml-list/info-entry=>commit=date from-entry)))
-	  ))
+        (cond
+         ((fsvn-url-repository-p to)
+          (setq to (fsvn-urlrev-url to))
+          (fsvn-call-command-discard "copy" from to
+                                     "--message" (fsvn-config-magic-remote-commit-message to)))
+         ((fsvn-file-versioned-directory-p to)
+          (fsvn-call-command-discard "copy" from to))
+         (t
+          (when (and (not ok-if-already-exists)
+                     (file-exists-p to))
+            (signal 'file-already-exists (list "File already exists." to)))
+          (when keep-time
+            (unless (setq from-entry (fsvn-magic-get-list/info-entry from))
+              (signal 'file-error (list "Copying svn file." from to))))
+          (unless (fsvn-save-file from to 'no-msg)
+            (signal 'file-error (list "Copying svn file." from to)))
+          (when from-entry
+            (set-file-times to (fsvn-magic-xml-list/info-entry=>commit=date from-entry)))
+          ))
       (cond
        ((not (fsvn-url-repository-p to))
-	(signal 'file-error (list "Copy error.")))
+        (signal 'file-error (list "Copy error.")))
        ((and ok-if-already-exists (file-exists-p newname))
-	(setq to (fsvn-urlrev-url to))
-	(fsvn-asap-modify-url-from-file from to))
+        (setq to (fsvn-urlrev-url to))
+        (fsvn-asap-modify-url-from-file from to))
        (t
-	(setq to (fsvn-urlrev-url to))
-	(fsvn-asap-add-file file to))
+        (setq to (fsvn-urlrev-url to))
+        (fsvn-asap-add-file file to))
        ))))
 
 (defun fsvn-magic-rename-file (file newname &optional ok-if-already-exists)
   (let ((from (fsvn-magic-parse-file-name file))
-	(to (fsvn-magic-parse-file-name newname))
-	from-info)
+        (to (fsvn-magic-parse-file-name newname))
+        from-info)
     (if (fsvn-url-repository-p from)
-	(progn
-	  (setq from (fsvn-urlrev-url from))
-	  (cond
-	   ((fsvn-url-repository-p to)
-	    (setq to (fsvn-urlrev-url to))
-	    (fsvn-call-command-discard "move" from to
-				       "--message" (fsvn-config-magic-remote-commit-message to)))
-	   ((fsvn-file-versioned-directory-p to)
-	    (fsvn-call-command-discard "move" from to))
-	   (t
-	    (when (and (not ok-if-already-exists)
-		       (file-exists-p to))
-	      (signal 'file-already-exists (list "File already exists." to)))
-	    (unless (fsvn-save-file from to 'no-msg)
-	      (signal 'file-error (list "Moving svn file." from to)))
-	    (fsvn-asap-delete-url from))))
+        (progn
+          (setq from (fsvn-urlrev-url from))
+          (cond
+           ((fsvn-url-repository-p to)
+            (setq to (fsvn-urlrev-url to))
+            (fsvn-call-command-discard "move" from to
+                                       "--message" (fsvn-config-magic-remote-commit-message to)))
+           ((fsvn-file-versioned-directory-p to)
+            (fsvn-call-command-discard "move" from to))
+           (t
+            (when (and (not ok-if-already-exists)
+                       (file-exists-p to))
+              (signal 'file-already-exists (list "File already exists." to)))
+            (unless (fsvn-save-file from to 'no-msg)
+              (signal 'file-error (list "Moving svn file." from to)))
+            (fsvn-asap-delete-url from))))
       (cond
        ((not (fsvn-url-repository-p to))
-	(signal 'file-error (list "Move error.")))
+        (signal 'file-error (list "Move error.")))
        ((fsvn-file-versioned-directory-p from)
-	(fsvn-call-command-discard "move" file to
-				   "--message" (fsvn-config-magic-remote-commit-message to)))
+        (fsvn-call-command-discard "move" file to
+                                   "--message" (fsvn-config-magic-remote-commit-message to)))
        (t
-	(fsvn-asap-add-file file (fsvn-url-dirname to))
-	(delete-file file))))))
+        (fsvn-asap-add-file file (fsvn-url-dirname to))
+        (delete-file file))))))
 
 (defun fsvn-magic-load (file &optional noerror nomessage nosuffix must-suffix)
   (let ((tmpfile (fsvn-magic-file-local-copy file)))
@@ -614,7 +614,7 @@ local (non-wc) -> remote : svn add -> svn commit
 
 (defun fsvn-magic-access-file (filename string)
   (let* ((urlrev (fsvn-magic-parse-file-name filename))
-	 (entry (fsvn-magic-get-list/info-entry urlrev)))
+         (entry (fsvn-magic-get-list/info-entry urlrev)))
     (cond
      ((null entry)
       (error "%s: %s" string filename))
@@ -628,19 +628,19 @@ local (non-wc) -> remote : svn add -> svn commit
 (defun fsvn-magic-make-directory (dir &optional parents)
   (let ((url (fsvn-magic-parse-file-as-writable dir)))
     (fsvn-call-command-discard "mkdir"
-			       (when parents "--parents")
-			       "--message" (fsvn-config-magic-remote-commit-message url)
-			       url)))
+                               (when parents "--parents")
+                               "--message" (fsvn-config-magic-remote-commit-message url)
+                               url)))
 
 (defun fsvn-magic-make-directory-internal (dir)
   (let ((url (fsvn-magic-parse-file-as-writable dir)))
     (fsvn-call-command-discard "mkdir"
-			       "--message" (fsvn-config-magic-remote-commit-message url)
-			       url)))
+                               "--message" (fsvn-config-magic-remote-commit-message url)
+                               url)))
 
 (defun fsvn-magic-file-newer-than-file-p (file1 file2)
   (let ((attr1 (file-attributes file1))
-	(attr2 (file-attributes file2)))
+        (attr2 (file-attributes file2)))
     (cond
      ((and attr1 attr2)
       (time-less-p (nth 5 attr2) (nth 5 attr1)))
@@ -654,27 +654,27 @@ local (non-wc) -> remote : svn add -> svn commit
   (let ((regexp (concat "^" (regexp-quote file))))
     (fsvn-magic-each-directory-entry directory entry
       (let ((name (fsvn-xml-lists->list->entry=>name$ entry)))
-	(cond
-	 ((not (string-match regexp name)))
-	 ((eq (fsvn-xml-lists->list->entry.kind entry) 'dir)
-	  (concat name "/"))
-	 (t
-	  name))))))
+        (cond
+         ((not (string-match regexp name)))
+         ((eq (fsvn-xml-lists->list->entry.kind entry) 'dir)
+          (concat name "/"))
+         (t
+          name))))))
 
 (defun fsvn-magic-file-name-completion (file directory &optional predicate)
   (let ((regexp (concat "^" (regexp-quote file)))
-	completions)
+        completions)
     (unless predicate
       (setq predicate (lambda (x) t)))
     (fsvn-magic-each-directory-entry directory entry
       (let ((name (fsvn-xml-lists->list->entry=>name$ entry)))
-	(cond
-	 ((not (string-match regexp name)))
-	 ((not (funcall predicate (fsvn-expand-file name directory))))
-	 ((eq (fsvn-xml-lists->list->entry.kind entry) 'dir)
-	  (setq completions (cons (concat name "/") completions)))
-	 (t
-	  (setq completions (cons name completions))))))
+        (cond
+         ((not (string-match regexp name)))
+         ((not (funcall predicate (fsvn-expand-file name directory))))
+         ((eq (fsvn-xml-lists->list->entry.kind entry) 'dir)
+          (setq completions (cons (concat name "/") completions)))
+         (t
+          (setq completions (cons name completions))))))
     (try-completion file completions)))
 
 (defun fsvn-magic-file-remote-p (file &optional identification connected)
@@ -685,8 +685,8 @@ local (non-wc) -> remote : svn add -> svn commit
     (mapc
      (lambda (b)
        (when (and buffer-file-name
-		  (string= buffer-file-name filename))
-	 (throw 'found b)))
+                  (string= buffer-file-name filename))
+         (throw 'found b)))
      (buffer-list))
     nil))
 
@@ -696,12 +696,12 @@ local (non-wc) -> remote : svn add -> svn commit
 
 (defun fsvn-magic-file-local-copy (file)
   (let* ((urlrev (fsvn-magic-parse-file-name file))
-	 (dir (fsvn-temp-directory))
-	 (filename (fsvn-urlrev-filename file))
-	 (name (file-name-sans-extension filename))
-	 (ext (file-name-extension filename))
-	 (i 1)
-	 tmp)
+         (dir (fsvn-temp-directory))
+         (filename (fsvn-urlrev-filename file))
+         (name (file-name-sans-extension filename))
+         (ext (file-name-extension filename))
+         (i 1)
+         tmp)
     (setq tmp (fsvn-expand-file (concat name "." ext) dir))
     (while (file-exists-p tmp)
       (setq tmp (fsvn-expand-file (format "%s(%d).%s" name i ext) dir))
@@ -712,15 +712,15 @@ local (non-wc) -> remote : svn add -> svn commit
 
 (defun fsvn-magic-find-file-noselect (filename &optional nowarn rawfile wildcards)
   (let* ((urlrev (fsvn-magic-parse-file-name filename))
-	 (buffer (fsvn-get-cat-buffer urlrev)))
+         (buffer (fsvn-get-cat-buffer urlrev)))
     ;;todo other args
     (if buffer
-	(with-current-buffer buffer
-	  (setq buffer-file-name filename)
-	  (current-buffer))
+        (with-current-buffer buffer
+          (setq buffer-file-name filename)
+          (current-buffer))
       (setq buffer (create-file-buffer filename))
       (with-current-buffer buffer
-	(setq buffer-file-name filename))
+        (setq buffer-file-name filename))
       buffer)))
 
 (defun fsvn-magic-find-backup-file-name (fn)
@@ -752,7 +752,7 @@ local (non-wc) -> remote : svn add -> svn commit
 ;; FIXME
 (defun fsvn-magic-pseudo-hash-number (ascii-string)
   (let* ((list (string-to-list ascii-string))
-	 (tmp 0))
+         (tmp 0))
     (mapc
      (lambda (ascii)
        (setq tmp (lsh (logxor tmp ascii) (% ascii 28))))

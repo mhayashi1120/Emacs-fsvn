@@ -38,9 +38,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-browse-file-name-parent-directory (file max-level)
   (let ((tmp (fsvn-file-name-directory (directory-file-name file)))
-	(i 0))
+        (i 0))
     (while (and (fsvn-directory-under-versioned-p (fsvn-file-name-directory tmp))
-		(< i max-level))
+                (< i max-level))
       (setq tmp (fsvn-file-name-directory tmp))
       (setq i (1+ i)))
     tmp))
@@ -50,11 +50,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (fsvn-mapitem
      (lambda (f)
        (let ((versioned (fsvn-meta-file-registered-p f)))
-	 (cond
-	  ((and file-versioned-p versioned))
-	  ((and (not file-versioned-p) (null versioned)))
-	  (t
-	   f))))
+         (cond
+          ((and file-versioned-p versioned))
+          ((and (not file-versioned-p) (null versioned)))
+          (t
+           f))))
      ;;TODO hard-coding
     (fsvn-search-same-name-files dir file (+ fsvn-browse-guessed-moved-parent-threshold 2)))))
 
@@ -62,17 +62,17 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-cmd-read-search-move/copy-file ()
   ;; (fsvn-browse-cmd-wc-only
    (let ((target-file (fsvn-browse-cmd-this-wc-file))
-	 files src-file dest-file
-	 target-versioned-p alist)
+         files src-file dest-file
+         target-versioned-p alist)
      (setq target-versioned-p (fsvn-meta-file-registered-p target-file))
      (if target-versioned-p
-	 (setq src-file target-file)
+         (setq src-file target-file)
        (setq dest-file target-file))
      (setq files (fsvn-browse-search-guessed-moved-files target-file target-versioned-p))
      (while files
        (if target-versioned-p
-	   (setq dest-file (car files))
-	 (setq src-file (car files)))
+           (setq dest-file (car files))
+         (setq src-file (car files)))
        (setq alist (cons (cons src-file dest-file) alist))
        (setq files (cdr files)))
      alist))
@@ -96,9 +96,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-stash-pop-read-time (directory)
   (let ((times (mapcar 
-		(lambda (tm) 
-		  (cons (format-time-string "%Y-%m-%d %H:%M:%S" tm) nil))
-		(fsvn-stash-pop-directory-times directory))))
+                (lambda (tm) 
+                  (cons (format-time-string "%Y-%m-%d %H:%M:%S" tm) nil))
+                (fsvn-stash-pop-directory-times directory))))
     (completing-read "TODO: " times)))
 
 (defun fsvn-stash-pop (directory &optional time)
@@ -110,11 +110,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (when (file-directory-p stashdir)
       ;; delete if empty
       (unless (directory-files stashdir nil dired-re-no-dot)
-	(delete-directory stashdir)))))
+        (delete-directory stashdir)))))
 
 (defun fsvn-stash-push (directory)
   (let* ((stashdir (fsvn-stash-pushing-directory directory))
-	 (stashdirs (fsvn-stash-pushing-directories stashdir)))
+         (stashdirs (fsvn-stash-pushing-directories stashdir)))
     (unless (file-directory-p stashdir)
       (make-directory stashdir t))
     ;;TODO copy changed file and .svn
@@ -127,30 +127,30 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-stash-pushing-directory (directory &optional time)
   (let* ((stashdir (fsvn-expand-file (format-time-string "%s" time) 
-				     (fsvn-stash-hash-directory directory))))
+                                     (fsvn-stash-hash-directory directory))))
     stashdir))
 
 (defun fsvn-stash-pop-directory (directory &optional time)
   (let ((dir
-	 (if time
-	     (fsvn-stash-pushing-directory directory time)
-	   (car (fsvn-stash-pop-directories directory)))))
+         (if time
+             (fsvn-stash-pushing-directory directory time)
+           (car (fsvn-stash-pop-directories directory)))))
     (when (and dir (file-exists-p dir))
       dir)))
 
 (defun fsvn-stash-pop-directories (directory)
   (let* ((dir (fsvn-stash-hash-directory directory))
-	 (files (directory-files dir nil dired-re-no-dot)))
+         (files (directory-files dir nil dired-re-no-dot)))
     (mapcar
      (lambda (sec)
        (fsvn-expand-file (format "%d" sec) dir))
      (sort
       (remove nil
-	      (mapcar 
-	       (lambda (name) 
-		 (when (string-match "^[0-9]+$" name)
-		   (string-to-number name)))
-	       files))
+              (mapcar 
+               (lambda (name) 
+                 (when (string-match "^[0-9]+$" name)
+                   (string-to-number name)))
+               files))
       '>))))
 
 (defun fsvn-stash-pop-directory-times (directory)
@@ -170,19 +170,19 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-copy-file-tree (base-directory src-files dest-directory &optional ok-if-exists)
   (let ((files
-	 (mapcar
-	  (lambda (src)
-	    ;;TODO check traversal
-	    (fsvn-file-relative src base-directory))
-	  src-files)))
+         (mapcar
+          (lambda (src)
+            ;;TODO check traversal
+            (fsvn-file-relative src base-directory))
+          src-files)))
     (mapc
      (lambda (file)
        (let* ((src (fsvn-expand-file file base-directory))
-	      (dest (fsvn-expand-file file dest-directory))
-	      (dir (fsvn-file-name-directory2 dest)))
-	 (unless (file-directory-p dir)
-	   (make-directory dir t))
-	 (copy-file src dest ok-if-exists t)))
+              (dest (fsvn-expand-file file dest-directory))
+              (dir (fsvn-file-name-directory2 dest)))
+         (unless (file-directory-p dir)
+           (make-directory dir t))
+         (copy-file src dest ok-if-exists t)))
      files)
     nil))
 
@@ -199,30 +199,30 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-xml-create-accessor (dtd paren multi-nodes)
   (let* ((base-nodes (append paren (list (car dtd))))
-	 (base-name (concat fsvn-xml-accessor-prefix (fsvn-xml-create-accessor-node base-nodes multi-nodes)))
-	 (attrs (fsvn-xml-node-attributes dtd))
-	 (name (symbol-name (car dtd)))
-	 (children (fsvn-xml-node-children dtd)))
+         (base-name (concat fsvn-xml-accessor-prefix (fsvn-xml-create-accessor-node base-nodes multi-nodes)))
+         (attrs (fsvn-xml-node-attributes dtd))
+         (name (symbol-name (car dtd)))
+         (children (fsvn-xml-node-children dtd)))
     (list
      (mapcar
       (lambda (attr)
-	(concat base-name  "." (symbol-name (car attr))))
+        (concat base-name  "." (symbol-name (car attr))))
       attrs)
      (cond
       ((atom children)
        (concat fsvn-xml-accessor-prefix (fsvn-xml-create-accessor-node paren multi-nodes) "=" name))
       (t
        (mapcar
-	(lambda (child)
-	  (fsvn-xml-create-accessor child base-nodes multi-nodes))
-	children))))))
+        (lambda (child)
+          (fsvn-xml-create-accessor child base-nodes multi-nodes))
+        children))))))
 
 (defun fsvn-xml-create-accessor-node (paren multi-nodes)
   (let (seq)
     (setq seq (fsvn-xml-accessor-multi-most-match paren multi-nodes))
     (cond
      ((or (null seq)
-	  (equal seq paren))
+          (equal seq paren))
       (mapconcat 'symbol-name paren "->"))
      (t
       (mapconcat 'symbol-name seq "=>")))))
@@ -232,16 +232,16 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (mapc
      (lambda (seq)
        (let ((len (length seq))
-	     (i 0)
-	     node)
-	 (catch 'unmatch
-	   (while (< i len)
-	     (setq node (nth i nodes))
-	     (unless (eq node (nth i seq))
-	       (throw 'unmatch t))
-	     (setq i (1+ i)))
-	   (when (> len (length max))
-	     (setq max seq)))))
+             (i 0)
+             node)
+         (catch 'unmatch
+           (while (< i len)
+             (setq node (nth i nodes))
+             (unless (eq node (nth i seq))
+               (throw 'unmatch t))
+             (setq i (1+ i)))
+           (when (> len (length max))
+             (setq max seq)))))
      multi-nodes)
     max))
 
@@ -277,9 +277,9 @@ How to send a bug report:
     (mail-position-on-field "subject")
     (insert pkgname "; Bug report" )
     (unless (y-or-n-p 
-	     (concat 
-	      "This bug report may contain privacy information (Like password).\n"
-	      "Please delete manually. OK? " ))
+             (concat 
+              "This bug report may contain privacy information (Like password).\n"
+              "Please delete manually. OK? " ))
       (set-buffer-modified-p nil)
       (kill-buffer (current-buffer)))))
 
@@ -326,9 +326,9 @@ How to send a bug report:
 
 (defun fsvn-cache-uuid-repository (uuid)
   (let* ((repos (fsvn-cache-repository-uuid-directory uuid))
-	 (url (fsvn-directory-name-as-repository repos)))
+         (url (fsvn-directory-name-as-repository repos)))
     (unless (and (file-directory-p repos)
-		 (> (length (directory-files repos nil dired-re-no-dot)) 0))
+                 (> (length (directory-files repos nil dired-re-no-dot)) 0))
       (make-directory repos t)
       (fsvn-admin-call-command-discard "create" nil repos)
       (fsvn-admin-call-command-discard "setuuid" nil repos uuid)
@@ -343,26 +343,26 @@ How to send a bug report:
   (unless (and root uuid)
     (let* ((info (fsvn-get-info-entry url)))
       (setq uuid (fsvn-xml-info->entry=>repository=>uuid$ info)
-	    root (fsvn-xml-info->entry=>repository=>root$ info))))
+            root (fsvn-xml-info->entry=>repository=>root$ info))))
   (let* ((cached-url (fsvn-cache-uuid-repository uuid))
-	 (info (fsvn-get-info-entry cached-url)))
+         (info (fsvn-get-info-entry cached-url)))
     (unless (and info (> (fsvn-xml-info->entry.revision info) 0))
       ;; No costed execute. sync process.
       (with-temp-buffer
-	(unless (= (call-process fsvn-svnsync-command-internal nil (current-buffer) nil "initialize" cached-url root) 0)
-	  (signal 'fsvn-command-error (cons (buffer-string) nil)))))
+        (unless (= (call-process fsvn-svnsync-command-internal nil (current-buffer) nil "initialize" cached-url root) 0)
+          (signal 'fsvn-command-error (cons (buffer-string) nil)))))
     cached-url))
 
 (defun fsvn-cache-mirror-start (url &optional root uuid)
   (let* ((cached-url (fsvn-cache-initialize-repository url root uuid))
-	 (buffer (fsvn-make-temp-buffer))
-	 proc)
+         (buffer (fsvn-make-temp-buffer))
+         proc)
     (fsvn-process-environment
      (setq proc (start-process "fsvn" buffer fsvn-svnsync-command-internal "synchronize" cached-url)))
     (set-process-sentinel proc 
-			  (lambda (p e)
-			    (fsvn-process-exit-handler p e
-			      (kill-buffer (process-buffer p)))))
+                          (lambda (p e)
+                            (fsvn-process-exit-handler p e
+                              (kill-buffer (process-buffer p)))))
     (set-process-filter proc (lambda (p e)))
     proc))
 
@@ -382,7 +382,7 @@ How to send a bug report:
      (save-excursion
        (goto-char (point-min))
        (unless (re-search-forward ,regexp nil t)
-	 (error "Assertion failed Expected %s have not found" ,regexp)))))
+         (error "Assertion failed Expected %s have not found" ,regexp)))))
 
 
 

@@ -49,46 +49,46 @@
       (list
 
        (list (concat "\\`" (car (car fsvn-process-list-column-alist)))
-	     '(".+" (forward-line 0) nil (0 fsvn-header-key-face)))
+             '(".+" (forward-line 0) nil (0 fsvn-header-key-face)))
 
        (list (concat "^-[- ]+" )
-	     '(".+" (forward-line 0) nil (0 fsvn-header-face)))
+             '(".+" (forward-line 0) nil (0 fsvn-header-face)))
 
        ;; Fsvn marks.
        (list fsvn-process-list-re-mark '(0 fsvn-mark-face))
 
        (list (format fsvn-process-list-re-mark-format (char-to-string fsvn-mark-mark-char))
-       	     '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-marked-face)))
+             '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-marked-face)))
 
        (list (format fsvn-process-list-re-mark-format (char-to-string fsvn-mark-delete-char))
-       	     '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-flagged-face)))
+             '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-flagged-face)))
        ))
 
 (defvar fsvn-process-list-mode-map nil)
 (unless fsvn-process-list-mode-map
   (setq fsvn-process-list-mode-map
-	(let ((map (make-sparse-keymap)))
-	  (suppress-keymap map)
+        (let ((map (make-sparse-keymap)))
+          (suppress-keymap map)
 
-	  (define-key map "U" 'fsvn-process-list-unmark-all)
-	  (define-key map "d" 'fsvn-process-list-put-delete)
-	  (define-key map "g" 'revert-buffer)
-	  (define-key map "m" 'fsvn-process-list-put-mark)
-	  (define-key map "n" 'fsvn-process-list-next-process)
-	  (define-key map "p" 'fsvn-process-list-previous-process)
-	  (define-key map "q" 'fsvn-process-list-quit)
-	  (define-key map "u" 'fsvn-process-list-unmark)
-	  (define-key map "x" 'fsvn-process-list-mark-execute)
-	  (define-key map "\C-c\C-t" 'fsvn-process-list-toggle-show-all)
-	  (define-key map "\C-c\C-c" 'fsvn-process-list-mark-execute)
-	  (define-key map "\C-c\C-k" 'fsvn-process-list-quit)
-	  (define-key map "\C-c\C-p" 'fsvn-process-list-send-password-selected)
-	  (define-key map "\C-c\C-q" 'fsvn-process-list-quit)
-	  (define-key map "\C-m" 'fsvn-process-list-show-buffer)
-	  (define-key map "\C-n" 'fsvn-process-list-next-process)
-	  (define-key map "\C-p" 'fsvn-process-list-previous-process)
+          (define-key map "U" 'fsvn-process-list-unmark-all)
+          (define-key map "d" 'fsvn-process-list-put-delete)
+          (define-key map "g" 'revert-buffer)
+          (define-key map "m" 'fsvn-process-list-put-mark)
+          (define-key map "n" 'fsvn-process-list-next-process)
+          (define-key map "p" 'fsvn-process-list-previous-process)
+          (define-key map "q" 'fsvn-process-list-quit)
+          (define-key map "u" 'fsvn-process-list-unmark)
+          (define-key map "x" 'fsvn-process-list-mark-execute)
+          (define-key map "\C-c\C-t" 'fsvn-process-list-toggle-show-all)
+          (define-key map "\C-c\C-c" 'fsvn-process-list-mark-execute)
+          (define-key map "\C-c\C-k" 'fsvn-process-list-quit)
+          (define-key map "\C-c\C-p" 'fsvn-process-list-send-password-selected)
+          (define-key map "\C-c\C-q" 'fsvn-process-list-quit)
+          (define-key map "\C-m" 'fsvn-process-list-show-buffer)
+          (define-key map "\C-n" 'fsvn-process-list-next-process)
+          (define-key map "\C-p" 'fsvn-process-list-previous-process)
 
-	  map)))
+          map)))
 
 (defcustom fsvn-process-list-mode-hook nil
   "*Run at the very end of `fsvn-process-list-mode'."
@@ -122,7 +122,7 @@ Keybindings:
     (mapc
      (lambda (o)
        (let ((p (overlay-get o 'fsvn-process-list-process)))
-	 (when p (throw 'found p))))
+         (when p (throw 'found p))))
      (overlays-at (point)))
     nil))
 
@@ -133,43 +133,43 @@ Keybindings:
        (forward-char ,column)
        (setq overlays (overlays-at (point)))
        (unless overlays
-	 (error "No process here"))
+         (error "No process here"))
        ,@form
        (mapc
-	(lambda (o)
-	  (move-overlay o (line-beginning-position) (overlay-end o)))
-	overlays)
+        (lambda (o)
+          (move-overlay o (line-beginning-position) (overlay-end o)))
+        overlays)
        (set-buffer-modified-p nil))))
 
 (defun fsvn-process-list-draw-list ()
   (let ((buffer (fsvn-process-list-get-buffer))
-	processes)
+        processes)
     (with-current-buffer buffer
       (let (buffer-read-only)
-	(erase-buffer)
-	(fsvn-process-list-mode)
-	(mapc 'delete-overlay (overlays-in (point-min) (point-max)))
-	(let (header1 header2)
-	  (mapc
-	   (lambda (def)
-	     (let* ((key (car def))
-		    (size (fsvn-process-list-column:size key))
-		    (name key))
-	       (when size
-		 (setq name (fsvn-filled-column key size)))
-	       (setq header1 (cons name header1))
-	       (when size
-		 (setq header2 (cons (fsvn-header-tail size) header2)))))
-	   fsvn-process-list-column-alist)
-	  (insert (mapconcat 'identity (nreverse header1) " ") "\n")
-	  (insert (mapconcat 'identity (nreverse header2) " ") " ")
-	  (fsvn-header-tail-fill-line))
-	(mapc
-	 (lambda (p)
-	   (when (funcall fsvn-process-list-display-p-function p)
-	     (fsvn-process-list-insert-process p)
-	     (setq processes (cons p processes))))
-	 (fsvn-union (process-list) fsvn-process-list-processes 'memq)))
+        (erase-buffer)
+        (fsvn-process-list-mode)
+        (mapc 'delete-overlay (overlays-in (point-min) (point-max)))
+        (let (header1 header2)
+          (mapc
+           (lambda (def)
+             (let* ((key (car def))
+                    (size (fsvn-process-list-column:size key))
+                    (name key))
+               (when size
+                 (setq name (fsvn-filled-column key size)))
+               (setq header1 (cons name header1))
+               (when size
+                 (setq header2 (cons (fsvn-header-tail size) header2)))))
+           fsvn-process-list-column-alist)
+          (insert (mapconcat 'identity (nreverse header1) " ") "\n")
+          (insert (mapconcat 'identity (nreverse header2) " ") " ")
+          (fsvn-header-tail-fill-line))
+        (mapc
+         (lambda (p)
+           (when (funcall fsvn-process-list-display-p-function p)
+             (fsvn-process-list-insert-process p)
+             (setq processes (cons p processes))))
+         (fsvn-union (process-list) fsvn-process-list-processes 'memq)))
       (fsvn-process-list-activate-timer)
       (setq buffer-read-only t)
       (setq fsvn-process-list-processes processes)
@@ -180,18 +180,18 @@ Keybindings:
 (defun fsvn-process-list-insert-process (process)
   (forward-line 0)
   (let ((cmdline (mapconcat 'identity (process-command process) " "))
-	(start (point))
-	(buffer (process-buffer process))
-	(dir "")
-	dirstr size sizestr status end overlay)
+        (start (point))
+        (buffer (process-buffer process))
+        (dir "")
+        dirstr size sizestr status end overlay)
     (when (string= cmdline "")
       (setq cmdline (prin1-to-string process)))
     (when (and buffer (buffer-live-p buffer))
       (setq size (buffer-size buffer))
       (setq dir (with-current-buffer buffer
-		  (or
-		   (and default-directory (abbreviate-file-name default-directory))
-		   ""))))
+                  (or
+                   (and default-directory (abbreviate-file-name default-directory))
+                   ""))))
     (setq sizestr (fsvn-filled-column size (fsvn-process-list-column:size "Buffer-Size")))
     (setq status (fsvn-filled-column (process-status process) (fsvn-process-list-column:size "Status")))
     (setq dir (fsvn-string-truncate dir (fsvn-process-list-column:size "PWD")))
@@ -208,45 +208,45 @@ Keybindings:
 (defun fsvn-process-list-activate-timer ()
   (fsvn-process-list-deactivate-timer)
   (setq fsvn-process-list-timer
-	(run-at-time t fsvn-process-list-timer-interval 'fsvn-process-list-redraw-list))
+        (run-at-time t fsvn-process-list-timer-interval 'fsvn-process-list-redraw-list))
   (add-hook 'kill-buffer-hook
-	    (lambda ()
-	      (fsvn-process-list-deactivate-timer))))
+            (lambda ()
+              (fsvn-process-list-deactivate-timer))))
 
 (defun fsvn-process-list-redraw-list ()
   (let ((buffer (fsvn-process-list-prepared-buffer))
-	prev)
+        prev)
     (when (and (buffer-live-p buffer) (eq (current-buffer) buffer))
       (with-current-buffer buffer
-	(unwind-protect
-	    (progn
-	      (setq prev (point))
-	      (mapc
-	       (lambda (p)
-		 (cond
-		  ((fsvn-process-list-goto-process p)
-		   (let ((buffer (process-buffer p))
-			 size)
-		     ;;TODO
-		     (when (looking-at "^..\\([ 0-9]\\{12\\} [ a-z]\\{8\\}\\)")
-		       (save-match-data
-			 (when (buffer-live-p buffer)
-			   (setq size (buffer-size buffer))))
-		       (let ((sizestr (fsvn-filled-column size (fsvn-process-list-column:size "Buffer-Size")))
-			     (status (fsvn-filled-column (process-status p) (fsvn-process-list-column:size "Status")))
-			     buffer-read-only)
-			 
-			 (replace-match (format "%s %s" sizestr status) nil nil nil 1)
-			 (goto-char prev)))))
-		  ((funcall fsvn-process-list-display-p-function p)
-		   (goto-char (point-max))
-		   (let (buffer-read-only)
-		     (fsvn-process-list-insert-process p)
-		     (setq fsvn-process-list-processes
-			   (cons p fsvn-process-list-processes))))))
-	       (fsvn-union (process-list) fsvn-process-list-processes 'memq)))
-	  ;;restore point
-	  (goto-char prev))))))
+        (unwind-protect
+            (progn
+              (setq prev (point))
+              (mapc
+               (lambda (p)
+                 (cond
+                  ((fsvn-process-list-goto-process p)
+                   (let ((buffer (process-buffer p))
+                         size)
+                     ;;TODO
+                     (when (looking-at "^..\\([ 0-9]\\{12\\} [ a-z]\\{8\\}\\)")
+                       (save-match-data
+                         (when (buffer-live-p buffer)
+                           (setq size (buffer-size buffer))))
+                       (let ((sizestr (fsvn-filled-column size (fsvn-process-list-column:size "Buffer-Size")))
+                             (status (fsvn-filled-column (process-status p) (fsvn-process-list-column:size "Status")))
+                             buffer-read-only)
+                         
+                         (replace-match (format "%s %s" sizestr status) nil nil nil 1)
+                         (goto-char prev)))))
+                  ((funcall fsvn-process-list-display-p-function p)
+                   (goto-char (point-max))
+                   (let (buffer-read-only)
+                     (fsvn-process-list-insert-process p)
+                     (setq fsvn-process-list-processes
+                           (cons p fsvn-process-list-processes))))))
+               (fsvn-union (process-list) fsvn-process-list-processes 'memq)))
+          ;;restore point
+          (goto-char prev))))))
 
 (defun fsvn-process-list-default-display-p (process)
   (string-match "^fsvn" (process-name process)))
@@ -265,15 +265,15 @@ Keybindings:
   (let (p)
     (catch 'found
       (while (and (not (eobp))
-		  (setq p (fsvn-process-list-point-process)))
-	(when (eq p process)
-	  (throw 'found p))
-	(forward-line 1)))))
+                  (setq p (fsvn-process-list-point-process)))
+        (when (eq p process)
+          (throw 'found p))
+        (forward-line 1)))))
 
 (defun fsvn-process-list-goto-first ()
   (goto-char (point-min))
   (while (and (not (eobp))
-	      (not (fsvn-process-list-point-process)))
+              (not (fsvn-process-list-point-process)))
     (forward-line 1)))
 
 (defun fsvn-process-list-revert-buffer (ignore-auto noconfirm)
@@ -285,31 +285,31 @@ Keybindings:
 (defun fsvn-process-list-showing-window ()
   (when fsvn-process-list-showing-process
     (let ((alist (mapcar (lambda (w) (cons (window-buffer w) w)) (window-list)))
-	  (buffer (process-buffer fsvn-process-list-showing-process))
-	  win)
+          (buffer (process-buffer fsvn-process-list-showing-process))
+          win)
       (when (setq win (assq buffer alist))
-	(cdr win)))))
+        (cdr win)))))
 
 (defun fsvn-process-list-after-move ()
   (let* ((win (fsvn-process-list-showing-window))
-	 (process (fsvn-process-list-point-process))
-	 (buffer (when process (process-buffer process))))
+         (process (fsvn-process-list-point-process))
+         (buffer (when process (process-buffer process))))
     (when win
       (if (and process (buffer-live-p buffer))
-	  (set-window-buffer win buffer)
-	(delete-window win))
+          (set-window-buffer win buffer)
+        (delete-window win))
       (setq fsvn-process-list-showing-process process))))
 
 (defun fsvn-process-list-gather-marked-processes (&optional mark)
   (let* ((marker-char (or mark fsvn-mark-mark-char))
-	 (regex (concat "^" (regexp-quote (char-to-string marker-char))))
-	 ret temp)
+         (regex (concat "^" (regexp-quote (char-to-string marker-char))))
+         ret temp)
     (save-excursion
       (fsvn-process-list-goto-first)
       (while (not (eobp))
-	(when (looking-at regex)
-	  (setq ret (cons (fsvn-process-list-point-process) ret)))
-	(forward-line 1))
+        (when (looking-at regex)
+          (setq ret (cons (fsvn-process-list-point-process) ret)))
+        (forward-line 1))
       (nreverse ret))))
 
 
@@ -327,9 +327,9 @@ Keybindings:
 (defun fsvn-process-list-toggle-show-all ()
   (interactive)
   (setq fsvn-process-list-display-p-function
-	(if (eq fsvn-process-list-display-p-function 'fsvn-process-list-default-display-p)
-	    (lambda (p) t)
-	  'fsvn-process-list-default-display-p))
+        (if (eq fsvn-process-list-display-p-function 'fsvn-process-list-default-display-p)
+            (lambda (p) t)
+          'fsvn-process-list-default-display-p))
   (fsvn-process-list-draw-list))
 
 (defun fsvn-process-list-quit ()
@@ -361,20 +361,20 @@ Keybindings:
 (defun fsvn-process-list-unmark-all (char)
   (interactive "cRemove marks (RET means all): ")
   (let ((all (eq char 13))
-	(count 0))
+        (count 0))
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(when (fsvn-process-list-point-process)
-	  (fsvn-process-list-retrieve-mark 0
-	    (when (or all (eq (char-after) char))
-	      (delete-char 1)
-	      (insert ?\s)
-	      (setq count (1+ count)))))
-	(forward-line 1)))
+        (when (fsvn-process-list-point-process)
+          (fsvn-process-list-retrieve-mark 0
+            (when (or all (eq (char-after) char))
+              (delete-char 1)
+              (insert ?\s)
+              (setq count (1+ count)))))
+        (forward-line 1)))
     (message (if (= count 1)
-		 "1 mark removed"
-	       "%d marks removed") count)))
+                 "1 mark removed"
+               "%d marks removed") count)))
 
 (defun fsvn-process-list-next-process (&optional arg)
   (interactive "p")
@@ -391,45 +391,45 @@ Keybindings:
   (let ((process (fsvn-process-list-point-process)))
     (when process
       (let ((buffer (process-buffer process)))
-	(unless buffer
-	  (error "This process has not buffer"))
-	(display-buffer buffer)
-	(with-current-buffer buffer
-	  (goto-char (point-max))
-	  (recenter))))
+        (unless buffer
+          (error "This process has not buffer"))
+        (display-buffer buffer)
+        (with-current-buffer buffer
+          (goto-char (point-max))
+          (recenter))))
     (setq fsvn-process-list-showing-process process)))
 
 (defun fsvn-process-list-send-password-selected (processes password)
   (interactive (let ((procs (fsvn-process-list-gather-marked-processes)))
-		 (unless procs
-		   (error "No process was selected"))
-		 (list procs (read-passwd "Password: "))))
+                 (unless procs
+                   (error "No process was selected"))
+                 (list procs (read-passwd "Password: "))))
   (mapc
    (lambda (p)
      (let ((buffer (process-buffer p)))
        (when (buffer-live-p buffer)
-	 (with-current-buffer buffer
-	   ;; remove password/passphrase prompt
-	   (goto-char (point-max))
-	   (forward-line 0)
-	   (when (looking-at "^.*\\(?:[Pp]assword\\|[Pp]assphrase\\).*")
-	     (replace-match ""))))
+         (with-current-buffer buffer
+           ;; remove password/passphrase prompt
+           (goto-char (point-max))
+           (forward-line 0)
+           (when (looking-at "^.*\\(?:[Pp]assword\\|[Pp]assphrase\\).*")
+             (replace-match ""))))
        (when (eq (process-status p) 'run)
-	 (process-send-string p (concat password "\n")))))
+         (process-send-string p (concat password "\n")))))
    processes))
 
 (defun fsvn-process-list-mark-execute ()
   (interactive)
   (let ((regexp (format fsvn-process-list-re-mark-format (char-to-string fsvn-mark-delete-char)))
-	process buffer-read-only)
+        process buffer-read-only)
     (save-excursion
       (fsvn-process-list-goto-first)
       (while (not (eobp))
-	(setq process (fsvn-process-list-point-process))
-	(when (and process (looking-at regexp))
-	  ;; will be updated after timer
-	  (delete-process process))
-	(forward-line 1)))))
+        (setq process (fsvn-process-list-point-process))
+        (when (and process (looking-at regexp))
+          ;; will be updated after timer
+          (delete-process process))
+        (forward-line 1)))))
 
 
 

@@ -65,7 +65,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
   (or
    (getenv "EDITOR")
    (and (featurep 'meadow)
-	(executable-find "gnuclient.exe"))
+        (executable-find "gnuclient.exe"))
    "emacsclient")
   "*Client program for edit conflicted file."
   :group 'fsvn-svk)
@@ -74,16 +74,16 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 
 (unless fsvn-svk-browse-map
   (setq fsvn-svk-browse-map
-	(let ((map (make-sparse-keymap)))
-	  (suppress-keymap map)
-	  (define-key map "\eI" 'fsvn-svk-browse-create)
-	  (define-key map "S" 'fsvn-svk-browse-push)
-	  (define-key map "L" 'fsvn-svk-browse-pull)
-	  (define-key map "R" 'fsvn-svk-browse-resync)
-	  map)))
+        (let ((map (make-sparse-keymap)))
+          (suppress-keymap map)
+          (define-key map "\eI" 'fsvn-svk-browse-create)
+          (define-key map "S" 'fsvn-svk-browse-push)
+          (define-key map "L" 'fsvn-svk-browse-pull)
+          (define-key map "R" 'fsvn-svk-browse-resync)
+          map)))
 
 (add-hook 'fsvn-browse-mode-hook
-	  (lambda () (define-key fsvn-browse-mode-map "\C-c\C-k" fsvn-svk-browse-map)))
+          (lambda () (define-key fsvn-browse-mode-map "\C-c\C-k" fsvn-svk-browse-map)))
 
 ;; fsvn-svk internal function
 
@@ -94,11 +94,11 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
   (let ((conf-file (fsvn-expand-file "config" (fsvn-svk-home-directory))))
     (when (file-exists-p conf-file)
       (with-temp-buffer
-	(insert-file-contents conf-file)
-	(goto-char (point-min))
-	(when (re-search-forward "^depotmap:" nil t)
-	  (when (re-search-forward "^[ \t]*\\(?:\"\"\\|''\\):[ \t]*\\(.+\\)" nil t)
-	    (fsvn-expand-file (match-string 1))))))))
+        (insert-file-contents conf-file)
+        (goto-char (point-min))
+        (when (re-search-forward "^depotmap:" nil t)
+          (when (re-search-forward "^[ \t]*\\(?:\"\"\\|''\\):[ \t]*\\(.+\\)" nil t)
+            (fsvn-expand-file (match-string 1))))))))
 
 (defun fsvn-svk-depotmap-url ()
   (let ((dir (fsvn-svk-depotmap-directory)))
@@ -120,16 +120,16 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 
 (defun fsvn-svk-mirroring-depotpath (file)
   (let* ((root (fsvn-svk-depotmap-url))
-	 (uuid (fsvn-get-file-parent-property file "svm:uuid"))
-	 (top-url (fsvn-expand-url fsvn-svk-mirror-depot root))
-	 url depot)
+         (uuid (fsvn-get-file-parent-property file "svm:uuid"))
+         (top-url (fsvn-expand-url fsvn-svk-mirror-depot root))
+         url depot)
     (catch 'found
       (mapc
        (lambda (entry)
-	 (setq url (fsvn-expand-url (fsvn-xml-lists->list->entry=>name$ entry) top-url))
-	 (when (string= (fsvn-get-propget url "svm:uuid") uuid)
-	   (setq depot (concat (fsvn-svk-mirror-top-depotpath) (fsvn-xml-lists->list->entry=>name$ entry)))
-	   (throw 'found depot)))
+         (setq url (fsvn-expand-url (fsvn-xml-lists->list->entry=>name$ entry) top-url))
+         (when (string= (fsvn-get-propget url "svm:uuid") uuid)
+           (setq depot (concat (fsvn-svk-mirror-top-depotpath) (fsvn-xml-lists->list->entry=>name$ entry)))
+           (throw 'found depot)))
        (fsvn-get-ls top-url))
       nil)))
 
@@ -138,11 +138,11 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
     (setq prop (fsvn-get-file-parent-property file "svm:uuid" t))
     (when prop
       (let (uuid1 uuid2 repos url name topdir info)
-	(setq topdir (car prop))
-	(setq uuid1 (cdr prop))
-	(setq repos (fsvn-svk-depotmap-url))
-	(setq info (fsvn-get-info-entry topdir))
-	(concat "/" (fsvn-info-repos-path info))))))
+        (setq topdir (car prop))
+        (setq uuid1 (cdr prop))
+        (setq repos (fsvn-svk-depotmap-url))
+        (setq info (fsvn-get-info-entry topdir))
+        (concat "/" (fsvn-info-repos-path info))))))
 
 (defun fsvn-svk-mirror-top-depotpath ()
   (concat "//" fsvn-svk-mirror-depot "/"))
@@ -170,22 +170,22 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 
 (defun fsvn-svk-browse-check-exec ()
   (unless (or (and fsvn-svk-perl-command
-		   (executable-find fsvn-svk-perl-command)
-		   (or (and (file-name-absolute-p fsvn-svk-script)
-			    (file-exists-p fsvn-svk-script))
-		       (executable-find fsvn-svk-script)))
-	      (executable-find fsvn-svk-script))
+                   (executable-find fsvn-svk-perl-command)
+                   (or (and (file-name-absolute-p fsvn-svk-script)
+                            (file-exists-p fsvn-svk-script))
+                       (executable-find fsvn-svk-script)))
+              (executable-find fsvn-svk-script))
     (error "cannot execute %s" fsvn-svk-script))
   (fsvn-svk-server-start))
 
 (defun fsvn-svk-browse-draw-mirrored-url ()
   (save-excursion
     (let ((mirroered-url (fsvn-svk-mirrored-repository-url default-directory))
-	  buffer-read-only)
+          buffer-read-only)
       (when mirroered-url
-	(goto-char (point-min))
-	(when (re-search-forward fsvn-browse-re-root nil t)
-	  (replace-match mirroered-url t nil nil 2))))))
+        (goto-char (point-min))
+        (when (re-search-forward fsvn-browse-re-root nil t)
+          (replace-match mirroered-url t nil nil 2))))))
 
 (defmacro fsvn-svk-process-environment (&rest form)
   `(fsvn-process-environment 
@@ -197,25 +197,25 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-call-command (subcommand buffer &rest args)
   (fsvn-svk-process-environment
    (let ((real-args (fsvn-command-args-canonicalize args))
-	 command internal-args script)
+         command internal-args script)
      (if (null fsvn-svk-perl-command)
-	 (setq command fsvn-svk-script
-	       internal-args (cons subcommand real-args))
+         (setq command fsvn-svk-script
+               internal-args (cons subcommand real-args))
        (setq command fsvn-svk-perl-command
-	     internal-args (append (list fsvn-svk-perl-command subcommand)
-				   real-args)))
+             internal-args (append (list fsvn-svk-perl-command subcommand)
+                                   real-args)))
      (fsvn-debug internal-args)
      (apply 'call-process command nil buffer nil internal-args))))
 
 (defun fsvn-svk-start-command (subcommand buffer &rest args)
   (fsvn-svk-process-environment
    (let ((real-args (fsvn-command-args-canonicalize args))
-	 internal-args proc script)
+         internal-args proc script)
      (setq internal-args 
-	   (if (null fsvn-svk-perl-command)
-	       (list fsvn-svk-script)
-	     (setq script (executable-find fsvn-svk-script))
-	     (list fsvn-svk-perl-command script)))
+           (if (null fsvn-svk-perl-command)
+               (list fsvn-svk-script)
+             (setq script (executable-find fsvn-svk-script))
+             (list fsvn-svk-perl-command script)))
      (setq internal-args (append internal-args (cons subcommand real-args)))
      (fsvn-debug internal-args)
      (setq proc (apply 'start-process "fsvn svk" buffer internal-args))
@@ -223,7 +223,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
      (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
      (with-current-buffer buffer
        (when (eq major-mode 'fsvn-popup-result-mode)
-	 (setq fsvn-popup-result-process proc)))
+         (setq fsvn-popup-result-process proc)))
      proc)))
 
 (defun fsvn-svk-process-sentinel (proc event)
@@ -232,7 +232,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
       (insert event))
     (setq fsvn-popup-result-process nil)
     (when (and (eq system-type 'windows-nt)
-	       (/= (process-exit-status proc) 0))
+               (/= (process-exit-status proc) 0))
       (fsvn-svk-win-start-external-window (process-command proc)))))
 
 ;;FIXME windows native perl.exe cannot accept terminal input
@@ -272,9 +272,9 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-depotmap-init (buffer)
   (let ((proc (fsvn-svk-start-command "depotmap" buffer "--init")))
     (fsvn-process-add-filter proc 
-			     (lambda (proc event)
-			       (when (string-match "^Repository .* does not exist, create\\? (y/n)" event)
-				 (process-send-string proc "y\n"))))
+                             (lambda (proc event)
+                               (when (string-match "^Repository .* does not exist, create\\? (y/n)" event)
+                                 (process-send-string proc "y\n"))))
     proc))
 
 (defun fsvn-svk-mirror-start (buffer mirrorpath url)
@@ -305,9 +305,9 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
   (interactive (fsvn-svk-browse-cmd-read-create))
   (fsvn-svk-browse-check-exec)
   (fsvn-async-let ((buffer (fsvn-popup-result-create-buffer))
-		   (url mirrored-url)
-		   (mirrorpath (fsvn-svk-mirror-depotpath mirrored-url))
-		   (depotpath (fsvn-svk-working-depotpath mirrored-url)))
+                   (url mirrored-url)
+                   (mirrorpath (fsvn-svk-mirror-depotpath mirrored-url))
+                   (depotpath (fsvn-svk-working-depotpath mirrored-url)))
     (fsvn-buffer-popup-as-information buffer)
     ;; create ~/.svk and local repository
     (fsvn-svk-depotmap-init buffer)
@@ -332,11 +332,11 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
     (fsvn-svk-confirm 'fsvn-svk-browse-push))
   (fsvn-svk-browse-check-exec)
   (let ((buffer (fsvn-popup-result-create-buffer))
-	(depotpath (fsvn-svk-browse-depotpath)))
+        (depotpath (fsvn-svk-browse-depotpath)))
     (unless depotpath
       (error "This directory has no depotpath"))
     (prog1
-	(fsvn-svk-start-command "push" buffer depotpath)
+        (fsvn-svk-start-command "push" buffer depotpath)
       (fsvn-buffer-popup-as-information buffer))))
 
 (defun fsvn-svk-browse-pull ()
@@ -346,11 +346,11 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
     (fsvn-svk-confirm 'fsvn-svk-browse-pull))
   (fsvn-svk-browse-check-exec)
   (let ((buffer (fsvn-popup-result-create-buffer))
-	(depotpath (fsvn-svk-browse-depotpath)))
+        (depotpath (fsvn-svk-browse-depotpath)))
     (unless depotpath
       (error "This directory has no depotpath"))
     (prog1
-	(fsvn-svk-start-command "pull" buffer depotpath)
+        (fsvn-svk-start-command "pull" buffer depotpath)
       (fsvn-buffer-popup-as-information buffer))))
 
 (defun fsvn-svk-browse-resync ()
@@ -360,11 +360,11 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
     (fsvn-svk-confirm 'fsvn-svk-browse-resync))
   (fsvn-svk-browse-check-exec)
   (let ((buffer (fsvn-popup-result-create-buffer))
-	(depotpath (fsvn-svk-browse-mirroring-depotpath)))
+        (depotpath (fsvn-svk-browse-mirroring-depotpath)))
     (unless depotpath
       (error "This directory has no mirroring depotpath"))
     (prog1
-	(fsvn-svk-start-command "sync" buffer depotpath)
+        (fsvn-svk-start-command "sync" buffer depotpath)
       (fsvn-buffer-popup-as-information buffer))))
 
 

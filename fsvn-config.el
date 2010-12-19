@@ -18,18 +18,18 @@ This configuration switch by repository root by `fsvn-repository-alist'."
 
 (defun fsvn-config-get-value (url key &optional default-value)
   (let ((config (catch 'matched
-		  (mapc
-		   (lambda (x)
-		     (when (and x (string-match (concat "^" (regexp-quote (car x))) url))
-		       (throw 'matched x)))
-		   fsvn-repository-alist)
-		  nil))
-	default value)
+                  (mapc
+                   (lambda (x)
+                     (when (and x (string-match (concat "^" (regexp-quote (car x))) url))
+                       (throw 'matched x)))
+                   fsvn-repository-alist)
+                  nil))
+        default value)
     (setq key (cond
-	       ((symbolp key)
-		(symbol-name key))
-	       (t
-		key)))
+               ((symbolp key)
+                (symbol-name key))
+               (t
+                key)))
     (setq default (intern (concat "fsvn-config-" key)))
     (or
      (cond
@@ -46,12 +46,12 @@ This configuration switch by repository root by `fsvn-repository-alist'."
     (mapc
      (lambda (x)
        (cond
-	((and (symbolp (car x))
-	      (string= (symbol-name (car x)) key))
-	 (throw 'found x))
-	((and (stringp (car x))
-	      (string= (car x) key))
-	 (throw 'found x))))
+        ((and (symbolp (car x))
+              (string= (symbol-name (car x)) key))
+         (throw 'found x))
+        ((and (stringp (car x))
+              (string= (car x) key))
+         (throw 'found x))))
      config)
     nil))
 
@@ -79,9 +79,9 @@ An example is as follows:
 If not matched any settings, then use `fsvn-config-' prefixed variable will be used."
   :group 'fsvn
   :type  '(alist :key-type string
-		 ;;todo not correct
-		 :value-type
-		 (list symbol)))
+                 ;;todo not correct
+                 :value-type
+                 (list symbol)))
 
 (defcustom fsvn-config-browse-show-update t
   "*Control `fsvn-browse-mode' access to repository or not.

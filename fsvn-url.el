@@ -30,12 +30,12 @@
   ;; `url-unhex-string' can't treat url correctly.(bug?)
   (let ((unibyte-url (fsvn-string-unibyte-only-p url)))
     (if unibyte-url
-	(decode-coding-string (url-unhex-string unibyte-url) fsvn-url-encoding)
+        (decode-coding-string (url-unhex-string unibyte-url) fsvn-url-encoding)
       url)))
 
 (defun fsvn-url-escape-revision-mark (url)
   (if (and (not (fsvn-url-urlrev-p url)) 
-	   (string-match fsvn-url-with-revision-regexp url))
+           (string-match fsvn-url-with-revision-regexp url))
       (concat url "@")
     url))
 
@@ -58,31 +58,31 @@
 
 (defun fsvn-url-encode-string (urlrev)
   (let* ((urlobj (fsvn-urlrev-parse urlrev))
-	 (url (car urlobj))
-	 (rev (cdr urlobj)))
+         (url (car urlobj))
+         (rev (cdr urlobj)))
     (fsvn-url-urlrev
      (fsvn-url-concat-split-path
       (mapcar
        (lambda (x)
-	 (cond
-	  ((fsvn-string-unibyte-only-p x)
-	   x)
-	  (t
-	   (url-hexify-string x))))
+         (cond
+          ((fsvn-string-unibyte-only-p x)
+           x)
+          (t
+           (url-hexify-string x))))
        (split-string url "/")))
      rev)))
 
 (defun fsvn-urlrev-decode-string (urlrev)
   (let* ((urlobj (fsvn-urlrev-parse urlrev))
-	 (url (car urlobj))
-	 (rev (cdr urlobj)))
+         (url (car urlobj))
+         (rev (cdr urlobj)))
     (fsvn-url-urlrev (fsvn-url-decode-string url) rev)))
 
 (defun fsvn-expand-url (part-of-url &optional url)
   (let* ((path (directory-file-name part-of-url))
-	 (parent (and url (directory-file-name url)))
-	 (path-list (split-string path "/"))
-	 (paren-list (and parent (split-string parent "/"))))
+         (parent (and url (directory-file-name url)))
+         (path-list (split-string path "/"))
+         (paren-list (and parent (split-string parent "/"))))
     (when (and path-list (string= (car path-list) ""))
       (setq path-list (cdr path-list)))
     (fsvn-url-concat-split-path (append paren-list path-list))))
@@ -92,19 +92,19 @@
 (defun fsvn-url-concat-split-path (path-list)
   "PATH-LIST modified."
   (let* ((topsegment (car path-list))
-	 (lst (nreverse (cdr path-list)))
-	 (ignore 0)
-	 segment ret)
+         (lst (nreverse (cdr path-list)))
+         (ignore 0)
+         segment ret)
     (while lst
       (setq segment (car lst))
       (cond
-       ((string= segment "."))		 ;; do nothing
-       ((string= segment "..")		 ;; ignore next
-	(setq ignore (1+ ignore)))
+       ((string= segment "."))           ;; do nothing
+       ((string= segment "..")           ;; ignore next
+        (setq ignore (1+ ignore)))
        ((> ignore 0)
-	(setq ignore (1- ignore)))
+        (setq ignore (1- ignore)))
        (t
-	(setq ret (cons segment ret))))
+        (setq ret (cons segment ret))))
       (setq lst (cdr lst)))
     (while (> ignore 0)
       (setq ret (cdr ret))
@@ -134,22 +134,22 @@
 
 (defun fsvn-url-relative-name (full-url base-url)
   (let ((base (split-string (fsvn-url-directory-file-name base-url) "/"))
-	(full (split-string full-url "/"))
-	ret)
+        (full (split-string full-url "/"))
+        ret)
     (cond
      ((not (equal (car base) (car full)))
       full-url)
      (t
       (while (and base full
-		  (equal (car base) (car full)))
-	(setq base (cdr base)
-	      full (cdr full)))
+                  (equal (car base) (car full)))
+        (setq base (cdr base)
+              full (cdr full)))
       (setq ret (append 
-		 (make-list (length base) "..") 
-		 full))
+                 (make-list (length base) "..") 
+                 full))
       (if (null ret)
-	  "./"
-	(mapconcat 'identity ret "/"))))))
+          "./"
+        (mapconcat 'identity ret "/"))))))
 
 (defun fsvn-urlrev-directory-file-name (urlrev)
   (let ((urlobj (fsvn-urlrev-parse urlrev)))
@@ -210,16 +210,16 @@
 (defun fsvn-url-remove-authority (url)
   ;; ip_server = [user [ : password ] @ ] host [ : port ]
   (let* ((segment-regexp (regexp-opt fsvn-svn-url-scheme-segment-list))
-	 (regexp (format "^\\(%s\\)\\(?:\\([^:/]+\\):\\)?\\([^@/]+\\)@\\(.+\\)" segment-regexp)))
+         (regexp (format "^\\(%s\\)\\(?:\\([^:/]+\\):\\)?\\([^@/]+\\)@\\(.+\\)" segment-regexp)))
     (if (string-match regexp url)
-	(concat (match-string 1 url) (match-string 4 url))
+        (concat (match-string 1 url) (match-string 4 url))
       url)))
 
 (defun fsvn-url-urlrev (url rev)
   (if rev
       (let ((tmp (fsvn-get-revision-string rev)))
-	(concat (fsvn-url-directory-file-name url) "@" 
-		(fsvn-string-put-property tmp 'fsvn-revision-property t)))
+        (concat (fsvn-url-directory-file-name url) "@" 
+                (fsvn-string-put-property tmp 'fsvn-revision-property t)))
     url))
 
 (defun fsvn-url-urlrev-p (string)
@@ -235,7 +235,7 @@
 (defun fsvn-urlrev-parse (urlrev)
   (let (pos)
     (if (setq pos (next-single-property-change 0 'fsvn-revision-property urlrev))
-	(cons (substring urlrev 0 (1- pos)) (substring urlrev pos))
+        (cons (substring urlrev 0 (1- pos)) (substring urlrev pos))
       (cons urlrev nil))))
 
 
@@ -265,7 +265,7 @@
 
 (defun fsvn-file-name-parent-directory (file level)
   (let ((tmp (fsvn-file-name-directory (directory-file-name file)))
-	(i 0))
+        (i 0))
     (while (< i level)
       (setq tmp (fsvn-file-name-directory tmp))
       (setq i (1+ i)))
@@ -274,8 +274,8 @@
 (defun fsvn-expand-file (name &optional dir)
   (let ((ret (expand-file-name name dir)))
     (if (eq system-type 'windows-nt)
-	;; todo expand-file-name bug?
-	(replace-regexp-in-string "\\\\" "/" ret)
+        ;; todo expand-file-name bug?
+        (replace-regexp-in-string "\\\\" "/" ret)
       ret)))
 
 (defun fsvn-file-relative (name &optional dir)
@@ -285,10 +285,10 @@
 (defun fsvn-file-name-as-revisioned (file revision)
   ;; like tortoise
   (let* ((filename (file-name-sans-extension file))
-	 (ext (file-name-extension file)))
+         (ext (file-name-extension file)))
     (concat filename "-"
-	    (fsvn-get-revision-string revision)
-	    (when ext (concat "." ext)))))
+            (fsvn-get-revision-string revision)
+            (when ext (concat "." ext)))))
 
 (defun fsvn-directory-name-as-repository (directory)
   (if (string-match "^/" directory)
@@ -303,7 +303,7 @@
 
 (defun fsvn-file= (file1 file2)
   (string= (fsvn-file-absolute-name file1)
-	   (fsvn-file-absolute-name file2)))
+           (fsvn-file-absolute-name file2)))
 
 (defun fsvn-file-member (file list)
   (fsvn-member file list 'fsvn-file=))
@@ -311,39 +311,39 @@
 (defun fsvn-file-assoc (elt list)
   (or (fsvn-string-assoc elt list)
       (catch 'found
-	(mapc
-	 (lambda (item)
-	   (let ((value
-		  (cond
-		   ((and (listp item) (stringp (car item)))
-		    (car item))
-		   ((atom item)
-		    item)
-		   (t
-		    nil))))
-	     (when (and value
-			(fsvn-file= elt value))
-	       (throw 'found item))))
-	 list)
-	nil)))
+        (mapc
+         (lambda (item)
+           (let ((value
+                  (cond
+                   ((and (listp item) (stringp (car item)))
+                    (car item))
+                   ((atom item)
+                    item)
+                   (t
+                    nil))))
+             (when (and value
+                        (fsvn-file= elt value))
+               (throw 'found item))))
+         list)
+        nil)))
 
 (defun fsvn-file-name-changed-prefix (src-file dest-file)
   (let* ((src-name (fsvn-file-name-nondirectory src-file))
-	 (dest-name (fsvn-file-name-nondirectory dest-file))
-	 (src-list (reverse (string-to-list src-name)))
-	 (dest-list (reverse (string-to-list dest-name)))
-	 src-diff dest-diff same)
+         (dest-name (fsvn-file-name-nondirectory dest-file))
+         (src-list (reverse (string-to-list src-name)))
+         (dest-list (reverse (string-to-list dest-name)))
+         src-diff dest-diff same)
     (while (and src-list dest-list 
-		(= (car src-list) (car dest-list)))
+                (= (car src-list) (car dest-list)))
       (setq same (cons (car src-list) same))
       (setq src-list (cdr src-list)
-	    dest-list (cdr dest-list)))
+            dest-list (cdr dest-list)))
     (setq src-diff (nreverse src-list))
     (setq dest-diff (nreverse dest-list))
     ;; Match to `.'
     (if (string-match "^\\([^.]+\\)\\." (concat same))
-	(let ((rest (match-string 1 (concat same))))
-	  (cons (concat src-diff rest) (concat dest-diff rest)))
+        (let ((rest (match-string 1 (concat same))))
+          (cons (concat src-diff rest) (concat dest-diff rest)))
       (cons (concat src-diff) (concat dest-diff)))))
 
 

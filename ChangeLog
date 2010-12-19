@@ -1,3 +1,7 @@
+2010-12-17  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fsvn-vc-commit-non-query-message
+
 2010-11-21  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Release: 0.9.8

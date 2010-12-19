@@ -41,60 +41,60 @@
   `(let (FSVN-TEST-ASYNC-RET)
      (mapc
       (lambda (exec-form)
-	(setq FSVN-TEST-ASYNC-RET (eval exec-form))
-	(when (processp FSVN-TEST-ASYNC-RET)
-	  ;; wait until process exit.
-	  (while (not (eq (process-status FSVN-TEST-ASYNC-RET) 'exit))
-	    (sit-for 3))
-	  FSVN-TEST-ASYNC-RET))
+        (setq FSVN-TEST-ASYNC-RET (eval exec-form))
+        (when (processp FSVN-TEST-ASYNC-RET)
+          ;; wait until process exit.
+          (while (not (eq (process-status FSVN-TEST-ASYNC-RET) 'exit))
+            (sit-for 3))
+          FSVN-TEST-ASYNC-RET))
       ',form)
      FSVN-TEST-ASYNC-RET))
 
 (defmacro fsvn-test-excursion (&rest form)
   `(if noninteractive
        (progn 
-	 (if (eq system-type 'windows-nt)
-	     ;; Ignore  when Windows (NTEmacs 22 & NTEmacs 23 & Meadow 3)
-	     ;; Following two code not works correctly when `noninteractive' call.
+         (if (eq system-type 'windows-nt)
+             ;; Ignore  when Windows (NTEmacs 22 & NTEmacs 23 & Meadow 3)
+             ;; Following two code not works correctly when `noninteractive' call.
 
-	     ;; 1
-	     ;; (let ((buf (get-buffer-create "T"))
-	     ;;       proc)
-	     ;;   (with-current-buffer buf
-	     ;;     (make-variable-buffer-local 'kill-buffer-hook)
-	     ;;     (add-hook 'kill-buffer-hook (lambda () (message "i was killed"))))
-	     ;;   (setq proc (start-process "A" buf "true"))
-	     ;;   (set-process-sentinel proc 
-	     ;; 			(lambda (p e) 
-	     ;; 			  (let ((b (process-buffer p)))
-	     ;; 			    (kill-buffer b))))
-	     ;;   (sit-for 3))
+             ;; 1
+             ;; (let ((buf (get-buffer-create "T"))
+             ;;       proc)
+             ;;   (with-current-buffer buf
+             ;;     (make-variable-buffer-local 'kill-buffer-hook)
+             ;;     (add-hook 'kill-buffer-hook (lambda () (message "i was killed"))))
+             ;;   (setq proc (start-process "A" buf "true"))
+             ;;   (set-process-sentinel proc 
+             ;;                         (lambda (p e) 
+             ;;                           (let ((b (process-buffer p)))
+             ;;                             (kill-buffer b))))
+             ;;   (sit-for 3))
 
-	     ;; 2 
-	     ;; (let ((proc (start-process "TEST" nil "true")))
-	     ;;   (while (eq (process-status proc) 'run)
-	     ;;     (message "%s" (process-status proc))
-	     ;;     (sit-for 3)))
-	     
-	     (message "Not works on Windows. Skipped.")
-	   ,@form))
+             ;; 2 
+             ;; (let ((proc (start-process "TEST" nil "true")))
+             ;;   (while (eq (process-status proc) 'run)
+             ;;     (message "%s" (process-status proc))
+             ;;     (sit-for 3)))
+             
+             (message "Not works on Windows. Skipped.")
+           ,@form))
      (let ((PREV-BUFFER-LIST (buffer-list))
-	   (PREV-BUFFER (current-buffer))
-	   (PREV-WIN-CONFIG (current-window-configuration))
-	   (INIT-PROCESS-LIST (process-list)))
+           (PREV-BUFFER (current-buffer))
+           (PREV-WIN-CONFIG (current-window-configuration))
+           (INIT-PROCESS-LIST (process-list)))
        (unwind-protect 
-	   (progn ,@form)
-	 (fsvn-test-wait-for-all-process INIT-PROCESS-LIST)
-	 (unless fsvn-test-keep-buffers
-	   (mapc 
-	    (lambda (b)
-	      (unless (memq b PREV-BUFFER-LIST)
-		(let ((process (get-buffer-process b)))
-		  (when (or (null process) (eq (process-status process) 'exit))
-		    (kill-buffer b)))))
-	    (buffer-list)))
-	 (switch-to-buffer PREV-BUFFER)
-	 (set-window-configuration PREV-WIN-CONFIG)))))
+           (progn ,@form)
+         (fsvn-test-wait-for-all-process INIT-PROCESS-LIST)
+         (unless fsvn-test-keep-buffers
+           (mapc 
+            (lambda (b)
+              (unless (memq b PREV-BUFFER-LIST)
+                (let ((process (get-buffer-process b)))
+                  (when (or (null process) (eq (process-status process) 'exit))
+                    (kill-buffer b)))))
+            (buffer-list)))
+         (switch-to-buffer PREV-BUFFER)
+         (set-window-configuration PREV-WIN-CONFIG)))))
 
 (defun fsvn-test-switch-file (wc1 wc2 file)
   (let ((r (file-relative-name file wc1)))
@@ -109,27 +109,27 @@ To show and see result.
 (defun fsvn-test-wait-for-all-process (init-processes)
   (let (buffer)
     (while (catch 'wait
-	     (mapc
-	      (lambda (p)
-		(unless (memq p init-processes)
-		  (when (not (eq (process-status p) 'exit))
-		    (throw 'wait t))
-		  (when (and (setq buffer (process-buffer p))
-			     (buffer-live-p buffer))
-		    (throw 'wait t))))
-	      (process-list))
-	     nil)
+             (mapc
+              (lambda (p)
+                (unless (memq p init-processes)
+                  (when (not (eq (process-status p) 'exit))
+                    (throw 'wait t))
+                  (when (and (setq buffer (process-buffer p))
+                             (buffer-live-p buffer))
+                    (throw 'wait t))))
+              (process-list))
+             nil)
       (sit-for 2))))
 
 (defun fsvn-test-unbound-functions ()
   (let ((targetp (lambda (s) 
-		   (and (string-match "^fsvn-test-" (symbol-name s))
-			(functionp s)
-			(listp (symbol-function s))))))
+                   (and (string-match "^fsvn-test-" (symbol-name s))
+                        (functionp s)
+                        (listp (symbol-function s))))))
     (mapatoms
      (lambda (s)
        (when (funcall targetp s)
-	 (fmakunbound s)))
+         (fmakunbound s)))
      obarray)))
 
 (defun fsvn-test-quick-commit (message dir)
@@ -321,7 +321,7 @@ To show and see result.
 
 (unless (or noninteractive (eq system-type 'windows-nt))
   (let ((buffer (fsvn-popup-result-create-buffer))
-	proc)
+        proc)
     (fsvn-async-let ((test-buffer buffer))
       (start-process "TEST1" test-buffer "sh" "-c" "echo 1 && sleep 1 && echo 2")
       ;;TODO
@@ -331,7 +331,7 @@ To show and see result.
       (start-process "TEST4" test-buffer "sh" "-c" "echo 7 && sleep 1 && echo 8")
       (start-process "TEST5" test-buffer "sh" "-c" "echo 9 && sleep 1 && echo 10"))
     (while (and (setq proc (get-buffer-process buffer))
-		(eq (process-status proc) 'run))
+                (eq (process-status proc) 'run))
       (sit-for 0.5))
     (with-current-buffer buffer
       (fsvn-test-equal (buffer-string) "1\n2\nfinished\n7\n8\nfinished\n9\n10\nfinished\n"))
@@ -340,24 +340,24 @@ To show and see result.
 ;; non interactive test
 (fsvn-test-excursion
  (let* ((test-dir (fsvn-make-temp-directory))
-	(repos-dir (expand-file-name "rep" test-dir))
-	(repos-url (fsvn-directory-name-as-repository repos-dir))
-	(wc1-dir (expand-file-name "wc1" test-dir))
-	(wc2-dir (expand-file-name "wc2" test-dir))
-	(wc3-dir (expand-file-name "wc3" test-dir))
-	(trash-dir (expand-file-name "trash" test-dir))
-	(default-directory test-dir)
-	;; cancel all configuration
-	(fsvn-repository-alist nil)
-	(fsvn-config-browse-show-update (default-value 'fsvn-config-browse-show-update))
-	(fsvn-config-commit-default-file-select-p (default-value 'fsvn-config-commit-default-file-select-p))
-	(fsvn-config-log-empty-warnings (default-value 'fsvn-config-log-empty-warnings))
-	(fsvn-config-log-limit-count (default-value 'fsvn-config-log-limit-count))
-	(fsvn-config-magic-remote-commit-message (default-value 'fsvn-config-magic-remote-commit-message))
-	(fsvn-config-repository-default-coding-system (default-value 'fsvn-config-repository-default-coding-system))
-	(fsvn-config-tortoise-property-use (default-value 'fsvn-config-tortoise-property-use))
-	list file1 file2 file3 file4 dir1 dir2 dir3
-	ignore-file)
+        (repos-dir (expand-file-name "rep" test-dir))
+        (repos-url (fsvn-directory-name-as-repository repos-dir))
+        (wc1-dir (expand-file-name "wc1" test-dir))
+        (wc2-dir (expand-file-name "wc2" test-dir))
+        (wc3-dir (expand-file-name "wc3" test-dir))
+        (trash-dir (expand-file-name "trash" test-dir))
+        (default-directory test-dir)
+        ;; cancel all configuration
+        (fsvn-repository-alist nil)
+        (fsvn-config-browse-show-update (default-value 'fsvn-config-browse-show-update))
+        (fsvn-config-commit-default-file-select-p (default-value 'fsvn-config-commit-default-file-select-p))
+        (fsvn-config-log-empty-warnings (default-value 'fsvn-config-log-empty-warnings))
+        (fsvn-config-log-limit-count (default-value 'fsvn-config-log-limit-count))
+        (fsvn-config-magic-remote-commit-message (default-value 'fsvn-config-magic-remote-commit-message))
+        (fsvn-config-repository-default-coding-system (default-value 'fsvn-config-repository-default-coding-system))
+        (fsvn-config-tortoise-property-use (default-value 'fsvn-config-tortoise-property-use))
+        list file1 file2 file3 file4 dir1 dir2 dir3
+        ignore-file)
    (make-directory wc1-dir)
    (make-directory wc2-dir)
    (make-directory wc3-dir)
@@ -447,7 +447,7 @@ To show and see result.
     (fsvn-test-sit-for)
     ;; export
     (let ((export-file (expand-file-name "export-file" trash-dir))
-	  (export-dir (expand-file-name "export-dir" trash-dir)))
+          (export-dir (expand-file-name "export-dir" trash-dir)))
       (fsvn-test-async
        (fsvn-browse-export-this file3 export-file)
        (fsvn-test-sit-for)
@@ -455,9 +455,9 @@ To show and see result.
        (fsvn-test-sit-for)))
     ;; copy
     (if (version<= fsvn-svn-version "1.5.0")
-	(fsvn-test-async
-	 (fsvn-browse-copy-selected (list file2) dir2)
-	 (fsvn-browse-copy-selected (list file3) dir2))
+        (fsvn-test-async
+         (fsvn-browse-copy-selected (list file2) dir2)
+         (fsvn-browse-copy-selected (list file3) dir2))
       (fsvn-browse-copy-selected (list file2 file3) dir2))
     (fsvn-test-sit-for)
     (fsvn-browse-copy-this file2 (expand-file-name "non-existence" dir2))
@@ -473,9 +473,9 @@ To show and see result.
     (fsvn-test-equal (fsvn-meta-get-property "fsvn:test" file3) "a\nb")
     (fsvn-test-equal (fsvn-get-proplist file3) '("fsvn:test"))
     (let* ((info (fsvn-get-info-entry (fsvn-file-name-nondirectory file2)))
-	   (url (fsvn-xml-info->entry=>url$ info))
-	   (tmpfile (fsvn-make-temp-file))
-	   magic2 magic3 magic4)
+           (url (fsvn-xml-info->entry=>url$ info))
+           (tmpfile (fsvn-make-temp-file))
+           magic2 magic3 magic4)
       ;; save file
       (fsvn-test-non-nil (fsvn-save-file (fsvn-url-urlrev url "HEAD") tmpfile))
       (fsvn-test-equal (fsvn-get-file-contents tmpfile) "BZ")
@@ -486,44 +486,44 @@ To show and see result.
       (setq magic3 (fsvn-magic-create-name (fsvn-url-urlrev url 3)))
       (setq magic4 (fsvn-magic-create-name (fsvn-url-urlrev url 4)))
       (with-temp-buffer
-	(fsvn-test-non-nil (file-exists-p magic2))
-	(fsvn-test-nil (file-directory-p magic2))
-	(fsvn-test-non-nil (file-readable-p magic2))
-	(fsvn-test-non-nil (file-regular-p magic2))
-	(fsvn-test-non-nil (file-remote-p magic2))
-	(fsvn-test-nil (file-writable-p magic2))
-;; 	(file-executable-p           magic2)
-;; 	(fsvn-test-nil (file-symlink-p magic2))
-	(insert-file-contents magic2)
-	(fsvn-test-equal (buffer-string) "B")
-	)
+        (fsvn-test-non-nil (file-exists-p magic2))
+        (fsvn-test-nil (file-directory-p magic2))
+        (fsvn-test-non-nil (file-readable-p magic2))
+        (fsvn-test-non-nil (file-regular-p magic2))
+        (fsvn-test-non-nil (file-remote-p magic2))
+        (fsvn-test-nil (file-writable-p magic2))
+;;      (file-executable-p           magic2)
+;;      (fsvn-test-nil (file-symlink-p magic2))
+        (insert-file-contents magic2)
+        (fsvn-test-equal (buffer-string) "B")
+        )
       (with-temp-buffer
-	(fsvn-test-non-nil (file-exists-p magic3))
-	(fsvn-test-nil (file-directory-p magic3))
-	(insert-file-contents magic3)
-	(fsvn-test-equal (buffer-string) "BZ")
-	)
+        (fsvn-test-non-nil (file-exists-p magic3))
+        (fsvn-test-nil (file-directory-p magic3))
+        (insert-file-contents magic3)
+        (fsvn-test-equal (buffer-string) "BZ")
+        )
       (with-temp-buffer
-	(fsvn-test-nil (file-exists-p magic4))
-	)
+        (fsvn-test-nil (file-exists-p magic4))
+        )
       )
     (fsvn-call-command-discard "commit" "--message" "modify file") ;; revision 4
     ;; move No.1
     (if (version<= fsvn-svn-version "1.5.0")
-	(fsvn-test-async
-	 (fsvn-browse-move-selected (list file2) dir1)
-	 (fsvn-browse-move-selected (list file3) dir1))
+        (fsvn-test-async
+         (fsvn-browse-move-selected (list file2) dir1)
+         (fsvn-browse-move-selected (list file3) dir1))
       (fsvn-browse-move-selected (list file2 file3) dir1))
     (fsvn-test-sit-for)
     (fsvn-call-command-discard "commit" "--message" "modify file") ;; revision 5
     ;; move No.2
     (if (version<= fsvn-svn-version "1.5.0")
-	(fsvn-test-async
-	 (fsvn-browse-move-selected (list (expand-file-name (file-name-nondirectory file2) dir1)) wc1-dir)
-	 (fsvn-browse-move-selected (list (expand-file-name (file-name-nondirectory file3) dir1)) wc1-dir))
+        (fsvn-test-async
+         (fsvn-browse-move-selected (list (expand-file-name (file-name-nondirectory file2) dir1)) wc1-dir)
+         (fsvn-browse-move-selected (list (expand-file-name (file-name-nondirectory file3) dir1)) wc1-dir))
       (fsvn-browse-move-selected (list (expand-file-name (file-name-nondirectory file2) dir1)
-				       (expand-file-name (file-name-nondirectory file3) dir1))
-				 wc1-dir))
+                                       (expand-file-name (file-name-nondirectory file3) dir1))
+                                 wc1-dir))
     (fsvn-test-sit-for)
     (fsvn-call-command-discard "commit" "--message" "modify file") ;; revision 6
     ;; move No.3
@@ -546,7 +546,7 @@ To show and see result.
     ;;todo
 ;;     (let ((proc (fsvn-browse-update-path)))
 ;;       (while (eq (process-status proc) 'run)
-;; 	(sit-for 0.5))
+;;      (sit-for 0.5))
 ;;       (process-send-string proc "p"))
       ;;todo
       ;;       (fsvn-set-revprop-value (fsvn-url-urlrev url 2) 
@@ -581,8 +581,8 @@ To show and see result.
 
 (defun fsvn-test-add-file-in-repos (dir)
   (let* ((file (fsvn-make-temp-file))
-	 (url (fsvn-wc-file-repository-url dir))
-	 (magic (fsvn-magic-create-name url)))
+         (url (fsvn-wc-file-repository-url dir))
+         (magic (fsvn-magic-create-name url)))
     (write-region (format-time-string "%c\n") nil file t)
     (fsvn-asap-add-file file url (format-time-string "%H-%M-%S"))))
 
@@ -592,20 +592,20 @@ To show and see result.
     (mapcar
      (lambda (cell)
        (cond
-	;; if Emacs function not provided, ignore this.
-	((not (functionp (car cell)))
-	 (setq ret (cons (format "%s is not a provided function." (car cell)) ret)))
-	((not (functionp (cdr cell)))
-	 (setq ret (cons (format "Magic handler not defined for %s" (car cell)) ret)))
-	((subrp (symbol-function (car cell)))
-	 )
-	((symbol-function (car cell))
-	 )
-	((equal (cadr (symbol-function (car cell))) 
-		(cadr (symbol-function (cdr cell))))
-	 cell)
-	(t
-	 nil)))
+        ;; if Emacs function not provided, ignore this.
+        ((not (functionp (car cell)))
+         (setq ret (cons (format "%s is not a provided function." (car cell)) ret)))
+        ((not (functionp (cdr cell)))
+         (setq ret (cons (format "Magic handler not defined for %s" (car cell)) ret)))
+        ((subrp (symbol-function (car cell)))
+         )
+        ((symbol-function (car cell))
+         )
+        ((equal (cadr (symbol-function (car cell))) 
+                (cadr (symbol-function (cdr cell))))
+         cell)
+        (t
+         nil)))
      fsvn-magic-handler-alist)
     (nreverse ret)))
 
@@ -621,14 +621,14 @@ To show and see result.
     (mapc
      (lambda (s)
        (cond
-	((or (listp s)
-	     (vectorp s))
-	 (when (fsvn-test-check-menu-spec-internal s command)
-	   (throw 'found t)))
-	((and (symbolp s)
-	      (commandp s))
-	 (when (eq s command)
-	   (throw 'found t)))))
+        ((or (listp s)
+             (vectorp s))
+         (when (fsvn-test-check-menu-spec-internal s command)
+           (throw 'found t)))
+        ((and (symbolp s)
+              (commandp s))
+         (when (eq s command)
+           (throw 'found t)))))
      spec)
     nil))
 

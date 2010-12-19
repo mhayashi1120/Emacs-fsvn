@@ -58,7 +58,7 @@
 
 (defun fsvn-status-stronger-than (all x y)
   (let ((xl (memq x all))
-	(yl (memq y all)))
+        (yl (memq y all)))
     (cond
      ((null xl)
       nil)
@@ -152,30 +152,30 @@
 
 (defun fsvn-status-get-status-6 (entry)
   (let ((repos (fsvn-xml-status->target->entry=>repos-status entry))
-	(wc (fsvn-xml-status->target->entry=>wc-status entry)))
+        (wc (fsvn-xml-status->target->entry=>wc-status entry)))
     (cond
      ((and repos wc)
       ;; when `status' with --show-updates
       (let ((repos-token (fsvn-xml-status->target=>entry->repos-status=>lock=>token$ entry))
-	    (wc-token (fsvn-xml-status->target->entry=>wc-status=>lock=>token$ entry)))
-	(cond
-	 ((and repos-token wc-token)
-	  (cond
-	   ((string= repos-token wc-token)
-	    ;; locked in repository, lock toKen present
-	    ?K)
-	   (t
-	    ;; locked in repository, lock token present but sTolen
-	    ?T)))
-	 (repos-token
-	  ;; locked in repository, lock token in some Other working copy
-	  ?O)
-	 (wc-token
-	  ;; not locked in repository, lock token present but Broken
-	  ;; FIXME never into here, because not locked in repository, repos-status node is not returned.
-	  ?B)
-	 (t
-	  ?.))))
+            (wc-token (fsvn-xml-status->target->entry=>wc-status=>lock=>token$ entry)))
+        (cond
+         ((and repos-token wc-token)
+          (cond
+           ((string= repos-token wc-token)
+            ;; locked in repository, lock toKen present
+            ?K)
+           (t
+            ;; locked in repository, lock token present but sTolen
+            ?T)))
+         (repos-token
+          ;; locked in repository, lock token in some Other working copy
+          ?O)
+         (wc-token
+          ;; not locked in repository, lock token present but Broken
+          ;; FIXME never into here, because not locked in repository, repos-status node is not returned.
+          ?B)
+         (t
+          ?.))))
      (repos
       ?.)
      ((fsvn-xml-status->target->entry=>wc-status=>lock entry)
@@ -198,39 +198,39 @@
 This list sorted revision descending.
 "
   (let ((current path)
-	ret rev)
+        ret rev)
     ;;TODO space or something contains. find better solution
     (setq current (fsvn-url-decode-string current))
     (mapc
      (lambda (logentry)
        (setq rev (fsvn-xml-log->logentry.revision logentry))
        (mapc
-	(lambda (path)
-	  (unless (string= (fsvn-xml-log->logentry->path.copyfrom-path path) "")
-	    (let ((logpath (fsvn-xml-log->logentry->paths->path$ path))
-		  (copyfrom (fsvn-xml-log->logentry->path.copyfrom-path path)))
-	      (cond
-	       ((string= logpath current)
-		(setq current copyfrom)
-		(setq ret (cons (cons rev current) ret)))
-	       ((string-match (concat "^" (regexp-quote logpath) "/") current)
-		(setq current (fsvn-expand-url (substring current (match-end 0)) copyfrom))
-		(setq ret (cons (cons rev current) ret)))))))
-	(fsvn-xml-log->logentry->paths logentry)))
+        (lambda (path)
+          (unless (string= (fsvn-xml-log->logentry->path.copyfrom-path path) "")
+            (let ((logpath (fsvn-xml-log->logentry->paths->path$ path))
+                  (copyfrom (fsvn-xml-log->logentry->path.copyfrom-path path)))
+              (cond
+               ((string= logpath current)
+                (setq current copyfrom)
+                (setq ret (cons (cons rev current) ret)))
+               ((string-match (concat "^" (regexp-quote logpath) "/") current)
+                (setq current (fsvn-expand-url (substring current (match-end 0)) copyfrom))
+                (setq ret (cons (cons rev current) ret)))))))
+        (fsvn-xml-log->logentry->paths logentry)))
      log-entries)
     (nreverse ret)))
 
 (defun fsvn-logs-chain-find (log-entries rev path)
   (let ((chain (fsvn-logs-create-path-chain log-entries path))
-	(prev path))
+        (prev path))
     (catch 'found
       (mapc
        (lambda (item)
-	 (let ((revision (car item))
-	       (name (cdr item)))
-	   (when (>= rev revision)
-	     (throw 'found prev))
-	   (setq prev name)))
+         (let ((revision (car item))
+               (name (cdr item)))
+           (when (>= rev revision)
+             (throw 'found prev))
+           (setq prev name)))
        chain)
       (or prev path))))
 
@@ -242,16 +242,16 @@ This list sorted revision descending.
 
 (defun fsvn-logs-unique-merge (&rest entries)
   (let ((all (apply 'append entries))
-	ret rev)
+        ret rev)
     (setq all (sort all
-		    (lambda (x y)
-		      (> (fsvn-xml-log->logentry.revision x)
-			 (fsvn-xml-log->logentry.revision y)))))
+                    (lambda (x y)
+                      (> (fsvn-xml-log->logentry.revision x)
+                         (fsvn-xml-log->logentry.revision y)))))
     (mapc
      (lambda (x)
        (unless (equal rev (fsvn-xml-log->logentry.revision x))
-	 (setq rev (fsvn-xml-log->logentry.revision x))
-	 (setq ret (cons x ret))))
+         (setq rev (fsvn-xml-log->logentry.revision x))
+         (setq ret (cons x ret))))
      all)
     (nreverse ret)))
 
@@ -270,20 +270,20 @@ This list sorted revision descending.
 (defun fsvn-revision-range-to-string (rev-range)
   "REV-RANGE is cons cell car is start revision, cdr is end revision."
   (format "%s:%s"
-	  (fsvn-get-revision-string (car rev-range))
-	  (fsvn-get-revision-string (cdr rev-range))))
+          (fsvn-get-revision-string (car rev-range))
+          (fsvn-get-revision-string (cdr rev-range))))
 
 (defun fsvn-set-filename-property (filename)
   (fsvn-string-put-property filename 'fsvn-filename t))
 
 (defun fsvn-info-repos-path (info)
   (let ((root (fsvn-xml-info->entry=>repository=>root$ info))
-	(url (fsvn-xml-info->entry=>url$ info))
-	ret)
+        (url (fsvn-xml-info->entry=>url$ info))
+        ret)
     (when (string-match (concat "^\\(" (regexp-quote root) "\\)") url)
       (setq ret (replace-match "" nil nil url 1))
       (when (string= ret "")
-	(setq ret "/")))
+        (setq ret "/")))
     ret))
 
 (defun fsvn-delete (elt seq)
@@ -291,7 +291,7 @@ This list sorted revision descending.
 
 (defun fsvn-take (count seq)
   (let ((i 0)
-	ret)
+        ret)
     (while (< i count)
       (setq ret (cons (nth i seq) ret))
       (setq i (1+ i)))
@@ -303,7 +303,7 @@ This list sorted revision descending.
     (mapc
      (lambda (x)
        (when (funcall predicate elt x)
-	 (throw 'found x)))
+         (throw 'found x)))
      list)
     nil))
 
@@ -313,8 +313,8 @@ This list sorted revision descending.
      (lambda (urlrev)
        (setq dir (directory-file-name (fsvn-url-dirname urlrev)))
        (unless (setq cell (assoc dir ret))
-	 (setq cell (cons dir nil))
-	 (setq ret (cons cell ret)))
+         (setq cell (cons dir nil))
+         (setq ret (cons cell ret)))
        (setcdr cell (cons (fsvn-urlrev-filename urlrev) (cdr cell))))
      urlrev-list)
     (nreverse ret)))
@@ -335,19 +335,19 @@ This list sorted revision descending.
     (mapc
      (lambda (var)
        (mapc
-	(lambda (x)
-	  (setq ret (cons (cons x nil) ret)))
-	(eval var)))
+        (lambda (x)
+          (setq ret (cons (cons x nil) ret)))
+        (eval var)))
      (cons 'fsvn-const-property-list fsvn-common-property-list))
     (when (and (fsvn-url-local-p file)
-	       (setq root (fsvn-get-root file))
-	       (fsvn-config-tortoise-property-use root))
+               (setq root (fsvn-get-root file))
+               (fsvn-config-tortoise-property-use root))
       (setq ret (append ret (fsvn-tortoise-tsvn:user*properties file))))
     ret))
 
 (defun fsvn-wc-file-repository-path (file)
   (let ((info (fsvn-get-info-entry file))
-	root url)
+        root url)
     (setq root (fsvn-xml-info->entry=>repository=>root$ info))
     (setq url (fsvn-xml-info->entry=>url$ info))
     (fsvn-repository-path root url)))
@@ -366,18 +366,18 @@ This list sorted revision descending.
 This implements consider svn:ignored directory."
   (let (target info)
     (setq target
-	  (if (fsvn-directory-versioned-p directory)
-	      directory
-	    (fsvn-find-parent-working-copy directory)))
+          (if (fsvn-directory-versioned-p directory)
+              directory
+            (fsvn-find-parent-working-copy directory)))
     (when target
       (setq info (fsvn-get-info-entry target)))))
 
 (defun fsvn-find-parent-working-copy (directory)
   (let ((prev directory)
-	(curr directory))
+        (curr directory))
     (while (and (setq curr (fsvn-file-name-directory curr))
-		(not (string= curr prev))
-		(not (fsvn-directory-versioned-p curr)))
+                (not (string= curr prev))
+                (not (fsvn-directory-versioned-p curr)))
       (setq prev curr))
     (when (fsvn-directory-versioned-p curr)
       curr)))
@@ -388,8 +388,8 @@ This implements consider svn:ignored directory."
     (fsvn-each-browse-buffer
      (mapc
       (lambda (subdir)
-	(when (fsvn-url-contains-p (car subdir) top)
-	  (setq top (car subdir))))
+        (when (fsvn-url-contains-p (car subdir) top)
+          (setq top (car subdir))))
       fsvn-browse-subdir-alist))
     top))
 
@@ -401,10 +401,10 @@ This implements consider svn:ignored directory."
     (fsvn-each-browse-buffer
      (mapc
       (lambda (subdir)
-	(let* ((info (fsvn-browse-subdir.info subdir))
-	       (root (fsvn-url-as-directory (fsvn-xml-info->entry=>repository=>root$ info))))
-	  (unless (member root ret)
-	    (setq ret (cons root ret)))))
+        (let* ((info (fsvn-browse-subdir.info subdir))
+               (root (fsvn-url-as-directory (fsvn-xml-info->entry=>repository=>root$ info))))
+          (unless (member root ret)
+            (setq ret (cons root ret)))))
       fsvn-browse-subdir-alist))
     ret))
 

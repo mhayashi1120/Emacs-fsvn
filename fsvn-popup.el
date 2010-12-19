@@ -39,14 +39,14 @@
 
 (unless fsvn-popup-result-mode-map
   (setq fsvn-popup-result-mode-map
-	(let ((map (make-sparse-keymap)))
-	  (set-keymap-parent map text-mode-map)
+        (let ((map (make-sparse-keymap)))
+          (set-keymap-parent map text-mode-map)
 
-	  (define-key map "\C-c\C-c" 'fsvn-popup-result-kill-process)
-	  (define-key map "\C-c\C-k" 'fsvn-popup-result-kill-process)
-	  (define-key map "\C-c\C-p" 'fsvn-popup-result-send-password)
-	  (define-key map "\C-m" 'fsvn-popup-result-send-string)
-	  map)))
+          (define-key map "\C-c\C-c" 'fsvn-popup-result-kill-process)
+          (define-key map "\C-c\C-k" 'fsvn-popup-result-kill-process)
+          (define-key map "\C-c\C-p" 'fsvn-popup-result-send-password)
+          (define-key map "\C-m" 'fsvn-popup-result-send-string)
+          map)))
 
 (defcustom fsvn-popup-result-mode-hook nil
   "*Run at the very end of `fsvn-popup-result-mode'."
@@ -75,14 +75,14 @@ Keybindings:
 (defun fsvn-popup-result-setup-mode-line ()
   (or (assq 'fsvn-popup-result-process mode-line-process)
       (setq mode-line-process
-	    (append fsvn-popup-result-mode-line-process mode-line-process))))
+            (append fsvn-popup-result-mode-line-process mode-line-process))))
 
 (defun fsvn-popup-result-buffer-list ()
   (fsvn-mapitem
    (lambda (b)
      (with-current-buffer b
        (when fsvn-popup-result-buffer-p
-	 b)))
+         b)))
    (buffer-list)))
 
 (defun fsvn-popup-result-create-buffer ()
@@ -102,18 +102,18 @@ Keybindings:
   (insert "\n")
   (when (eobp)
     (let ((proc (get-buffer-process (current-buffer)))
-	  string)
+          string)
       (when (and proc
-		 (eq (process-status proc) 'run)
-		 fsvn-popup-result-end-of-output)
-	(setq string (buffer-substring-no-properties fsvn-popup-result-end-of-output (point)))
-	(set-marker fsvn-popup-result-end-of-output (point-max))
-	(process-send-string proc (concat string))))))
+                 (eq (process-status proc) 'run)
+                 fsvn-popup-result-end-of-output)
+        (setq string (buffer-substring-no-properties fsvn-popup-result-end-of-output (point)))
+        (set-marker fsvn-popup-result-end-of-output (point-max))
+        (process-send-string proc (concat string))))))
 
 (defun fsvn-popup-result-send-password ()
   (interactive)
   (let ((pass (read-passwd "Password: "))
-	(proc (get-buffer-process (current-buffer))))
+        (proc (get-buffer-process (current-buffer))))
     (process-send-string proc (concat pass "\n"))))
 
 (defun fsvn-popup-result-kill-process ()
@@ -137,13 +137,13 @@ Keybindings:
   "SUBCOMMAND svn command.
 ARGS is svn subcommand args."
   (let ((buffer (or fsvn-popup-start-process-buffer (fsvn-popup-result-create-buffer)))
-	proc)
+        proc)
     (setq proc (fsvn-start-command-display subcommand buffer args))
     (set-process-sentinel proc 'fsvn-popup-general-process-sentinel)
     (set-process-filter proc 'fsvn-popup-process-filter-in-buffer)
     (with-current-buffer buffer
       (when (eq major-mode 'fsvn-popup-result-mode)
-	(setq fsvn-popup-result-process proc)))
+        (setq fsvn-popup-result-process proc)))
     (fsvn-buffer-popup-as-information buffer)
     proc))
 
@@ -155,7 +155,7 @@ ARGS is svn subcommand args."
 ARGS is svn subcommand args.  Accepts nil (but not sended).
 return buffer of result output."
   (let ((buffer (or fsvn-popup-call-process-buffer (fsvn-popup-result-create-buffer)))
-	ret)
+        ret)
     (setq ret (fsvn-call-command-display command buffer args))
     (fsvn-buffer-popup-as-information buffer)
     (unless (= ret 0)
@@ -172,11 +172,11 @@ Argument COMMAND svn subcommand.
 Argument FILES target files.
 Optional argument ARGS svn command arguments."
   (let ((buffer (fsvn-popup-result-create-buffer))
-	ret)
+        ret)
     (setq args
-	  (if (> (length files) 1)
-	      (append args (list "--targets" (fsvn-make-targets-file files)))
-	    (append args files)))
+          (if (> (length files) 1)
+              (append args (list "--targets" (fsvn-make-targets-file files)))
+            (append args files)))
     (setq ret (apply 'fsvn-call-command-display command buffer args))
     (fsvn-buffer-popup-as-information buffer)
     (unless (= ret 0)
@@ -200,13 +200,13 @@ Optional argument ARGS svn command arguments."
   (with-current-buffer (process-buffer proc)
     (let (keep-point)
       (unless (= (point) (point-max))
-	(setq keep-point (point))
-	(goto-char (point-max)))
+        (setq keep-point (point))
+        (goto-char (point-max)))
       (insert event)
       (fsvn-parse-result-if-auth-prompt proc)
       (setq fsvn-popup-result-end-of-output (point-marker))
       (when keep-point
-	(goto-char keep-point)))))
+        (goto-char keep-point)))))
 
 (defun fsvn-popup-general-process-sentinel (proc event)
   (fsvn-process-exit-handler proc event

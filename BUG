@@ -51,6 +51,12 @@ revert forcely.
 ** fsvn-log-sibling-ediff-previous
 for directory
 
+
+** fsvn-log-list-revert-to-revision
+
+cannot revert directory
+
+
 * popup-result-mode
 
 ** sometime running process exists but hide mode-line process running

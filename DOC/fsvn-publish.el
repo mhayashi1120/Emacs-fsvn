@@ -31,8 +31,8 @@
     (unless (string-match "/\\([^/]+\\)-\\(..\\)\\.piki$" piki)
       (error "Invalid filename %s" piki))
     (let ((name (match-string 1 piki))
-	  (lang (match-string 2 piki))
-	  (newpath (expand-file-name (file-name-directory path) fsvn-publish-publishing-directory)))
+          (lang (match-string 2 piki))
+          (newpath (expand-file-name (file-name-directory path) fsvn-publish-publishing-directory)))
       (expand-file-name (format "%s.html.%s" name lang) newpath))))
 
 (defun fsvn-publish-directory-files (dir regexp)
@@ -40,10 +40,10 @@
     (mapc
      (lambda (file)
        (cond
-	((file-directory-p file)
-	 (setq ret (append ret (fsvn-publish-directory-files file regexp))))
-	((string-match regexp file)
-	 (setq ret (cons file ret)))))
+        ((file-directory-p file)
+         (setq ret (append ret (fsvn-publish-directory-files file regexp))))
+        ((string-match regexp file)
+         (setq ret (cons file ret)))))
      (directory-files dir t dired-re-no-dot))
     ret))
 
@@ -53,16 +53,16 @@
 (defun fsvn-publish ()
   (interactive)
   (let* ((coding-system-for-read 'utf-8-unix)
-	 (coding-system-for-write 'utf-8-unix)
-	 (template (expand-file-name "template.htm" fsvn-publish-template-directory))
-	 (message-log-max))
+         (coding-system-for-write 'utf-8-unix)
+         (template (expand-file-name "template.htm" fsvn-publish-template-directory))
+         (message-log-max))
     (with-temp-buffer
       (mapc
        (lambda (piki)
-	 (let ((html (fsvn-publish-html-file piki)))
-	   (shell-command (format "piki %s %s > %s" template piki html))
-	   (message nil)
-	   (fsvn-publish-prepare-lang html)))
+         (let ((html (fsvn-publish-html-file piki)))
+           (shell-command (format "piki %s %s > %s" template piki html))
+           (message nil)
+           (fsvn-publish-prepare-lang html)))
        (fsvn-publish-files)))
     (message "Wiki files are published.")))
 

@@ -36,7 +36,7 @@ Argument SEQUENCE see `mapcar'."
     (mapc
      (lambda (x)
        (when (setq value (funcall function x))
-	 (setq ret (cons value ret))))
+         (setq ret (cons value ret))))
      sequence)
     (nreverse ret)))
 
@@ -58,11 +58,11 @@ Argument SEQUENCE see `mapcar'."
 Save selected window, not contain point."
   `(let ((RETURN-WINDOW (get-buffer-window (current-buffer))))
      (unwind-protect
-	 (progn
-	   (select-window ,window)
-	   ,@form)
+         (progn
+           (select-window ,window)
+           ,@form)
        (when (window-live-p RETURN-WINDOW) 
-	 (select-window RETURN-WINDOW)))))
+         (select-window RETURN-WINDOW)))))
 
 (cond
  ((= emacs-major-version 21)
@@ -70,9 +70,9 @@ Save selected window, not contain point."
     `(interactive-p)))
  ((memq emacs-major-version '(22 23))
   (if (and (version<= emacs-version "23.2")
-	   (not (version= emacs-version "23.2")))
+           (not (version= emacs-version "23.2")))
       (defmacro fsvn-interactive-p ()
-	`(called-interactively-p))
+        `(called-interactively-p))
     (defmacro fsvn-interactive-p ()
       `(called-interactively-p 'any))))
  (t
@@ -91,7 +91,7 @@ Save selected window, not contain point."
 
 (defun fsvn-forward-bytes (bytes)
   (let ((count 0)
-	c)
+        c)
     (while (< count bytes)
       (setq c (char-after))
       (setq count (+ (length (encode-coding-char c buffer-file-coding-system)) count))
@@ -103,7 +103,7 @@ Save selected window, not contain point."
 
 (defun fsvn-number-sequence (min max)
   (let ((i min)
-	ret)
+        ret)
     (while (<= i max)
       (setq ret (cons i ret))
       (setq i (1+ i)))
@@ -127,7 +127,7 @@ Save selected window, not contain point."
 (defmacro fsvn-string-pad (string maxlen &rest form)
   `(let ((LEN (length string)))
      (if (> LEN maxlen)
-	 (substring string 0 maxlen)
+         (substring string 0 maxlen)
        ,@form)))
 
 (defun fsvn-string-rpad (string maxlen &optional char)
@@ -139,13 +139,13 @@ Save selected window, not contain point."
 (defun fsvn-string-rtrim (string maxlen)
   (let ((len (length string)))
     (if (> len maxlen)
-	(substring string 0 maxlen)
+        (substring string 0 maxlen)
       string)))
 
 (defun fsvn-string-single-line (string &optional max)
   (let ((ret (replace-regexp-in-string "\n" " " string)))
     (if (and max (> (length ret) max))
-	(substring ret 0 max)
+        (substring ret 0 max)
       ret)))
 
 (defun fsvn-string-rm-lspace (string)
@@ -180,13 +180,13 @@ Save selected window, not contain point."
 (defun fsvn-string-balanced-quoting-p (string)
   (condition-case err
       (with-temp-buffer
-	(insert string)
-	(goto-char (point-min))
-	(while (not (eobp))
-	  (skip-syntax-forward "^\"")
-	  (goto-char (or (scan-sexps (point) 1)
-			 (point-max))))
-	t)
+        (insert string)
+        (goto-char (point-min))
+        (while (not (eobp))
+          (skip-syntax-forward "^\"")
+          (goto-char (or (scan-sexps (point) 1)
+                         (point-max))))
+        t)
     (scan-error nil)))
 
 (if (fboundp 'assoc-string)
@@ -198,30 +198,30 @@ Save selected window, not contain point."
 (defun fsvn-tr1:wregex->regexp (wregex)
   ""
   (let ((lst (string-to-list wregex))
-	tmp c n)
+        tmp c n)
     (while lst
       (setq c (car lst))
       (setq n (cadr lst))
       (setq lst (cdr lst))
       (setq tmp
-	    (cons
-	     (cond
-	      ((eq ?\\ c)
-	       (cond
-		((eq ?d n) (setq lst (cdr lst)) "[0-9]")
-		((eq ?D n) (setq lst (cdr lst)) "[^0-9]")
-		((eq ?w n) (setq lst (cdr lst)) "\\w")
-		((eq ?W n) (setq lst (cdr lst)) "\\W")
-		((eq ?s n) (setq lst (cdr lst)) "\\s ")
-		((eq ?\) n) (setq lst (cdr lst)) ")")
-		((eq ?\( n) (setq lst (cdr lst)) "(")
-		(t  (concat "\\" (char-to-string n)))))
-	      ((eq ?\( c) "\\(")
-	      ((eq ?\) c) "\\)")
-	      ((eq ?\| c) "\\|")
-	      (t
-	       (char-to-string c)))
-	     tmp)))
+            (cons
+             (cond
+              ((eq ?\\ c)
+               (cond
+                ((eq ?d n) (setq lst (cdr lst)) "[0-9]")
+                ((eq ?D n) (setq lst (cdr lst)) "[^0-9]")
+                ((eq ?w n) (setq lst (cdr lst)) "\\w")
+                ((eq ?W n) (setq lst (cdr lst)) "\\W")
+                ((eq ?s n) (setq lst (cdr lst)) "\\s ")
+                ((eq ?\) n) (setq lst (cdr lst)) ")")
+                ((eq ?\( n) (setq lst (cdr lst)) "(")
+                (t  (concat "\\" (char-to-string n)))))
+              ((eq ?\( c) "\\(")
+              ((eq ?\) c) "\\)")
+              ((eq ?\| c) "\\|")
+              (t
+               (char-to-string c)))
+             tmp)))
     (apply 'concat (nreverse tmp))))
 
 
@@ -239,7 +239,7 @@ Save selected window, not contain point."
 (defun fsvn-regexp-matched (matched-object subexp)
   "Wrapper of `match-string'."
   (let ((string (car matched-object))
-	(matched (cdr matched-object)))
+        (matched (cdr matched-object)))
     (save-match-data
       (set-match-data matched)
       (match-string subexp string))))
@@ -248,43 +248,43 @@ Save selected window, not contain point."
 
 (defun fsvn-filled-column (value &optional pad)
   (format (concat "%" 
-		  (when pad (int-to-string pad))
-		  (cond 
-		   ((integerp value) "d")
-		   ((stringp value) "s")
-		   ((symbolp value) "s")
-		   (t (error "Not supported"))))
-	  (or value "")))
+                  (when pad (int-to-string pad))
+                  (cond 
+                   ((integerp value) "d")
+                   ((stringp value) "s")
+                   ((symbolp value) "s")
+                   (t (error "Not supported"))))
+          (or value "")))
 
 
 
 (defun fsvn-union (list1 list2 &optional predicate)
   (let ((list (nreverse (copy-sequence list1)))
-	(pred (or predicate 'member)))
+        (pred (or predicate 'member)))
     (mapc
      (lambda (i)
        (unless (funcall pred i list)
-	 (setq list (cons i list))))
+         (setq list (cons i list))))
      list2)
     (nreverse list)))
 
 (defun fsvn-except (list1 list2 &optional predicate)
   (let ((pred (or predicate 'member))
-	list)
+        list)
     (mapc
      (lambda (i)
        (unless (funcall pred i list2)
-	 (setq list (cons i list))))
+         (setq list (cons i list))))
      list1)
     (nreverse list)))
 
 (defun fsvn-intersection (list1 list2 &optional predicate)
   (let ((pred (or predicate 'member))
-	list)
+        list)
     (mapc
      (lambda (i)
        (when (funcall pred i list2)
-	 (setq list (cons i list))))
+         (setq list (cons i list))))
      list1)
     (nreverse list)))
 
@@ -292,14 +292,14 @@ Save selected window, not contain point."
   (catch 'found
     (while list
        (when (funcall predicate elt (car list))
-	 (throw 'found list))
+         (throw 'found list))
        (setq list (cdr list)))))
 
 (defun fsvn-member-regexp (regexp list)
   (catch 'match
     (while list
       (when (and (stringp (car list)) (string-match regexp (car list)))
-	(throw 'match list))
+        (throw 'match list))
       (setq list (cdr list)))))
 
 (defun fsvn-member-startswith (start-string list)
@@ -310,18 +310,18 @@ Save selected window, not contain point."
   (catch 'match
     (while list
       (when (string-match (concat "^" (regexp-quote (car list))) string)
-	(throw 'match list))
+        (throw 'match list))
       (setq list (cdr list)))))
 
 (defun fsvn-split-list (elt list)
   (let ((after list)
-	before)
+        before)
     (catch 'matched
       (while after
-	(when (equal elt (car after))
-	  (throw 'matched (cons (nreverse before) after)))
-	(setq before (cons (car after) before))
-	(setq after (cdr after)))
+        (when (equal elt (car after))
+          (throw 'matched (cons (nreverse before) after)))
+        (setq before (cons (car after) before))
+        (setq after (cdr after)))
       (cons (nreverse before) nil))))
 
 
@@ -332,9 +332,9 @@ Save selected window, not contain point."
 Use %% to put a single % into the output.
 "
   (let ((search-start 0)
-	(ret "")
-	(escape-char "%")
-	case-fold-search table next-begin search-end)
+        (ret "")
+        (escape-char "%")
+        case-fold-search table next-begin search-end)
     (while (string-match escape-char format-string search-start)
       (setq search-end (match-beginning 0))
       (setq next-begin (match-end 0))
@@ -342,12 +342,12 @@ Use %% to put a single % into the output.
       (setq ret (concat ret (substring format-string search-start search-end)))
       (setq search-start next-begin)
       (while table
-	(when (and (string-match (caar table) format-string search-start)
-		   (= (match-beginning 0) search-start))
-	  (setq search-start (match-end 0))
-	  (setq ret (concat ret (cdar table)))
-	  (setq table nil))
-	(setq table (cdr table))))
+        (when (and (string-match (caar table) format-string search-start)
+                   (= (match-beginning 0) search-start))
+          (setq search-start (match-end 0))
+          (setq ret (concat ret (cdar table)))
+          (setq table nil))
+        (setq table (cdr table))))
     (setq ret (concat ret (substring format-string search-start)))
     ret))
 
@@ -356,10 +356,10 @@ Use %% to put a single % into the output.
 (defun fsvn-month-max-day (year month)
   (let (next-year next-month next-first last-day)
     (if (= month 12)
-	(setq next-month 1
-	      next-year (1+ year))
+        (setq next-month 1
+              next-year (1+ year))
       (setq next-month (1+ month)
-	    next-year year))
+            next-year year))
     (setq next-first (float-time (encode-time 0 0 0 1 next-month next-year)))
     (setq last-day (seconds-to-time (1- next-first)))
     (string-to-number (format-time-string "%d" last-day))))
@@ -380,14 +380,14 @@ Use %% to put a single % into the output.
     (with-temp-buffer
       (pp lisp (current-buffer))
       (let ((coding-system-for-write 'utf-8))
-	(write-region (point-min) (point-max) file nil 'no-msg)))))
+        (write-region (point-min) (point-max) file nil 'no-msg)))))
 
 (defun fsvn-lisp-load (file)
   (condition-case nil
       (with-temp-buffer
-	(let ((coding-system-for-read 'utf-8))
-	  (insert-file-contents file))
-	(read (current-buffer)))
+        (let ((coding-system-for-read 'utf-8))
+          (insert-file-contents file))
+        (read (current-buffer)))
     (error ())))
 
 
@@ -397,8 +397,8 @@ Use %% to put a single % into the output.
     (mapcar
      (lambda (sym)
        (prog1
-	   (cons (intern (concat ":" (symbol-name sym))) i)
-	 (setq i (1+ i))))
+           (cons (intern (concat ":" (symbol-name sym))) i)
+         (setq i (1+ i))))
      spec)))
 
 (defmacro fsvn-defstruct (type &rest spec)
@@ -409,29 +409,29 @@ Use %% to put a single % into the output.
 (defmacro fsvn-defstruct-constructor (type &rest spec)
   `(let ((SYM (quote ,(intern (concat (format "fsvn-struct-%s-make" (symbol-name type)))))))
      (fset SYM
-	   (lambda (&rest args)
-	     (let* ((alist (quote ,(fsvn-defstruct-keyword-number-pair spec)))
-		    (struct (make-list (length alist) nil))
-		    key val key-num)
-	       (while args
-		 (setq key  (car args))
-		 (setq args (cdr args))
-		 (setq val  (car args))
-		 (setq args (cdr args))
-		 (unless (keywordp key)
-		   (error "'%s' is not a keyword" key))
-		 (setq key-num (assoc key alist))
-		 (if key-num
-		     (setcar (nthcdr (cdr key-num) struct) val)
-		   (error "'%s' is unknown" key)))
-	       struct)))))
+           (lambda (&rest args)
+             (let* ((alist (quote ,(fsvn-defstruct-keyword-number-pair spec)))
+                    (struct (make-list (length alist) nil))
+                    key val key-num)
+               (while args
+                 (setq key  (car args))
+                 (setq args (cdr args))
+                 (setq val  (car args))
+                 (setq args (cdr args))
+                 (unless (keywordp key)
+                   (error "'%s' is not a keyword" key))
+                 (setq key-num (assoc key alist))
+                 (if key-num
+                     (setcar (nthcdr (cdr key-num) struct) val)
+                   (error "'%s' is unknown" key)))
+               struct)))))
 
 (defmacro fsvn-defstruct-s/getter (type &rest spec)
   `(let* ((TYPE-NAME (symbol-name (quote ,type)))
-	  (KEYS (quote ,spec))
-	  (LEN (length KEYS))
-	  (INDEX 0)
-	  member-name setter getter)
+          (KEYS (quote ,spec))
+          (LEN (length KEYS))
+          (INDEX 0)
+          member-name setter getter)
      (while (< INDEX LEN)
        (setq member-name (symbol-name (car KEYS)))
        (setq setter (intern (format "fsvn-struct-%s-set-%s" TYPE-NAME member-name)))
@@ -453,8 +453,8 @@ Use %% to put a single % into the output.
     (setq cs (car (find-operation-coding-system 'insert-file-contents file)))
     (when (or (null cs) (eq cs 'undecided))
       (with-temp-buffer
-	(insert-file-contents file nil 0 fsvn-file-guessed-coding-system-threshold)
-	(setq cs buffer-file-coding-system)))
+        (insert-file-contents file nil 0 fsvn-file-guessed-coding-system-threshold)
+        (setq cs buffer-file-coding-system)))
     cs))
 
 (defun fsvn-wc-files-only-non-recursive-p (files)
@@ -462,14 +462,14 @@ Use %% to put a single % into the output.
     (mapc
      (lambda (file)
        (when (and (fsvn-file-exact-directory-p file)
-		  (> (length (fsvn-directory-files file)) 0))
-	 (throw 'non-file nil)))
+                  (> (length (fsvn-directory-files file)) 0))
+         (throw 'non-file nil)))
      files)
     t))
 
 (defun fsvn-file-directly-under-p (dir file)
   (string= (file-name-as-directory dir)
-	   (file-name-directory (directory-file-name file))))
+           (file-name-directory (directory-file-name file))))
 
 (defun fsvn-directory-files (directory &optional match)
   (directory-files directory nil (or match dired-re-no-dot)))
@@ -484,7 +484,7 @@ Use %% to put a single % into the output.
 
 (defun fsvn-make-temp-filename (file)
   (let ((i 1)
-	name)
+        name)
     (while (file-exists-p (setq name (format "%s.%d" file i)))
       (setq i (1+ i)))
     name))
@@ -501,9 +501,9 @@ Use %% to put a single % into the output.
     (mapc
      (lambda (file)
        (when (time-less-p (nth 5 (file-attributes file)) time)
-	 (if (fsvn-file-exact-directory-p file)
-	     (fsvn-delete-directory file)
-	   (delete-file file))))
+         (if (fsvn-file-exact-directory-p file)
+             (fsvn-delete-directory file)
+           (delete-file file))))
      (directory-files directory t dired-re-no-dot))))
 
 (defun fsvn-process-using-temp-files ()
@@ -511,12 +511,12 @@ Use %% to put a single % into the output.
     (mapc
      (lambda (p)
        (when (string-match "^fsvn" (process-name p))
-	 (mapc
-	  (lambda (string)
-	    (when (and (file-name-absolute-p string)
-		       (file-exists-p string))
-	      (setq ret (cons string ret))))
-	  (process-command p))))
+         (mapc
+          (lambda (string)
+            (when (and (file-name-absolute-p string)
+                       (file-exists-p string))
+              (setq ret (cons string ret))))
+          (process-command p))))
      (process-list))
     (nreverse ret)))
 
@@ -537,14 +537,14 @@ Use %% to put a single % into the output.
   `(let ((count 0))
      (save-excursion
        (mapc
-	(lambda (b)
-	  (set-buffer b)
-	  (when (and ,each-buffer-condition
-		     (or (null (get-buffer-process b))
-			 (eq (process-status (get-buffer-process b)) 'exit)))
-	    (kill-buffer (current-buffer))
-	    (setq count (1+ count))))
-	(buffer-list)))
+        (lambda (b)
+          (set-buffer b)
+          (when (and ,each-buffer-condition
+                     (or (null (get-buffer-process b))
+                         (eq (process-status (get-buffer-process b)) 'exit)))
+            (kill-buffer (current-buffer))
+            (setq count (1+ count))))
+        (buffer-list)))
      count))
 
 (defun fsvn-files-unsaved-buffers (files)
@@ -552,27 +552,27 @@ Use %% to put a single % into the output.
     (mapc
      (lambda (file)
        (cond
-	((fsvn-file-exact-directory-p file)
-	 (when (setq tmp (fsvn-directory-unsaved-buffers file))
-	   (setq ret (append ret tmp))))
-	(t
-	 (let ((buffer (get-file-buffer file)))
-	   (when (and buffer
-		      (buffer-modified-p buffer))
-	     (setq ret (cons buffer ret)))))))
+        ((fsvn-file-exact-directory-p file)
+         (when (setq tmp (fsvn-directory-unsaved-buffers file))
+           (setq ret (append ret tmp))))
+        (t
+         (let ((buffer (get-file-buffer file)))
+           (when (and buffer
+                      (buffer-modified-p buffer))
+             (setq ret (cons buffer ret)))))))
      files)
     ret))
 
 (defun fsvn-directory-unsaved-buffers (directory)
   (let ((regex (concat "^" (regexp-quote (directory-file-name directory)) "/"))
-	ret)
+        ret)
     (mapc
      (lambda (buffer)
        (let ((file (buffer-file-name buffer)))
-	 (when (and file
-		    (string-match regex (fsvn-expand-file file))
-		    (buffer-modified-p buffer))
-	   (setq ret (cons buffer ret)))))
+         (when (and file
+                    (string-match regex (fsvn-expand-file file))
+                    (buffer-modified-p buffer))
+           (setq ret (cons buffer ret)))))
      (buffer-list))
     ret))
 
@@ -622,8 +622,8 @@ Use %% to put a single % into the output.
   "Show temporary message to current point.
 referenced mew-complete.el"
   (let ((wait-msec (max (* (length m) 0.05) 0.5))
-	(savemodified (buffer-modified-p))
-	savepoint savemax)
+        (savemodified (buffer-modified-p))
+        savepoint savemax)
     (save-excursion
       (setq savepoint (point))
       (insert m)
@@ -634,8 +634,8 @@ referenced mew-complete.el"
       (delete-region savepoint savemax)
       (set-buffer-modified-p savemodified)
       (when quit-flag
-	(setq quit-flag nil)
-	(setq unread-command-events (list 7))))))
+        (setq quit-flag nil)
+        (setq unread-command-events (list 7))))))
 
 
 
@@ -647,13 +647,13 @@ referenced mew-complete.el"
 
 (defun fsvn-text-buffer-line-as-list (&optional all)
   (let ((regexp (if all "^.*$" "^.+$"))
-	ret )
+        ret )
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(when (looking-at regexp)
-	  (setq ret (cons (match-string-no-properties 0) ret)))
-	(forward-line 1)))
+        (when (looking-at regexp)
+          (setq ret (cons (match-string-no-properties 0) ret)))
+        (forward-line 1)))
     (nreverse ret)))
 
 (defun fsvn-get-file-contents (filename)

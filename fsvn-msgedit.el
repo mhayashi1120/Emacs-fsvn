@@ -39,17 +39,17 @@
 (defvar fsvn-message-edit-mode-map nil)
 (unless fsvn-message-edit-mode-map
   (setq fsvn-message-edit-mode-map
-	(let ((map (make-sparse-keymap)))
-	  (set-keymap-parent map text-mode-map)
+        (let ((map (make-sparse-keymap)))
+          (set-keymap-parent map text-mode-map)
 
-	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+          (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
 
-	  (define-key map "\en" 'fsvn-message-edit-next-message)
-	  (define-key map "\ep" 'fsvn-message-edit-previous-message)
-	  (define-key map "\er" 'fsvn-message-edit-re-search-message-forward)
-	  (define-key map "\e\C-r" 'fsvn-message-edit-re-search-message-backward)
+          (define-key map "\en" 'fsvn-message-edit-next-message)
+          (define-key map "\ep" 'fsvn-message-edit-previous-message)
+          (define-key map "\er" 'fsvn-message-edit-re-search-message-forward)
+          (define-key map "\e\C-r" 'fsvn-message-edit-re-search-message-backward)
 
-	  map)))
+          map)))
 
 (defcustom fsvn-message-edit-mode-hook nil
   "*Run at the very end of `fsvn-message-edit-mode'."
@@ -81,72 +81,72 @@ Keybindings:
 
 (defun fsvn-message-edit-insert-log-file (file)
   (let ((start (point-marker))
-	end)
+        end)
     (save-excursion
       (let ((coding-system-for-read fsvn-message-edit-file-encoding))
-	(forward-char (cadr (insert-file-contents file)))
-	(setq end (point-marker))))
+        (forward-char (cadr (insert-file-contents file)))
+        (setq end (point-marker))))
     (setq fsvn-message-edit-last-message
-	  (fsvn-struct-log-edit-message-make :file file :region (cons start end)))))
+          (fsvn-struct-log-edit-message-make :file file :region (cons start end)))))
 
 (defun fsvn-message-edit-delete-if-repeated ()
   (when (and (fsvn-message-edit-repeated-command-p)
-	     fsvn-message-edit-last-message)
+             fsvn-message-edit-last-message)
     (let ((region (fsvn-struct-log-edit-message-get-region fsvn-message-edit-last-message)))
       (delete-region (car region) (cdr region)))))
 
 (defun fsvn-message-edit-repeated-command-p ()
   (memq last-command 
-	'(fsvn-message-edit-previous-message 
-	  fsvn-message-edit-next-message
-	  fsvn-message-edit-re-search-message-backward
-	  fsvn-message-edit-re-search-message-forward)))
+        '(fsvn-message-edit-previous-message 
+          fsvn-message-edit-next-message
+          fsvn-message-edit-re-search-message-backward
+          fsvn-message-edit-re-search-message-forward)))
 
 (defun fsvn-message-edit-find-file (reverse)
   (let* ((message fsvn-message-edit-last-message)
-	 (find-list (fsvn-message-edit-message-files))
-	 (len (length find-list))
-	 (i 0)
-	 file)
+         (find-list (fsvn-message-edit-message-files))
+         (len (length find-list))
+         (i 0)
+         file)
     (if (null message)
-	(car (last find-list))
+        (car (last find-list))
       (when reverse
-	(setq find-list (nreverse find-list)))
+        (setq find-list (nreverse find-list)))
       (setq file (fsvn-struct-log-edit-message-get-file message))
       (catch 'found
-	(mapc
-	 (lambda (f)
-	   (when (fsvn-file= file f)
-	     (throw 'found (nth (mod (1- i) len) find-list)))
-	   (setq i (1+ i)))
-	 find-list)
-	nil))))
+        (mapc
+         (lambda (f)
+           (when (fsvn-file= file f)
+             (throw 'found (nth (mod (1- i) len) find-list)))
+           (setq i (1+ i)))
+         find-list)
+        nil))))
 
 (defun fsvn-message-edit-search-file (regexp reverse)
   (let* ((message fsvn-message-edit-last-message)
-	 (find-list (fsvn-message-edit-message-files)))
+         (find-list (fsvn-message-edit-message-files)))
     (if (null message)
-	(car (last find-list))
+        (car (last find-list))
       (when reverse
-	(setq find-list (nreverse find-list)))
+        (setq find-list (nreverse find-list)))
       (catch 'found
-	(let ((coding-system-for-read fsvn-message-edit-file-encoding))
-	  (mapc
-	   (lambda (f)
-	     (with-temp-buffer
-	       (insert-file-contents f)
-	       (goto-char (point-min))
-	       (when (re-search-forward regexp nil t)
-		 (throw 'found f))))
-	   find-list)
-	  nil)))))
+        (let ((coding-system-for-read fsvn-message-edit-file-encoding))
+          (mapc
+           (lambda (f)
+             (with-temp-buffer
+               (insert-file-contents f)
+               (goto-char (point-min))
+               (when (re-search-forward regexp nil t)
+                 (throw 'found f))))
+           find-list)
+          nil)))))
 
 (defun fsvn-message-edit-message-files ()
   (let* ((dir (fsvn-message-edit-get-message-directory))
-	 (ret (directory-files-and-attributes dir t dired-re-no-dot)))
+         (ret (directory-files-and-attributes dir t dired-re-no-dot)))
     (setq ret
-	  (sort ret (lambda (x y)
-		      (time-less-p (nth 5 (cdr x)) (nth 5 (cdr y))))))
+          (sort ret (lambda (x y)
+                      (time-less-p (nth 5 (cdr x)) (nth 5 (cdr y))))))
     (mapcar 'car ret)))
 
 
@@ -162,17 +162,17 @@ Keybindings:
     (error "Can't execute this function in this mode"))
   (let (tmpfile)
     (if (= (buffer-size) 0)
-	(when (fsvn-config-log-empty-warnings fsvn-buffer-repos-root)
-	  (unless (y-or-n-p "Log message is empty.  Really commit? ")
-	    (error "No log messages")))
+        (when (fsvn-config-log-empty-warnings fsvn-buffer-repos-root)
+          (unless (y-or-n-p "Log message is empty.  Really commit? ")
+            (error "No log messages")))
       (setq tmpfile (fsvn-message-edit-make-message-file))
       (let ((coding-system-for-write fsvn-message-edit-file-encoding))
-	(write-region (point-min) (point-max) tmpfile nil 'no-msg))
+        (write-region (point-min) (point-max) tmpfile nil 'no-msg))
       tmpfile)))
 
 (defun fsvn-message-edit-make-message-file ()
   (let* ((dir (fsvn-message-edit-get-message-directory))
-	 (temporary-file-directory dir))
+         (temporary-file-directory dir))
     (make-temp-file (format-time-string "%s"))))
 
 ;; * fsvn-message-edit-mode interactive commands
