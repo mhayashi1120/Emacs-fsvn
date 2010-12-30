@@ -1,3 +1,7 @@
+2010-12-30  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Delete: Unsupport Emacs 22 officially.
+
 2010-12-17  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: fsvn-vc-commit-non-query-message

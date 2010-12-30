@@ -24,7 +24,7 @@
 ;;; Commentary:
 
 ;; fsvn supports
-;;  * GNU Emacs 22.x or later.
+;;  * GNU Emacs 23.x or later.
 ;;  * Subversion 1.5.x or later. (1.4.x works but some restriction)
 
 ;; fsvn has TortoiseSVN like user interface by using `svn' command.
@@ -42,7 +42,6 @@
 ;;  * A little user help.
 
 ;; This package is tested on following environment.
-;;      Meadow (based Emacs 22.2) on Windows.  svn 1.5.x - 1.7.x
 ;;      NTEmacs (based Emacs 23.1) on Windows.  svn 1.5.x - 1.7.x
 ;;      Emacs (23.2) on GNU/Linux (Debian).  svn svn 1.5.x - 1.7.x
 ;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.7.x
@@ -59,7 +58,7 @@
 ;; * fsvn-log-message-mode (`fsvn-log-list-mode' subwindow revision log message)
 ;; * fsvn-process-list-mode (Process list view)
 
-;; see repositories below
+;; see following repositories
 ;; * http://svn.apache.org/repos/asf/subversion/trunk/
 ;; * http://tortoisesvn.tigris.org/svn/tortoisesvn/trunk
 ;; * http://svn.meadowy.org/Meadow/trunk/
@@ -128,37 +127,7 @@
 ;; (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
 ;; (global-set-key "\C-xvN" 'fsvn-vc-commit-non-query)
 
-;; 4. TODO this is old
-;;    Emacs 22 unicode conversion is wrong.
-;;    Put following lines into your dot-emacs
-;;
-;;    thanks.
-;;   http://www.pqrs.org/tekezo/emacs/doc/wide-character/index.html
-;;
-;;   (utf-translate-cjk-set-unicode-range
-;;    '((#x00a2 . #x00a3)                       ; Cent Sign, Pound Sign
-;;      (#x00a7 . #x00a8)                       ; Section Sign, Diaeresis
-;;      (#x00ac . #x00ac)                       ; Not Sign
-;;      (#x00b0 . #x00b1)                       ; Degree Sign, Plus-Minus Sign
-;;      (#x00b4 . #x00b4)                       ; Acute Accent
-;;      (#x00b6 . #x00b6)                       ; Pilcrow Sign
-;;      (#x00d7 . #x00d7)                       ; Multiplication Sign
-;;      (#X00f7 . #x00f7)                       ; Division Sign
-;;      (#x0370 . #x03ff)                       ; Greek And Coptic
-;;      (#x0400 . #x04FF)                       ; Cyrillic
-;;      (#x2000 . #x206F)                       ; General Punctuation
-;;      (#x2100 . #x214F)                       ; Letterlike Symbols
-;;      (#x2190 . #x21FF)                       ; Arrows
-;;      (#x2200 . #x22FF)                       ; Mathematical Operators
-;;      (#x2300 . #x23FF)                       ; Miscellaneous Technical
-;;      (#x2500 . #x257F)                       ; Box Drawing
-;;      (#x25A0 . #x25FF)                       ; Geometric Shapes
-;;      (#x2600 . #x26FF)                       ; Miscellaneous Symbols
-;;      (#x2e80 . #xd7a3) (#xff00 . #xffef))))
-;;    
-;;    TODO: Circle number, Fullwidth Tilde
-
-;;  5. Module dependency
+;;  4. Module dependency
 ;;     Independent modules
 ;;      * fsvn-env
 ;;      * fsvn-debug
