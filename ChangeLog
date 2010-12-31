@@ -1,3 +1,7 @@
+2010-12-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: a lot of commit buffer problem
+
 2010-12-30  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Delete: Unsupport Emacs 22 officially.

@@ -1240,7 +1240,7 @@ PATH is each executed path."
 (defun fsvn-browse-add-file-select (files args)
   (let* ((win-configure (current-window-configuration))
          (root fsvn-buffer-repos-root)
-         (select-buffer (fsvn-select-file-generate-buffer))
+         (select-buffer (fsvn-parasite-add-get-buffer files))
          win)
     (with-current-buffer select-buffer
       (fsvn-select-file-mode)
@@ -1258,8 +1258,9 @@ PATH is each executed path."
   (let* ((browse-buffer (current-buffer))
          (win-configure (current-window-configuration))
          (root fsvn-buffer-repos-root)
-         (select-buffer (fsvn-select-file-generate-buffer))
-         (msgedit-buffer (fsvn-message-edit-generate-buffer))
+         (buffers (fsvn-parasite-commit-get-buffers files))
+         (select-buffer (car buffers))
+         (msgedit-buffer (cdr buffers))
          win)
     ;; fsvn-message-edit-mode prior than fsvn-select-file-mode
     (with-current-buffer select-buffer
@@ -1277,8 +1278,8 @@ PATH is each executed path."
       (setq fsvn-message-edit-file-select-buffer select-buffer)
       (fsvn-parasite-commit-mode 1)
       (fsvn-parasite-commit-set-subcommand-args args)
-     (when (fsvn-config-tortoise-property-use root)
-       (fsvn-tortoise-commit-initialize)))
+      (when (fsvn-config-tortoise-property-use root)
+        (fsvn-tortoise-commit-initialize)))
     (fsvn-parasite-commit-setup-window msgedit-buffer select-buffer)))
 
 (defun fsvn-browse-delete-message-edit (files args)

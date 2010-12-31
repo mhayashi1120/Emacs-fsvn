@@ -79,6 +79,11 @@ Keybindings:
 (defun fsvn-message-edit-generate-buffer ()
   (generate-new-buffer fsvn-message-edit-buffer-name))
 
+(defmacro fsvn-message-edit-each-buffers (minor-var &rest form)
+  `(fsvn-each-buffer-mode 'fsvn-message-edit-mode
+     (when (symbol-value ,minor-var)
+       (progn ,@form))))
+
 (defun fsvn-message-edit-insert-log-file (file)
   (let ((start (point-marker))
         end)

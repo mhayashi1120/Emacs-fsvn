@@ -194,6 +194,17 @@
   (with-current-buffer buffer
     major-mode))
 
+(defmacro fsvn-each-buffer-mode (major &rest form)
+  `(let (RET)
+     (mapc
+      (lambda (b)
+        (with-current-buffer b
+          (save-excursion
+            (when (eq major-mode ,major)
+              (setq RET (cons (progn ,@form) RET))))))
+      (buffer-list))
+     (nreverse RET)))
+
 (defcustom fsvn-no-confirm nil
   "*Control hide confirm prompt.
 `t' means completely ignore all.
@@ -345,15 +356,8 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (defmacro fsvn-each-browse-buffer (&rest form)
   "Execute FORM in each `fsvn-browse-mode' buffer."
-  `(let (RET)
-     (save-excursion
-       (mapc
-        (lambda (b)
-          (set-buffer b)
-          (when (eq major-mode 'fsvn-browse-mode)
-            (setq RET (cons (progn ,@form) RET))))
-        (buffer-list)))
-     (nreverse RET)))
+  `(fsvn-each-buffer-mode 'fsvn-browse-mode
+     ,@form))
 
 
 
@@ -405,6 +409,7 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (put 'fsvn-save-browse-directory-excursion 'lisp-indent-function 1)
 (put 'fsvn-save-browse-file-excursion 'lisp-indent-function 1)
+(put 'fsvn-each-buffer-mode  'lisp-indent-function 1)
 
 
 

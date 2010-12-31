@@ -138,6 +138,11 @@ Keybindings:
 (defun fsvn-select-file-generate-buffer ()
   (generate-new-buffer fsvn-select-file-buffer-name))
 
+(defmacro fsvn-select-file-each-buffers (minor-var &rest form)
+  `(fsvn-each-buffer-mode 'fsvn-select-file-mode
+     (when (symbol-value ,minor-var)
+       (progn ,@form))))
+
 (defun fsvn-select-file-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))
         ;;FIXME when multiple subdir and D mark

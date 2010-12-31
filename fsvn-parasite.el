@@ -40,6 +40,10 @@
 (defun fsvn-parasite-make-buffer-variables (variables)
   (fsvn-make-buffer-variables-internal variables))
 
+(defun fsvn-parasite-when-kill-buffer ()
+  (fsvn-parasite-cleanup-buffers 
+   (fsvn-parasite-related-buffers)))
+
 (defun fsvn-parasite-cleanup-buffers (buffers)
   (mapc
    (lambda (b)
@@ -53,7 +57,7 @@
    (fsvn-parasite-cleanup-message-edit)))
 
 (defun fsvn-parasite-cleanup-message-edit ()
-  (fsvn-parasite-cleanup-buffers (fsvn-parasite-related-buffers)))
+  (fsvn-parasite-when-kill-buffer))
 
 (defun fsvn-parasite-setup-message-edit-window (msgedit-buffer)
   (delete-other-windows)
@@ -259,6 +263,14 @@ Keybindings:
     (switch-to-buffer sel-buffer)
     (unless no-msg
       (fsvn-parasite-show-brief-help))))
+
+(defun fsvn-parasite-commit-get-buffers (files)
+  (catch 'found
+    (fsvn-select-file-each-buffers 'fsvn-parasite-commit-mode
+      (when (and (equal fsvn-parasite-commit-target-files files)
+                 (buffer-live-p fsvn-select-file-msgedit-buffer))
+        (throw 'found (cons (current-buffer) fsvn-select-file-msgedit-buffer))))
+    (cons (fsvn-select-file-generate-buffer) (fsvn-message-edit-generate-buffer))))
 
 (defun fsvn-parasite-commit-execute ()
   (interactive)
@@ -733,6 +745,13 @@ Keybindings:
      'fsvn-default-window-configuration (current-window-configuration))
     (switch-to-buffer select)
     (fsvn-parasite-show-brief-help)))
+
+(defun fsvn-parasite-add-get-buffer (files)
+  (catch 'found
+    (fsvn-select-file-each-buffers 'fsvn-parasite-add-mode
+      (when (equal fsvn-parasite-add-target-files files)
+        (throw 'found (current-buffer))))
+    (fsvn-select-file-generate-buffer)))
 
 (defun fsvn-parasite-add-execute ()
   (interactive)
