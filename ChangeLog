@@ -1,3 +1,7 @@
+2011-01-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: Blame minor mode accept changings.
+
 2010-12-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: a lot of commit buffer problem

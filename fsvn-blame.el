@@ -11,8 +11,6 @@
 
 
 
-;; TODO after-change-functions
-
 (require 'fsvn-mode)
 
 
@@ -20,10 +18,6 @@
 (defvar minor-mode-alist)
 
 
-
-;; todo highlight specific revisions.
-;;    fsvn-blame-minor-highlight-specific-revisions
-;;    fsvn-blame-minor-highlight-log-regexp
 
 (defvar fsvn-blame-subwindow-mode-map nil)
 
@@ -75,7 +69,6 @@ Keybindings:
   (setq mode-name "Fsvn Blame Control")
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-blame-subwindow-buffer-local-variables)
-  ;;FIXME too slow fontify.
   (font-lock-fontify-buffer))
 
 (defun fsvn-blame-subwindow-insert-message (line string)
@@ -115,17 +108,14 @@ Keybindings:
 
 (defconst fsvn-blame-minor-buffer-local-variables
   '(
-    (fsvn-blame-minor-mode . t)
     (fsvn-blame-blame-logs)
     (fsvn-blame-previous-revision)
     (fsvn-blame-blame-data)
     (fsvn-blame-log-data)
-    (kill-buffer-hook . kill-buffer-hook)
     (fsvn-blame-spent-time . (cons (float-time) nil))
     (fsvn-blame-subwindow-message-list)
     ))
 
-(defvar fsvn-blame-minor-mode nil)
 (defvar fsvn-blame-blame-logs nil)
 (defvar fsvn-blame-blame-data nil)
 (defvar fsvn-blame-log-data nil)
@@ -134,31 +124,27 @@ Keybindings:
 (defvar fsvn-blame-spent-time nil)
 (defvar fsvn-blame-subwindow-buffer nil)
 
-;;todo slow!!
-(defun fsvn-blame-minor-mode ()
+(define-minor-mode fsvn-blame-minor-mode 
   "Minor mode for visualized Subversion annotate/blame/praise output.
 
 Keybindings: none
 
 "
-  (interactive)
+  nil nil nil
   (unless (buffer-file-name)
+    (fsvn-blame-minor-mode-quit)
     (error "This buffer has no associated file"))
-  (let ((cell (assq 'fsvn-blame-minor-mode minor-mode-alist)))
-    (unless cell
-      (setq cell (list 'fsvn-blame-minor-mode nil))
-      (setq minor-mode-alist
-            (cons cell minor-mode-alist)))
-    (setcdr cell (list " [Fsvn Blame]"))
-    (if fsvn-blame-minor-mode
-        (fsvn-blame-minor-mode-quit)
-      (fsvn-blame-minor-mode-start))))
+  (if fsvn-blame-minor-mode
+      (fsvn-blame-minor-mode-start)
+    (fsvn-blame-minor-mode-quit)))
 
 (defun fsvn-blame-minor-mode-start ()
   (fsvn-blame-file-logs)
   (fsvn-make-buffer-variables-internal fsvn-blame-minor-buffer-local-variables)
+  (add-to-list (make-local-variable 'after-change-functions)
+               'fsvn-blame-after-change-function)
   (fsvn-blame-activate-timer)
-  (add-hook 'kill-buffer-hook 'fsvn-blame-kill-buffer))
+  (add-hook 'kill-buffer-hook 'fsvn-blame-kill-buffer nil t))
 
 (defun fsvn-blame-minor-mode-quit ()
   (interactive)
@@ -167,6 +153,50 @@ Keybindings: none
   (fsvn-blame-clear-all-overlay)
   (fsvn-blame-tidy-up-subwindow)
   (fsvn-blame-cleanup-process))
+
+(defun fsvn-blame-after-change-function (start end len)
+  (when fsvn-blame-minor-mode
+    (let ((ov (fsvn-blame-overlay-at end)))
+      (when ov
+        (fsvn-blame-split-overlay ov start end)))))
+
+(defun fsvn-blame-split-overlay (ov start end)
+  (save-excursion 
+    (let ((ov-start (overlay-start ov))
+          (ov-end (overlay-end ov))
+          top-beg top-fin bottom-beg bottom-fin
+          start-fin end-start ov2)
+      (goto-char ov-start)
+      (setq top-beg (line-beginning-position)
+            top-fin (line-end-position))
+      (goto-char ov-end)
+      (setq bottom-beg (line-beginning-position)
+            bottom-fin (line-end-position))
+      (goto-char start)
+      (forward-line 0)
+      (setq start-fin (line-beginning-position))
+      (goto-char end)
+      (forward-line 1)
+      (setq end-start (line-beginning-position))
+      (cond
+       ((and (<= top-beg start) (<= start top-fin)
+             (< bottom-beg end) (<= end bottom-fin))
+        ;; change whole overlay
+        (delete-overlay ov))
+       ((and (<= top-beg start) (<= start top-fin))
+        ;; only top of target
+        (let ((ov1 (fsvn-blame-overlay-at top-beg)))
+          (when ov1
+            (move-overlay ov1 (overlay-start ov1) top-beg)))
+        (move-overlay ov end-start ov-end))
+       ((and (< bottom-beg end) (<= end bottom-fin))
+        ;; only bottom of target
+        (move-overlay ov ov-start bottom-beg))
+       (t
+        ;; split to overlays
+        (move-overlay ov ov-start start-fin)
+        (setq ov2 (copy-overlay ov))
+        (move-overlay ov2 end-start ov-end))))))
 
 (defun fsvn-blame-activate-timer ()
   (unless fsvn-blame-timer
@@ -194,10 +224,12 @@ Keybindings: none
       (fsvn-blame-tidy-up-subwindow)
     (let* ((overlay
             (catch 'found
-              (mapc (lambda (o)
-                      (when (overlay-get o 'fsvn-blame-revision)
-                        (throw 'found o)))
-                    (overlays-at (point)))))
+              (mapc 
+               (lambda (o)
+                 (when (overlay-get o 'fsvn-blame-revision)
+                   (throw 'found o)))
+               (overlays-at (point)))
+              nil))
            (data fsvn-blame-blame-logs)
            (prev-rev fsvn-blame-previous-revision)
            (start (car fsvn-blame-spent-time))
@@ -235,30 +267,26 @@ Keybindings: none
                       (insert msg))))))
               (set-buffer-modified-p nil)
               (setq buffer-read-only t)
-              (fsvn-blame-minor-setup-subwindow control-buffer))
+              (fsvn-blame-minor-setup-subwindow control-buffer)
+              (font-lock-fontify-buffer))
           ;;FIXME if error occur
           (error (insert (format "%s" err)))))
       (cond
        ((null rev)
-        (fsvn-blame-dehighlight-all))
+        (fsvn-blame-highlight-revision nil))
        ((eq prev-rev rev))
        (t
         (fsvn-blame-highlight-revision rev)))
       (setq fsvn-blame-previous-revision rev))))
 
 (defun fsvn-blame-highlight-revision (rev)
-  (fsvn-blame-dehighlight-all)
   (mapc
    (lambda (o)
-     (when (eq (overlay-get o 'fsvn-blame-revision) rev)
-       (overlay-put o 'face 'highlight)))
-   (overlays-in (point-min) (point-max))))
-
-(defun fsvn-blame-dehighlight-all ()
-  (mapc
-   (lambda (o)
-     (when (overlay-get o 'fsvn-blame-revision)
-       (overlay-put o 'face nil)))
+     (cond
+      ((eq (overlay-get o 'fsvn-blame-revision) rev)
+       (overlay-put o 'face 'highlight))
+      (t
+       (overlay-put o 'face (overlay-get o 'fsvn-blame-face)))))
    (overlays-in (point-min) (point-max))))
 
 (defun fsvn-blame-make-buffer-overlay (blame-logs diff-alist)
@@ -272,7 +300,7 @@ Keybindings: none
        (let ((rev (fsvn-xml-log->logentry.revision entry)))
          (unless (assq rev face-alist)
            (setq foreground (nth (% rev (length colors)) colors))
-           (setq background (fsvn-get-background-color foreground))
+           (setq background (fsvn-get-background-color foreground colors))
            (setq face-alist
                  (cons
                   (cons rev (list
@@ -347,9 +375,18 @@ Keybindings: none
   (let (overlay-face overlay)
     (setq overlay-face (cdr (assq rev face-alist)))
     (setq overlay (make-overlay start end nil t t))
-;;     (overlay-put overlay 'face overlay-face)
+    (overlay-put overlay 'fsvn-blame-face overlay-face)
     (overlay-put overlay 'fsvn-blame-name 'fsvn-blame-face-overlay)
     (overlay-put overlay 'fsvn-blame-revision rev)))
+
+(defun fsvn-blame-overlay-at (point)
+  (catch 'found
+    (mapc
+     (lambda (o)
+       (when (overlay-get o 'fsvn-blame-revision)
+         (throw 'found o)))
+     (overlays-at point))
+    nil))
 
 (defun fsvn-blame-clear-all-overlay ()
   (save-restriction
@@ -451,12 +488,12 @@ Keybindings: none
       (setcdr fsvn-blame-spent-time (float-time))))))
 
 (defun fsvn-blame-get-subwindow-buffer ()
-  (let ((exists fsvn-blame-subwindow-buffer))
-    (when (and exists (buffer-live-p exists))
-      (with-current-buffer exists
+  (let ((buffer fsvn-blame-subwindow-buffer))
+    (unless (and buffer (buffer-live-p buffer))
+      (setq buffer (generate-new-buffer fsvn-blame-subwindow-buffer-name))
+      (with-current-buffer buffer
         (fsvn-blame-subwindow-mode)))
-    (setq fsvn-blame-subwindow-buffer
-          (or exists (generate-new-buffer fsvn-blame-subwindow-buffer-name)))))
+    (setq fsvn-blame-subwindow-buffer buffer)))
 
 (defun fsvn-blame-get-processes (&optional buffer)
   (let ((buffer (or buffer (current-buffer))))

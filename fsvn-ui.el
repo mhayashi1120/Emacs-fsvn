@@ -174,11 +174,12 @@ This is what the do-commands look for, and what the mark-commands store.")
 ;; face utility
 
 ;; FIXME want to well contrast value
-(defun fsvn-get-background-color (foreground)
-  (let ((count (length (defined-colors)))
-        (rest (member foreground (defined-colors))))
+(defun fsvn-get-background-color (foreground &optional colors)
+  (let ((colors (or colors (defined-colors)))
+        (count (length colors))
+        (rest (member foreground colors)))
     ;;FIXME
-    (nth (% (+ (length rest) 100) count) (defined-colors))))
+    (nth (% (+ (length rest) 100) count) colors)))
 
 
 

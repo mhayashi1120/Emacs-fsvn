@@ -137,6 +137,11 @@ proplist --recursive
 ** fsvn-blame-minor-mode accept revision range
 
 
+** fsvn-blae-minor-mode highlight specific revisions.
+
+    fsvn-blame-minor-highlight-specific-revisions
+    fsvn-blame-minor-highlight-log-regexp
+
 ** parse result threshold
 
 ** tsvn:lockmsgminsize, tsvn:logsummary, tsvn:projectlanguage
