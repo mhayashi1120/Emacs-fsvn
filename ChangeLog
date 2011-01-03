@@ -1,3 +1,27 @@
+2011-01-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: Blame minor mode accept changings.
+
+2010-12-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: a lot of commit buffer problem
+
+2010-12-30  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Delete: Unsupport Emacs 22 officially.
+
+2010-12-17  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fsvn-vc-commit-non-query-message
+
+2010-11-21  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Release: 0.9.8
+
+2010-11-13  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fsvn-vc-commit-non-query
+
 2010-10-19  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: fsvn-browse-smart-move-this bound to `C-c C-b C-m'

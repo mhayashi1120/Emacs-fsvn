@@ -1,0 +1,78 @@
+* Question and Answer
+
+****** This description based on ["sample key settings" http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn].
+
+# Authenticate question
+{Q-auth-0001
+? Q. How to authorize repository.  Password prompt stop everything.
+! A. M-x fsvn-authenticate-repository
+{dd-note
+  This makes svn to cache password.
+  If possible, to use ssh-agent program when access by svn+ssh protcol. If using windows and putty, should be pageant.
+}
+}
+
+# General question
+{Q-general-0001
+? Q. A lot of buffer are too noisy.
+! A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)
+}
+
+{Q-general-0002
+? Q. How to switch fsvn to dired?
+! A. C-c C-d (or M-x fsvn-dired-toggle-browser)
+}
+
+{Q-general-0003
+? Q. How to switch dired to fsvn?
+! A. C-c C-d (or M-x fsvn-dired-toggle-browser)
+}
+
+{Q-general-0004
+? Q. How to disable fsvn feature?
+! A. M-x fsvn-toggle-feature
+}
+
+# Property question
+{Q-prop-0001
+? Q. How to execute `propset' recursively?
+! A. In propedit-mode M-x fsvn-propedit-toggle-recursive (or type C-c C-r)
+}
+
+# Configuration question
+{Q-config-0001
+? Q. Change fsvn-svn-command, fsvn-svnadmin-command but no effect.
+! A. M-x fsvn-initialize-loading
+}
+
+# svk question
+{Q-svk-0001
+? Q. How to use svk in windows.
+! A. Sample of settings.
+>|
+(require 'fsvn-svk)
+(setq fsvn-svk-perl-command "c:/usr/local/svk/bin/perl")
+(setq fsvn-svk-script "c:/usr/local/svk/bin/svk")
+|<
+
+{dd-note
+ * TODO Windows native perl.exe displays propmt but not works in Emacs process.
+}
+}
+
+# svnadmin question
+{Q-svnadmin-0001
+? Q. How to create repository
+! A. M-x fsvn-admin-create-repository to create repository if default-directory have no files.
+}
+
+# Misc question
+{Q-about-0001
+? Q. Who did these questions?
+! A. In my brain.
+}
+
+{Q-about-0002
+? Q. In spite of reading this document, I can't understand. Or there is bug.
+! A. ["Send mail to author" mailto:mhayashi1120@gmail.com] Will be added new QA.
+}

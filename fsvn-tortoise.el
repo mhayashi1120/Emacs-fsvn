@@ -47,33 +47,33 @@
 
 (defun fsvn-tortoise-tsvn:*-commit-check (dir)
   (let ((logminsize (fsvn-get-directory-parent-property dir "tsvn:logminsize"))
-	(logwidthmarker (fsvn-get-directory-parent-property dir "tsvn:logwidthmarker")))
+        (logwidthmarker (fsvn-get-directory-parent-property dir "tsvn:logwidthmarker")))
     (when logminsize
       (setq logminsize (fsvn-string-force-number logminsize)))
     (when logwidthmarker
       (setq logwidthmarker (fsvn-string-force-number logwidthmarker 80)))
     (when logminsize
       (unless (>= (buffer-size) logminsize)
-	(unless (y-or-n-p (format "tsvn:logminsize is %d. Really commit? " logminsize))
-	  (error "Log min size error."))))
+        (unless (y-or-n-p (format "tsvn:logminsize is %d. Really commit? " logminsize))
+          (error "Log min size error."))))
     (when logwidthmarker
       (when (catch 'width-over
-	      (save-excursion
-		(goto-char (point-min))
-		(while (not (eobp))
-		  (forward-line 1)
-		  (forward-char -1)
-		  (when (> (current-column) logwidthmarker)
-		    (throw 'width-over t))
-		  (forward-line 1))))
-	(unless (y-or-n-p (format "tsvn:logwidthmarker is %d. Really commit? " logwidthmarker))
-	  (error "Fill buffer."))))))
+              (save-excursion
+                (goto-char (point-min))
+                (while (not (eobp))
+                  (forward-line 1)
+                  (forward-char -1)
+                  (when (> (current-column) logwidthmarker)
+                    (throw 'width-over t))
+                  (forward-line 1))))
+        (unless (y-or-n-p (format "tsvn:logwidthmarker is %d. Really commit? " logwidthmarker))
+          (error "Fill buffer."))))))
 
 (defun fsvn-tortoise-tsvn:user*properties (target-file)
   (let* ((parent-dir (fsvn-file-name-directory2 target-file))
-	 userproperties userdirproperties userfileproperties)
+         userproperties userdirproperties userfileproperties)
     (if (not (fsvn-file-exact-directory-p target-file))
-	(setq userfileproperties (fsvn-get-directory-parent-property parent-dir "tsvn:userfileproperties"))
+        (setq userfileproperties (fsvn-get-directory-parent-property parent-dir "tsvn:userfileproperties"))
       (setq userdirproperties (fsvn-get-directory-parent-property target-file "tsvn:userdirproperties"))
       (setq userfileproperties (fsvn-get-directory-parent-property target-file "tsvn:userfileproperties")))
     (when userdirproperties
@@ -88,18 +88,18 @@
 
 (defmacro fsvn-tortoise-bugtraq:*-exec (dir &rest form)
   `(let ((URL (fsvn-get-directory-parent-property ,dir "bugtraq:url"))
-	 (MESSAGE (fsvn-get-directory-parent-property ,dir "bugtraq:message"))
-	 (LOGREGEX (fsvn-get-directory-parent-property ,dir "bugtraq:logregex"))
-	 (WARNIFNOISSUE (fsvn-get-directory-parent-property ,dir "bugtraq:warnifnoissue"))
-	 (NUMBER (fsvn-get-directory-parent-property ,dir "bugtraq:number"))
-	 (LABEL (fsvn-get-directory-parent-property ,dir "bugtraq:label"))
-	 (APPEND (fsvn-get-directory-parent-property ,dir "bugtraq:append"))
-	 MESSAGE-REGEX LOGREGEX1 LOGREGEX2)
+         (MESSAGE (fsvn-get-directory-parent-property ,dir "bugtraq:message"))
+         (LOGREGEX (fsvn-get-directory-parent-property ,dir "bugtraq:logregex"))
+         (WARNIFNOISSUE (fsvn-get-directory-parent-property ,dir "bugtraq:warnifnoissue"))
+         (NUMBER (fsvn-get-directory-parent-property ,dir "bugtraq:number"))
+         (LABEL (fsvn-get-directory-parent-property ,dir "bugtraq:label"))
+         (APPEND (fsvn-get-directory-parent-property ,dir "bugtraq:append"))
+         MESSAGE-REGEX LOGREGEX1 LOGREGEX2)
      (when LOGREGEX
        (setq LOGREGEX (split-string LOGREGEX "[\n\r]" t))
        (when (= (length LOGREGEX) 2)
-	(setq LOGREGEX1 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (car LOGREGEX)))
-	      LOGREGEX2 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (cadr LOGREGEX))))))
+        (setq LOGREGEX1 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (car LOGREGEX)))
+              LOGREGEX2 (fsvn-string-rm-space (fsvn-tr1:wregex->regexp (cadr LOGREGEX))))))
      (setq NUMBER (fsvn-tortoise-boolean-value NUMBER nil))
      (setq WARNIFNOISSUE (fsvn-tortoise-boolean-value WARNIFNOISSUE t))
      (setq APPEND  (fsvn-tortoise-boolean-value APPEND t))
@@ -111,54 +111,54 @@
   (fsvn-tortoise-bugtraq:*-exec dir
     (let (real-label)
       (setq real-label
-	    (if LABEL
-		(fsvn-string-rm-rspace LABEL)
-	      "Bug ID/Issue ID: "))
+            (if LABEL
+                (fsvn-string-rm-rspace LABEL)
+              "Bug ID/Issue ID: "))
       (cond
        ;; bugtraq:logregex priority to bugtraq:message
        ;; http://tortoisesvn.net/docs/release/TortoiseSVN_ja/tsvn-dug-bugtracker.html
        ((and LOGREGEX1 LOGREGEX2)
-	(let (ng)
-	  (save-excursion
-	    (goto-char (point-min))
-	    (if (not (re-search-forward LOGREGEX1 nil t))
-		(setq ng t)
-	      (let* ((matched (fsvn-tortoise-gather-matched LOGREGEX1)))
-		(unless (catch 'found
-			  (mapc
-			   (lambda (m)
-			     (when (and m (string-match LOGREGEX2 m))
-			       (throw 'found t)))
-			   matched)
-			  nil)
-		  (setq ng t)))))
-	  (when ng
-	    (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
-			(null WARNIFNOISSUE)
-			(y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
-	      (error "Miss \"%s\" in Log message" real-label)))))
+        (let (ng)
+          (save-excursion
+            (goto-char (point-min))
+            (if (not (re-search-forward LOGREGEX1 nil t))
+                (setq ng t)
+              (let* ((matched (fsvn-tortoise-gather-matched LOGREGEX1)))
+                (unless (catch 'found
+                          (mapc
+                           (lambda (m)
+                             (when (and m (string-match LOGREGEX2 m))
+                               (throw 'found t)))
+                           matched)
+                          nil)
+                  (setq ng t)))))
+          (when ng
+            (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
+                        (null WARNIFNOISSUE)
+                        (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
+              (error "Miss \"%s\" in Log message" real-label)))))
        (MESSAGE-REGEX
-	(save-excursion
-	  (goto-char (point-min))
-	  (unless (re-search-forward MESSAGE-REGEX nil t)
-	    (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
-			(null WARNIFNOISSUE)
-			(y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
-	      (error "Miss \"%s\" in Log message" real-label)))))
+        (save-excursion
+          (goto-char (point-min))
+          (unless (re-search-forward MESSAGE-REGEX nil t)
+            (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
+                        (null WARNIFNOISSUE)
+                        (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
+              (error "Miss \"%s\" in Log message" real-label)))))
        (LABEL
-	(unless (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label))
-	  (error "Set property `bugtraq:logregex' or `bugtraq:message' correctly")))))))
+        (unless (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label))
+          (error "Set property `bugtraq:logregex' or `bugtraq:message' correctly")))))))
 
 (defun fsvn-tortoise-bugtraq-create-message-regexp (message append number)
   (when (and message (string-match "%BUGID%" message))
     (let (mleft mright)
       (setq mleft (regexp-quote (substring message 0 (match-beginning 0)))
-	    mright (regexp-quote (substring message (match-end 0))))
+            mright (regexp-quote (substring message (match-end 0))))
       (concat (if append "^" "\\`")
-	      mleft
-	      "\\(" (if number "[0-9]+" ".+") "\\)"
-	      mright
-	      (if append "\\'" "$")))))
+              mleft
+              "\\(" (if number "[0-9]+" ".+") "\\)"
+              mright
+              (if append "\\'" "$")))))
 
 (defun fsvn-tortoise-bugtraq-create-url (url bugid)
   (when (and url (string-match "%BUGID%" url))
@@ -171,14 +171,14 @@
     (let (id)
       (setq id (fsvn-tortoise-bugtraq-commit-read-bugid number label))
       (when id
-	(save-excursion
-	  (goto-char (if append (point-max) (point-min)))
-	  (when append
-	    (insert "\n"))
-	  (insert (format message id))
-	  (unless append
-	    (insert "\n"))
-	  id)))))
+        (save-excursion
+          (goto-char (if append (point-max) (point-min)))
+          (when append
+            (insert "\n"))
+          (insert (format message id))
+          (unless append
+            (insert "\n"))
+          id)))))
 
 (defun fsvn-tortoise-bugtraq-commit-read-bugid (number label)
   (let (tmp)
@@ -186,16 +186,16 @@
      (number
       (setq tmp (fsvn-read-number (format "%s " label) 'allow-null))
       (when tmp
-	(number-to-string tmp)))
+        (number-to-string tmp)))
      (t
       (setq tmp (read-string (format "%s " label)))
       (unless (zerop (length tmp))
-	tmp)))))
+        tmp)))))
 
 (defun fsvn-tortoise-gather-matched (regexp &optional string)
   (let* ((depth (regexp-opt-depth regexp))
-	 (i 1)
-	 matched)
+         (i 1)
+         matched)
     (while (<= i depth)
       (setq matched (cons (match-string i string) matched))
       (setq i (1+ i)))
@@ -215,18 +215,18 @@
    (lambda (line)
      (when (string-match "\\([^=]+\\)=\\(.*\\)" line)
        (let ((key (match-string 1 line))
-	     (value (match-string 2 line)))
-	 (setq key (fsvn-string-rm-space key))
-	 (setq value (fsvn-string-rm-space value))
-	 (let ((values (split-string value "[; \t]" t))
-	       alist)
-	   (setq alist
-		 (fsvn-mapitem
-		  (lambda (value)
-		    (when (string-match "^\\([^=]+\\)=\\(.*\\)" value)
-		      (cons (match-string 1 value) (match-string 2 value))))
-		  values))
-	   (cons (fsvn-svn-autoprop-wildcard->regexp key) alist)))))
+             (value (match-string 2 line)))
+         (setq key (fsvn-string-rm-space key))
+         (setq value (fsvn-string-rm-space value))
+         (let ((values (split-string value "[; \t]" t))
+               alist)
+           (setq alist
+                 (fsvn-mapitem
+                  (lambda (value)
+                    (when (string-match "^\\([^=]+\\)=\\(.*\\)" value)
+                      (cons (match-string 1 value) (match-string 2 value))))
+                  values))
+           (cons (fsvn-svn-autoprop-wildcard->regexp key) alist)))))
    (split-string value "\n")))
 
 (defun fsvn-tortoise-tsvn:autoprops-set (files buffer)
@@ -236,26 +236,26 @@
        (setq prop (fsvn-get-file-parent-property file "tsvn:autoprops"))
        (setq filename (fsvn-url-filename file))
        (when prop
-	 (mapc
-	  (lambda (regexp-prop-alist)
-	    (setq regexp (car regexp-prop-alist))
-	    (setq prop-alist (cdr regexp-prop-alist))
-	    (when (string-match regexp filename)
-	      (mapc
-	       (lambda (prop-value)
-		 (setq propname (car prop-value))
-		 (setq value (cdr prop-value))
-		 (when (fsvn-file-prop-acceptable-p file propname)
-		   (setq tmpfile (fsvn-get-prop-temp-file propname value))
-		   (fsvn-insert-string-to-buffer "\n" buffer)
-		   (fsvn-call-command-display "propset" buffer propname "--file" tmpfile file)))
-	       prop-alist)))
-	  (fsvn-tortoise-tsvn:autoprops-parse prop))))
+         (mapc
+          (lambda (regexp-prop-alist)
+            (setq regexp (car regexp-prop-alist))
+            (setq prop-alist (cdr regexp-prop-alist))
+            (when (string-match regexp filename)
+              (mapc
+               (lambda (prop-value)
+                 (setq propname (car prop-value))
+                 (setq value (cdr prop-value))
+                 (when (fsvn-file-prop-acceptable-p file propname)
+                   (setq tmpfile (fsvn-get-prop-temp-file propname value))
+                   (fsvn-insert-string-to-buffer "\n" buffer)
+                   (fsvn-call-command-display "propset" buffer propname "--file" tmpfile file)))
+               prop-alist)))
+          (fsvn-tortoise-tsvn:autoprops-parse prop))))
      files)))
 
 (defun fsvn-tortoise-commit-initialize ()
   (let ((template (fsvn-get-directory-parent-property default-directory "tsvn:logtemplate"))
-	(logwidthmarker (fsvn-get-directory-parent-property default-directory "tsvn:logwidthmarker")))
+        (logwidthmarker (fsvn-get-directory-parent-property default-directory "tsvn:logwidthmarker")))
     (when template
       (insert template))
     (when logwidthmarker
@@ -269,24 +269,24 @@
     (when URL
       (cond
        ((and LOGREGEX1 LOGREGEX2)
-	(save-excursion
-	  (goto-char (point-min))
-	  (while (re-search-forward LOGREGEX1 nil t)
-	    (save-restriction
-	      (narrow-to-region (match-beginning 0) (match-end 0))
-	      (fsvn-tortoise-fontify-buffer-url URL LOGREGEX2)))))
+        (save-excursion
+          (goto-char (point-min))
+          (while (re-search-forward LOGREGEX1 nil t)
+            (save-restriction
+              (narrow-to-region (match-beginning 0) (match-end 0))
+              (fsvn-tortoise-fontify-buffer-url URL LOGREGEX2)))))
        (MESSAGE-REGEX
-	(fsvn-tortoise-fontify-buffer-url URL MESSAGE-REGEX))))))
+        (fsvn-tortoise-fontify-buffer-url URL MESSAGE-REGEX))))))
 
 (defun fsvn-tortoise-fontify-buffer-url (url regexp)
   (let (buffer-read-only real-url)
     (save-excursion
       (goto-char (point-min))
       (when (re-search-forward regexp nil t)
-	(save-match-data
-	  (setq real-url (fsvn-tortoise-bugtraq-create-url url (match-string 1))))
-	(put-text-property (match-beginning 0) (match-end 0) 'face fsvn-link-face)
-	(put-text-property (match-beginning 0) (match-end 0) 'fsvn-url-link real-url)))))
+        (save-match-data
+          (setq real-url (fsvn-tortoise-bugtraq-create-url url (match-string 1))))
+        (put-text-property (match-beginning 0) (match-end 0) 'face fsvn-link-face)
+        (put-text-property (match-beginning 0) (match-end 0) 'fsvn-url-link real-url)))))
 
 (put 'fsvn-tortoise-bugtraq:*-exec 'lisp-indent-function 1)
 

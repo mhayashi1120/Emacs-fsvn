@@ -46,7 +46,7 @@
     (mapc
      (lambda (n)
        (when (stringp n)
-	 (setq ret (cons n ret))))
+         (setq ret (cons n ret))))
      (fsvn-xml-node-children node))
     (nth index (nreverse ret))))
 
@@ -178,7 +178,7 @@
       nil
       (path
        ((action . identity)
-	(copyfrom-rev . string-to-number))
+        (copyfrom-rev . string-to-number))
        . t))
      (msg nil . t))))
 
@@ -434,15 +434,15 @@
     (mapc
      (lambda (target&cl)
        (mapc
-	(lambda (entry)
-	  (setq ret (cons entry ret)))
-	(fsvn-xml-status->target&cl->entries target&cl)))
+        (lambda (entry)
+          (setq ret (cons entry ret)))
+        (fsvn-xml-status->target&cl->entries target&cl)))
      (copy-sequence status))
     (sort ret
-	  (lambda (x y)
-	    (string-lessp
-	     (fsvn-xml-status->target->entry.path x)
-	     (fsvn-xml-status->target->entry.path y))))))
+          (lambda (x y)
+            (string-lessp
+             (fsvn-xml-status->target->entry.path x)
+             (fsvn-xml-status->target->entry.path y))))))
 
 ;; svn status --xml end
 
@@ -542,11 +542,11 @@ if dtd is symbol call symbol as function that accept a argument.
 if dtd is list call this function recursively.
 "
   (let ((name-node (car node))
-	(attrs (fsvn-xml-node-attributes node))
-	(attrd (fsvn-xml-node-attributes dtd-alist))
-	(children (fsvn-xml-node-children node))
-	(childrend (fsvn-xml-node-children dtd-alist))
-	ret child converter dtd name)
+        (attrs (fsvn-xml-node-attributes node))
+        (attrd (fsvn-xml-node-attributes dtd-alist))
+        (children (fsvn-xml-node-children node))
+        (childrend (fsvn-xml-node-children dtd-alist))
+        ret child converter dtd name)
     (cond
      ((atom name-node)
       (setq name name-node))
@@ -555,53 +555,53 @@ if dtd is list call this function recursively.
     (mapc
      (lambda (attr)
        (when (setq converter (cdr (assq (car attr) attrd)))
-	 (setcdr attr (funcall converter (cdr attr)))))
+         (setcdr attr (funcall converter (cdr attr)))))
      attrs)
     (while children
       (setq child (car children))
       (setq children (cdr children))
       (unless (stringp child)
-	(setq dtd (assq (car child) childrend))
-	(setq converter (fsvn-xml-node-children dtd))
-	(setq ret
-	      (cons
-	       (cond
-		((eq converter t)
-		 child)
-		((listp converter)
-		 (fsvn-xml-processor child dtd))
-		((symbolp converter)
-		 (list
-		  (car child)
-		  (fsvn-xml-node-attributes child)
-		  (funcall converter (fsvn-xml-get-node child))))
-		(t
-		 (error "Unrecognized node")))
-	       ret))))
+        (setq dtd (assq (car child) childrend))
+        (setq converter (fsvn-xml-node-children dtd))
+        (setq ret
+              (cons
+               (cond
+                ((eq converter t)
+                 child)
+                ((listp converter)
+                 (fsvn-xml-processor child dtd))
+                ((symbolp converter)
+                 (list
+                  (car child)
+                  (fsvn-xml-node-attributes child)
+                  (funcall converter (fsvn-xml-get-node child))))
+                (t
+                 (error "Unrecognized node")))
+               ret))))
     (cons name
-	  (cons
-	   attrs
-	   (nreverse ret)))))
+          (cons
+           attrs
+           (nreverse ret)))))
 
 (defun fsvn-xml-text-matched (node string)
   (catch 'found
     (mapc
      (lambda (attr)
        (when (and (stringp (cdr attr))
-		  (string-match string (cdr attr)))
-	 (throw 'found node)))
+                  (string-match string (cdr attr)))
+         (throw 'found node)))
      (fsvn-xml-node-attributes node))
     (mapc
      (lambda (x)
        (cond
-	((stringp x)
-	 (when (string-match string x)
-	   (throw 'found x)))
-	((and (listp x)
-	      (symbolp (car x)))
-	 (let ((matched (fsvn-xml-text-matched x string)))
-	   (when matched
-	     (throw 'found matched))))))
+        ((stringp x)
+         (when (string-match string x)
+           (throw 'found x)))
+        ((and (listp x)
+              (symbolp (car x)))
+         (let ((matched (fsvn-xml-text-matched x string)))
+           (when matched
+             (throw 'found matched))))))
      (fsvn-xml-node-children node))
     nil))
 
@@ -641,7 +641,7 @@ if dtd is list call this function recursively.
 
 (defun fsvn-xml-parse-lists ()
   (let ((xml (xml-parse-region (point-min) (point-max)))
-	ret)
+        ret)
     ;; ignore rootnode, attribute, newline
     (fsvn-xml-get-children
      (fsvn-xml-processor (car xml) fsvn-xml-ls-dtd-alist)

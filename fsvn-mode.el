@@ -144,10 +144,10 @@
   "Set window setting according to variable `fsvn-previous-window-configuration' after evaluate FORM."
   `(let ((WIN-CONFIGURE fsvn-previous-window-configuration))
      (prog1
-	 (progn ,@form)
+         (progn ,@form)
        (when (and WIN-CONFIGURE
-		  (window-configuration-p WIN-CONFIGURE))
-	 (set-window-configuration WIN-CONFIGURE)))))
+                  (window-configuration-p WIN-CONFIGURE))
+         (set-window-configuration WIN-CONFIGURE)))))
 
 (defun fsvn-restore-previous-window-setting ()
   (interactive)
@@ -157,14 +157,14 @@
 (defun fsvn-restore-default-window-setting ()
   (interactive)
   (when (and fsvn-default-window-configuration
-	     (window-configuration-p fsvn-default-window-configuration))
+             (window-configuration-p fsvn-default-window-configuration))
     (set-window-configuration fsvn-default-window-configuration)))
 
 (defun fsvn-restore-default-window-display ()
   (interactive)
   (let ((prev (current-buffer)))
     (when (and fsvn-default-window-configuration
-	       (window-configuration-p fsvn-default-window-configuration))
+               (window-configuration-p fsvn-default-window-configuration))
       (set-window-configuration fsvn-default-window-configuration))
     (when (get-buffer-window prev)
       (set-frame-selected-window (selected-frame) (get-buffer-window prev)))))
@@ -194,15 +194,26 @@
   (with-current-buffer buffer
     major-mode))
 
+(defmacro fsvn-each-buffer-mode (major &rest form)
+  `(let (RET)
+     (mapc
+      (lambda (b)
+        (with-current-buffer b
+          (save-excursion
+            (when (eq major-mode ,major)
+              (setq RET (cons (progn ,@form) RET))))))
+      (buffer-list))
+     (nreverse RET)))
+
 (defcustom fsvn-no-confirm nil
   "*Control hide confirm prompt.
 `t' means completely ignore all.
 List of command symbol means, each of command's prompt will not be shown."
   :group 'fsvn
   :type '(choice
-	  (const nil)
-	  (const t)
-	  (repeat symbol)))
+          (const nil)
+          (const t)
+          (repeat symbol)))
 
 (defun fsvn-confirm-prompt (op-symbol prompt)
   "Show PROMPT unless `fsvn-no-confirm' indicate non-confirm."
@@ -224,26 +235,26 @@ DISPLAYED-ONLY non-nil means never switch if BUFFER is not displayed."
     (when (buffer-live-p buffer)
       (cond
        ((get-buffer-window buffer)
-	(set-frame-selected-window (selected-frame) (get-buffer-window buffer)))
+        (set-frame-selected-window (selected-frame) (get-buffer-window buffer)))
        ((not displayed-only)
-	(switch-to-buffer buffer))
+        (switch-to-buffer buffer))
        (t
-	)))))
+        )))))
 
 (defmacro fsvn-scroll-window-buffer (buffer-or-window scroller mover sig)
   `(let ((ORIGIN-WIN (selected-window))
-	 (RET t)
-	 WIN)
+         (RET t)
+         WIN)
      (setq WIN
-	   (if (windowp buffer-or-window)
-	       buffer-or-window
-	     (get-buffer-window buffer-or-window)))
+           (if (windowp buffer-or-window)
+               buffer-or-window
+             (get-buffer-window buffer-or-window)))
      (unwind-protect
-	 (progn
-	   (set-frame-selected-window (selected-frame) WIN)
-	   (condition-case err
-	       ,scroller
-	     (,sig ,mover (setq RET nil))))
+         (progn
+           (set-frame-selected-window (selected-frame) WIN)
+           (condition-case err
+               ,scroller
+             (,sig ,mover (setq RET nil))))
        (set-frame-selected-window (selected-frame) ORIGIN-WIN))
      RET))
 
@@ -290,13 +301,13 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (defun fsvn-points-of-filename ()
   (let* ((bol (line-beginning-position))
-	 (eol (line-end-position))
-	 (start (next-single-property-change bol 'fsvn-filename nil eol))
-	 end)
+         (eol (line-end-position))
+         (start (next-single-property-change bol 'fsvn-filename nil eol))
+         end)
     (when start
       (setq end (next-single-property-change start 'fsvn-filename nil eol))
       (when (and end (< start end))
-	(cons start end)))))
+        (cons start end)))))
 
 
 
@@ -304,16 +315,16 @@ Optional prefix ARG says how many lines to move; default is one line."
   "Goto DIR and execute FORM with no point move.
 "
   `(let ((PREV-MARKER (point-marker))
-	 (BUFFER (fsvn-local-directory-buffer ,dir)))
+         (BUFFER (fsvn-local-directory-buffer ,dir)))
      (when BUFFER
        (unwind-protect
-	   (progn
-	     (set-buffer BUFFER)
-	     (save-excursion
-	       (when (fsvn-browse-goto-directory ,dir)
-		 (progn ,@form))))
-	 (set-buffer (marker-buffer PREV-MARKER))
-	 (goto-char PREV-MARKER)))))
+           (progn
+             (set-buffer BUFFER)
+             (save-excursion
+               (when (fsvn-browse-goto-directory ,dir)
+                 (progn ,@form))))
+         (set-buffer (marker-buffer PREV-MARKER))
+         (goto-char PREV-MARKER)))))
 
 (defmacro fsvn-save-browse-file-excursion (file &rest form)
   "Goto FILE and execute FORM with no point move.
@@ -321,8 +332,8 @@ Optional prefix ARG says how many lines to move; default is one line."
   `(let ((DIR (fsvn-file-name-directory ,file)))
      (fsvn-save-browse-directory-excursion DIR
        (save-excursion
-	 (when (fsvn-browse-goto-file ,file)
-	   (progn ,@form))))))
+         (when (fsvn-browse-goto-file ,file)
+           (progn ,@form))))))
 
 (defun fsvn-goto-browse-directory (dir)
   "Goto DIR in current buffer and return non-nil value if DIR is found.
@@ -337,7 +348,7 @@ Optional prefix ARG says how many lines to move; default is one line."
   "Goto FILE in current buffer and return non-nil value if FILE is found.
 "
   (let ((dir (fsvn-file-name-directory file))
-	buffer)
+        buffer)
     ;;BUG cannot keep point 
     (when (setq buffer (fsvn-get-exists-browse-buffer dir))
       (set-buffer buffer)
@@ -345,21 +356,14 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (defmacro fsvn-each-browse-buffer (&rest form)
   "Execute FORM in each `fsvn-browse-mode' buffer."
-  `(let (RET)
-     (save-excursion
-       (mapc
-	(lambda (b)
-	  (set-buffer b)
-	  (when (eq major-mode 'fsvn-browse-mode)
-	    (setq RET (cons (progn ,@form) RET))))
-	(buffer-list)))
-     (nreverse RET)))
+  `(fsvn-each-buffer-mode 'fsvn-browse-mode
+     ,@form))
 
 
 
 (defun fsvn-toggle-mode-line-variable (arg var on-value message)
   (let ((value (symbol-value var))
-	(propertize-on (list :propertize on-value 'face 'fsvn-warning-face)))
+        (propertize-on (list :propertize on-value 'face 'fsvn-warning-face)))
     (setq value (set var (if (or arg (not value)) propertize-on nil)))
     (force-mode-line-update)
     (message "Now %s `%s'" message (if value "ON" "OFF"))
@@ -384,7 +388,7 @@ Optional prefix ARG says how many lines to move; default is one line."
   (unless (file-exists-p file)
     (error "%s does not exist" file))
   (let ((had-a-buf (get-file-buffer file))
-	buffer)
+        buffer)
     (cond
      ((null had-a-buf))
      ((verify-visited-file-modtime had-a-buf))
@@ -395,16 +399,17 @@ Optional prefix ARG says how many lines to move; default is one line."
 
 (defun fsvn-view-buffer (buffer)
   (view-buffer buffer
-	       `(lambda
-		  (buffer)
-		  (kill-buffer buffer)
-		  (when (buffer-live-p ,(current-buffer))
-		    (switch-to-buffer ,(current-buffer))))))
+               `(lambda
+                  (buffer)
+                  (kill-buffer buffer)
+                  (when (buffer-live-p ,(current-buffer))
+                    (switch-to-buffer ,(current-buffer))))))
 
 
 
 (put 'fsvn-save-browse-directory-excursion 'lisp-indent-function 1)
 (put 'fsvn-save-browse-file-excursion 'lisp-indent-function 1)
+(put 'fsvn-each-buffer-mode  'lisp-indent-function 1)
 
 
 

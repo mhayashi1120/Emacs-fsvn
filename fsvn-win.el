@@ -42,7 +42,7 @@
 
 (defun tortoise-call-program (command &optional path)
   (unless (and tortoise-interface-program
-	       (executable-find tortoise-interface-program))
+               (executable-find tortoise-interface-program))
     (error "Interface program not found"))
   (let ((args nil))
     (setq args (cons (concat "/command:" command) nil))
@@ -59,7 +59,7 @@
 
 (defun tortoise-diff-program (fromfile tofile &optional switches)
   (call-process tortoise-merge-program nil 0 nil
-		(expand-file-name fromfile) (expand-file-name tofile)))
+                (expand-file-name fromfile) (expand-file-name tofile)))
 
 (defun tortoise-show-log (&optional arg)
   (interactive "P")
@@ -77,7 +77,7 @@
 (defun tortoise-browse-repository ()
   (interactive)
   (let* ((urlrev (fsvn-dired-current-directory))
-	 rev url)
+         rev url)
     (when (fsvn-magic-file-name-absolute-p urlrev)
       (setq urlrev (fsvn-magic-parse-file-name urlrev)))
     (setq rev (fsvn-urlrev-revision urlrev))
@@ -91,49 +91,49 @@
 
 (defun tortoise-diff-read-args ()
   (let ((current (fsvn-browse-point-url))
-	(default (if (mark t)
-		     (save-excursion (goto-char (mark t))
-				     (fsvn-browse-point-url)))))
+        (default (if (mark t)
+                     (save-excursion (goto-char (mark t))
+                                     (fsvn-browse-point-url)))))
     (when (or (equal default current)
-	      (and (not (equal (fsvn-dired-dwim-target-directory)
-			       (fsvn-dired-current-directory)))
-		   (not mark-active)))
+              (and (not (equal (fsvn-dired-dwim-target-directory)
+                               (fsvn-dired-current-directory)))
+                   (not mark-active)))
       (setq default nil))
     (list (read-file-name (format "Diff %s with%s: "
-				  current
-				  (if default
-				      (concat " (default " default ")")
-				    ""))
-			  (if default
-			      (fsvn-dired-current-directory)
-			    (fsvn-dired-dwim-target-directory))
-			  default t)
-	  (when current-prefix-arg
-	    (require 'diff)
-	    (read-string "Options for TortoiseMerge: "
-			 (if (stringp diff-switches)
-			     diff-switches
-			   (mapconcat 'identity diff-switches " ")))))))
+                                  current
+                                  (if default
+                                      (concat " (default " default ")")
+                                    ""))
+                          (if default
+                              (fsvn-dired-current-directory)
+                            (fsvn-dired-dwim-target-directory))
+                          default t)
+          (when current-prefix-arg
+            (require 'diff)
+            (read-string "Options for TortoiseMerge: "
+                         (if (stringp diff-switches)
+                             diff-switches
+                           (mapconcat 'identity diff-switches " ")))))))
 
 (defvar tortoise-external-svn-keymap nil)
 (setq tortoise-external-svn-keymap
       (let ((map (make-sparse-keymap)))
 
-	(define-key map "l" 'tortoise-show-log)
-	(define-key map "L" 'tortoise-show-log-directory)
-	(define-key map "b" 'tortoise-browse-repository)
-	(define-key map "=" 'tortoise-diff-local)
-	map))
+        (define-key map "l" 'tortoise-show-log)
+        (define-key map "L" 'tortoise-show-log-directory)
+        (define-key map "b" 'tortoise-browse-repository)
+        (define-key map "=" 'tortoise-diff-local)
+        map))
 
 (add-hook 'dired-mode-hook
-	  (lambda ()
-	    (define-key dired-mode-map "\C-c\C-t" tortoise-external-svn-keymap)
-	    ))
+          (lambda ()
+            (define-key dired-mode-map "\C-c\C-t" tortoise-external-svn-keymap)
+            ))
 
 (add-hook 'fsvn-browse-mode-hook
-	  (lambda ()
-	    (define-key fsvn-browse-mode-map "\C-c\C-t" tortoise-external-svn-keymap)
-	    ))
+          (lambda ()
+            (define-key fsvn-browse-mode-map "\C-c\C-t" tortoise-external-svn-keymap)
+            ))
 
 
 ;; for cygwin
@@ -153,39 +153,39 @@
 (defun fsvn-cygwin-installed-dir ()
   (let ((fold (fsvn-cygwin-installed-folder)))
     (and fold
-	 (file-name-as-directory (dos-to-unix-filename fold)))))
+         (file-name-as-directory (dos-to-unix-filename fold)))))
 
 (defvar fsvn-cygwin-guessed-installed nil)
 (defun fsvn-cygwin-guessed-installed ()
   (condition-case err
       (progn
-	(mw32-registry-get fsvn-cygwin-registory-root-key)
-	(and
-	 (file-exists-p (fsvn-cygwin-installed-folder))
-	 t))
+        (mw32-registry-get fsvn-cygwin-registory-root-key)
+        (and
+         (file-exists-p (fsvn-cygwin-installed-folder))
+         t))
     (error nil)))
 
 (defun fsvn-cygwin-registry-get (key name)
   (condition-case err
       (let (form)
-	(setq form
-	      (concat fsvn-cygwin-registory-root-key
-		      "\\"
-		      (and key (concat "\\" key))))
-	(mw32-registry-get form name))
+        (setq form
+              (concat fsvn-cygwin-registory-root-key
+                      "\\"
+                      (and key (concat "\\" key))))
+        (mw32-registry-get form name))
     (error nil)))
 
 (defvar fsvn-cygwin-svn-p nil)
 (defun fsvn-cygwin-svn-p ()
   (let ((command (executable-find fsvn-svn-command-internal))
-	(cygdir (fsvn-cygwin-installed-dir)))
+        (cygdir (fsvn-cygwin-installed-dir)))
     (and command
-	 cygdir
-	 (string-match (concat "^" (regexp-quote cygdir)) command))))
+         cygdir
+         (string-match (concat "^" (regexp-quote cygdir)) command))))
 
 (defun fsvn-cygwin-expand-path (name &optional default)
   (let ((inst-dir fsvn-cygwin-installed-dir)
-	(expanded (expand-file-name name default)))
+        (expanded (expand-file-name name default)))
     (cond
      ((not fsvn-cygwin-guessed-installed)
       expanded)
@@ -193,13 +193,13 @@
       (concat "/" (substring expanded (match-end 0))))
      (t
       (let* ((file (expand-file-name name default))
-	     (drive (substring file 0 1))
-	     (name (substring file 2)))
-	(concat (file-name-as-directory fsvn-cygwin-drive-prefix-dir) drive name))))))
+             (drive (substring file 0 1))
+             (name (substring file 2)))
+        (concat (file-name-as-directory fsvn-cygwin-drive-prefix-dir) drive name))))))
 
 (defun fsvn-cygwin-to-emacs-path (path)
   (let ((prefix fsvn-cygwin-drive-prefix-dir)
-	(installed fsvn-cygwin-installed-folder))
+        (installed fsvn-cygwin-installed-folder))
     (cond
      ((string-match (format "^\\(%s\\)/\\([a-zA-Z]\\)/\\(.*\\)" (regexp-quote prefix)) path)
       (format "%s:/%s" (match-string 2 path) (match-string 3 path)))
@@ -217,14 +217,14 @@
   (cond
    (fsvn-cygwin-svn-p
     (setq fsvn-cygwin-installed-folder (fsvn-cygwin-installed-folder)
-	  fsvn-cygwin-guessed-installed (fsvn-cygwin-guessed-installed)
-	  fsvn-cygwin-installed-dir (fsvn-cygwin-installed-dir)
-	  fsvn-cygwin-drive-prefix-dir (fsvn-cygwin-drive-prefix-dir)
-	  fsvn-targets-file-converter 'fsvn-win-targets-file-converter
-	  fsvn-password-prompt-accessible-p t))
+          fsvn-cygwin-guessed-installed (fsvn-cygwin-guessed-installed)
+          fsvn-cygwin-installed-dir (fsvn-cygwin-installed-dir)
+          fsvn-cygwin-drive-prefix-dir (fsvn-cygwin-drive-prefix-dir)
+          fsvn-targets-file-converter 'fsvn-win-targets-file-converter
+          fsvn-password-prompt-accessible-p t))
    (t
     (setq fsvn-targets-file-converter nil
-	  fsvn-password-prompt-accessible-p nil))))
+          fsvn-password-prompt-accessible-p nil))))
 
 (setq fsvn-initialize-function 'fsvn-win-initialize-loading)
 
@@ -260,21 +260,21 @@
       (call-process "explorer" nil 0 nil args))))
 
 (add-hook 'fsvn-browse-mode-hook
-	  (lambda ()
-	    (define-key fsvn-browse-mode-map "\C-c\C-s" 'fsvn-win-start-gui-viewer)
-	    ))
+          (lambda ()
+            (define-key fsvn-browse-mode-map "\C-c\C-s" 'fsvn-win-start-gui-viewer)
+            ))
 
 
 
 ;; TODO NTEmacs has no fiber.exe
 (defun fsvn-win-start-external-terminal (&rest args)
   (let ((tmpfile (fsvn-make-temp-file))
-	(command (mapconcat 'identity (cons "/C" (fsvn-command-args-canonicalize args)) " "))
-	batfile)
+        (command (mapconcat 'identity (cons "/C" (fsvn-command-args-canonicalize args)) " "))
+        batfile)
     (with-temp-buffer
       (insert (unix-to-dos-filename (executable-find "cmd.exe")) " " command "\n")
       (insert "@echo off" "\n")
-      (insert "sleep 5" "\n") 		; wait several seconds.
+      (insert "sleep 5" "\n")           ; wait several seconds.
       (write-region (point-min) (point-max) tmpfile nil 'no-msg))
     (setq batfile (concat tmpfile ".bat"))
     (rename-file tmpfile batfile)

@@ -21,6 +21,8 @@ a lot of process makes this error?
 
 ** Sometimes repeat revret-buffer destroy buffer format.
 
+** switch with --relocate arg
+
 * select-file-mode
 
 ** freezing several minutes when commit a lot of files.
@@ -48,6 +50,12 @@ revert forcely.
 
 ** fsvn-log-sibling-ediff-previous
 for directory
+
+
+** fsvn-log-list-revert-to-revision
+
+cannot revert directory
+
 
 * popup-result-mode
 

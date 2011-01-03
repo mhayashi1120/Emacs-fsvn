@@ -56,58 +56,58 @@
        (list fsvn-select-file-re-root '(1 fsvn-header-key-face) '(2 fsvn-header-face))
        (list fsvn-select-file-re-mark '(0 fsvn-mark-face))
        (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
-	     '(".+" (fsvn-move-to-filename) nil (0 fsvn-marked-face)))
+             '(".+" (fsvn-move-to-filename) nil (0 fsvn-marked-face)))
        (list fsvn-select-file-re-dir
-	     '(".+" (fsvn-move-to-filename) nil (0 fsvn-directory-face)))
+             '(".+" (fsvn-move-to-filename) nil (0 fsvn-directory-face)))
        (list fsvn-select-file-re-symlink
-	     '(".+" (fsvn-move-to-filename) nil (0 fsvn-symlink-face)))
+             '(".+" (fsvn-move-to-filename) nil (0 fsvn-symlink-face)))
        ))
 
 (defvar fsvn-select-file-diff-map nil)
 (defvar fsvn-select-file-mode-map nil)
 (unless fsvn-select-file-diff-map
   (setq fsvn-select-file-diff-map
-	(let ((map (make-sparse-keymap)))
+        (let ((map (make-sparse-keymap)))
 
-	  (define-key map "=" 'fsvn-select-file-diff-base)
-	  (define-key map "e" 'fsvn-select-file-ediff-base)
+          (define-key map "=" 'fsvn-select-file-diff-base)
+          (define-key map "e" 'fsvn-select-file-ediff-base)
 
-	  map)))
+          map)))
 
 (unless fsvn-select-file-mode-map
   (setq fsvn-select-file-mode-map
-	(let ((map (make-sparse-keymap)))
-	  (suppress-keymap map)
+        (let ((map (make-sparse-keymap)))
+          (suppress-keymap map)
 
-	  (fsvn-readonly-mode-keymap map)
+          (fsvn-readonly-mode-keymap map)
 
-	  (define-key map "," 'scroll-other-window-down)
-	  (define-key map "." 'scroll-other-window)
-	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	  (define-key map "\C-c\ei" 'fsvn-select-file-ignore-this)
-	  (define-key map "\C-m" 'fsvn-select-file-view-file)
-	  (define-key map "\C-n" 'fsvn-select-file-next-file)
-	  (define-key map "\C-p" 'fsvn-select-file-previous-file)
-	  (define-key map "g" 'revert-buffer)
-	  (define-key map "m" 'fsvn-select-file-mark)
-	  (define-key map "n" 'fsvn-select-file-next-file)
-	  (define-key map "p" 'fsvn-select-file-previous-file)
-	  (define-key map "u" 'fsvn-select-file-mark-clear)
-	  (define-key map "D" 'fsvn-select-file-do-delete-this)
-	  (define-key map "w" 'fsvn-select-file-copy-filename)
-	  
-	  (define-key map "zd" 'fsvn-select-file-delete-this)
+          (define-key map "," 'scroll-other-window-down)
+          (define-key map "." 'scroll-other-window)
+          (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+          (define-key map "\C-c\ei" 'fsvn-select-file-ignore-this)
+          (define-key map "\C-m" 'fsvn-select-file-view-file)
+          (define-key map "\C-n" 'fsvn-select-file-next-file)
+          (define-key map "\C-p" 'fsvn-select-file-previous-file)
+          (define-key map "g" 'revert-buffer)
+          (define-key map "m" 'fsvn-select-file-mark)
+          (define-key map "n" 'fsvn-select-file-next-file)
+          (define-key map "p" 'fsvn-select-file-previous-file)
+          (define-key map "u" 'fsvn-select-file-mark-clear)
+          (define-key map "D" 'fsvn-select-file-do-delete-this)
+          (define-key map "w" 'fsvn-select-file-copy-filename)
+          
+          (define-key map "zd" 'fsvn-select-file-delete-this)
 
-	  ;; TODO
-	  ;; (define-key map "za" 'fsvn-select-file-add-this)
-	  ;;TODO commit
-	  (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
-	  (define-key map "=" fsvn-select-file-diff-map)
+          ;; TODO
+          ;; (define-key map "za" 'fsvn-select-file-add-this)
+          ;;TODO commit
+          (define-key map "\C-c\C-vr" 'fsvn-select-file-revert-this)
+          (define-key map "=" fsvn-select-file-diff-map)
 
-	  ;;todo not implement
-	  ;;	(define-key map "" 'fsvn-select-file-show-changelist-member)
+          ;;todo not implement
+          ;;    (define-key map "" 'fsvn-select-file-show-changelist-member)
 
-	  map)))
+          map)))
 
 (defcustom fsvn-select-file-mode-hook nil
   "*Run at the very end of `fsvn-select-file-mode'."
@@ -138,32 +138,37 @@ Keybindings:
 (defun fsvn-select-file-generate-buffer ()
   (generate-new-buffer fsvn-select-file-buffer-name))
 
+(defmacro fsvn-select-file-each-buffers (minor-var &rest form)
+  `(fsvn-each-buffer-mode 'fsvn-select-file-mode
+     (when (symbol-value ,minor-var)
+       (progn ,@form))))
+
 (defun fsvn-select-file-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))
-	;;FIXME when multiple subdir and D mark
-	(marked (fsvn-select-file-gather-marked-files))
-	(opoint (point)))
+        ;;FIXME when multiple subdir and D mark
+        (marked (fsvn-select-file-gather-marked-files))
+        (opoint (point)))
     (funcall fsvn-select-file-draw-list-function)
     (mapc
      (lambda (file)
        (fsvn-select-file-file-put-mark file t))
      marked)
     (or (and file
-	     (fsvn-select-file-goto-file file))
-	(goto-char opoint))))
+             (fsvn-select-file-goto-file file))
+        (goto-char opoint))))
 
 (defun fsvn-select-file-cmd-file (&optional subcommand default-args)
   (let ((file (fsvn-current-filename))
-	args)
+        args)
     (unless file
       (error "No file on this line"))
     (setq file (fsvn-expand-file file))
     (setq args
-	  (if (and current-prefix-arg subcommand)
-	      (fsvn-read-svn-subcommand-args subcommand t default-args)
-	    default-args))
+          (if (and current-prefix-arg subcommand)
+              (fsvn-read-svn-subcommand-args subcommand t default-args)
+            default-args))
     (if args
-	(list file args)
+        (list file args)
       (list file))))
 
 (defmacro fsvn-select-file-each-file (var &rest form)
@@ -171,8 +176,8 @@ Keybindings:
      (let (,var RET)
        (fsvn-select-file-first-file)
        (while (setq ,var (fsvn-current-filename))
-	 (setq RET (cons ,@form RET))
-	 (fsvn-select-file-next-file))
+         (setq RET (cons ,@form RET))
+         (fsvn-select-file-next-file))
        (nreverse RET))))
 
 (defun fsvn-select-file-first-file ()
@@ -181,7 +186,7 @@ Keybindings:
     (while (and (not (eobp)) (null (fsvn-current-filename)))
       (forward-line 1))
     (if (eobp)
-	(goto-char saved)
+        (goto-char saved)
       (fsvn-move-to-filename))))
 
 (defun fsvn-select-file-choice-unversioned (files)
@@ -189,8 +194,8 @@ Keybindings:
    (lambda (file)
      (let ((status (fsvn-select-file-file-status file)))
        (when (or (null status)
-		 (eq (fsvn-xml-status->target->entry=>wc-status.item status) 'unversioned))
-	 file)))
+                 (eq (fsvn-xml-status->target->entry=>wc-status.item status) 'unversioned))
+         file)))
      files))
 
 (defun fsvn-select-file-choice-just-locked (files)
@@ -198,10 +203,10 @@ Keybindings:
    (lambda (file)
      (let ((status (fsvn-select-file-file-status file)))
        (when (and status
-		  (eq (fsvn-xml-status->target->entry=>wc-status.item status) 'normal)
-		  (eq (fsvn-xml-status->target->entry=>wc-status.props status) 'none)
-		  (fsvn-xml-status->target->entry=>wc-status=>lock status))
-	 file)))
+                  (eq (fsvn-xml-status->target->entry=>wc-status.item status) 'normal)
+                  (eq (fsvn-xml-status->target->entry=>wc-status.props status) 'none)
+                  (fsvn-xml-status->target->entry=>wc-status=>lock status))
+         file)))
    files))
 
 (defun fsvn-select-file-file-status (file)
@@ -212,9 +217,9 @@ Keybindings:
     (when (fsvn-move-to-filename)
       (forward-line 0)
       (let ((inhibit-read-only t))
-	(delete-char 1)
-	(insert (if mark fsvn-mark-mark-char fsvn-space-char))
-	(set-buffer-modified-p nil)))))
+        (delete-char 1)
+        (insert (if mark fsvn-mark-mark-char fsvn-space-char))
+        (set-buffer-modified-p nil)))))
 
 (defun fsvn-select-file-point-put-mark (mark)
   (let ((filename (fsvn-current-filename)))
@@ -223,13 +228,13 @@ Keybindings:
 
 (defun fsvn-select-file-goto-file (filename)
   (let ((prev (point))
-	file)
+        file)
     (catch 'found
       (fsvn-select-file-first-file)
       (while (setq file (fsvn-current-filename))
-	(when (string= (fsvn-expand-file file) filename)
-	  (throw 'found t))
-	(fsvn-select-file-next-file))
+        (when (string= (fsvn-expand-file file) filename)
+          (throw 'found t))
+        (fsvn-select-file-next-file))
       (goto-char prev)
       nil)))
 
@@ -243,35 +248,35 @@ Keybindings:
       (setq dirp (file-directory-p filename))
       ;; status nil means unversioned
       (when (and dirp (or (not status)
-			  (memq status1 '(?A ?M ?? ?D))
-			  (memq status2 '(?A ?M))))
-	(fsvn-select-file-mark-below filename mark))
+                          (memq status1 '(?A ?M ?? ?D))
+                          (memq status2 '(?A ?M))))
+        (fsvn-select-file-mark-below filename mark))
       (cond
        ((and mark (or (not status)
-		      (memq status1 '(?A ??))))
-	(fsvn-select-file-mark-above-only filename t))
+                      (memq status1 '(?A ??))))
+        (fsvn-select-file-mark-above-only filename t))
        ((and (not mark) (eq status1 ?D))
-	(fsvn-select-file-mark-above-only filename nil)))
+        (fsvn-select-file-mark-above-only filename nil)))
       (fsvn-select-file-point-put-mark-internal mark))))
 
 (defun fsvn-select-file-mark-above-only (file mark)
   (fsvn-select-file-each-file f
     (let ((regexp (concat "^" (regexp-quote f) "/")))
       (when (string-match regexp file)
-	(fsvn-select-file-point-put-mark-internal mark)))))
+        (fsvn-select-file-point-put-mark-internal mark)))))
 
 (defun fsvn-select-file-mark-below (dir mark)
   (fsvn-select-file-each-file f
     (let ((regexp (concat "^" (regexp-quote dir) "/")))
       (when (string-match regexp f)
-	(fsvn-select-file-point-put-mark-internal mark)))))
+        (fsvn-select-file-point-put-mark-internal mark)))))
 
 (defun fsvn-select-file-draw-root (root)
   (let (buffer-read-only)
     (save-excursion
       (goto-char (point-min))
       (when (looking-at "^ Root: .*\n")
-	(replace-match "" nil nil nil 0))
+        (replace-match "" nil nil nil 0))
       (insert (format " Root: %s\n" root))
       (insert "\n")
       (setq fsvn-buffer-repos-root root))))
@@ -289,14 +294,14 @@ Keybindings:
       (setq saved (point))
       (mapc
        (lambda (target)
-	 (fsvn-select-file-draw-target target))
+         (fsvn-select-file-draw-target target))
        (fsvn-get-files-status files))
       (save-excursion
-	(setq point (point))
-	(goto-char (point-min))
-	(if (= saved point)
-	    (insert (format " %s" no-msg))
-	  (insert (format " %s" msg))))
+        (setq point (point))
+        (goto-char (point-min))
+        (if (= saved point)
+            (insert (format " %s" no-msg))
+          (insert (format " %s" msg))))
       (insert "\n")
       (set-buffer-modified-p nil))))
 
@@ -305,11 +310,11 @@ Keybindings:
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(when (looking-at fsvn-select-file-re-mark)
-	  (setq filename (fsvn-current-filename))
-	  (when filename
-	    (setq ret (cons (fsvn-expand-file filename) ret))))
-	(forward-line 1)))
+        (when (looking-at fsvn-select-file-re-mark)
+          (setq filename (fsvn-current-filename))
+          (when filename
+            (setq ret (cons (fsvn-expand-file filename) ret))))
+        (forward-line 1)))
     (nreverse ret)))
 
 (defun fsvn-select-file-draw-target (target=cl)
@@ -319,50 +324,50 @@ Keybindings:
      (lambda (entry)
        (fsvn-select-file-draw-internal entry))
      (sort entries
-	   (lambda (x y)
-	     (string-lessp
-	      (fsvn-xml-status->target->entry.path x)
-	      (fsvn-xml-status->target->entry.path y)))))))
+           (lambda (x y)
+             (string-lessp
+              (fsvn-xml-status->target->entry.path x)
+              (fsvn-xml-status->target->entry.path y)))))))
 
 (defun fsvn-select-file-draw-internal (entry)
   (let* ((status (fsvn-status-get-status entry))
-	 (status1 (fsvn-status-get-status-1 entry))
-	 (status2 (fsvn-status-get-status-2 entry))
-	 (mark (or (memq status1 '(?R ?A ?M ?D)) (memq status2 '(?M))))
-	 (filename (fsvn-select-file-filename entry))
-	 cell buffer-read-only)
+         (status1 (fsvn-status-get-status-1 entry))
+         (status2 (fsvn-status-get-status-2 entry))
+         (mark (or (memq status1 '(?R ?A ?M ?D)) (memq status2 '(?M))))
+         (filename (fsvn-select-file-filename entry))
+         cell buffer-read-only)
     (fsvn-select-file-buffer!status entry)
     (fsvn-select-file-set-filename-property filename)
     (insert (format "%c %c %s %s\n"
-		    (if mark fsvn-mark-mark-char fsvn-space-char)
-		    (cond 
-		     ((fsvn-file-exact-directory-p filename) ?d)
-		     ((fsvn-file-symlink-p filename) ?l)
-		     (t fsvn-space-char))
-		    status
-		    filename))
+                    (if mark fsvn-mark-mark-char fsvn-space-char)
+                    (cond 
+                     ((fsvn-file-exact-directory-p filename) ?d)
+                     ((fsvn-file-symlink-p filename) ?l)
+                     (t fsvn-space-char))
+                    status
+                    filename))
     (when (and (file-directory-p filename)
-	       (eq status1 ??))
+               (eq status1 ??))
       (fsvn-select-file-draw-unversioned-directory-files entry))
     (set-buffer-modified-p nil)))
 
 (defun fsvn-select-file-draw-unversioned-directory-files (entry)
   (let* ((dirname (fsvn-xml-status->target->entry.path entry))
-	 ;; todo deep recursive make slow
-	 (files (fsvn-select-file-recursive-files dirname)))
+         ;; todo deep recursive make slow
+         (files (fsvn-select-file-recursive-files dirname)))
     (mapc
      (lambda (filename)
        (fsvn-select-file-set-filename-property filename)
        (insert (format "%c %c %s %s\n"
-		       fsvn-space-char
-		       (if (file-directory-p filename) ?d fsvn-space-char)
-		       (fsvn-string-rpad "?" fsvn-svn-status-length ?.)
-		       filename)))
+                       fsvn-space-char
+                       (if (file-directory-p filename) ?d fsvn-space-char)
+                       (fsvn-string-rpad "?" fsvn-svn-status-length ?.)
+                       filename)))
      files)))
 
 (defun fsvn-select-file-filename (entry)
   (let* ((path (fsvn-xml-status->target->entry.path entry))
-	 (ret (fsvn-file-relative path)))
+         (ret (fsvn-file-relative path)))
     ret))
 
 (defun fsvn-select-file-recursive-files (directory)
@@ -372,7 +377,7 @@ Keybindings:
 
 (defun fsvn-select-file-buffer!status (entry)
   (let ((filename (fsvn-select-file-filename entry))
-	cell)
+        cell)
     (setq cell (fsvn-string-assoc filename fsvn-select-file-files-status))
     (unless cell
       (setq cell (cons filename nil))
@@ -399,28 +404,28 @@ Keybindings:
   (save-excursion
     (when (fsvn-select-file-goto-file file)
       (let ((buffer-read-only)
-	    (start (save-excursion (forward-line 0) (point)))
-	    (end (save-excursion (forward-line 1) (point))))
-	(delete-region start end))))
+            (start (save-excursion (forward-line 0) (point)))
+            (end (save-excursion (forward-line 1) (point))))
+        (delete-region start end))))
   (fsvn-move-to-filename))
 
 (defun fsvn-select-file-remove-file-hierarchy (file)
   (let ((regexp (format "^%s\\(/\\|$\\)" (directory-file-name file)))
-	cur)
+        cur)
     (save-excursion
       (fsvn-select-file-first-file)
       (while (setq cur (fsvn-current-filename))
-	(setq cur (fsvn-expand-file cur))
-	(if (string-match regexp cur)
-	    (fsvn-select-file-remove-file cur)
-	  (fsvn-select-file-next-file))))
+        (setq cur (fsvn-expand-file cur))
+        (if (string-match regexp cur)
+            (fsvn-select-file-remove-file cur)
+          (fsvn-select-file-next-file))))
     (fsvn-move-to-filename)))
 
 (defun fsvn-select-file-redraw-file (file)
   (let ((status (fsvn-get-file-status file)))
     (save-excursion
       (when (fsvn-select-file-goto-file file)
-	(fsvn-select-file-remove-file file))
+        (fsvn-select-file-remove-file file))
       (forward-line 0)
       (fsvn-select-file-draw-internal status))))
 
@@ -441,7 +446,7 @@ Keybindings:
 (defun fsvn-select-file-ediff-base (file)
   (interactive (fsvn-select-file-command-file))
   (let* ((urlrev (fsvn-url-urlrev file "BASE"))
-	 (directory-p (file-directory-p file)))
+         (directory-p (file-directory-p file)))
     (fsvn-ediff-between-urlrevs urlrev file directory-p)))
 
 (defun fsvn-select-file-mark ()
@@ -472,15 +477,15 @@ Keybindings:
       (setq reverted (fsvn-parse-result-cmd-revert buffer))
       (mapc
        (lambda (file)
-	 (fsvn-select-file-remove-file file))
+         (fsvn-select-file-remove-file file))
        reverted))))
 
 (defun fsvn-select-file-do-delete-this (file)
   (interactive (list (fsvn-expand-file (fsvn-current-filename))))
   (when (or (not (fsvn-interactive-p))
-	    (fsvn-confirm-prompt 'fsvn-select-file-do-delete-this "Delete this file? "))
+            (fsvn-confirm-prompt 'fsvn-select-file-do-delete-this "Delete this file? "))
     (if (fsvn-file-exact-directory-p file)
-	(fsvn-delete-directory file)
+        (fsvn-delete-directory file)
       (delete-file file))
     (fsvn-select-file-remove-file file)))
 
@@ -491,20 +496,20 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 This is usefull for missing file (marked `!')
 "
   (interactive (list (fsvn-expand-file (fsvn-current-filename)) 
-		     (when current-prefix-arg
-		       (fsvn-read-svn-subcommand-args "delete" t nil))))
+                     (when current-prefix-arg
+                       (fsvn-read-svn-subcommand-args "delete" t nil))))
   (if (or (not (fsvn-interactive-p))
-	  (fsvn-confirm-prompt 'fsvn-select-file-delete-this "Svn: Delete this file? "))
+          (fsvn-confirm-prompt 'fsvn-select-file-delete-this "Svn: Delete this file? "))
       (progn
-	(fsvn-popup-call-process "delete" args (list file))
-	(fsvn-select-file-redraw-file file))
+        (fsvn-popup-call-process "delete" args (list file))
+        (fsvn-select-file-redraw-file file))
     (message "(No svn Delete performed)")))
 
 (defun fsvn-select-file-copy-filename ()
   (interactive)
   (let ((file (fsvn-current-filename)))
     (if (null file)
-	(message "No file here.")
+        (message "No file here.")
       (setq file (fsvn-expand-file file))
       (kill-new file)
       (message "%s" file))))

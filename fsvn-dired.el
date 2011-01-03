@@ -42,8 +42,8 @@ This function suppress this behavior."
   (interactive (list (fsvn-read-directory-name "Dired dir: " default-directory) nil))
   (unwind-protect
       (progn
-	(setq fsvn-dired-force-dired t)
-	(dired dirname switches))
+        (setq fsvn-dired-force-dired t)
+        (dired dirname switches))
     (setq fsvn-dired-force-dired nil)))
 
 (defmacro fsvn-dired-switch-by-major-mode (dired-form fsvn-form)
@@ -61,28 +61,28 @@ This function suppress this behavior."
   (fsvn-dired-switch-by-major-mode
    ;; change to fsvn
    (let ((file (fsvn-dired-get-filename nil t))
-	 (dir (fsvn-dired-current-directory)))
+         (dir (fsvn-dired-current-directory)))
      (if (not (fsvn-directory-versioned-p dir))
-	 (message "Not a working copy.")
+         (message "Not a working copy.")
        (fsvn-working-copy (directory-file-name dir))
        (when file
-	 (fsvn-browse-goto-file file))))
+         (fsvn-browse-goto-file file))))
    ;; change to dired
    (if fsvn-browse-repos-p
        (message "Not a local directory.")
      (let (file)
        (when (fsvn-current-filename)
-	 (setq file (fsvn-expand-file (fsvn-current-filename) (fsvn-browse-current-directory-url))))
+         (setq file (fsvn-expand-file (fsvn-current-filename) (fsvn-browse-current-directory-url))))
        (fsvn-dired-force-dired (directory-file-name (fsvn-browse-current-directory-url)))
        (when file
-	 (dired-goto-file file))))))
+         (dired-goto-file file))))))
 
 (defmacro fsvn-dired-each-buffer (&rest form)
   `(fsvn-mapitem
     (lambda (buffer)
       (with-current-buffer buffer
-	(when (memq major-mode '(fsvn-browse-mode dired-mode))
-	  ,@form)))
+        (when (memq major-mode '(fsvn-browse-mode dired-mode))
+          ,@form)))
     (buffer-list)))
 
 (defun fsvn-dired-get-filename (&optional localp no-error-if-not-filep)
@@ -120,7 +120,7 @@ This function suppress this behavior."
    (let ((dir (fsvn-dired-current-directory)))
      (dired-goto-subdir dir)
      (while (and (not (eobp))
-		 (not (dired-move-to-filename)))
+                 (not (dired-move-to-filename)))
        (forward-line 1)))
    (fsvn-browse-goto-first-file)))
 
@@ -129,9 +129,9 @@ This function suppress this behavior."
    (save-excursion
      (when (dired-move-to-filename)
        (let (buffer-read-only)
-	 (forward-line 0)
-	 (delete-char 1)
-	 (insert (or mark dired-marker-char)))))
+         (forward-line 0)
+         (delete-char 1)
+         (insert (or mark dired-marker-char)))))
    (when (fsvn-current-filename)
      (fsvn-browse-put-mark-point (or mark fsvn-mark-mark-char)))))
 
@@ -149,8 +149,8 @@ This function suppress this behavior."
    (let (buffer-read-only)
      (save-excursion
        (unless (fsvn-current-filename)
-	 (unless (fsvn-browse-goto-first-file)
-	   (goto-char (point-max))))
+         (unless (fsvn-browse-goto-first-file)
+           (goto-char (point-max))))
        (forward-line 0)
        (fsvn-browse-ls-insert-wc-entry file))
      (fsvn-move-to-filename)
@@ -175,36 +175,36 @@ This function suppress this behavior."
 
 (defun fsvn-dired-region-files (&optional get-dot-file)
   (let ((start (region-beginning))
-	(end (region-end))
-	temp ret)
+        (end (region-end))
+        temp ret)
     (save-excursion
       (goto-char start)
       (while (and (not (= end (point-max)))
-		  (not (fsvn-dired-get-filename nil t)))
-	(forward-line 1))
+                  (not (fsvn-dired-get-filename nil t)))
+        (forward-line 1))
       (while (and (>= end (point))
-		  (dired-move-to-filename))
-	(when (and (setq temp (fsvn-dired-get-filename nil t))
-		   (or get-dot-file
-		       (not (string-match "/\\.\\.?$" temp))))
-	  (setq ret (cons temp ret)))
-	(forward-line 1)))
+                  (dired-move-to-filename))
+        (when (and (setq temp (fsvn-dired-get-filename nil t))
+                   (or get-dot-file
+                       (not (string-match "/\\.\\.?$" temp))))
+          (setq ret (cons temp ret)))
+        (forward-line 1)))
     (nreverse ret)))
 
 (defun fsvn-dired-marked-files (&optional get-dot-file)
   (let ((regexp (dired-marker-regexp))
-	ret temp)
+        ret temp)
     (save-excursion
       (fsvn-dired-goto-first-file)
       (while (and (not (eobp))
-		  (dired-move-to-filename))
-	(forward-line 0)
-	(when (and (looking-at regexp)
-		   (setq temp (fsvn-dired-get-filename))
-		   (or get-dot-file
-		       (not (string-match "/\\.\\.?$" temp))))
-	  (setq ret (cons temp ret)))
-	(forward-line 1)))
+                  (dired-move-to-filename))
+        (forward-line 0)
+        (when (and (looking-at regexp)
+                   (setq temp (fsvn-dired-get-filename))
+                   (or get-dot-file
+                       (not (string-match "/\\.\\.?$" temp))))
+          (setq ret (cons temp ret)))
+        (forward-line 1)))
     ret))
 
 
@@ -216,39 +216,39 @@ This function suppress this behavior."
   (interactive)
   (fsvn-browse-wc-only
    (let* ((current (file-name-as-directory (fsvn-browse-current-path)))
-	  (dir (fsvn-read-directory-name "Create directory: " current)))
+          (dir (fsvn-read-directory-name "Create directory: " current)))
      (make-directory dir t)
      (when (fsvn-file-directly-under-p current dir)
        (forward-line 1)
        (let (buffer-read-only)
-	 (fsvn-browse-ls-insert-wc-entry dir)
-	 (fsvn-browse-put-status-1 dir ??)
-	 (forward-line -1))
+         (fsvn-browse-ls-insert-wc-entry dir)
+         (fsvn-browse-put-status-1 dir ??)
+         (forward-line -1))
        (fsvn-move-to-filename)))))
 
 (defun fsvn-dired-do-load (files)
   "Act like `dired-do-load'. But not equals of this."
   (interactive (fsvn-dired-cmd-selected-files))
   (if (or (not (fsvn-interactive-p))
-	  (fsvn-browse-dired-confirm files 'load))
+          (fsvn-browse-dired-confirm files 'load))
       (progn
-	(mapc 'load-file files)
-	(message "%d Load done." (length files)))
+        (mapc 'load-file files)
+        (message "%d Load done." (length files)))
     (message "(No load performed)")))
 
 (defun fsvn-dired-do-byte-compile (files)
   "Act like `dired-do-byte-compile'. But not equals of this."
   (interactive (fsvn-dired-cmd-selected-files))
   (if (or (not (fsvn-interactive-p))
-	  (fsvn-browse-dired-confirm files 'byte-compile))
+          (fsvn-browse-dired-confirm files 'byte-compile))
       (progn
-	(mapc
-	 (lambda (file)
-	   (let ((elc-file (byte-compile-dest-file file)))
-	     (byte-compile-file file)
-	     (fsvn-browse-redraw-wc-file-entry elc-file)))
-	 files)
-	(message "%d Byte compile done." (length files)))
+        (mapc
+         (lambda (file)
+           (let ((elc-file (byte-compile-dest-file file)))
+             (byte-compile-file file)
+             (fsvn-browse-redraw-wc-file-entry elc-file)))
+         files)
+        (message "%d Byte compile done." (length files)))
     (message "(No byte-compile performed)")))
 
 (defun fsvn-dired-do-compress (files)
@@ -264,18 +264,18 @@ This function suppress this behavior."
 (defmacro fsvn-dired-do-move-overwrap (mover message &rest form)
   `(let (OVERWRITE-QUERY DEST)
      (when (and (= (length files) 1)
-		(not (file-directory-p destination)))
+                (not (file-directory-p destination)))
        (setq DEST destination))
      (mapc
       (lambda (from)
-	(let* ((to (or DEST (fsvn-expand-file (fsvn-file-name-nondirectory from) destination)))
-	       (overwrite (file-exists-p to))
-	       (dired-overwrite-confirmed
-		(and overwrite
-		     (dired-query 'OVERWRITE-QUERY "Overwrite `%s'?" to))))
-	  (,mover from to dired-overwrite-confirmed)
-	  (fsvn-browse-redraw-wc-file-entry from)
-	  (fsvn-browse-redraw-wc-file-entry to)))
+        (let* ((to (or DEST (fsvn-expand-file (fsvn-file-name-nondirectory from) destination)))
+               (overwrite (file-exists-p to))
+               (dired-overwrite-confirmed
+                (and overwrite
+                     (dired-query 'OVERWRITE-QUERY "Overwrite `%s'?" to))))
+          (,mover from to dired-overwrite-confirmed)
+          (fsvn-browse-redraw-wc-file-entry from)
+          (fsvn-browse-redraw-wc-file-entry to)))
       files)
      (message (format "%d file(s) %s." (length files) ,message))))
 
@@ -292,19 +292,19 @@ This function suppress this behavior."
 (defun fsvn-dired-do-marked-delete (files)
   "Act like `dired-do-flagged-delete'. But not equals of this."
   (interactive (let ((files (fsvn-browse-gather-marked-files fsvn-mark-delete-char)))
-		 (when (fsvn-file-member (fsvn-browse-current-directory) files)
-		   (error "Cannot operate on `.'"))
-		 (list files)))
+                 (when (fsvn-file-member (fsvn-browse-current-directory) files)
+                   (error "Cannot operate on `.'"))
+                 (list files)))
   (if (and files
-	   (or (not (fsvn-interactive-p))
-	       (fsvn-browse-dired-confirm files 'delete dired-deletion-confirmer)))
+           (or (not (fsvn-interactive-p))
+               (fsvn-browse-dired-confirm files 'delete dired-deletion-confirmer)))
       (progn
-	(mapc
-	 (lambda (file)
-	   (dired-delete-file file dired-recursive-deletes)
-	   (fsvn-browse-redraw-wc-file-entry file))
-	 files)
-	(message "%d deletions done." (length files)))
+        (mapc
+         (lambda (file)
+           (dired-delete-file file dired-recursive-deletes)
+           (fsvn-browse-redraw-wc-file-entry file))
+         files)
+        (message "%d deletions done." (length files)))
     (message "(No deletions performed)")))
 
 (defun fsvn-dired-mark-delete-backup-files ()
@@ -326,7 +326,7 @@ This function suppress this behavior."
 Act like `dired-copy-filename-as-kill' but not equal."
   (interactive (fsvn-dired-cmd-selected-files))
   (let ((string (mapconcat 'fsvn-urlrev-filename
-			   files fsvn-dired-copy-filename-separator)))
+                           files fsvn-dired-copy-filename-separator)))
     (kill-new string)
     (message "%s" string)))
 
@@ -343,15 +343,15 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
 See `fsvn-dired-copy-filename-as-kill' but kills full path."
   (interactive (fsvn-dired-cmd-selected-files))
   (let* ((repos-dir (fsvn-browse-current-repository-url))
-	 (dir (fsvn-browse-current-path))
-	 (string (mapconcat (lambda (file)
-			      (let (name)
-				(setq name 
-				      (if (fsvn-file= file dir)
-					  "."
-					(fsvn-file-name-nondirectory file)))
-				(fsvn-expand-url name repos-dir)))
-			    files fsvn-dired-copy-filename-separator)))
+         (dir (fsvn-browse-current-path))
+         (string (mapconcat (lambda (file)
+                              (let (name)
+                                (setq name 
+                                      (if (fsvn-file= file dir)
+                                          "."
+                                        (fsvn-file-name-nondirectory file)))
+                                (fsvn-expand-url name repos-dir)))
+                            files fsvn-dired-copy-filename-separator)))
     (kill-new string)
     (message "%s" string)))
 
@@ -364,25 +364,25 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
 (defun fsvn-dired-pseudo-get-marked-files (&optional localp arg filter distinguish-one-marked)
   (let* (all-of-them)
     (if arg
-	(cons (fsvn-dired-pseudo-get-filename) nil)
+        (cons (fsvn-dired-pseudo-get-filename) nil)
       (setq all-of-them (fsvn-browse-gather-marked-files))
       (cond
        ((and filter all-of-them)
-	(fsvn-mapitem
-	 (lambda (file)
-	   (when (funcall filter file)
-	     file))
-	 all-of-them))
+        (fsvn-mapitem
+         (lambda (file)
+           (when (funcall filter file)
+             file))
+         all-of-them))
        ((and distinguish-one-marked (= (length all-of-them) 1))
-	(cons t all-of-them))
+        (cons t all-of-them))
        (all-of-them
-	all-of-them)
+        all-of-them)
        (t
-	(cons (fsvn-dired-pseudo-get-filename) nil))))))
+        (cons (fsvn-dired-pseudo-get-filename) nil))))))
 
 (defun fsvn-dired-cmd-read-destination (act op-symbol)
   (let ((from (car (fsvn-dired-cmd-selected-files)))
-	to confirmer args)
+        to confirmer args)
     (cond
      ((= (length from) 1)
       (setq confirmer 'read-file-name)
@@ -391,15 +391,15 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
       (setq confirmer 'read-directory-name)
       (setq args (list (format "%s to directory: " act) nil nil t))))
     (setq to (apply 'dired-mark-pop-up act op-symbol
-		    (mapcar 'fsvn-file-name-nondirectory from)
-		    confirmer args))
+                    (mapcar 'fsvn-file-name-nondirectory from)
+                    confirmer args))
     (list from to)))
 
 (defun fsvn-dired-cmd-selected-files ()
   (let (tmp)
     (cond
      ((and current-prefix-arg
-	   (setq tmp (fsvn-browse-point-url)))
+           (setq tmp (fsvn-browse-point-url)))
       (list (cons tmp nil)))
      ((setq tmp (fsvn-browse-gather-selected-files))
       (list tmp))
@@ -408,17 +408,17 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
 
 (defun fsvn-dired-define-key (key def)
   (add-hook 'dired-mode-hook
-	    `(lambda () (define-key dired-mode-map ,key ',def)))
+            `(lambda () (define-key dired-mode-map ,key ',def)))
   (add-hook 'fsvn-browse-mode-hook
-	    `(lambda () (define-key fsvn-browse-mode-map ,key ',def))))
+            `(lambda () (define-key fsvn-browse-mode-map ,key ',def))))
 
 (defun fsvn-dired-define-browse-key (key def)
   (add-hook 'fsvn-browse-mode-hook
-	    `(lambda () (define-key fsvn-browse-mode-map ,key ',def))))
+            `(lambda () (define-key fsvn-browse-mode-map ,key ',def))))
 
 (defun fsvn-dired-define-browse-prefix-key (key def)
   (add-hook 'fsvn-browse-mode-hook
-	    `(lambda () (define-key fsvn-browse-prefix-map ,key ',def))))
+            `(lambda () (define-key fsvn-browse-prefix-map ,key ',def))))
 
 
 
@@ -427,12 +427,12 @@ See `fsvn-dired-copy-filename-as-kill' but kills full path."
 (defadvice dired
   (around fsvn-dired-mode (dirname &optional switches) disable)
   (if (and (not fsvn-dired-force-dired)
-	   (fsvn-directory-versioned-p dirname)
-	   (stringp fsvn-svn-command-internal)
-	   (executable-find fsvn-svn-command-internal))
+           (fsvn-directory-versioned-p dirname)
+           (stringp fsvn-svn-command-internal)
+           (executable-find fsvn-svn-command-internal))
       (condition-case err
-	  (fsvn-working-copy dirname)
-	(error ad-do-it))
+          (fsvn-working-copy dirname)
+        (error ad-do-it))
     ad-do-it))
 
 (defadvice dired-goto-file

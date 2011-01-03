@@ -174,11 +174,12 @@ This is what the do-commands look for, and what the mark-commands store.")
 ;; face utility
 
 ;; FIXME want to well contrast value
-(defun fsvn-get-background-color (foreground)
-  (let ((count (length (defined-colors)))
-	(rest (member foreground (defined-colors))))
+(defun fsvn-get-background-color (foreground &optional colors)
+  (let ((colors (or colors (defined-colors)))
+        (count (length colors))
+        (rest (member foreground colors)))
     ;;FIXME
-    (nth (% (+ (length rest) 100) count) (defined-colors))))
+    (nth (% (+ (length rest) 100) count) colors)))
 
 
 
@@ -207,9 +208,9 @@ This is what the do-commands look for, and what the mark-commands store.")
     (catch 'found
       (mapc
        (lambda (w)
-	 (select-window w)
-	 (when (eq major-mode 'fsvn-popup-result-mode)
-	   (throw 'found w)))
+         (select-window w)
+         (when (eq major-mode 'fsvn-popup-result-mode)
+           (throw 'found w)))
        (window-list))
       nil)))
 
@@ -219,7 +220,7 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 (defun fsvn-brief-message-show-popup ()
   (let* ((buf (get-buffer-create fsvn-brief-message-buffer-name))
-	 (win (get-buffer-window buf)))
+         (win (get-buffer-window buf)))
     (when (and win (window-live-p win))
       (delete-window win))
     (dired-pop-to-buffer buf)))
@@ -250,30 +251,30 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 (unless fsvn-electric-line-select-mode-map
   (setq fsvn-electric-line-select-mode-map
-	(let ((map (make-keymap)))
-	  (fillarray (car (cdr map)) 'undefined)
+        (let ((map (make-keymap)))
+          (fillarray (car (cdr map)) 'undefined)
 
-	  (define-key map " " 'fsvn-electric-line-select-select)
-	  (define-key map "*" 'fsvn-electric-line-mark)
-	  (define-key map "?" 'Helper-describe-bindings)
-	  (define-key map "U" 'fsvn-electric-line-unmark-all)
-	  (define-key map "\C-]" 'fsvn-electric-line-select-quit)
-	  (define-key map "\C-c" nil)
-	  (define-key map "\C-c\C-c" 'fsvn-electric-line-select-quit)
-	  (define-key map "\C-m" 'fsvn-electric-line-select-select)
-	  (define-key map "\C-n" 'fsvn-electric-next-line)
-	  (define-key map "\C-p" 'fsvn-electric-previous-line)
-	  (define-key map "\C-u" 'universal-argument)
-	  (define-key map "\C-v" 'fsvn-electric-scroll-up)
-	  (define-key map "\e" nil)
-	  (define-key map "\ev" 'fsvn-electric-scroll-down)
-	  (define-key map "m" 'fsvn-electric-line-mark)
-	  (define-key map "n" 'fsvn-electric-next-line)
-	  (define-key map "p" 'fsvn-electric-previous-line)
-	  (define-key map "q" 'fsvn-electric-line-select-quit)
-	  (define-key map "u" 'fsvn-electric-line-unmark)
+          (define-key map " " 'fsvn-electric-line-select-select)
+          (define-key map "*" 'fsvn-electric-line-mark)
+          (define-key map "?" 'Helper-describe-bindings)
+          (define-key map "U" 'fsvn-electric-line-unmark-all)
+          (define-key map "\C-]" 'fsvn-electric-line-select-quit)
+          (define-key map "\C-c" nil)
+          (define-key map "\C-c\C-c" 'fsvn-electric-line-select-quit)
+          (define-key map "\C-m" 'fsvn-electric-line-select-select)
+          (define-key map "\C-n" 'fsvn-electric-next-line)
+          (define-key map "\C-p" 'fsvn-electric-previous-line)
+          (define-key map "\C-u" 'universal-argument)
+          (define-key map "\C-v" 'fsvn-electric-scroll-up)
+          (define-key map "\e" nil)
+          (define-key map "\ev" 'fsvn-electric-scroll-down)
+          (define-key map "m" 'fsvn-electric-line-mark)
+          (define-key map "n" 'fsvn-electric-next-line)
+          (define-key map "p" 'fsvn-electric-previous-line)
+          (define-key map "q" 'fsvn-electric-line-select-quit)
+          (define-key map "u" 'fsvn-electric-line-unmark)
 
-	  map)))
+          map)))
 
 (defvar fsvn-electric-line-alist nil)
 (defvar fsvn-electric-start-point nil)
@@ -314,42 +315,42 @@ Keybindings:
     (save-window-excursion
       (Electric-pop-up-window buffer)
       (unwind-protect
-	  (progn
-	    (set-buffer buffer)
-	    (fsvn-electric-line-select-buffer-update-highlight)
-	    (setq select
-		  (catch 'fsvn-electric-buffer-menu-select
-		    (message (or prompt "->"))
-		    (when (eq (setq unread-command-events (list (read-event))) ?\s)
-		      (setq unread-command-events nil)
-		      (throw 'fsvn-electric-buffer-menu-select nil))
-		    (let* ((start-point (point))
-			   (first-form '(or fsvn-electric-start-point (point-min)))
-			   (last-form '(or fsvn-electric-end-point 
-					   (progn 
-					     (goto-char (1- (point-max))) 
-					     (line-beginning-position))))
-			   (first (eval first-form))
-			   (last (eval last-form)))
-		      ;; Use start-point if it is meaningful.
-		      (goto-char (if (or (< start-point first)
-					 (> start-point last))
-				     first
-				   start-point))
-		      (Electric-command-loop 'fsvn-electric-buffer-menu-select
-					     prompt
-					     t
-					     'fsvn-electric-line-select-buffer-menu-looper
-					     (cons first-form last-form))))))
-	(message nil)))
+          (progn
+            (set-buffer buffer)
+            (fsvn-electric-line-select-buffer-update-highlight)
+            (setq select
+                  (catch 'fsvn-electric-buffer-menu-select
+                    (message (or prompt "->"))
+                    (when (eq (setq unread-command-events (list (read-event))) ?\s)
+                      (setq unread-command-events nil)
+                      (throw 'fsvn-electric-buffer-menu-select nil))
+                    (let* ((start-point (point))
+                           (first-form '(or fsvn-electric-start-point (point-min)))
+                           (last-form '(or fsvn-electric-end-point 
+                                           (progn 
+                                             (goto-char (1- (point-max))) 
+                                             (line-beginning-position))))
+                           (first (eval first-form))
+                           (last (eval last-form)))
+                      ;; Use start-point if it is meaningful.
+                      (goto-char (if (or (< start-point first)
+                                         (> start-point last))
+                                     first
+                                   start-point))
+                      (Electric-command-loop 'fsvn-electric-buffer-menu-select
+                                             prompt
+                                             t
+                                             'fsvn-electric-line-select-buffer-menu-looper
+                                             (cons first-form last-form))))))
+        (message nil)))
     select))
 
 (defun fsvn-electric-line-select-buffer-menu-looper (state condition)
   (cond 
    ((and condition
-	 (not (memq (car condition) '(buffer-read-only
-				      end-of-buffer
-				      beginning-of-buffer))))
+         (not (memq (car condition) '(buffer-read-only
+                                      end-of-buffer
+                                      beginning-of-buffer))))
     (signal (car condition) (cdr condition)))
    ((< (point) (save-excursion (eval (car state))))
     (goto-char (point-min)))
@@ -357,7 +358,7 @@ Keybindings:
     (goto-char (point-max))
     (forward-line -1)
     (if (pos-visible-in-window-p (point-max))
-	(recenter -1))))
+        (recenter -1))))
   (fsvn-electric-line-select-buffer-update-highlight))
 
 (defvar fsvn-electric-line-select-buffer-overlay nil)
@@ -368,15 +369,15 @@ Keybindings:
       (make-local-variable 'fsvn-electric-line-select-buffer-overlay)
       (setq fsvn-electric-line-select-buffer-overlay (make-overlay (point) (point))))
     (move-overlay fsvn-electric-line-select-buffer-overlay 
-		  (line-beginning-position)
-		  (line-end-position))
+                  (line-beginning-position)
+                  (line-end-position))
     (overlay-put fsvn-electric-line-select-buffer-overlay 'face 'highlight)))
 
 (defun fsvn-electric-call-next-data ()
   (condition-case err
       (progn
-	(message "Geting Next...")
-	(funcall fsvn-electric-next-data-function))
+        (message "Geting Next...")
+        (funcall fsvn-electric-next-data-function))
     (error
      (setq fsvn-electric-scroll-terminate t)
      (setq fsvn-electric-next-data-function nil)
@@ -413,8 +414,8 @@ Keybindings:
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(funcall fsvn-electric-unmark-function)
-	(fsvn-electric-next-line)))
+        (funcall fsvn-electric-unmark-function)
+        (fsvn-electric-next-line)))
     (font-lock-fontify-buffer)))
 
 (defun fsvn-electric-line-update-fontify ()
@@ -423,14 +424,14 @@ Keybindings:
 (defmacro fsvn-electric-scroll (scroller error next-pos)
   `(condition-case nil
        (prog1
-	   ,scroller
-	 (setq fsvn-electric-scroll-terminate nil))
+           ,scroller
+         (setq fsvn-electric-scroll-terminate nil))
      (,error
       (if (and fsvn-electric-scroll-terminate
-	       (not (pos-visible-in-window-p ,next-pos)))
-	  (goto-char ,next-pos)
-	(unless fsvn-electric-next-data-function
-	  (ding)))
+               (not (pos-visible-in-window-p ,next-pos)))
+          (goto-char ,next-pos)
+        (unless fsvn-electric-next-data-function
+          (ding)))
       (setq fsvn-electric-scroll-terminate t))))
 
 (defun fsvn-electric-scroll-down ()
@@ -463,11 +464,11 @@ Keybindings:
 (defvar fsvn-electric-select-file-font-lock-keywords
   (list
    (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
-	 '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-marked-face)))
+         '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-marked-face)))
    (list "^..d"
-	 '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-directory-face)))
+         '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-directory-face)))
    (list "^..l"
-	 '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-symlink-face)))
+         '("\\(.+\\)" (fsvn-electric-select-pre-match) nil (1 fsvn-symlink-face)))
    ))
 
 
@@ -481,12 +482,12 @@ Elements of the alist are:
 3. Rest of data.
 "
   (let ((specialize-prompt
-	 (concat prompt
-		 (substitute-command-keys (concat
-					   "\\<fsvn-electric-line-select-mode-map>"
-					   "Type \\[fsvn-electric-line-mark] to mark, "
-					   "\\[fsvn-electric-line-unmark] to unmark, "
-					   "\\[fsvn-electric-line-select-select] to finish.")))))
+         (concat prompt
+                 (substitute-command-keys (concat
+                                           "\\<fsvn-electric-line-select-mode-map>"
+                                           "Type \\[fsvn-electric-line-mark] to mark, "
+                                           "\\[fsvn-electric-line-unmark] to unmark, "
+                                           "\\[fsvn-electric-line-select-select] to finish.")))))
     (fsvn-electric-fs-prepare-list base-directory specialize-prompt
       (fsvn-electric-select-files-insert base-directory alist)
       (setq fsvn-electric-done-function 'fsvn-electric-select-files-done)
@@ -496,15 +497,15 @@ Elements of the alist are:
 
 (defun fsvn-electric-select-file (base-directory files &optional prompt)
   (let ((specialize-prompt
-	 (concat prompt
-		 (substitute-command-keys (concat
-					   "\\<fsvn-electric-line-select-mode-map>"
-					   "Type \\[fsvn-electric-line-select-select] to finish.")))))
+         (concat prompt
+                 (substitute-command-keys (concat
+                                           "\\<fsvn-electric-line-select-mode-map>"
+                                           "Type \\[fsvn-electric-line-select-select] to finish.")))))
     (fsvn-electric-fs-prepare-list base-directory specialize-prompt
       (fsvn-electric-select-file-insert base-directory files)
       (setq fsvn-electric-done-function 'fsvn-electric-select-file-done)
       (setq fsvn-electric-line-alist
-	    (mapcar (lambda (f) (cons f nil)) files)))))
+            (mapcar (lambda (f) (cons f nil)) files)))))
 
 (defun fsvn-electric-select-pre-match ()
   (let ((points (fsvn-points-of-filename)))
@@ -523,12 +524,12 @@ Elements of the alist are:
   `(let ((buffer (get-buffer-create fsvn-electric-select-file-list-buffer-name)))
      (with-current-buffer buffer
        (set (make-local-variable 'font-lock-defaults)
-	    '(fsvn-electric-select-file-font-lock-keywords t nil nil beginning-of-line))
+            '(fsvn-electric-select-file-font-lock-keywords t nil nil beginning-of-line))
        (let (buffer-read-only)
-	 (erase-buffer)
-	 (fsvn-electric-line-select-mode 1)
-	 (setq default-directory (file-name-as-directory ,base-directory))
-	 ,@form)
+         (erase-buffer)
+         (fsvn-electric-line-select-mode 1)
+         (setq default-directory (file-name-as-directory ,base-directory))
+         ,@form)
        (font-lock-mode 1)
        (font-lock-fontify-buffer)
        (run-mode-hooks 'fsvn-electric-line-select-mode-hook))
@@ -555,15 +556,15 @@ Elements of the alist are:
 (defun fsvn-electric-select-file-format (base-directory file)
   (let ((attr (file-attributes file)))
     (format "  %s %s %s %s"
-	    (nth 8 attr)
-	    (fsvn-generic-format-file-size (nth 7 attr))
-	    (format-time-string fsvn-generic-datetime-format (nth 5 attr))
-	    (propertize (fsvn-url-relative-name file base-directory) 'fsvn-filename t))))
+            (nth 8 attr)
+            (fsvn-generic-format-file-size (nth 7 attr))
+            (format-time-string fsvn-generic-datetime-format (nth 5 attr))
+            (propertize (fsvn-url-relative-name file base-directory) 'fsvn-filename t))))
 
 (defun fsvn-electric-select-files-insert-line (base-directory file-info)
   (let* ((file (nth 0 file-info))
-	 (mark (nth 1 file-info))
-	 (msg (nth 2 file-info)))
+         (mark (nth 1 file-info))
+         (msg (nth 2 file-info)))
     (insert (fsvn-electric-select-file-format base-directory file))
     (when msg
       (insert " : ")
@@ -575,23 +576,23 @@ Elements of the alist are:
 (defun fsvn-electric-select-files-switch-mark (mark-char)
   (save-excursion
     (let ((inhibit-read-only t)
-	  buffer-read-only)
+          buffer-read-only)
       (when (fsvn-move-to-filename)
-	(forward-line 0)
-	(delete-char 1)
-	(insert mark-char)))))
+        (forward-line 0)
+        (delete-char 1)
+        (insert mark-char)))))
 
 (defun fsvn-electric-select-files-done ()
   (let ((inhibit-quit) ;; for safe
-	(regexp (concat "^" (char-to-string fsvn-mark-mark-char)))
-	name tmp ret)
+        (regexp (concat "^" (char-to-string fsvn-mark-mark-char)))
+        name tmp ret)
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(when (looking-at regexp)
-	  (when (setq tmp (fsvn-electric-select-files-current-item))
-	    (setq ret (cons tmp ret))))
-	(forward-line 1)))
+        (when (looking-at regexp)
+          (when (setq tmp (fsvn-electric-select-files-current-item))
+            (setq ret (cons tmp ret))))
+        (forward-line 1)))
     (cond
      (ret
       (nreverse ret))
@@ -666,15 +667,15 @@ static char * data[] = {
 
 (defun fsvn-ui-fancy-install-state-mark (color)
   (let ((mode `(fsvn-ui-fancy-modeline
-		,(fsvn-ui-fancy-modeline-picture color))))
+                ,(fsvn-ui-fancy-modeline-picture color))))
     (unless (assq 'fsvn-ui-fancy-modeline mode-line-format)
       (setq mode-line-format (cons mode mode-line-format)))
     (force-mode-line-update t)))
 
 (defun fsvn-ui-fancy-uninstall-state-mark ()
   (setq mode-line-format
-	(assq-delete-all 'fsvn-ui-fancy-modeline
-			 mode-line-format))
+        (assq-delete-all 'fsvn-ui-fancy-modeline
+                         mode-line-format))
   (force-mode-line-update t))
 
 (defun fsvn-ui-fancy-update-state-mark-tooltip (tooltip)
@@ -686,7 +687,7 @@ static char * data[] = {
 
 (defun fsvn-ui-fancy-redraw ()
   (if (and fsvn-ui-fancy-file-state-in-modeline
-	   (fsvn-vc-mode-p))
+           (fsvn-vc-mode-p))
       (fsvn-ui-fancy-update-modeline)
     (fsvn-ui-fancy-uninstall-state-mark)))
 
@@ -723,7 +724,7 @@ static char * data[] = {
     (fsvn-ui-fancy-update-state-mark
      (fsvn-ui-fancy-interpret-state-mode-color
       (let ((status (fsvn-get-file-status buffer-file-name)))
-	(fsvn-xml-status->target->entry=>wc-status.item status))))))
+        (fsvn-xml-status->target->entry=>wc-status.item status))))))
 
 (defun fsvn-ui-fancy-interpret-state-mode-color (val)
   "Interpret vc-svn-state symbol to mode line color"

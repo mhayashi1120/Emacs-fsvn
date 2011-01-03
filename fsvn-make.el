@@ -48,13 +48,13 @@
 
 (when (memq system-type '(windows-nt))
   (setq ALL-MODULES
-	(append ALL-MODULES (list "fsvn-win.el")))
+        (append ALL-MODULES (list "fsvn-win.el")))
   (unless (featurep 'meadow)
     (setq ALL-MODULES
-	(append ALL-MODULES (list 
-			     "mw32cmp.el"
-			     "mw32script.el"
-			     )))))
+        (append ALL-MODULES (list 
+                             "mw32cmp.el"
+                             "mw32script.el"
+                             )))))
 
 (defun make-fsvn ()
   (fsvn-make-initialize)
@@ -71,8 +71,8 @@
   ;; see comment in `fsvn-test-excursion' at fsvn-test.el
   (condition-case err
       (progn
-	(fsvn-make-test)
-	(kill-emacs))
+        (fsvn-make-test)
+        (kill-emacs))
     (error
      (princ err)
      (kill-emacs 1))))
@@ -90,16 +90,16 @@
     (setq load-path (cons "." load-path))
     (load config)
     (when (and (eq system-type 'windows-nt)
-	       (not (featurep 'meadow)))
+               (not (featurep 'meadow)))
       (unless (and (file-exists-p "mw32script.el"))
-	;; for NTEmacs
-	(princ "\n")
-	(princ "-------------------------------------------------------------\n")
-	(princ "For NTEmacs user\n")
-	(princ "To complete this installation, please read mw32cmp.el header.\n")
-	(princ "-------------------------------------------------------------\n")
-	(princ "\n")
-	(error "")))))
+        ;; for NTEmacs
+        (princ "\n")
+        (princ "-------------------------------------------------------------\n")
+        (princ "For NTEmacs user\n")
+        (princ "To complete this installation, please read mw32cmp.el header.\n")
+        (princ "-------------------------------------------------------------\n")
+        (princ "\n")
+        (error "")))))
 
 (defun fsvn-make-compile ()
   (mapc
@@ -131,15 +131,15 @@
        (princ (format "%s -> %s\n" el dest-el))
        (princ (format "%s -> %s\n" elc dest-elc))
        (unless just-print
-	 (mapc
-	  (lambda (src-dest)
-	    (let ((src (car src-dest))
-		  (dest (cdr src-dest)))
-	      (unless (file-exists-p src)
-		(error "%s not exists." src))
-	      (copy-file src dest t)
-	      (set-file-modes dest ?\644)))
-	  (list (cons el dest-el) (cons elc dest-elc)))))
+         (mapc
+          (lambda (src-dest)
+            (let ((src (car src-dest))
+                  (dest (cdr src-dest)))
+              (unless (file-exists-p src)
+                (error "%s not exists." src))
+              (copy-file src dest t)
+              (set-file-modes dest ?\644)))
+          (list (cons el dest-el) (cons elc dest-elc)))))
      ALL-MODULES)))
 
 (defun fsvn-make-test ()
@@ -164,11 +164,11 @@
       (single-file-parse-required)
       (goto-char (point-min))
       (unless (re-search-forward "(provide 'fsvn)" nil t)
-	(error "Unable find provide"))
+        (error "Unable find provide"))
       (forward-line -1)
       (mapc
        (lambda (m)
-      	 (single-file-file m (current-buffer)))
+         (single-file-file m (current-buffer)))
        ALL-MODULES)
       (single-file-remove-duplicated-top-form)
       (single-file-remove-blank-page)
@@ -185,38 +185,38 @@
   (save-excursion
     (goto-char (point-min))
     (let ((prev (point-min))
-	  forms form)
+          forms form)
       (while (setq form
-		   (condition-case err
-		       (read (current-buffer))
-		     (end-of-file nil)))
-	(if (member form forms)
-	    (delete-region prev (point))
-	  (setq forms (cons form forms)))
-	(setq prev (save-excursion (forward-line 1) (point)))))))
+                   (condition-case err
+                       (read (current-buffer))
+                     (end-of-file nil)))
+        (if (member form forms)
+            (delete-region prev (point))
+          (setq forms (cons form forms)))
+        (setq prev (save-excursion (forward-line 1) (point)))))))
 
 (defun single-file-remove-blank-lines ()
   (save-excursion
     (goto-char (point-min))
     (let ((count 0))
       (while (not (eobp))
-	(cond
-	 ((not (looking-at "\n"))
-	  (setq count 0))
-	 ((= count 1)
-	  (delete-region (point) (save-excursion (forward-line 1) (point)))
-	  (forward-line -1))
-	 (t
-	  (setq count (1+ count))))
-	(forward-line 1)))))
+        (cond
+         ((not (looking-at "\n"))
+          (setq count 0))
+         ((= count 1)
+          (delete-region (point) (save-excursion (forward-line 1) (point)))
+          (forward-line -1))
+         (t
+          (setq count (1+ count))))
+        (forward-line 1)))))
 
 (defun single-file-parse-required ()
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward "^[ \t]*(require '\\(fsvn-[^)]+\\))" nil t)
       (let ((module (match-string 1)))
-	(replace-match "")
-	(single-file-file (concat module ".el") (current-buffer))))))
+        (replace-match "")
+        (single-file-file (concat module ".el") (current-buffer))))))
 
 (defun single-file-remove-provide ()
   (save-excursion

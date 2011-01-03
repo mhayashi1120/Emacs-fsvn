@@ -50,28 +50,28 @@
   "Cleanup cached log messages."
   (interactive)
   (let ((topdir (fsvn-logmessage-directory))
-	time file
-	(deleted 0)
-	(renamed 0))
+        time file
+        (deleted 0)
+        (renamed 0))
     (mapc
      (lambda (d)
        (when (file-directory-p d)
-	 (let (messages msg)
-	   (mapc
-	    (lambda (f)
-	      (setq msg (fsvn-get-file-contents f))
-	      (cond
-	       ((fsvn-string-assoc msg messages nil)
-		(delete-file f)
-		(setq deleted (1+ deleted)))
-	       (t
-		(setq messages (cons msg messages))
-		(setq time (format-time-string "%s" (nth 5 (file-attributes f))))
-		(unless (string-match (concat "^" time) (fsvn-file-name-nondirectory f))
-		  (while (file-exists-p (setq file (make-temp-name (fsvn-expand-file time d)))))
-		  (rename-file f file)
-		  (setq renamed (1+ renamed))))))
-	    (directory-files d t dired-re-no-dot)))))
+         (let (messages msg)
+           (mapc
+            (lambda (f)
+              (setq msg (fsvn-get-file-contents f))
+              (cond
+               ((fsvn-string-assoc msg messages nil)
+                (delete-file f)
+                (setq deleted (1+ deleted)))
+               (t
+                (setq messages (cons msg messages))
+                (setq time (format-time-string "%s" (nth 5 (file-attributes f))))
+                (unless (string-match (concat "^" time) (fsvn-file-name-nondirectory f))
+                  (while (file-exists-p (setq file (make-temp-name (fsvn-expand-file time d)))))
+                  (rename-file f file)
+                  (setq renamed (1+ renamed))))))
+            (directory-files d t dired-re-no-dot)))))
      (directory-files topdir t dired-re-no-dot))
     (message "%d renamed %d deleted." renamed deleted)))
 
@@ -90,11 +90,11 @@
       (setq count (+ count (fsvn-cleanup-result-buffer)))
       (cond
        ((= count 0)
-	(message "No buffer was killed."))
+        (message "No buffer was killed."))
        ((= count 1)
-	(message "killed a buffer."))
+        (message "killed a buffer."))
        (t
-	(message "killed %d buffers." count))))))
+        (message "killed %d buffers." count))))))
 
 (defun fsvn-forward-popup-result-buffer ()
   (interactive)
@@ -106,48 +106,48 @@
 
 (defun fsvn-cycle-popup-result-buffer (&optional backward)
   (let ((buffers (fsvn-popup-result-buffer-list))
-	comparator)
+        comparator)
     (if (null buffers)
-	(message "No popup buffer.")
+        (message "No popup buffer.")
       (if backward
-	  ;; FIXME howto clean?
-	  (setq comparator (lambda (x y) (not (string-lessp (buffer-name x) (buffer-name y)))))
-	(setq comparator (lambda (x y) (string-lessp (buffer-name x) (buffer-name y)))))
+          ;; FIXME howto clean?
+          (setq comparator (lambda (x y) (not (string-lessp (buffer-name x) (buffer-name y)))))
+        (setq comparator (lambda (x y) (string-lessp (buffer-name x) (buffer-name y)))))
       (setq buffers (sort buffers comparator))
       (let (exists next window)
-	(cond
-	 ((= (length (window-list)) 1)
-	  (setq next (car buffers)))
-	 ((setq exists (catch 'found
-			 (mapc
-			  (lambda (b)
-			    (when (memq b (mapcar 'window-buffer (window-list)))
-			      (throw 'found b)))
-			  buffers)
-			 nil))
-	  (unless (setq next (cadr (memq exists buffers)))
-	    (setq next (car buffers))))
-	 (t
-	  (setq next (car buffers))))
-	(cond
-	 ((= (length (window-list)) 1)
-	  (split-window)
-	  (setq window (cadr (window-list))))
-	 (exists
-	  (setq window (get-buffer-window exists)))
-	 (t
-	  (setq window (cadr (window-list)))))
-	(set-window-buffer window next)))))
+        (cond
+         ((= (length (window-list)) 1)
+          (setq next (car buffers)))
+         ((setq exists (catch 'found
+                         (mapc
+                          (lambda (b)
+                            (when (memq b (mapcar 'window-buffer (window-list)))
+                              (throw 'found b)))
+                          buffers)
+                         nil))
+          (unless (setq next (cadr (memq exists buffers)))
+            (setq next (car buffers))))
+         (t
+          (setq next (car buffers))))
+        (cond
+         ((= (length (window-list)) 1)
+          (split-window)
+          (setq window (cadr (window-list))))
+         (exists
+          (setq window (get-buffer-window exists)))
+         (t
+          (setq window (cadr (window-list)))))
+        (set-window-buffer window next)))))
 
 (defun fsvn-browse-wc-noselect (directory)
   (save-excursion
     (let ((dir (directory-file-name (fsvn-expand-file directory))))
       (when (fsvn-directory-versioned-p dir)
-	(fsvn-browse-draw-local-directory dir)
-	(set-visited-file-modtime (current-time))
-	(setq buffer-read-only t)
-	(run-mode-hooks 'fsvn-browse-mode-hook)
-	(current-buffer)))))
+        (fsvn-browse-draw-local-directory dir)
+        (set-visited-file-modtime (current-time))
+        (setq buffer-read-only t)
+        (run-mode-hooks 'fsvn-browse-mode-hook)
+        (current-buffer)))))
 
 (defun fsvn-save-file (urlrev file &optional no-msg revision)
   "Save URLREV as FILE.
@@ -155,18 +155,18 @@ Optional argument NO-MSG suppress message.
 Optional argument REVISION means point of URLREV log chain."
   (with-temp-buffer
     (if (= (fsvn-call-command "export" (current-buffer)
-			      "--quiet"
-			      urlrev (when revision (list "--revision" revision))
-			      file) 0)
-	(progn
-	  (unless no-msg
-	    (message "Save done."))
-	  ;; return
-	  t)
+                              "--quiet"
+                              urlrev (when revision (list "--revision" revision))
+                              file) 0)
+        (progn
+          (unless no-msg
+            (message "Save done."))
+          ;; return
+          t)
       (when (file-exists-p file)
-	(delete-file file))
+        (delete-file file))
       (unless no-msg
-	(message "Save failed."))
+        (message "Save failed."))
       ;; return
       nil)))
 
@@ -174,11 +174,11 @@ Optional argument REVISION means point of URLREV log chain."
   "Save URLREV as FILE in background.
 Optional argument REVISION means point of URLREV log chain."
   (let* ((buffer (fsvn-make-temp-buffer))
-	 proc)
+         proc)
     (setq proc (fsvn-start-command "export" buffer
-				   "--quiet"
-				   urlrev (when revision (list "--revision" revision))
-				   file))
+                                   "--quiet"
+                                   urlrev (when revision (list "--revision" revision))
+                                   file))
     (process-put proc 'fsvn-save-file-name file)
     (set-process-sentinel proc 'fsvn-save-file-sentinel)
     proc))
@@ -187,11 +187,11 @@ Optional argument REVISION means point of URLREV log chain."
   (fsvn-process-exit-handler proc event
     (let ((file (process-get proc 'fsvn-save-file-name)))
       (if (and (= (process-exit-status proc) 0)
-	       (fsvn-save-file-validate-buffer))
-	  (message "Save done. \"%s\"" file)
-	(when (file-exists-p file)
-	  (delete-file file))
-	(message "Save failed. \"%s\"" file))
+               (fsvn-save-file-validate-buffer))
+          (message "Save done. \"%s\"" file)
+        (when (file-exists-p file)
+          (delete-file file))
+        (message "Save failed. \"%s\"" file))
       (kill-buffer (current-buffer)))))
 
 (defun fsvn-save-file-validate-buffer ()
@@ -217,15 +217,15 @@ Optional argument REVISION means point of URLREV log chain."
       ;;TODO FIXME not works prompt on windows binary.
       (funcall 'fsvn-win-authenticate-repository repository)
     (let ((buffer (fsvn-make-temp-buffer))
-	  (coding-system-for-write 'unix)
-	  proc)
+          (coding-system-for-write 'unix)
+          proc)
       (setq fsvn-authenticate-password-prompt-shown nil)
       (setq proc (fsvn-start-command "info" buffer repository))
       (set-process-sentinel proc 'fsvn-authenticate-sentinel)
       (set-process-filter proc 'fsvn-authenticate-filter)
       (while (eq (process-status proc) 'run)
-	(discard-input)
-	(sit-for 0.5))
+        (discard-input)
+        (sit-for 0.5))
       proc)))
 
 (defun fsvn-authenticate-filter (proc event)
@@ -234,7 +234,7 @@ Optional argument REVISION means point of URLREV log chain."
     (insert event)
     (let ((prompt (fsvn-parse-result-if-auth-prompt proc)))
       (when prompt
-	(setq fsvn-authenticate-password-prompt-shown t)))))
+        (setq fsvn-authenticate-password-prompt-shown t)))))
 
 (defun fsvn-authenticate-sentinel (proc event)
   (fsvn-process-exit-handler proc event
@@ -257,15 +257,15 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive (fsvn-cmd-read-checkout-args))
   (let ((dir (fsvn-expand-file default-directory)))
     (when (or (= (length (fsvn-directory-files dir)) 0)
-	      (y-or-n-p "This directory is not empty.  Really checkout? "))
+              (y-or-n-p "This directory is not empty.  Really checkout? "))
       (fsvn-popup-start-process "checkout" args url dir))))
 
 (defun fsvn-start (repository &optional rev)
   (interactive (let ((url (fsvn-completing-read-url))
-		     rev)
-		 (when current-prefix-arg
-		   (setq rev (fsvn-completing-read-revision nil nil nil url)))
-		 (list url rev)))
+                     rev)
+                 (when current-prefix-arg
+                   (setq rev (fsvn-completing-read-revision nil nil nil url)))
+                 (list url rev)))
   (fsvn-browse-switch-directory-buffer (fsvn-url-urlrev repository rev)))
 
 (defun fsvn-import (file url &optional args)
@@ -274,9 +274,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-cmd-read-import-args))
   (let ((root (fsvn-get-root-upward url))
-	(browse-buffer (current-buffer))
-	(win-configure (current-window-configuration))
-	(msgedit-buffer (fsvn-message-edit-generate-buffer)))
+        (browse-buffer (current-buffer))
+        (win-configure (current-window-configuration))
+        (msgedit-buffer (fsvn-message-edit-generate-buffer)))
     (unless root
       (error "Unable to get root repository"))
     (with-current-buffer msgedit-buffer
@@ -301,15 +301,15 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 \(fn ARG)"
   (interactive "P")
   (setq fsvn-debug-enabled
-	(fsvn-toggle-command-boolean arg fsvn-debug-enabled))
+        (fsvn-toggle-command-boolean arg fsvn-debug-enabled))
   (unless no-msg
     (message "fsvn debug %s." (if fsvn-debug-enabled "enabled" "disabled"))))
 
 (defun fsvn-command (subcommand args)
   "Execute `svn SUBCOMMAND ARGS'"
   (interactive (let* ((subcommand (fsvn-read-svn-subcommand))
-		      (args (fsvn-read-svn-subcommand-args subcommand)))
-		 (list subcommand args)))
+                      (args (fsvn-read-svn-subcommand-args subcommand)))
+                 (list subcommand args)))
   (fsvn-popup-start-process subcommand args))
 
 (defun fsvn-toggle-feature (&optional arg no-msg)
@@ -318,25 +318,25 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 \(fn ARG)"
   (interactive "P")
   (let* ((featured (memq 'fsvn-browse-wc-noselect find-directory-functions))
-	 (feature (fsvn-toggle-command-boolean arg featured))
-	 file-handler auto-mode ignore-buffers)
+         (feature (fsvn-toggle-command-boolean arg featured))
+         file-handler auto-mode ignore-buffers)
     (mapc
      (lambda (x)
        (let (enabler activator)
-	 (if feature
-	     (setq enabler 'ad-enable-advice
-		   activator 'ad-activate)
-	   (setq enabler 'ad-disable-advice
-		 activator 'ad-deactivate))
-	 (funcall enabler (nth 0 x) (nth 1 x) (nth 2 x))
-	 (funcall activator (nth 0 x))))
+         (if feature
+             (setq enabler 'ad-enable-advice
+                   activator 'ad-activate)
+           (setq enabler 'ad-disable-advice
+                 activator 'ad-deactivate))
+         (funcall enabler (nth 0 x) (nth 1 x) (nth 2 x))
+         (funcall activator (nth 0 x))))
      fsvn-advised-alist)
     (setq file-handler (assoc fsvn-magic-file-name-regexp file-name-handler-alist))
     (setq auto-mode (list (concat "@\\(?:" fsvn-revision-regexp "\\)$") 'ignore t))
     (setq ignore-buffers
-	  (list
-	   (concat "^" (regexp-quote fsvn-log-sibling-buffer-name) "$")
-	   (concat "^" (regexp-quote fsvn-log-message-buffer-name) "$")))
+          (list
+           (concat "^" (regexp-quote fsvn-log-sibling-buffer-name) "$")
+           (concat "^" (regexp-quote fsvn-log-message-buffer-name) "$")))
     (unless (boundp 'iswitchb-buffer-ignore)
       (setq iswitchb-buffer-ignore nil))
     (cond
@@ -349,13 +349,13 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (add-to-list 'find-directory-functions 'fsvn-browse-wc-noselect)
       ;; for magic utility
       (unless file-handler
-	(setq file-handler (cons fsvn-magic-file-name-regexp 'fsvn-magic-file-name-handler))
-	(add-to-list 'file-name-handler-alist file-handler))
+        (setq file-handler (cons fsvn-magic-file-name-regexp 'fsvn-magic-file-name-handler))
+        (add-to-list 'file-name-handler-alist file-handler))
       (add-hook 'pre-command-hook 'fsvn-magic-clear-cache-if-toplevel)
       ;; iswitchb ignore buffers
       (mapc
        (lambda (regexp)
-	 (add-to-list 'iswitchb-buffer-ignore regexp))
+         (add-to-list 'iswitchb-buffer-ignore regexp))
        ignore-buffers))
      (t
       (setq auto-mode-alist (delete auto-mode auto-mode-alist))
@@ -365,7 +365,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (remove-hook 'pre-command-hook 'fsvn-magic-clear-cache-if-toplevel)
       (mapc
        (lambda (regexp)
-	 (setq iswitchb-buffer-ignore (delete regexp iswitchb-buffer-ignore)))
+         (setq iswitchb-buffer-ignore (delete regexp iswitchb-buffer-ignore)))
        ignore-buffers)))
     (unless no-msg
       (message "Now fsvn feature `%s'" (if feature "ON" "OFF")))))
@@ -376,7 +376,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (let* ((patch (fsvn-read-file-name "Patch file: ")))
     (when (file-exists-p patch)
       (unless (y-or-n-p "File exists. Overwrite? ")
-	(signal 'quit nil)))
+        (signal 'quit nil)))
     (list (fsvn-expand-file patch))))
 
 (defun fsvn-cmd-read-checkout-args ()
@@ -409,24 +409,58 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (error "Buffer file is not under versioned"))
   (fsvn-open-logview-mode buffer-file-name nil))
 
-(defun fsvn-vc-commit (&optional arg)
-  "Prepare `commit' buffer for buffer file."
+(defun fsvn-vc-commit (&optional args)
+  "Prepare `commit' buffer for buffer file.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
-  (unless buffer-file-name
-    (error "Buffer is not associated with a file"))
-  (when (and (buffer-modified-p)
-	     (y-or-n-p "Buffer modified. Save? "))
-    (save-buffer nil))
+  (fsvn-vc-check-before-commit)
   (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory)))
     (unless fsvn-buffer-repos-root
       (error "Buffer file is not under versioned"))
-    (fsvn-browse-commit-mode (list buffer-file-name) arg)))
+    (fsvn-browse-commit-mode (list buffer-file-name) args)))
+
+(defcustom fsvn-vc-commit-non-query-message "*** empty log message ***"
+  "*Commit message when \\[fsvn-vc-commit-non-query]
+Default value is same as vc.el"
+  :group 'fsvn
+  :type  'string
+  )
+
+(defun fsvn-vc-commit-non-query (&optional args)
+  "Execute `commit' for editing file.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
+  (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
+  (fsvn-vc-check-before-commit)
+  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory))
+        (file buffer-file-name))
+    (unless (and fsvn-buffer-repos-root
+                 (not (fsvn-file-unversioned-p file)))
+      (error "Buffer file is not under versioned"))
+    (unless (member "--message" args)
+      (setq args (append args (list "--message" (or fsvn-vc-commit-non-query-message "")))))
+    (with-temp-buffer
+      (unless (= (fsvn-call-command "commit" (current-buffer) file args) 0)
+        (error "Commit failed %s" (buffer-string))))
+    (fsvn-ui-fancy-redraw)
+    (fsvn-save-browse-file-excursion file
+      (fsvn-browse-draw-file-status file))
+    (message "Successfuly finished.")))
+
+(defun fsvn-vc-check-before-commit ()
+  (unless buffer-file-name
+    (error "Buffer is not associated with a file"))
+  (when (and (buffer-modified-p)
+             (y-or-n-p "Buffer modified. Save? "))
+    (save-buffer nil)))
 
 
 
 (defvar fsvn-initialize-function nil)
 
 (defun fsvn-initialize-loading ()
+  (interactive)
   (fsvn-set-command-information)
   (unless (file-directory-p fsvn-home-directory)
     (make-directory fsvn-home-directory t))
@@ -434,7 +468,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
    (lambda (dir)
      (let ((dirname (fsvn-expand-file dir fsvn-home-directory)))
        (unless (file-directory-p dirname)
-	 (make-directory dirname))))
+         (make-directory dirname))))
    fsvn-temp-directory-dirs)
   (fsvn-cleanup-temp-directory)
   (fsvn-build-subcommand)
@@ -459,22 +493,22 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-after-save-hook ()
   (condition-case err
       (when (buffer-file-name)
-	(let* ((file (buffer-file-name))
-	       (base (fsvn-meta-text-base-file file))
-	       size1 size2)
-	  (fsvn-save-browse-file-excursion file
-	    (if (or (null base)
-		    (string= 
-		     (downcase (or (fsvn-meta-get-property "svn:eol-style" file) ""))
-		     "native"))
-		(fsvn-browse-draw-file-status file)
-	      (setq size1 (fsvn-file-size file)
-		    size2 (fsvn-file-size base))
-	      (if (and size1 size2 (/= size1 size2))
-		  ;; changed file size means certainly modified.
-		  (fsvn-browse-put-status-if-weak-internal file ?M 0)
-		;; delegate to `status' subcommand.
-		(fsvn-browse-draw-file-status file))))))
+        (let* ((file (buffer-file-name))
+               (base (fsvn-meta-text-base-file file))
+               size1 size2)
+          (fsvn-save-browse-file-excursion file
+            (if (or (null base)
+                    (string= 
+                     (downcase (or (fsvn-meta-get-property "svn:eol-style" file) ""))
+                     "native"))
+                (fsvn-browse-draw-file-status file)
+              (setq size1 (fsvn-file-size file)
+                    size2 (fsvn-file-size base))
+              (if (and size1 size2 (/= size1 size2))
+                  ;; changed file size means certainly modified.
+                  (fsvn-browse-put-status-if-weak-internal file ?M 0)
+                ;; delegate to `status' subcommand.
+                (fsvn-browse-draw-file-status file))))))
     (error nil)))
 
 (defun fsvn-get-exists-browse-buffer (urlrev)
@@ -483,19 +517,19 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      ((fsvn-url-repository-p urlrev)
       (fsvn-each-browse-buffer
        (let ((url (fsvn-urlrev-url urlrev)))
-	 (when (string-match (concat "^" (regexp-quote fsvn-buffer-repos-root) "\\(.*\\)") url)
-	   (let ((regexp (format fsvn-browse-re-format-subdir (match-string 1 url))))
-	     (save-excursion
-	       (goto-char (point-min))
-	       (when (re-search-forward regexp nil t)
-		 (throw 'found (current-buffer)))))))))
+         (when (string-match (concat "^" (regexp-quote fsvn-buffer-repos-root) "\\(.*\\)") url)
+           (let ((regexp (format fsvn-browse-re-format-subdir (match-string 1 url))))
+             (save-excursion
+               (goto-char (point-min))
+               (when (re-search-forward regexp nil t)
+                 (throw 'found (current-buffer)))))))))
      (t
       (let ((regexp (format fsvn-browse-re-format-subdir (regexp-quote urlrev))))
-	(fsvn-each-browse-buffer
-	 (save-excursion
-	   (goto-char (point-min))
-	   (when (re-search-forward regexp nil t)
-	     (throw 'found (current-buffer))))))))
+        (fsvn-each-browse-buffer
+         (save-excursion
+           (goto-char (point-min))
+           (when (re-search-forward regexp nil t)
+             (throw 'found (current-buffer))))))))
     nil))
 
 (defun fsvn-local-directory-buffer (directory)
@@ -503,10 +537,10 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (catch 'found
       (fsvn-each-browse-buffer
        (mapc
-	(lambda (subdir)
-	  (when (string= (car subdir) dir)
-	    (throw 'found (current-buffer))))
-	fsvn-browse-subdir-alist))
+        (lambda (subdir)
+          (when (string= (car subdir) dir)
+            (throw 'found (current-buffer))))
+        fsvn-browse-subdir-alist))
       nil)))
 
 (defun fsvn-find-buffer-by-variable (var value)
@@ -514,9 +548,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (catch 'found
       (mapc
        (lambda (b)
-	 (set-buffer b)
-	 (when (equal (eval var) value)
-	   (throw 'found b)))
+         (set-buffer b)
+         (when (equal (eval var) value)
+           (throw 'found b)))
        (buffer-list))
       nil)))
 
@@ -526,10 +560,10 @@ Argument REV-RANGE revision range cons cell `(start . end)'
 Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings.
 "
   (let ((root (or (and fsvn-buffer-repos-root
-		       (fsvn-url-contains-p fsvn-buffer-repos-root urlrev)
-		       fsvn-buffer-repos-root)
-		  (fsvn-get-root urlrev)))
-	entries buffer win-config prev-entries)
+                       (fsvn-url-contains-p fsvn-buffer-repos-root urlrev)
+                       fsvn-buffer-repos-root)
+                  (fsvn-get-root urlrev)))
+        entries buffer win-config prev-entries)
     (setq buffer (fsvn-log-list-get-buffer urlrev))
     (cond
      ((eq buffer (current-buffer))
@@ -539,36 +573,36 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
       (setq win-config (current-window-configuration))))
     (setq entries (fsvn-log-list-cmd urlrev root rev-range count))
     (if (null entries)
-	(if prev-entries
-	    (message "No more log entry.")
-	  (message "No log entry."))
+        (if prev-entries
+            (message "No more log entry.")
+          (message "No log entry."))
       (set-buffer buffer)
       (let ((first (car (last entries)))
-	    (last (car entries))
-	    buffer-read-only)
-	(when (> (fsvn-xml-log->logentry.revision first)
-		 (fsvn-xml-log->logentry.revision last))
-	  (setq entries (nreverse entries))
-	  (setq first (car (last entries))
-		last (car entries)))
-	(fsvn-log-list-mode)
-	(setq fsvn-logview-target-directory-p directory-p)
-	(setq fsvn-logview-target-urlrev urlrev)
-	(setq fsvn-buffer-repos-root root)
-	(setq fsvn-previous-window-configuration win-config)
-	(setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))
-	(setq fsvn-log-list-target-path
-	      (if (fsvn-url-local-p urlrev)
-		  (fsvn-wc-file-repository-path urlrev)
-		(fsvn-repository-path root urlrev)))
-	(setq fsvn-log-list-entries entries)
-	(erase-buffer)
-	(fsvn-log-list-insert-header-entry urlrev first last)
-	(mapc
-	 (lambda (entry)
-	   (fsvn-log-list-insert-entry entry))
-	 entries)
-	(fsvn-log-list-goto-first-revision))
+            (last (car entries))
+            buffer-read-only)
+        (when (> (fsvn-xml-log->logentry.revision first)
+                 (fsvn-xml-log->logentry.revision last))
+          (setq entries (nreverse entries))
+          (setq first (car (last entries))
+                last (car entries)))
+        (fsvn-log-list-mode)
+        (setq fsvn-logview-target-directory-p directory-p)
+        (setq fsvn-logview-target-urlrev urlrev)
+        (setq fsvn-buffer-repos-root root)
+        (setq fsvn-previous-window-configuration win-config)
+        (setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))
+        (setq fsvn-log-list-target-path
+              (if (fsvn-url-local-p urlrev)
+                  (fsvn-wc-file-repository-path urlrev)
+                (fsvn-repository-path root urlrev)))
+        (setq fsvn-log-list-entries entries)
+        (erase-buffer)
+        (fsvn-log-list-insert-header-entry urlrev first last)
+        (mapc
+         (lambda (entry)
+           (fsvn-log-list-insert-entry entry))
+         entries)
+        (fsvn-log-list-goto-first-revision))
       (setq buffer-read-only t)
       (set-buffer-modified-p nil)
       (switch-to-buffer buffer)
@@ -604,11 +638,11 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
   (let (proc buffer)
     (setq proc (fsvn-recursive-status-running-process directory))
     (if proc
-	(when (eq major-mode 'fsvn-browse-mode)
-	  (setq fsvn-browse-buffer-directories-status-process proc))
+        (when (eq major-mode 'fsvn-browse-mode)
+          (setq fsvn-browse-buffer-directories-status-process proc))
       (setq buffer (fsvn-make-temp-buffer))
       (with-current-buffer buffer
-	(make-local-variable 'fsvn-recursive-status-parsed))
+        (make-local-variable 'fsvn-recursive-status-parsed))
       (setq proc (fsvn-start-command "status" buffer directory))
       (set-process-sentinel proc 'fsvn-recursive-status-sentinel)
       (set-process-filter proc 'fsvn-recursive-status-filter)

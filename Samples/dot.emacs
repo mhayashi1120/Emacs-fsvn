@@ -32,6 +32,9 @@
 ;; Commit current buffer.
 (global-set-key "\C-xvV" 'fsvn-vc-commit)
 
+;; Commit current buffer with no query.
+(global-set-key "\C-xvN" 'fsvn-vc-commit-non-query)
+
 ;; Show log current buffer file.
 (global-set-key "\C-xvL" 'fsvn-vc-print-log)
 

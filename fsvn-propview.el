@@ -53,38 +53,38 @@
       (list
        (list fsvn-proplist-re-header '(1 fsvn-header-key-face) '(2 fsvn-header-face))
        (list (concat "^[" (char-to-string fsvn-mark-delete-char) "]")
-	     '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-flagged-face)))
+             '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-flagged-face)))
        (list "^.."
-	     '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-keyname-face)))
+             '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-keyname-face)))
        ))
 
 (defvar fsvn-proplist-mode-map nil)
 (unless fsvn-proplist-mode-map
   (setq fsvn-proplist-mode-map
-	(let ((map (make-sparse-keymap)))
-	  (suppress-keymap map)
+        (let ((map (make-sparse-keymap)))
+          (suppress-keymap map)
 
-	  (fsvn-readonly-mode-keymap map)
+          (fsvn-readonly-mode-keymap map)
 
-	  (define-key map "\C-c\C-c" 'fsvn-proplist-do-marked-execute)
-	  (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
-	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	  (define-key map "\C-c\C-o" 'fsvn-proplist-propedit-window)
-	  (define-key map "\C-m" 'fsvn-proplist-show-value)
-	  (define-key map "\C-n" 'fsvn-proplist-next-line)
-	  (define-key map "\C-p" 'fsvn-proplist-previous-line)
-	  (define-key map "a" 'fsvn-proplist-add-property)
-	  (define-key map "d" 'fsvn-proplist-mark-delete)
-	  (define-key map "e" 'fsvn-proplist-edit-property)
-	  (define-key map "g" 'revert-buffer)
-	  (define-key map "n" 'fsvn-proplist-next-line)
-	  (define-key map "p" 'fsvn-proplist-previous-line)
-	  (define-key map "q" 'fsvn-restore-previous-window-setting)
-	  (define-key map "r" 'fsvn-proplist-mark-recursive)
-	  (define-key map "u" 'fsvn-proplist-mark-unmark)
-	  (define-key map "x" 'fsvn-proplist-do-marked-execute)
+          (define-key map "\C-c\C-c" 'fsvn-proplist-do-marked-execute)
+          (define-key map "\C-c\C-k" 'fsvn-restore-previous-window-setting)
+          (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+          (define-key map "\C-c\C-o" 'fsvn-proplist-propedit-window)
+          (define-key map "\C-m" 'fsvn-proplist-show-value)
+          (define-key map "\C-n" 'fsvn-proplist-next-line)
+          (define-key map "\C-p" 'fsvn-proplist-previous-line)
+          (define-key map "a" 'fsvn-proplist-add-property)
+          (define-key map "d" 'fsvn-proplist-mark-delete)
+          (define-key map "e" 'fsvn-proplist-edit-property)
+          (define-key map "g" 'revert-buffer)
+          (define-key map "n" 'fsvn-proplist-next-line)
+          (define-key map "p" 'fsvn-proplist-previous-line)
+          (define-key map "q" 'fsvn-restore-previous-window-setting)
+          (define-key map "r" 'fsvn-proplist-mark-recursive)
+          (define-key map "u" 'fsvn-proplist-mark-unmark)
+          (define-key map "x" 'fsvn-proplist-do-marked-execute)
 
-	  map)))
+          map)))
 
 (defcustom fsvn-proplist-mode-hook nil
   "*Run at the very end of `fsvn-proplist-mode'."
@@ -145,23 +145,23 @@ Keybindings:
 
 (defun fsvn-proplist-goto-propname (propname)
   (let ((saved (point))
-	name)
+        name)
     (if (catch 'found
-	  (when (fsvn-proplist-goto-first-property)
-	    (while (and (not (eobp))
-			(setq name (fsvn-proplist-current-propname)))
-	      (when (string= name propname)
-		(fsvn-proplist-move-to-propname)
-		(throw 'found t))
-	      (forward-line 1))))
-	(point)
+          (when (fsvn-proplist-goto-first-property)
+            (while (and (not (eobp))
+                        (setq name (fsvn-proplist-current-propname)))
+              (when (string= name propname)
+                (fsvn-proplist-move-to-propname)
+                (throw 'found t))
+              (forward-line 1))))
+        (point)
       (goto-char saved)
       nil)))
 
 (defun fsvn-proplist-setup-window ()
   (let ((list-buffer (fsvn-proplist-get-buffer))
-	(value-buffer (fsvn-propedit-get-buffer))
-	first-win second-win)
+        (value-buffer (fsvn-propedit-get-buffer))
+        first-win second-win)
     (delete-other-windows)
     (setq first-win (get-buffer-window (current-buffer)))
     (set-window-buffer first-win list-buffer)
@@ -174,7 +174,7 @@ Keybindings:
     (let ((change (next-single-property-change (point) 'fsvn-propname nil eol)))
       (cond
        ((and change (< change eol))
-	(goto-char change))))))
+        (goto-char change))))))
 
 (defun fsvn-proplist-get-proplist (urlrev)
   (cond
@@ -196,7 +196,7 @@ Keybindings:
     (mapc
      (lambda (prop)
        (when (eq (fsvn-struct-proplist-prop-get-mark prop) mark)
-	 (setq ret (cons prop ret))))
+         (setq ret (cons prop ret))))
      (fsvn-proplist-gather-properties))
     (nreverse ret)))
 
@@ -206,15 +206,15 @@ Keybindings:
       (fsvn-proplist-goto-first-property)
       (forward-line 0)
       (while (not (eobp))
-	(when (looking-at "^\\(.\\)\\(.\\) ")
-	  (setq col1 (match-string 1))
-	  (setq col2 (match-string 2))
-	  (setq struct (fsvn-struct-proplist-prop-make
-			:name (fsvn-proplist-current-propname)
-			:mark (string-to-char col1)
-			:recursive-p (eq (string-to-char col2) fsvn-proplist-recursive-mark-char)))
-	  (setq ret (cons struct ret)))
-	(forward-line 1))
+        (when (looking-at "^\\(.\\)\\(.\\) ")
+          (setq col1 (match-string 1))
+          (setq col2 (match-string 2))
+          (setq struct (fsvn-struct-proplist-prop-make
+                        :name (fsvn-proplist-current-propname)
+                        :mark (string-to-char col1)
+                        :recursive-p (eq (string-to-char col2) fsvn-proplist-recursive-mark-char)))
+          (setq ret (cons struct ret)))
+        (forward-line 1))
       (nreverse ret))))
 
 (defun fsvn-proplist-gather-propnames ()
@@ -242,13 +242,13 @@ Keybindings:
     (while (not (eobp))
       (forward-line 1)
       (when (fsvn-proplist-move-to-propname)
-	(throw 'found t)))
+        (throw 'found t)))
     nil))
 
 (defun fsvn-proplist-check-propedit-status ()
   (when (fsvn-propedit-buffer-modified-p)
     (if (y-or-n-p "Propedit buffer is changed.  Discard it? ")
-	(fsvn-propedit-buffer-discard-changes)
+        (fsvn-propedit-buffer-discard-changes)
       (error "Discard postponed"))))
 
 (defun fsvn-proplist-current-propname ()
@@ -260,11 +260,11 @@ Keybindings:
   (save-excursion
     (when (fsvn-proplist-move-to-propname)
       (let (buffer-read-only)
-	(forward-line 0)
-	(forward-char col)
-	(delete-char 1)
-	(insert (or mark fsvn-space-char))
-	(set-buffer-modified-p nil)))))
+        (forward-line 0)
+        (forward-char col)
+        (delete-char 1)
+        (insert (or mark fsvn-space-char))
+        (set-buffer-modified-p nil)))))
 
 (defun fsvn-proplist-subwindow-display-p ()
   (let ((buffers (mapcar 'window-buffer (window-list))))
@@ -272,23 +272,23 @@ Keybindings:
 
 (defun fsvn-proplist-revert-buffer (ignore-auto noconfirm)
   (let ((propname (fsvn-proplist-current-propname))
-	(opoint (point)))
+        (opoint (point)))
     (fsvn-proplist-draw-list fsvn-propview-target-urlrev)
     (or (and propname
-	     (fsvn-proplist-goto-propname propname))
-	(goto-char opoint))
+             (fsvn-proplist-goto-propname propname))
+        (goto-char opoint))
     (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
     (run-mode-hooks 'fsvn-proplist-mode-hook)))
 
 (defun fsvn-proplist-draw-value (propname)
   (let ((file fsvn-propview-target-urlrev)
-	(prev-config fsvn-previous-window-configuration)
-	(buffer (fsvn-propedit-get-buffer))
-	(dirp fsvn-propview-target-directory-p)
-	(win-config fsvn-default-window-configuration)
-	(root fsvn-buffer-repos-root)
-	(working-dir default-directory)
-	value)
+        (prev-config fsvn-previous-window-configuration)
+        (buffer (fsvn-propedit-get-buffer))
+        (dirp fsvn-propview-target-directory-p)
+        (win-config fsvn-default-window-configuration)
+        (root fsvn-buffer-repos-root)
+        (working-dir default-directory)
+        value)
     (with-current-buffer buffer
       (fsvn-propedit-mode)
       (setq fsvn-previous-window-configuration prev-config)
@@ -300,14 +300,14 @@ Keybindings:
       (setq buffer-read-only t)
       (fsvn-set-default-directory working-dir)
       (let (buffer-read-only)
-	(erase-buffer)
-	(when propname
-	  (setq value (if (fsvn-url-local-p file)
-			  (fsvn-meta-get-property propname file)
-			(fsvn-get-propget file propname)))
-	  (when value
-	    (insert value)))
-	(set-buffer-modified-p nil))
+        (erase-buffer)
+        (when propname
+          (setq value (if (fsvn-url-local-p file)
+                          (fsvn-meta-get-property propname file)
+                        (fsvn-get-propget file propname)))
+          (when value
+            (insert value)))
+        (set-buffer-modified-p nil))
       (run-mode-hooks 'fsvn-propedit-mode-hook))))
 
 (defun fsvn-proplist-command-propname ()
@@ -368,8 +368,8 @@ Keybindings:
   (interactive "P")
   (fsvn-proplist-wc-only
    (let ((propname (fsvn-read-propname fsvn-propview-target-urlrev))
-	 (file fsvn-propview-target-urlrev)
-	 ret)
+         (file fsvn-propview-target-urlrev)
+         ret)
      (when (member propname (fsvn-proplist-get-proplist file))
        (error "Property `%s' is already exists" propname))
      (fsvn-proplist-draw-value propname)
@@ -385,29 +385,29 @@ Keybindings:
   (interactive)
   (fsvn-proplist-wc-only
    (let ((file fsvn-propview-target-urlrev)
-	 (fsvn-call-process-buffer (fsvn-popup-result-create-buffer))
-	 value-file buffer-read-only)
+         (fsvn-call-process-buffer (fsvn-popup-result-create-buffer))
+         value-file buffer-read-only)
      (unwind-protect
-	 (mapc
-	  (lambda (prop)
-	    (let ((propname (fsvn-struct-proplist-prop-get-name prop)))
-	      (cond
-	       ((eq (fsvn-struct-proplist-prop-get-mark prop) fsvn-mark-delete-char)
-		(fsvn-popup-call-process
-		 "propdel" propname
-		 (when (fsvn-struct-proplist-prop-get-recursive-p prop)
-		   "--recursive")
-		 file)
-		(fsvn-proplist-delete-entry propname))
-	       ((fsvn-struct-proplist-prop-get-recursive-p prop)
-		(unless value-file
-		  (setq value-file (fsvn-get-propget-file file propname)))
-		(fsvn-popup-call-process
-		 "propset" propname
-		 "--recursive"
-		 "--file" value-file
-		 file)))))
-	  (fsvn-proplist-gather-properties))
+         (mapc
+          (lambda (prop)
+            (let ((propname (fsvn-struct-proplist-prop-get-name prop)))
+              (cond
+               ((eq (fsvn-struct-proplist-prop-get-mark prop) fsvn-mark-delete-char)
+                (fsvn-popup-call-process
+                 "propdel" propname
+                 (when (fsvn-struct-proplist-prop-get-recursive-p prop)
+                   "--recursive")
+                 file)
+                (fsvn-proplist-delete-entry propname))
+               ((fsvn-struct-proplist-prop-get-recursive-p prop)
+                (unless value-file
+                  (setq value-file (fsvn-get-propget-file file propname)))
+                (fsvn-popup-call-process
+                 "propset" propname
+                 "--recursive"
+                 "--file" value-file
+                 file)))))
+          (fsvn-proplist-gather-properties))
        (set-buffer-modified-p nil)))))
 
 
@@ -428,16 +428,16 @@ Keybindings:
 (defvar fsvn-propedit-mode-map nil)
 (unless fsvn-propedit-mode-map
   (setq fsvn-propedit-mode-map
-	(let ((map (make-sparse-keymap)))
-	  (set-keymap-parent map text-mode-map)
+        (let ((map (make-sparse-keymap)))
+          (set-keymap-parent map text-mode-map)
 
-	  (define-key map "\C-c\C-c" 'fsvn-propedit-save)
-	  (define-key map "\C-c\C-k" 'fsvn-propedit-restore-window)
-	  (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
-	  (define-key map "\C-c\C-o" 'fsvn-propedit-proplist-window)
-	  (define-key map "\C-c\C-r" 'fsvn-propedit-toggle-recursive)
-	  (define-key map "\C-x\C-s" 'fsvn-propedit-save)
-	  map)))
+          (define-key map "\C-c\C-c" 'fsvn-propedit-save)
+          (define-key map "\C-c\C-k" 'fsvn-propedit-restore-window)
+          (define-key map "\C-c\C-l" 'fsvn-restore-default-window-setting)
+          (define-key map "\C-c\C-o" 'fsvn-propedit-proplist-window)
+          (define-key map "\C-c\C-r" 'fsvn-propedit-toggle-recursive)
+          (define-key map "\C-x\C-s" 'fsvn-propedit-save)
+          map)))
 
 (defcustom fsvn-propedit-mode-hook nil
   "*Run at the very end of `fsvn-propedit-mode'."
@@ -471,8 +471,8 @@ Keybindings:
 (defun fsvn-propedit-get-value-file ()
   (with-current-buffer (fsvn-propedit-get-buffer)
     (let* ((propname fsvn-propedit-propname)
-	   (tmpfile (fsvn-make-temp-file))
-	   (coding-system-for-write (fsvn-prop-file-coding-system propname)))
+           (tmpfile (fsvn-make-temp-file))
+           (coding-system-for-write (fsvn-prop-file-coding-system propname)))
       (write-region (point-min) (point-max) tmpfile nil 'no-msg)
       tmpfile)))
 
@@ -495,21 +495,21 @@ Keybindings:
   (unless (buffer-modified-p)
     (error "Value unchanged"))
   (let ((file (fsvn-propedit-get-value-file))
-	(propname fsvn-propedit-propname)
-	(target fsvn-propview-target-urlrev)
-	(recursive fsvn-propedit-recursive-save)
-	ret output)
+        (propname fsvn-propedit-propname)
+        (target fsvn-propview-target-urlrev)
+        (recursive fsvn-propedit-recursive-save)
+        ret output)
     (with-temp-buffer
       (setq ret (fsvn-call-command
-		 "propset" (current-buffer)
-		 propname
-		 "--file" file
-		 (when recursive
-		   "--recursive")
-		 ;;svn: --encoding option applies only to textual Subversion-controlled properties
-		 (when (fsvn-propname-svn-texture-p propname)
-		   (list "--encoding" (fsvn-coding-system-name (fsvn-prop-file-coding-system propname))))
-		 target))
+                 "propset" (current-buffer)
+                 propname
+                 "--file" file
+                 (when recursive
+                   "--recursive")
+                 ;;svn: --encoding option applies only to textual Subversion-controlled properties
+                 (when (fsvn-propname-svn-texture-p propname)
+                   (list "--encoding" (fsvn-coding-system-name (fsvn-prop-file-coding-system propname))))
+                 target))
       (setq output (buffer-string)))
     (unless (= ret 0)
       (error "Error occur while setting property.  See below message\n\n%s" output))
@@ -518,12 +518,12 @@ Keybindings:
     (setq buffer-undo-list nil)
     (with-current-buffer (fsvn-proplist-get-buffer)
       (let (propnames)
-	(setq propnames (fsvn-proplist-gather-propnames))
-	;; svn:eol-style like non applicable property for directory, but can set recursively.
-	(when (and (member propname (fsvn-proplist-get-proplist fsvn-propview-target-urlrev))
-		   (not (member propname propnames)))
-	  (fsvn-proplist-insert-propname propname))
-	(fsvn-proplist-draw-value propname)))
+        (setq propnames (fsvn-proplist-gather-propnames))
+        ;; svn:eol-style like non applicable property for directory, but can set recursively.
+        (when (and (member propname (fsvn-proplist-get-proplist fsvn-propview-target-urlrev))
+                   (not (member propname propnames)))
+          (fsvn-proplist-insert-propname propname))
+        (fsvn-proplist-draw-value propname)))
     (fsvn-save-browse-file-excursion target
       (fsvn-browse-draw-file-status target))
     (fsvn-restore-default-window-setting)))

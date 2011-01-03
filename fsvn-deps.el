@@ -44,8 +44,8 @@ Please call `fsvn-initialize-loading' function.
 "
   :group 'fsvn
   :type  '(choice
-	   string
-	   file))
+           string
+           file))
 
 (defcustom fsvn-svnadmin-command "svnadmin"
   "*Subversion Administrator command. Must be set before loading this file.
@@ -57,8 +57,8 @@ Please call `fsvn-initialize-loading' function.
 "
   :group 'fsvn
   :type  '(choice
-	   string
-	   file))
+           string
+           file))
 
 (defvar fsvn-svn-command-internal nil)
 (defvar fsvn-svnadmin-command-internal nil)
@@ -86,40 +86,40 @@ Please call `fsvn-initialize-loading' function.
 
 \(fn FILE)"
   (let ((propfile
-	 (if (fsvn-file-exact-directory-p file)
-	     (fsvn-meta-prop-directory-file file)
-	   (fsvn-meta-prop-file file)))
-	(prop-regex (format "^K \\([0-9]+\\)"))
-	propname-length)
+         (if (fsvn-file-exact-directory-p file)
+             (fsvn-meta-prop-directory-file file)
+           (fsvn-meta-prop-file file)))
+        (prop-regex (format "^K \\([0-9]+\\)"))
+        propname-length)
     (when propfile
       (with-temp-buffer
-	;; todo check source coding-system
-	(let ((coding-system-for-read fsvn-svn-common-coding-system)
-	      alist)
-	  (insert-file-contents propfile)
-	  (goto-char (point-min))
-	  (catch 'done
-	    (while (re-search-forward prop-regex nil t)
-	      (let ((name-length (string-to-number (match-string 1)))
-		    (bytes 0)
-		    name val-length value start c)
-		(forward-line 1)
-		(unless (looking-at "^\\(.+\\)$")
-		  (error "Unrecognized format."))
-		(setq name (match-string 1))
-		(forward-line 1)
-		(unless (looking-at "^V \\([0-9]+\\)$")
-		  (error "Unrecognized format."))
-		(setq val-length (string-to-number (match-string 1)))
-		(forward-line 1)
-		(setq start (point))
-		(fsvn-forward-bytes val-length)
-		(setq value (fsvn-meta-prop-string-region start (point)))
-		(when (and propname (string= propname name))
-		  (throw 'done value))
-		(setq alist (cons (cons name value) alist))))
-	    (unless propname
-	      (nreverse alist))))))))
+        ;; todo check source coding-system
+        (let ((coding-system-for-read fsvn-svn-common-coding-system)
+              alist)
+          (insert-file-contents propfile)
+          (goto-char (point-min))
+          (catch 'done
+            (while (re-search-forward prop-regex nil t)
+              (let ((name-length (string-to-number (match-string 1)))
+                    (bytes 0)
+                    name val-length value start c)
+                (forward-line 1)
+                (unless (looking-at "^\\(.+\\)$")
+                  (error "Unrecognized format."))
+                (setq name (match-string 1))
+                (forward-line 1)
+                (unless (looking-at "^V \\([0-9]+\\)$")
+                  (error "Unrecognized format."))
+                (setq val-length (string-to-number (match-string 1)))
+                (forward-line 1)
+                (setq start (point))
+                (fsvn-forward-bytes val-length)
+                (setq value (fsvn-meta-prop-string-region start (point)))
+                (when (and propname (string= propname name))
+                  (throw 'done value))
+                (setq alist (cons (cons name value) alist))))
+            (unless propname
+              (nreverse alist))))))))
 
 (defun fsvn-meta-prop-string-region (start end)
   ;;FIXME
@@ -134,8 +134,8 @@ Please call `fsvn-initialize-loading' function.
 
 (defun fsvn-meta-text-base-file-name (file)
   (let* ((admindir (fsvn-meta-file-directory file))
-	 (name (fsvn-file-name-nondirectory file))
-	 (metadir (fsvn-expand-file "text-base" admindir)))
+         (name (fsvn-file-name-nondirectory file))
+         (metadir (fsvn-expand-file "text-base" admindir)))
     (concat (fsvn-expand-file name metadir) ".svn-base")))
 
 (defun fsvn-meta-text-base-file (file)
@@ -148,20 +148,20 @@ Please call `fsvn-initialize-loading' function.
 
 (defun fsvn-meta-prop-file (file)
   (let* ((admindir (fsvn-meta-file-directory file))
-	 (name (fsvn-file-name-nondirectory file))
-	 metadir tmp)
+         (name (fsvn-file-name-nondirectory file))
+         metadir tmp)
     (setq metadir (fsvn-expand-file "props" admindir))
     (setq tmp (concat (fsvn-expand-file name metadir) ".svn-work"))
     (if (file-exists-p tmp)
-	tmp
+        tmp
       (setq metadir (fsvn-expand-file "prop-base" admindir))
       (setq tmp (concat (fsvn-expand-file name metadir) ".svn-base"))
       (when (file-exists-p tmp)
-	tmp))))
+        tmp))))
 
 (defun fsvn-meta-prop-directory-file (dir)
   (let* ((admindir (fsvn-meta-dir-directory (file-name-as-directory dir)))
-	 base wc)
+         base wc)
     (cond
      ((file-exists-p (setq wc (fsvn-expand-file "dir-props" admindir)))
       wc)
@@ -171,7 +171,7 @@ Please call `fsvn-initialize-loading' function.
 (defun fsvn-meta-dir-name ()
   "svn meta data directory."
   (if (and (eq system-type 'windows-nt)
-	   (getenv "SVN_ASP_DOT_NET_HACK"))
+           (getenv "SVN_ASP_DOT_NET_HACK"))
       "_svn" ".svn"))
 
 
@@ -206,49 +206,49 @@ Please call `fsvn-initialize-loading' function.
      ;; not depend on fsvn-call-process
      (call-process fsvn-svn-command-internal nil (list (current-buffer) nil) nil "--version" "--quiet")
      (let ((raw-version (car (fsvn-text-buffer-line-as-list)))
-	   version)
+           version)
        (when (fboundp 'version<=)
-	 (when (string-match "^\\([0-9]+\\.[0-9]+\\.[0-9]+\\)" raw-version)
-	   (setq version (match-string 1 raw-version)))
-	 (setq fsvn-svn-version (or version raw-version))
-	 (when (version<= fsvn-svn-version  "1.4")
-	   (error "Svn command must be 1.4.x or later")))))))
+         (when (string-match "^\\([0-9]+\\.[0-9]+\\.[0-9]+\\)" raw-version)
+           (setq version (match-string 1 raw-version)))
+         (setq fsvn-svn-version (or version raw-version))
+         (when (version<= fsvn-svn-version  "1.4")
+           (error "Svn command must be 1.4.x or later")))))))
 
 (defun fsvn-build-subcommand (&optional force)
   (mapc
    (lambda (x)
      (let ((command (nth 0 x))
-	   (subcommand-var (nth 1 x))
-	   (arguments-var (nth 2 x))
-	   (prefix (nth 3 x))
-	   subcache argcache cache-dir)
+           (subcommand-var (nth 1 x))
+           (arguments-var (nth 2 x))
+           (prefix (nth 3 x))
+           subcache argcache cache-dir)
        (setq cache-dir (fsvn-cache-command-directory))
        (unless (file-directory-p cache-dir)
-	 (make-directory cache-dir t))
+         (make-directory cache-dir t))
        (setq subcache (fsvn-expand-file (concat prefix "-subcommand") cache-dir))
        (setq argcache (fsvn-expand-file (concat prefix "-arguments") cache-dir))
        (set subcommand-var (fsvn-lisp-load subcache))
        (set arguments-var (fsvn-lisp-load argcache))
        (when (or force (null (symbol-value subcommand-var)))
-	 (set subcommand-var (fsvn-subcommand-alist-build command))
-	 (set arguments-var
-	      (mapcar
-	       (lambda (subcommand)
-		 (cons subcommand (fsvn-subcommand-argument-list command subcommand)))
-	       (fsvn-subcommand-formal-list (symbol-value subcommand-var))))
-	 (fsvn-lisp-save (symbol-value subcommand-var) subcache)
-	 (fsvn-lisp-save (symbol-value arguments-var) argcache))))
+         (set subcommand-var (fsvn-subcommand-alist-build command))
+         (set arguments-var
+              (mapcar
+               (lambda (subcommand)
+                 (cons subcommand (fsvn-subcommand-argument-list command subcommand)))
+               (fsvn-subcommand-formal-list (symbol-value subcommand-var))))
+         (fsvn-lisp-save (symbol-value subcommand-var) subcache)
+         (fsvn-lisp-save (symbol-value arguments-var) argcache))))
    (list
     (list fsvn-svn-command
-	  'fsvn-svn-subcommand-completion-alist
-	  'fsvn-svn-subcommand-arguments-alist
-	  (concat "svn-" fsvn-svn-version))
+          'fsvn-svn-subcommand-completion-alist
+          'fsvn-svn-subcommand-arguments-alist
+          (concat "svn-" fsvn-svn-version))
     (list fsvn-svnadmin-command
-	  'fsvn-svnadmin-subcommand-completion-alist
-	  'fsvn-svnadmin-subcommand-arguments-alist
-	  (concat "svnadmin-" fsvn-svn-version)))) ;; version is guessed as `svn'
+          'fsvn-svnadmin-subcommand-completion-alist
+          'fsvn-svnadmin-subcommand-arguments-alist
+          (concat "svnadmin-" fsvn-svn-version)))) ;; version is guessed as `svn'
   (setq fsvn-svnsync-command-internal
-	(fsvn-svn-command-sibling-find "svnsync")))
+        (fsvn-svn-command-sibling-find "svnsync")))
 
 
 (defun fsvn-subcommand-argument-list (command subcommand)
@@ -259,39 +259,39 @@ Please call `fsvn-initialize-loading' function.
     (goto-char (point-min))
     (let (ret)
       (while (re-search-forward "^ \\{2\\}\\(?:\\(--[^ ]+\\)\\|\\(-[^-]\\) +\\[\\(--[^ ]+\\)\\]\\) +\\([^ :]+\\)?" nil t)
-	(let ((long (or (match-string 1) (match-string 3)))
-	      (short (match-string 2))
-	      (arg (match-string 4))
-	      args applicant)
-	  (when arg
-	    (save-excursion
-	      (let ((start (save-excursion (forward-line 0) (point)))
-		    (end
-		     (if (re-search-forward "^[ ]\\{2\\}-" nil t)
-			 (progn (forward-line 0) (point))
-		       (point-max))))
-		(save-restriction
-		  (narrow-to-region start end)
-		  (goto-char (point-min))
-		  (while (re-search-forward "^ \\{3,\\}\\(?:\\(--[^: ]+\\)\\|\\(-[^-]\\) +(\\(--[^ ]+\\))\\)" nil t)
-		    (let ((long (or (match-string 1) (match-string 3)))
-			  (short (match-string 2)))
-		      (setq args (cons (cons (cons long short) nil) args))))
-		  (unless args
-		    (when (re-search-forward "(" nil t)
-		      (let (start end)
-			(backward-char 1)
-			(setq start (1+ (point)))
-			(forward-sexp)
-			(setq end (1- (point)))
-			(setq args (fsvn-subcommand-parse-command-args (buffer-substring start end))))))
-		  ))))
-	  (setq args (nreverse args))
-	  (setq applicant
-		(cond
-		 (args args)
-		 (arg t)))
-	  (setq ret (cons (cons (cons long short) applicant) ret))))
+        (let ((long (or (match-string 1) (match-string 3)))
+              (short (match-string 2))
+              (arg (match-string 4))
+              args applicant)
+          (when arg
+            (save-excursion
+              (let ((start (save-excursion (forward-line 0) (point)))
+                    (end
+                     (if (re-search-forward "^[ ]\\{2\\}-" nil t)
+                         (progn (forward-line 0) (point))
+                       (point-max))))
+                (save-restriction
+                  (narrow-to-region start end)
+                  (goto-char (point-min))
+                  (while (re-search-forward "^ \\{3,\\}\\(?:\\(--[^: ]+\\)\\|\\(-[^-]\\) +(\\(--[^ ]+\\))\\)" nil t)
+                    (let ((long (or (match-string 1) (match-string 3)))
+                          (short (match-string 2)))
+                      (setq args (cons (cons (cons long short) nil) args))))
+                  (unless args
+                    (when (re-search-forward "(" nil t)
+                      (let (start end)
+                        (backward-char 1)
+                        (setq start (1+ (point)))
+                        (forward-sexp)
+                        (setq end (1- (point)))
+                        (setq args (fsvn-subcommand-parse-command-args (buffer-substring start end))))))
+                  ))))
+          (setq args (nreverse args))
+          (setq applicant
+                (cond
+                 (args args)
+                 (arg t)))
+          (setq ret (cons (cons (cons long short) applicant) ret))))
       (nreverse ret))))
 
 (defun fsvn-subcommand-parse-command-args (string)
@@ -299,7 +299,7 @@ Please call `fsvn-initialize-loading' function.
     (mapc
      (lambda (x)
        (when (string-match "'\\([^']+\\)'" x)
-	 (setq ret (cons (cons (cons (match-string 1 x) nil) nil) ret))))
+         (setq ret (cons (cons (cons (match-string 1 x) nil) nil) ret))))
      (split-string string "[, \n\t]" t))
     (nreverse ret)))
 
@@ -310,26 +310,26 @@ Please call `fsvn-initialize-loading' function.
     (goto-char (point-min))
     (let (ret)
       (when (re-search-forward "^Available subcommands:")
-	(forward-line 1)
-	;; match to "proplist (plist, pl)" like string
-	(while (looking-at "^[ \t]*\\([^ \t\n]+\\)\\(?:[ \t\n]*\\(?:(\\(.+\\))\\)\\)?")
-	  (let ((subcommand (match-string 1))
-		(aliases (match-string 2)))
-	    (when aliases
-	      (mapc
-	       (lambda (alias)
-		 (setq ret (cons (cons alias subcommand) ret)))
-	       (split-string aliases ", ")))
-	    (setq ret (cons (cons subcommand subcommand) ret)))
-	  (forward-line 1))
-	(nreverse ret)))))
+        (forward-line 1)
+        ;; match to "proplist (plist, pl)" like string
+        (while (looking-at "^[ \t]*\\([^ \t\n]+\\)\\(?:[ \t\n]*\\(?:(\\(.+\\))\\)\\)?")
+          (let ((subcommand (match-string 1))
+                (aliases (match-string 2)))
+            (when aliases
+              (mapc
+               (lambda (alias)
+                 (setq ret (cons (cons alias subcommand) ret)))
+               (split-string aliases ", ")))
+            (setq ret (cons (cons subcommand subcommand) ret)))
+          (forward-line 1))
+        (nreverse ret)))))
 
 (defun fsvn-subcommand-formal-list (subcommand-alist)
   (let (ret)
     (mapc
      (lambda (x)
        (unless (member (cdr x) ret)
-	 (setq ret (cons (cdr x) ret))))
+         (setq ret (cons (cdr x) ret))))
      subcommand-alist)
     (nreverse ret)))
 
@@ -337,7 +337,7 @@ Please call `fsvn-initialize-loading' function.
   (fsvn-find-first
    (lambda (key item)
      (or (string= (caar item) key)
-	 (string= (cdar item) key)))
+         (string= (cdar item) key)))
    argument list))
 
 (defun fsvn-subcommand-accepted-argument (alist subcommand arg)
@@ -351,7 +351,7 @@ Please call `fsvn-initialize-loading' function.
     (mapc
      (lambda (alist)
        (when (fsvn-subcommand-assoc-argument argument (cdr alist))
-	 (setq ret (cons (car alist) ret))))
+         (setq ret (cons (car alist) ret))))
      alist)
     (nreverse ret)))
 
@@ -456,8 +456,8 @@ Please call `fsvn-initialize-loading' function.
        propname)
       ((consp propname)
        (cond
-	((stringp (car propname))
-	 (car propname))))))
+        ((stringp (car propname))
+         (car propname))))))
    fsvn-property-list))
 
 (defconst fsvn-nondirectory-property-list
@@ -465,7 +465,7 @@ Please call `fsvn-initialize-loading' function.
    (lambda (propname)
      (cond
       ((and (consp propname)
-	    (memq 'unable-directory propname))
+            (memq 'unable-directory propname))
        (car propname))))
    fsvn-property-list))
 
@@ -483,7 +483,7 @@ Please call `fsvn-initialize-loading' function.
   (let (tmp)
     (cond
      ((and (memq system-type '(windows-nt))
-	   (file-exists-p (setq tmp (expand-file-name "Subversion" (getenv "APPDATA")))))
+           (file-exists-p (setq tmp (expand-file-name "Subversion" (getenv "APPDATA")))))
       tmp)
      (t
       (expand-file-name ".subversion" (getenv "HOME")))))
@@ -496,19 +496,19 @@ Please call `fsvn-initialize-loading' function.
 
 (defun fsvn-svn-gather-server ()
   (let ((regexp (concat "^<\\(" (regexp-opt fsvn-svn-url-scheme-segment-list) "[^/\n>]+\\)>" ))
-	servers)
+        servers)
     (mapc
      (lambda (dir)
        (mapc
-	(lambda (file)
-	  (let (server)
-	    (with-temp-buffer
-	      (insert-file-contents file)
-	      (goto-char (point-min))
-	      (while (re-search-forward regexp nil t)
-		(setq server (match-string 1))
-		(setq servers (cons server servers))))))
-	(directory-files dir t dired-re-no-dot)))
+        (lambda (file)
+          (let (server)
+            (with-temp-buffer
+              (insert-file-contents file)
+              (goto-char (point-min))
+              (while (re-search-forward regexp nil t)
+                (setq server (match-string 1))
+                (setq servers (cons server servers))))))
+        (directory-files dir t dired-re-no-dot)))
      (directory-files (fsvn-svn-auth-directory) t dired-re-no-dot))
     servers))
 
@@ -536,16 +536,16 @@ Please call `fsvn-initialize-loading' function.
 (defun fsvn-directory-under-versioned-p (directory)
   "Return non-nil when DIRECTORY guessed just under the versioned directory or subordinate."
   (let* ((dir (fsvn-expand-file directory))
-	 (before dir))
+         (before dir))
     (catch 'versioned
       (while (not (fsvn-file-name-root-p dir))
-	(when (fsvn-directory-versioned-p dir)
-	  (throw 'versioned t))
-	(setq dir (fsvn-url-dirname dir))
-	;; avoid invalid filename and eternal recurse.
-	(when (string= before dir)
-	  (throw 'versioned nil))
-	(setq before dir)))))
+        (when (fsvn-directory-versioned-p dir)
+          (throw 'versioned t))
+        (setq dir (fsvn-url-dirname dir))
+        ;; avoid invalid filename and eternal recurse.
+        (when (string= before dir)
+          (throw 'versioned nil))
+        (setq before dir)))))
 
 (defun fsvn-directory-versioned-p (directory)
   "Return non-nil when DIRECTORY guessed under versioned."
@@ -576,11 +576,11 @@ $"
 (defun fsvn-svn-parse-date (date)
   (when (string-match fsvn-svn-date-regexp date)
     (let ((year (string-to-number (match-string 1 date)))
-	  (month (string-to-number (match-string 2 date)))
-	  (day (string-to-number (match-string 3 date)))
-	  (hh (string-to-number (match-string 4 date)))
-	  (mm (string-to-number (match-string 5 date)))
-	  (ss (string-to-number (match-string 6 date))))
+          (month (string-to-number (match-string 2 date)))
+          (day (string-to-number (match-string 3 date)))
+          (hh (string-to-number (match-string 4 date)))
+          (mm (string-to-number (match-string 5 date)))
+          (ss (string-to-number (match-string 6 date))))
       (encode-time ss mm hh day month year t))))
 
 (defun fsvn-svn-parse-boolean (boolean)
@@ -592,25 +592,25 @@ $"
   (mapcar
    (lambda (x)
      (let ((values (split-string x "[ \t]" t))
-	   real sym base-url)
+           real sym base-url)
        (setq real (car values))
        (setq sym (cadr values))
        (cond
-	((fsvn-url-repository-p real))
-	((string-match "^\\.\\./" real)
-	 ;; relate path from current directory
-	 (setq base-url (file-name-directory (fsvn-xml-info->entry=>url$ pinfo)))
-	 (setq real (fsvn-expand-url (replace-match "" nil nil real) base-url)))
-	((string-match "^\\^/" real)
-	 ;; relate path from repository root
-	 (setq base-url (fsvn-xml-info->entry=>repository=>root$ pinfo))
-	 (setq real (fsvn-expand-url (replace-match "" nil nil real) base-url)))
-	((string-match "^//" real)
-	 ;;FIXME not depend on scheme
-	 )
-	((string-match "^/" real)
-	 ;;FIXME relate path from server root
-	 ))
+        ((fsvn-url-repository-p real))
+        ((string-match "^\\.\\./" real)
+         ;; relate path from current directory
+         (setq base-url (file-name-directory (fsvn-xml-info->entry=>url$ pinfo)))
+         (setq real (fsvn-expand-url (replace-match "" nil nil real) base-url)))
+        ((string-match "^\\^/" real)
+         ;; relate path from repository root
+         (setq base-url (fsvn-xml-info->entry=>repository=>root$ pinfo))
+         (setq real (fsvn-expand-url (replace-match "" nil nil real) base-url)))
+        ((string-match "^//" real)
+         ;;FIXME not depend on scheme
+         )
+        ((string-match "^/" real)
+         ;;FIXME relate path from server root
+         ))
        (cons real sym)))
    (fsvn-string-line-to-list value)))
 
@@ -627,9 +627,9 @@ $"
       (mapconcat
        'identity
        (mapcar
-	(lambda (string)
-	  (fsvn-svn-autoprop-wildcard->regexp-internal string (cdr alist)))
-	(split-string string (car item)))
+        (lambda (string)
+          (fsvn-svn-autoprop-wildcard->regexp-internal string (cdr alist)))
+        (split-string string (car item)))
        (cdr item))))))
 
 
@@ -645,21 +645,21 @@ $"
     (save-excursion
       (goto-char (or min (point-min)))
       (while (not (eobp))
-	(when (looking-at "^'\\([^']+\\)' locked by user '\\([^']+\\)'\\.$")
-	  ;; (un)lock command in `fsvn-browse-mode' effected in a directory.
-	  (let ((file (fsvn-expand-file (match-string 1))))
-	    (fsvn-browse-redraw-wc-file-entry file)))
-	(forward-line 1)))))
+        (when (looking-at "^'\\([^']+\\)' locked by user '\\([^']+\\)'\\.$")
+          ;; (un)lock command in `fsvn-browse-mode' effected in a directory.
+          (let ((file (fsvn-expand-file (match-string 1))))
+            (fsvn-browse-redraw-wc-file-entry file)))
+        (forward-line 1)))))
 
 (defun fsvn-parse-result-cmd-unlock (buffer &optional min)
   (with-current-buffer buffer
     (save-excursion
       (goto-char (or min (point-min)))
       (while (not (eobp))
-	(when (looking-at "^'\\([^']+\\)' unlocked\\.$")
-	  (let ((file (fsvn-expand-file (match-string 1))))
-	    (fsvn-browse-redraw-wc-file-entry file)))
-	(forward-line 1)))))
+        (when (looking-at "^'\\([^']+\\)' unlocked\\.$")
+          (let ((file (fsvn-expand-file (match-string 1))))
+            (fsvn-browse-redraw-wc-file-entry file)))
+        (forward-line 1)))))
 
 (defun fsvn-parse-result-cmd-delete (buffer &optional min)
   (fsvn-parse-result-modify-cmd-wrapper-internal
@@ -669,14 +669,14 @@ $"
 (defun fsvn-parse-result-cmd-add (buffer &optional min)
   (let (files info)
     (setq files
-	  (fsvn-parse-result-modify-cmd-wrapper-internal
-	   (format "^%c\\(?:[ \t]+(bin)[ \t]+\\|[ \t]+\\)\\([^ \t].+\\)$" ?A)
-	   buffer min (lambda (f) (fsvn-browse-put-status-1 f ?A))))
+          (fsvn-parse-result-modify-cmd-wrapper-internal
+           (format "^%c\\(?:[ \t]+(bin)[ \t]+\\|[ \t]+\\)\\([^ \t].+\\)$" ?A)
+           buffer min (lambda (f) (fsvn-browse-put-status-1 f ?A))))
     (when (> (length files) 0)
       (setq info (fsvn-get-info-entry (car files)))
       (when (fsvn-config-tortoise-property-use (fsvn-xml-info->entry=>repository=>root$ info))
-	;; todo asynchronous
-	(fsvn-tortoise-tsvn:autoprops-set files buffer)))
+        ;; todo asynchronous
+        (fsvn-tortoise-tsvn:autoprops-set files buffer)))
     files))
 
 (defun fsvn-parse-result-cmd-resolved (buffer &optional min)
@@ -684,39 +684,39 @@ $"
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(when (looking-at "^Resolved conflicted state of '\\([^']+\\)'$")
-	  (let* ((file (fsvn-expand-file (match-string 1)))
-		 (dir (fsvn-file-name-directory2 file))
-		 (name (fsvn-file-name-nondirectory file))
-		 (regexp (concat "^" (regexp-quote name)))
-		 entries)
-	    (fsvn-browse-redraw-wc-file-entry file)
-	    (fsvn-save-browse-directory-excursion dir
-	      (fsvn-browse-each-file fn dir
-		(when (and (string-match regexp fn)
-			   (not (file-exists-p (fsvn-expand-file fn dir))))
-		  (setq entries (cons (fsvn-expand-file fn dir) entries))))
-	      (mapc
-	       (lambda (file)
-		 (fsvn-browse-remove-wc-file-entry-internal file))
-	       entries))))
-	(forward-line 1)))))
+        (when (looking-at "^Resolved conflicted state of '\\([^']+\\)'$")
+          (let* ((file (fsvn-expand-file (match-string 1)))
+                 (dir (fsvn-file-name-directory2 file))
+                 (name (fsvn-file-name-nondirectory file))
+                 (regexp (concat "^" (regexp-quote name)))
+                 entries)
+            (fsvn-browse-redraw-wc-file-entry file)
+            (fsvn-save-browse-directory-excursion dir
+              (fsvn-browse-each-file fn dir
+                (when (and (string-match regexp fn)
+                           (not (file-exists-p (fsvn-expand-file fn dir))))
+                  (setq entries (cons (fsvn-expand-file fn dir) entries))))
+              (mapc
+               (lambda (file)
+                 (fsvn-browse-remove-wc-file-entry-internal file))
+               entries))))
+        (forward-line 1)))))
 
 (defmacro fsvn-parse-result-modify-cmd-wrapper-internal (regexp buffer min action)
   `(let (dir files)
      (with-current-buffer ,buffer
        (save-excursion
-	 (goto-char (or min (point-min)))
-	 (while (re-search-forward ,regexp nil t)
-	   (setq files (cons (fsvn-expand-file (match-string 1)) files)))
-	 (mapc
-	  (lambda (file)
-	    (setq dir (fsvn-file-name-directory file))
-	    (fsvn-save-browse-directory-excursion dir
-	      (unless (fsvn-browse-goto-file file)
-		(fsvn-browse-add-wc-raw-entry dir (fsvn-file-name-nondirectory file) file))
-	      (,action file)))
-	  files)))))
+         (goto-char (or min (point-min)))
+         (while (re-search-forward ,regexp nil t)
+           (setq files (cons (fsvn-expand-file (match-string 1)) files)))
+         (mapc
+          (lambda (file)
+            (setq dir (fsvn-file-name-directory file))
+            (fsvn-save-browse-directory-excursion dir
+              (unless (fsvn-browse-goto-file file)
+                (fsvn-browse-add-wc-raw-entry dir (fsvn-file-name-nondirectory file) file))
+              (,action file)))
+          files)))))
 
 (defun fsvn-parse-result-cmd-revert (buffer &optional min)
   (fsvn-parse-result-modify-cmd-wrapper-internal
@@ -732,19 +732,19 @@ $"
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(fsvn-parse-result-cmd-commit-parse-line)
-	(forward-line 1)))))
+        (fsvn-parse-result-cmd-commit-parse-line)
+        (forward-line 1)))))
 
 (defun fsvn-parse-result-cmd-commit-parse-line ()
   (let ((alist fsvn-parse-result-cmd-commit-behavior-alist)
-	stamp func file)
+        stamp func file)
     (while alist
       (setq stamp (caar alist))
       (setq func (cdar alist))
       (when (looking-at (format "^%s[ \t]+\\(.+\\)" stamp))
-	(setq file (match-string 1))
-	(setq alist nil)
-	(funcall func (fsvn-expand-file file)))
+        (setq file (match-string 1))
+        (setq alist nil)
+        (funcall func (fsvn-expand-file file)))
       (setq alist (cdr alist)))))
 
 (defun fsvn-parse-result-cmd-commit-modified (file)
@@ -769,9 +769,9 @@ $"
 
 (defun fsvn-parse-result-instant-sentinel (proc parser)
   (set-process-sentinel proc
-			`(lambda (proc event)
-			   (fsvn-process-exit-handler proc event
-			     (,parser (current-buffer)))))
+                        `(lambda (proc event)
+                           (fsvn-process-exit-handler proc event
+                             (,parser (current-buffer)))))
   proc)
 
 (defun fsvn-parse-result-if-auth-prompt (proc)
@@ -780,11 +780,11 @@ $"
       (forward-line 0)
       (cond
        ((looking-at "^Username: ")
-	(setq string (read-from-minibuffer "Username: ")))
+        (setq string (read-from-minibuffer "Username: ")))
        ((looking-at "^\\(?:Password\\|Passphrase\\) for '[^']*': ")
-	(setq string (read-passwd (match-string 0))))
+        (setq string (read-passwd (match-string 0))))
        ((looking-at "^Store \\(?:password\\|passphrase\\) unencrypted")
-	(setq string (if (y-or-n-p "Store password unencrypted? ") "yes" "no")))))
+        (setq string (if (y-or-n-p "Store password unencrypted? ") "yes" "no")))))
     (when string
       (process-send-string proc (concat string "\n"))
       (insert "\n")
@@ -815,23 +815,23 @@ Huge value makes Emacs slow down."
 (defun fsvn-process-filter-for-update (proc event)
   (fsvn-process-event-handler proc event
     (let ((prev (or fsvn-process-filter-for-update-parsed-end 0))
-	  end line matched-obj)
+          end line matched-obj)
       (when (< prev fsvn-popup-result-update-parsed-threshold)
-	(goto-char (or prev (point-min)))
-	(while (and (not (eobp))
-		    (looking-at "^\\(.*\\)\n"))
-	  (setq line (match-string 1)
-		end (match-end 0))
-	  (when (setq matched-obj (fsvn-regexp-match "^\\([ADUCGE]\\) +\\(.+\\)$" line))
-	    (let ((direction (string-to-char (fsvn-regexp-matched matched-obj 1)))
-		  (file (fsvn-expand-file (fsvn-regexp-matched matched-obj 2)))
-		  actor-cell)
-	      (setq actor-cell (assq direction fsvn-process-filter-update-actor-alist))
-	      (unless actor-cell
-		(error "Assertion failed (Non defined mark)"))
-	      (funcall (cdr actor-cell) file)))
-	  (forward-line 1))
-	(setq fsvn-process-filter-for-update-parsed-end end)))))
+        (goto-char (or prev (point-min)))
+        (while (and (not (eobp))
+                    (looking-at "^\\(.*\\)\n"))
+          (setq line (match-string 1)
+                end (match-end 0))
+          (when (setq matched-obj (fsvn-regexp-match "^\\([ADUCGE]\\) +\\(.+\\)$" line))
+            (let ((direction (string-to-char (fsvn-regexp-matched matched-obj 1)))
+                  (file (fsvn-expand-file (fsvn-regexp-matched matched-obj 2)))
+                  actor-cell)
+              (setq actor-cell (assq direction fsvn-process-filter-update-actor-alist))
+              (unless actor-cell
+                (error "Assertion failed (Non defined mark)"))
+              (funcall (cdr actor-cell) file)))
+          (forward-line 1))
+        (setq fsvn-process-filter-for-update-parsed-end end)))))
 
 (defun fsvn-process-filter-update-for-added (file)
   (fsvn-browse-add-wc-file-entry file t))
@@ -850,15 +850,15 @@ Huge value makes Emacs slow down."
   (let ((dir (fsvn-file-name-directory2 file)))
     (fsvn-save-browse-directory-excursion dir
       (let ((filename (fsvn-file-name-nondirectory file)))
-	(save-excursion
-	  (mapc
-	   (lambda (fn)
-	     (if (fsvn-browse-goto-file fn)
-		 (when (fsvn-file= fn file)
-		   ;; conflicted file is rare so not concern about `svn' execute.
-		   (fsvn-browse-redraw-wc-file-entry fn))
-	       (fsvn-browse-add-wc-raw-entry dir (fsvn-file-name-nondirectory fn) fn)))
-	   (directory-files dir t (concat "^" (regexp-quote filename)))))))))
+        (save-excursion
+          (mapc
+           (lambda (fn)
+             (if (fsvn-browse-goto-file fn)
+                 (when (fsvn-file= fn file)
+                   ;; conflicted file is rare so not concern about `svn' execute.
+                   (fsvn-browse-redraw-wc-file-entry fn))
+               (fsvn-browse-add-wc-raw-entry dir (fsvn-file-name-nondirectory fn) fn)))
+           (directory-files dir t (concat "^" (regexp-quote filename)))))))))
 
 (defalias 'fsvn-process-filter-update-for-merged 'fsvn-process-filter-update-for-updated)
 
@@ -870,7 +870,7 @@ Huge value makes Emacs slow down."
   (let ((buffer (get-file-buffer file)))
     (when (and buffer (not (buffer-modified-p buffer)))
       (with-current-buffer buffer
-	(revert-buffer nil t)))))
+        (revert-buffer nil t)))))
 
 
 

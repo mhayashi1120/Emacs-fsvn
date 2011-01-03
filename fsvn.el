@@ -4,7 +4,7 @@
 ;; Author: Hayashi Masahiro <mhayashi1120@gmail.com>
 ;; URL: http://fsvn.sourceforge.jp/
 ;; Keywords: Emacs, Subversion, Frontend
-;; Version: 0.9.7
+;; Version: 0.9.8
 
 ;; fsvn.el is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
 ;;; Commentary:
 
 ;; fsvn supports
-;;  * GNU Emacs 22.x or later.
+;;  * GNU Emacs 23.x or later.
 ;;  * Subversion 1.5.x or later. (1.4.x works but some restriction)
 
 ;; fsvn has TortoiseSVN like user interface by using `svn' command.
 ;;  Have following advantages of other Emacs svn client.
 ;;  * tsvn:*, bugtraq:* like property supported. (or will be supported)
 ;;  * Using `svn help' output for completing read.
-;;  * Fast in huge working copy by asynchronous process.
+;;  * Fast in huge working copy by background process.
 ;;  * Has repository browser.
 ;;  * Has visualize blame/annotate/praise minor-mode.
 ;;  * Has svk support
@@ -42,9 +42,9 @@
 ;;  * A little user help.
 
 ;; This package is tested on following environment.
-;;      Meadow (based Emacs 22.1) on Windows.  svn 1.6.x
-;;      Emacs (23.2) on GNU/Linux (Debian).  svn 1.6.x
-;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.6.x
+;;      NTEmacs (based Emacs 23.1) on Windows.  svn 1.5.x - 1.7.x
+;;      Emacs (23.2) on GNU/Linux (Debian).  svn svn 1.5.x - 1.7.x
+;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.7.x
 
 ;; major-mode and brief description
 ;; * fsvn-browse-mode (dired like interface)
@@ -56,50 +56,22 @@
 ;; * fsvn-log-list-mode (Log list)
 ;; * fsvn-log-sibling-mode (`fsvn-log-list-mode' subwindow revision changed file list)
 ;; * fsvn-log-message-mode (`fsvn-log-list-mode' subwindow revision log message)
+;; * fsvn-process-list-mode (Process list view)
 
-;; see repositories below
+;; see following repositories
 ;; * http://svn.apache.org/repos/asf/subversion/trunk/
 ;; * http://tortoisesvn.tigris.org/svn/tortoisesvn/trunk
 ;; * http://svn.meadowy.org/Meadow/trunk/
 
 ;; NOTE:
-;; Q.  How to execute `propset' recursively?
-;; A.  M-x fsvn-propedit-toggle-recursive (or type C-c C-r)
-
-;; Q.  How to authorize repository.  Password prompt stop everything.
-;; A.  M-x fsvn-authenticate-repository
-;;    This makes svn to cache password.
-;;    If possible, to use ssh-agent program when access by svn+ssh protcol.
-;;    TODO: password authenticate only when commit.
-;;          How to send password for stopping processes.
 
 ;; Q. TODO
 ;; A. TODO
 ;; (setenv "SVN_SSH" "ssh -q")
 
-;; Q.  How to use svk in windows.
-;; A.  Sample of settings.
-;;    (require 'fsvn-svk)
-;;    (setq fsvn-svk-perl-command "c:/usr/local/svk/bin/perl")
-;;    (setq fsvn-svk-script "c:/usr/local/svk/bin/svk")
-;;    
-;;   Windows native perl.exe displays propmt but not works in Emacs sub process.
-;;
-
-;; Q.  How to create repository
-;; A.  M-x fsvn-admin-create-repository
-;;    to create repository if default-directory have no files.
-
 ;; Q.  How to use in NTEmacs
 ;; A.  TODO
 ;;    fiber.exe patch
-
-;;;;;;;;;; DO following sometimes ;;;;;;;;;;;;;;;;;;;
-;; elint with Emacs command line option -q
-;; fsvn-test Emacs command line option -q
-;; checkdoc (?)
-;; checkdoc-message-text
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; Coding
 
@@ -137,9 +109,9 @@
 ;;  (setq fsvn-help-locale "ja")
 ;;  (setq fsvn-repository-alist
 ;;       '(
-;; 	("svn://localhost"
-;; 	 )
-;; 	))
+;;      ("svn://localhost"
+;;       )
+;;      ))
 
 ;; 3. global key bindings (option)
 ;; (global-set-key "\C-xv!" 'fsvn-command)
@@ -153,38 +125,9 @@
 ;; (global-set-key "\C-xvP" 'fsvn-process-list)
 ;; (global-set-key "\C-xvZ" 'fsvn-debug-toggle)
 ;; (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
+;; (global-set-key "\C-xvN" 'fsvn-vc-commit-non-query)
 
-;; 4. TODO this is old
-;;    Emacs 22 unicode conversion is wrong.
-;;    Put following lines into your dot-emacs
-;;
-;;    thanks.
-;;   http://www.pqrs.org/tekezo/emacs/doc/wide-character/index.html
-;;
-;;   (utf-translate-cjk-set-unicode-range
-;;    '((#x00a2 . #x00a3)			; Cent Sign, Pound Sign
-;;      (#x00a7 . #x00a8)			; Section Sign, Diaeresis
-;;      (#x00ac . #x00ac)			; Not Sign
-;;      (#x00b0 . #x00b1)			; Degree Sign, Plus-Minus Sign
-;;      (#x00b4 . #x00b4)			; Acute Accent
-;;      (#x00b6 . #x00b6)			; Pilcrow Sign
-;;      (#x00d7 . #x00d7)			; Multiplication Sign
-;;      (#X00f7 . #x00f7)			; Division Sign
-;;      (#x0370 . #x03ff)			; Greek And Coptic
-;;      (#x0400 . #x04FF)			; Cyrillic
-;;      (#x2000 . #x206F)			; General Punctuation
-;;      (#x2100 . #x214F)			; Letterlike Symbols
-;;      (#x2190 . #x21FF)			; Arrows
-;;      (#x2200 . #x22FF)			; Mathematical Operators
-;;      (#x2300 . #x23FF)			; Miscellaneous Technical
-;;      (#x2500 . #x257F)			; Box Drawing
-;;      (#x25A0 . #x25FF)			; Geometric Shapes
-;;      (#x2600 . #x26FF)			; Miscellaneous Symbols
-;;      (#x2e80 . #xd7a3) (#xff00 . #xffef))))
-;;    
-;;    TODO: Circle number, Fullwidth Tilde
-
-;;  5. Module dependency
+;;  4. Module dependency
 ;;     Independent modules
 ;;      * fsvn-env
 ;;      * fsvn-debug
@@ -207,7 +150,7 @@
   :group 'tools
   :prefix "fsvn-")
 
-(defvar fsvn-version "0.9.7"
+(defvar fsvn-version "0.9.8"
   "Version of fsvn.")
 
 

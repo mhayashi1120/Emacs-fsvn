@@ -27,52 +27,52 @@
 
 (defun fsvn-get-revprop (propname urlrev)
   (let ((rev (fsvn-urlrev-revision urlrev))
-	(url (fsvn-urlrev-url urlrev)))
+        (url (fsvn-urlrev-url urlrev)))
     (with-temp-buffer
       (when (= (fsvn-call-command
-		"propget" t
-		propname
-		"--revprop"
-		"--revision" (or rev "HEAD")
-		url)
-	       0)
-	(fsvn-buffer-string-propget propname)))))
+                "propget" t
+                propname
+                "--revprop"
+                "--revision" (or rev "HEAD")
+                url)
+               0)
+        (fsvn-buffer-string-propget propname)))))
 
 (defun fsvn-get-propget-file (propname url)
   (let ((value (fsvn-get-propget propname url))
-	(file (fsvn-make-temp-file)))
+        (file (fsvn-make-temp-file)))
     (write-region value nil file nil 'no-msg)
     file))
 
 (defun fsvn-get-proplist (urlrev)
   (with-temp-buffer
     (if (fsvn-svn-subcommand-accepted-argument "proplist" "--xml")
-	;;FIXME proplist --xml accept --verbose arg this makes all values get.
-	(when (= (fsvn-call-command "proplist" t "--xml" urlrev) 0)
-	  (mapcar
-	   (lambda (node)
-	     (fsvn-xml-properties->target->property.name node))
-	   (fsvn-xml-properties->target->properties (car (fsvn-xml-parse-proplist)))))
+        ;;FIXME proplist --xml accept --verbose arg this makes all values get.
+        (when (= (fsvn-call-command "proplist" t "--xml" urlrev) 0)
+          (mapcar
+           (lambda (node)
+             (fsvn-xml-properties->target->property.name node))
+           (fsvn-xml-properties->target->properties (car (fsvn-xml-parse-proplist)))))
       ;; for svn 1.4.x
       (when (= (fsvn-call-command "proplist" t urlrev) 0)
-	;; first line is header info so `cdr'
-	(mapcar 'fsvn-string-rm-lspace (cdr (fsvn-text-buffer-line-as-list)))))))
+        ;; first line is header info so `cdr'
+        (mapcar 'fsvn-string-rm-lspace (cdr (fsvn-text-buffer-line-as-list)))))))
 
 (defun fsvn-get-revprops (urlrev)
   (let ((rev (fsvn-urlrev-revision urlrev))
-	(url (fsvn-urlrev-url urlrev)))
+        (url (fsvn-urlrev-url urlrev)))
     (with-temp-buffer
       (if (fsvn-svn-subcommand-accepted-argument "proplist" "--xml")
-	  ;;FIXME proplist --xml accept --verbose arg this makes all values get.
-	  (when (= (fsvn-call-command "proplist" t "--xml" "--revprop" "--revision" (or rev "HEAD") url) 0)
-	    (mapcar
-	     (lambda (node)
-	       (fsvn-xml-properties->revprops->property.name node))
-	     (fsvn-xml-properties->revprops->properties (car (fsvn-xml-parse-revprops)))))
-	;; for svn 1.4.x
-	(when (= (fsvn-call-command "proplist" t "--revprop" "--revision" (or rev "HEAD") url) 0)
-	  ;; first line is header info so `cdr'
-	  (mapcar 'fsvn-string-rm-lspace (cdr (fsvn-text-buffer-line-as-list))))))))
+          ;;FIXME proplist --xml accept --verbose arg this makes all values get.
+          (when (= (fsvn-call-command "proplist" t "--xml" "--revprop" "--revision" (or rev "HEAD") url) 0)
+            (mapcar
+             (lambda (node)
+               (fsvn-xml-properties->revprops->property.name node))
+             (fsvn-xml-properties->revprops->properties (car (fsvn-xml-parse-revprops)))))
+        ;; for svn 1.4.x
+        (when (= (fsvn-call-command "proplist" t "--revprop" "--revision" (or rev "HEAD") url) 0)
+          ;; first line is header info so `cdr'
+          (mapcar 'fsvn-string-rm-lspace (cdr (fsvn-text-buffer-line-as-list))))))))
 
 (defun fsvn-get-svn:ignore-as-list (directory)
   "get `svn:ignore' property as list."
@@ -80,14 +80,14 @@
     (let (args)
       (setq args (list "svn:ignore" directory))
       (when (= (apply 'fsvn-call-command "propget" t args) 0)
-	(fsvn-text-buffer-line-as-list)))))
+        (fsvn-text-buffer-line-as-list)))))
 
 (defun fsvn-get-ls (urlrev)
   (with-temp-buffer
     (let (args)
       (setq args (list urlrev "--xml"))
       (when (= (apply 'fsvn-call-command "list" t args) 0)
-	(fsvn-xml-parse-lists-entries)))))
+        (fsvn-xml-parse-lists-entries)))))
 
 (defun fsvn-get-uuid (url)
   (let ((info (fsvn-get-info-entry url)))
@@ -99,11 +99,11 @@
 
 (defun fsvn-get-root-upward (url)
   (let ((tmp url)
-	root)
+        root)
     (while (and tmp (null root))
       (condition-case err
-	  (setq root (fsvn-xml-info->entry=>repository=>root$ (fsvn-get-info-entry tmp)))
-	(error))
+          (setq root (fsvn-xml-info->entry=>repository=>root$ (fsvn-get-info-entry tmp)))
+        (error))
       (setq tmp (fsvn-url-dirname tmp)))
     root))
 
@@ -126,21 +126,21 @@
       (setq target (fsvn-make-targets-file urlrev-list))
       (setq args (list "--targets" target "--xml"))
       (when (= (apply 'fsvn-call-command "info" t args) 0)
-	(fsvn-xml-parse-info)))))
+        (fsvn-xml-parse-info)))))
 
 (defun fsvn-get-directory-files-status (directory)
   (with-temp-buffer
     (let ((args (list "--xml" "--verbose" "--non-recursive" "--no-ignore" directory)))
       (when (= (apply 'fsvn-call-command "status" t args) 0)
-	(fsvn-xml-status->entries (fsvn-xml-parse-status))))))
+        (fsvn-xml-status->entries (fsvn-xml-parse-status))))))
 
 (defun fsvn-get-file-status (file)
   (with-temp-buffer
     (let ((args (list "--xml" "--verbose" "--non-recursive" "--no-ignore" file))
-	  entries)
+          entries)
       (when (= (apply 'fsvn-call-command "status" t args) 0)
-	(setq entries (fsvn-xml-status->entries (fsvn-xml-parse-status)))
-	(fsvn-find-status-entry entries file)))))
+        (setq entries (fsvn-xml-status->entries (fsvn-xml-parse-status)))
+        (fsvn-find-status-entry entries file)))))
 
 (defun fsvn-get-files-status (files)
   (with-temp-buffer
@@ -151,13 +151,13 @@
   (with-temp-buffer
     (let ((args (list "--xml" directory)))
       (when (= (apply 'fsvn-call-command "status" t args) 0)
-	(fsvn-xml-status->entries (fsvn-xml-parse-status))))))
+        (fsvn-xml-status->entries (fsvn-xml-parse-status))))))
 
 (defun fsvn-get-file-revision-log (file rev)
   (with-temp-buffer
     (let ((args (list "--revision" rev "--xml" "--verbose" file)))
       (when (= (apply 'fsvn-call-command "log" t args) 0)
-	(car (fsvn-xml-parse-logentry))))))
+        (car (fsvn-xml-parse-logentry))))))
 
 ;;TODO move to fsvn-deps
 (defun fsvn-get-file-parent-property (file propname &optional with-dir)
@@ -173,25 +173,25 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
   (let ((dir directory))
     (catch 'found
       (while (and (fsvn-directory-versioned-p dir)
-		  (not (fsvn-file-name-root-p dir)))
-	(let (value)
-	  (when (setq value (fsvn-meta-get-property propname dir))
-	    (if with-dir
-		(throw 'found (cons dir value))
-	      (throw 'found value))))
-	(setq dir (fsvn-file-name-directory2 dir)))
+                  (not (fsvn-file-name-root-p dir)))
+        (let (value)
+          (when (setq value (fsvn-meta-get-property propname dir))
+            (if with-dir
+                (throw 'found (cons dir value))
+              (throw 'found value))))
+        (setq dir (fsvn-file-name-directory2 dir)))
       nil)))
 
 (defun fsvn-get-file-logs (file &optional rev-range count)
   (with-temp-buffer
     (let ((args (list "--xml" "--verbose")))
       (when rev-range
-	(setq args (append args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
+        (setq args (append args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
       (when count
-	(setq args (append args (list "--limit" count))))
+        (setq args (append args (list "--limit" count))))
       (setq args (append args (list file)))
       (when (= (apply 'fsvn-call-command "log" t args) 0)
-	(fsvn-xml-parse-logentry)))))
+        (fsvn-xml-parse-logentry)))))
 
 (defun fsvn-get-files-logs (files &optional rev-range)
   (let (entries)
@@ -206,21 +206,27 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
   (with-temp-buffer
     (let ((args (list "--xml")))
       (when rev-range
-	(setq args (append args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
+        (setq args (append args (list "--revision" (fsvn-revision-range-to-string rev-range)))))
       (setq args (append args (list file)))
       (when (= (apply 'fsvn-call-command "blame" t args) 0)
-	(car (fsvn-xml-parse-blame))))))
+        (car (fsvn-xml-parse-blame))))))
 
 (defun fsvn-get-file-blame-logs (file &optional rev-range)
   (let ((logs (fsvn-get-file-logs file rev-range))
-	(blame (fsvn-get-file-blame file rev-range)))
+        (blame (fsvn-get-file-blame file rev-range)))
     (mapcar
      (lambda (entry)
        (let ((rev (fsvn-xml-blame->target->entry=>commit.revision entry)))
-	 (if rev
-	     (fsvn-logs-find-logentry logs rev)
-	   nil)))
+         (if rev
+             (fsvn-logs-find-logentry logs rev)
+           nil)))
      (fsvn-xml-blame->target->entries blame))))
+
+(defun fsvn-file-unversioned-p (file)
+  (let ((entry (fsvn-get-file-status file)))
+    (unless entry
+      (signal 'fsvn-command-error '("Unable get status")))
+    (eq (fsvn-xml-status->target->entry=>wc-status.item entry) 'unversioned)))
 
 (defun fsvn-get-prop-svn:needs-lock (file)
   (fsvn-get-boolean-prop-value file "svn:needs-lock"))
@@ -232,23 +238,23 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
   (with-temp-buffer
     (let ((dir (fsvn-make-temp-directory)))
       (unless (= (fsvn-call-command "checkout" t (unless recursive "--non-recursive") urlrev dir) 0)
-	(error "Error while svn `checkout' subcommand"))
+        (error "Error while svn `checkout' subcommand"))
       dir)))
 
 (defun fsvn-get-cat-buffer (urlrev)
   (let ((std-buf (fsvn-make-temp-buffer))
-	(err-file (fsvn-make-temp-file))
-	(args (list urlrev)))
+        (err-file (fsvn-make-temp-file))
+        (args (list urlrev)))
     (when (= (apply 'fsvn-call-command "cat" (cons std-buf err-file) args) 0)
       (when (= (nth 7 (file-attributes err-file)) 0)
-	(with-current-buffer std-buf
-	  (save-excursion
-	    (goto-char (point-min))
-	    (rename-buffer (fsvn-urlrev-filename urlrev) t)
-	    (setq buffer-file-name urlrev)
-	    (set-buffer-modified-p nil)
-	    (set-auto-mode)
-	    std-buf))))))
+        (with-current-buffer std-buf
+          (save-excursion
+            (goto-char (point-min))
+            (rename-buffer (fsvn-urlrev-filename urlrev) t)
+            (setq buffer-file-name urlrev)
+            (set-buffer-modified-p nil)
+            (set-auto-mode)
+            std-buf))))))
 
 
 
@@ -258,8 +264,8 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
   "Add FILE to DEST-URL.
 FILENAME non-nil means ignore DEST-URL filename section."
   (let* ((dest-info (fsvn-get-info-entry dest-url))
-	 (dest-dir (fsvn-url-dirname dest-url))
-	 dest)
+         (dest-dir (fsvn-url-dirname dest-url))
+         dest)
     (unless filename
       (setq filename (fsvn-file-name-nondirectory file)))
     (cond
@@ -270,14 +276,14 @@ FILENAME non-nil means ignore DEST-URL filename section."
      (t
       (signal 'file-error (list "Svn Repository file already exists" dest-url))))
     (fsvn-call-command-discard "import"
-			       "--message" (fsvn-config-magic-remote-commit-message dest-url)
-			       file dest)
+                               "--message" (fsvn-config-magic-remote-commit-message dest-url)
+                               file dest)
     t))
 
 (defun fsvn-asap-delete-url (url)
   (fsvn-call-command-discard "delete"
-			     "--message" (fsvn-config-magic-remote-commit-message url)
-			     url))
+                             "--message" (fsvn-config-magic-remote-commit-message url)
+                             url))
 
 (defun fsvn-asap-modify-url-from-buffer (buffer url)
   "Substitute URL(file) contents as BUFFER
@@ -291,14 +297,14 @@ FILENAME non-nil means ignore DEST-URL filename section."
   "Substitute URL(file) contents as FILE
 "
   (let* ((wc (fsvn-get-temporary-wc (fsvn-urlrev-dirname url)))
-	 (filename (fsvn-url-filename url))
-	 (tmpfile (fsvn-expand-file filename wc)))
+         (filename (fsvn-url-filename url))
+         (tmpfile (fsvn-expand-file filename wc)))
     (unless (file-exists-p tmpfile)
       (error "Repository was modified"))
     (copy-file file tmpfile t)
     (fsvn-call-command-discard "commit"
-			       "--message" (fsvn-config-magic-remote-commit-message url)
-			       tmpfile)))
+                               "--message" (fsvn-config-magic-remote-commit-message url)
+                               tmpfile)))
 
 
 
@@ -309,13 +315,13 @@ FILENAME non-nil means ignore DEST-URL filename section."
 
 (defun fsvn-set-revprop-value (urlrev propname value)
   (let ((url (fsvn-urlrev-url urlrev))
-	(rev (fsvn-urlrev-revision urlrev))
-	(tmpfile (fsvn-get-prop-temp-file propname value)))
+        (rev (fsvn-urlrev-revision urlrev))
+        (tmpfile (fsvn-get-prop-temp-file propname value)))
     (fsvn-call-command-discard "propset" propname
-			       "--file" tmpfile
-			       "--revprop"
-			       "--revision" rev
-			       url)))
+                               "--file" tmpfile
+                               "--revprop"
+                               "--revision" rev
+                               url)))
 
 (defun fsvn-set-propdel (file propname)
   (fsvn-call-command-discard "propdel" propname file))
@@ -335,12 +341,12 @@ FILENAME non-nil means ignore DEST-URL filename section."
   "DIR is parent of FILES
 FILES accept a file as string."
   (let ((current (fsvn-get-svn:ignore-as-list dir))
-	values)
+        values)
     (setq values current)
     (mapc
      (lambda (file)
        (unless (member file values)
-	 (setq values (cons (fsvn-url-filename file) values))))
+         (setq values (cons (fsvn-url-filename file) values))))
      (cond
       ((stringp files) (list files))
       ((listp files) files)))
@@ -361,11 +367,11 @@ FILES accept a file as string."
   (let ((default-directory (file-name-as-directory dir)))
     (with-temp-buffer
       (fsvn-call-command "update" (current-buffer)
-			 (when revision 
-			   (list "--revision" revision)))
+                         (when revision 
+                           (list "--revision" revision)))
       (goto-char (point-max))
       (unless (re-search-backward "^At revision \\([0-9]+\\)." nil t)
-	(error "Not found"))
+        (error "Not found"))
       (string-to-number (match-string 1)))))
 
 
@@ -384,16 +390,16 @@ Imported from %u at %r"
 
 (defun fsvn-import-with-log-formatted-message (url log-entry)
   (let ((msg (or (fsvn-xml-log->logentry=>msg$ log-entry) ""))
-	(rev (fsvn-get-revision-string (fsvn-xml-log->logentry.revision log-entry))))
+        (rev (fsvn-get-revision-string (fsvn-xml-log->logentry.revision log-entry))))
     (fsvn-text-format fsvn-import-with-log-message-format
-		      `(("u" . ,(fsvn-url-remove-authority url))
-			("r" . ,rev)
-			("m" . ,msg)))))
+                      `(("u" . ,(fsvn-url-remove-authority url))
+                        ("r" . ,rev)
+                        ("m" . ,msg)))))
 
 (defun fsvn-merged-import-create-log-message (log-message)
   (unless (string= log-message "")
     (let ((message (fsvn-make-temp-file))
-	  (coding-system-for-write fsvn-svn-common-coding-system))
+          (coding-system-for-write fsvn-svn-common-coding-system))
       (write-region log-message nil message nil 'no-msg)
       message)))
   
@@ -402,16 +408,16 @@ Imported from %u at %r"
 REV-RANGE cons cell like (from . to)
 "
   (let* ((src-info (fsvn-get-info-entry src-url))
-	 (src-path (fsvn-info-repos-path src-info))
-	 (src-root (fsvn-xml-info->entry=>repository=>root$ src-info))
-	 (src-directoryp (eq (fsvn-xml-info->entry.kind src-info) 'dir))
-	 (popup-buffer (fsvn-popup-result-create-buffer))
-	 log-entries dest-wc export-file buffer)
+         (src-path (fsvn-info-repos-path src-info))
+         (src-root (fsvn-xml-info->entry=>repository=>root$ src-info))
+         (src-directoryp (eq (fsvn-xml-info->entry.kind src-info) 'dir))
+         (popup-buffer (fsvn-popup-result-create-buffer))
+         log-entries dest-wc export-file buffer)
     (message "Getting log...")
     (setq log-entries (fsvn-get-file-logs src-url rev-range))
     (message "Creating temporary working copy...")
     (if src-directoryp
-	(setq dest-wc (fsvn-get-temporary-wc dest-url))
+        (setq dest-wc (fsvn-get-temporary-wc dest-url))
       (setq dest-wc (fsvn-get-temporary-wc (fsvn-url-dirname dest-url)))
       (setq export-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc)))
     (fsvn-buffer-popup-as-information popup-buffer)
@@ -419,24 +425,24 @@ REV-RANGE cons cell like (from . to)
     (with-current-buffer buffer
       (mapc
        (lambda (entry)
-	 (when src-directoryp
-	   ;; Export to temporary directory that has directory hierarchy completedly
-	   (setq export-file (fsvn-make-temp-directory)))
-	 (let* ((rev (fsvn-xml-log->logentry.revision entry))
-		(path (fsvn-logs-chain-find log-entries rev src-path))
-		(url (fsvn-expand-url path src-root))
-		(urlrev (fsvn-url-urlrev url rev))
-		(log-message (fsvn-import-with-log-formatted-message url entry))
-		message)
-	   (setq message (fsvn-merged-import-create-log-message log-message))
-	   (message "Exporting %s at %d..." url rev)
-	   (fsvn-call-command-discard "export" urlrev "--force" export-file)
-	   (when src-directoryp
-	     (fsvn-browse-upgrade-source-tree export-file))
-	   (fsvn-call-command-display "commit" popup-buffer
-				      (if message 
-					  (list "--file" message)
-					(list "--message" "")))))
+         (when src-directoryp
+           ;; Export to temporary directory that has directory hierarchy completedly
+           (setq export-file (fsvn-make-temp-directory)))
+         (let* ((rev (fsvn-xml-log->logentry.revision entry))
+                (path (fsvn-logs-chain-find log-entries rev src-path))
+                (url (fsvn-expand-url path src-root))
+                (urlrev (fsvn-url-urlrev url rev))
+                (log-message (fsvn-import-with-log-formatted-message url entry))
+                message)
+           (setq message (fsvn-merged-import-create-log-message log-message))
+           (message "Exporting %s at %d..." url rev)
+           (fsvn-call-command-discard "export" urlrev "--force" export-file)
+           (when src-directoryp
+             (fsvn-browse-upgrade-source-tree export-file))
+           (fsvn-call-command-display "commit" popup-buffer
+                                      (if message 
+                                          (list "--file" message)
+                                        (list "--message" "")))))
        log-entries))
     (kill-buffer buffer)))
 
@@ -448,39 +454,39 @@ Intent to mirror SRC-URL and DEST-URL with commit log (Only log message).
 If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-import-with-log'
 "
   (let* ((src-info (fsvn-get-info-entry src-url))
-	 (src-path (fsvn-info-repos-path src-info))
-	 (src-root (fsvn-xml-info->entry=>repository=>root$ src-info))
-	 (src-directoryp (eq (fsvn-xml-info->entry.kind src-info) 'dir))
-	 (popup-buffer (fsvn-popup-result-create-buffer))
-	 log-entries dest-wc merging-file buffer conflict-urlrev)
+         (src-path (fsvn-info-repos-path src-info))
+         (src-root (fsvn-xml-info->entry=>repository=>root$ src-info))
+         (src-directoryp (eq (fsvn-xml-info->entry.kind src-info) 'dir))
+         (popup-buffer (fsvn-popup-result-create-buffer))
+         log-entries dest-wc merging-file buffer conflict-urlrev)
     (message "Getting log...")
     (setq log-entries (fsvn-get-file-logs src-url rev-range))
     (message "Creating temporary working copy...")
     (cond
      (src-directoryp
       (setq dest-wc 
-	    (if (fsvn-url-local-p dest-url) 
-		dest-url
-	      (fsvn-get-temporary-wc dest-url t)))
+            (if (fsvn-url-local-p dest-url) 
+                dest-url
+              (fsvn-get-temporary-wc dest-url t)))
       (setq merging-file dest-wc))
      (t
       (setq dest-wc 
-	    (if (fsvn-url-local-p dest-url)
-		dest-url
-	      (fsvn-get-temporary-wc (fsvn-url-dirname dest-url))))
+            (if (fsvn-url-local-p dest-url)
+                dest-url
+              (fsvn-get-temporary-wc (fsvn-url-dirname dest-url))))
       (setq merging-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc))))
     (setq buffer (fsvn-browse-wc-noselect dest-wc))
     (fsvn-buffer-popup-as-information popup-buffer)
     (setq conflict-urlrev
-	  (catch 'conflicted
-	    (unwind-protect
-		(with-current-buffer buffer
-		  (fsvn-merged-import-with-log-entries 
-		   log-entries src-root 
-		   src-url src-path src-directoryp merging-file popup-buffer)
-		  (message "Successfully finished merging rev.%s to rev.%s." (car rev-range) (cdr rev-range))
-		  nil)
-	      (kill-buffer buffer))))
+          (catch 'conflicted
+            (unwind-protect
+                (with-current-buffer buffer
+                  (fsvn-merged-import-with-log-entries 
+                   log-entries src-root 
+                   src-url src-path src-directoryp merging-file popup-buffer)
+                  (message "Successfully finished merging rev.%s to rev.%s." (car rev-range) (cdr rev-range))
+                  nil)
+              (kill-buffer buffer))))
     (when conflict-urlrev
       (setq buffer (fsvn-browse-wc-noselect dest-wc))
       (switch-to-buffer buffer)
@@ -490,33 +496,33 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
   (mapc
    (lambda (entry)
      (let* ((rev (fsvn-xml-log->logentry.revision entry))
-	    (path (fsvn-logs-chain-find log-entries rev src-path))
-	    (url (fsvn-expand-url path src-root))
-	    (urlrev (fsvn-url-urlrev url rev))
-	    (log-message (fsvn-import-with-log-formatted-message url entry))
-	    message status-entries add-files)
+            (path (fsvn-logs-chain-find log-entries rev src-path))
+            (url (fsvn-expand-url path src-root))
+            (urlrev (fsvn-url-urlrev url rev))
+            (log-message (fsvn-import-with-log-formatted-message url entry))
+            message status-entries add-files)
        (setq message (fsvn-merged-import-create-log-message log-message))
        (message "Merging %s at %d..." url rev)
        (cond
-	(src-directoryp
-	 (setq add-files (fsvn-merged-import-export-non-tree-files src-root src-url entry))
-	 (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
-	((file-exists-p merging-file)
-	 (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
-	(t
-	 (fsvn-call-command-discard "export" "--force" urlrev merging-file)
-	 (fsvn-call-command-display "add" popup-buffer merging-file)))
+        (src-directoryp
+         (setq add-files (fsvn-merged-import-export-non-tree-files src-root src-url entry))
+         (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
+        ((file-exists-p merging-file)
+         (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
+        (t
+         (fsvn-call-command-discard "export" "--force" urlrev merging-file)
+         (fsvn-call-command-display "add" popup-buffer merging-file)))
        (when (fsvn-status-conflict-exists-p merging-file)
-	 (throw 'conflicted urlrev))
+         (throw 'conflicted urlrev))
        (mapc
-	(lambda (file)
-	  (fsvn-call-command-display "add" popup-buffer file))
-	add-files)
+        (lambda (file)
+          (fsvn-call-command-display "add" popup-buffer file))
+        add-files)
        (fsvn-call-command-display "commit" 
-				  popup-buffer
-				  (if message 
-				      (list "--file" message)
-				    (list "--message" "")))
+                                  popup-buffer
+                                  (if message 
+                                      (list "--file" message)
+                                    (list "--message" "")))
        (fsvn-call-command-discard "update")
        ;; redisplay buffer
        (revert-buffer nil t)))
@@ -524,64 +530,65 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 
 (defun fsvn-merged-import-export-non-tree-files (src-root src-url entry)
   (let ((rev (fsvn-xml-log->logentry.revision entry))
-	add-files)
+        add-files)
     (mapc
      (lambda (path-entry)
        (let* ((path (fsvn-xml-log->logentry->paths->path$ path-entry))
-	      (url (fsvn-expand-url path src-root))
-	      (urlrev (fsvn-url-urlrev url rev))
-	      relative-name file)
-	 (when (fsvn-url-descendant-p src-url url)
-	   (setq relative-name (fsvn-url-relative-name url src-url))
-	   (setq file (fsvn-expand-file relative-name))
-	   (unless (file-exists-p file)
-	     (unless (file-directory-p (file-name-directory file))
-	       (make-directory (file-name-directory file) t))
-	     (fsvn-call-command-discard "export" urlrev file)
-	     ;; not commited file exists `merge' simply ignore the file.
-	     ;; if add this point, sometime `merge' failed.
-	     (setq add-files (cons file add-files))))))
+              (url (fsvn-expand-url path src-root))
+              (urlrev (fsvn-url-urlrev url rev))
+              relative-name file)
+         (when (fsvn-url-descendant-p src-url url)
+           (setq relative-name (fsvn-url-relative-name url src-url))
+           (setq file (fsvn-expand-file relative-name))
+           (unless (file-exists-p file)
+             (unless (file-directory-p (file-name-directory file))
+               (make-directory (file-name-directory file) t))
+             (fsvn-call-command-discard "export" urlrev file)
+             ;; not commited file exists `merge' simply ignore the file.
+             ;; if add this point, sometime `merge' failed.
+             (setq add-files (cons file add-files))))))
      (fsvn-xml-log->logentry->paths entry))
     add-files))
 
 (defun fsvn-status-modified-exists-p (file)
   (let (status-entries)
     (setq status-entries
-	  (if (fsvn-file-exact-directory-p file)
-	      (fsvn-get-directory-status file)
-	    (list (fsvn-get-file-status file))))
+          (if (fsvn-file-exact-directory-p file)
+              (fsvn-get-directory-status file)
+            (list (fsvn-get-file-status file))))
     (catch 'modified
       (mapc
        (lambda (entry)
-	 (when (or (memq (fsvn-xml-status->target->entry=>wc-status.item entry) '(modified added))
-		   (memq (fsvn-xml-status->target->entry=>wc-status.props entry) '(added)))
-	   (throw 'modified t)))
+         (when (or (memq (fsvn-xml-status->target->entry=>wc-status.item entry) '(modified added))
+                   (memq (fsvn-xml-status->target->entry=>wc-status.props entry) '(added)))
+           (throw 'modified t)))
        status-entries)
       nil)))
 
 (defun fsvn-status-conflict-exists-p (file)
   (let (status-entries)
     (setq status-entries
-	  (if (fsvn-file-exact-directory-p file)
-	      (fsvn-get-directory-status file)
-	    (list (fsvn-get-file-status file))))
+          (if (fsvn-file-exact-directory-p file)
+              (fsvn-get-directory-status file)
+            (list (fsvn-get-file-status file))))
     (catch 'conflicted
       (mapc
        (lambda (entry)
-	 (when (or (eq (fsvn-xml-status->target->entry=>wc-status.tree-conflicted entry) t)
-		   (eq (fsvn-xml-status->target->entry=>wc-status.item entry) 'conflicted)
-		   (eq (fsvn-xml-status->target->entry=>wc-status.props entry) 'conflicted))
-	   (throw 'conflicted t)))
+         (when (or (eq (fsvn-xml-status->target->entry=>wc-status.tree-conflicted entry) t)
+                   (eq (fsvn-xml-status->target->entry=>wc-status.item entry) 'conflicted)
+                   (eq (fsvn-xml-status->target->entry=>wc-status.props entry) 'conflicted))
+           (throw 'conflicted t)))
        status-entries)
       nil)))
 
 (defun fsvn-status-unversioned-files (directory)
   (with-temp-buffer
     (let (ret)
-      (fsvn-call-command "status" (current-buffer) directory)
+      (unless (= (fsvn-call-command "status" (current-buffer) directory) 0)
+        (signal 'fsvn-command-error nil))
       (goto-char (point-min))
       (while (re-search-forward fsvn-svn-status-unversioned-regexp nil t)
-	(setq ret (cons (fsvn-expand-file (match-string 2)) ret)))
+        (setq ret (cons (fsvn-expand-file (match-string 2)) ret)))
       (nreverse ret))))
 
 
@@ -589,21 +596,21 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
 ;; todo svn bug? move to some file...?
 (defun fsvn-rename-case-missing-file (file)
   (let* ((tmp (fsvn-make-temp-filename file))
-	 (dir (fsvn-file-name-directory file))
-	 (orig-name (fsvn-file-name-nondirectory file))
-	 (case-fold-search t)
-	 (target-entry
-	  (catch 'found
-	    (mapc
-	     (lambda (ls-entry)
-	       (when (string-match (format "^%s$" orig-name) (fsvn-xml-lists->list->entry=>name$ ls-entry))
-		 (throw 'found ls-entry)))
-	     (fsvn-get-ls dir))))
-	 new-name)
+         (dir (fsvn-file-name-directory file))
+         (orig-name (fsvn-file-name-nondirectory file))
+         (case-fold-search t)
+         (target-entry
+          (catch 'found
+            (mapc
+             (lambda (ls-entry)
+               (when (string-match (format "^%s$" orig-name) (fsvn-xml-lists->list->entry=>name$ ls-entry))
+                 (throw 'found ls-entry)))
+             (fsvn-get-ls dir))))
+         new-name)
     (if (or (null target-entry) 
-	    (and (setq new-name (fsvn-xml-lists->list->entry=>name$ target-entry))
-		 (string= new-name orig-name)))
-	(message "Nothing to do.")
+            (and (setq new-name (fsvn-xml-lists->list->entry=>name$ target-entry))
+                 (string= new-name orig-name)))
+        (message "Nothing to do.")
       (rename-file file tmp)
       (rename-file tmp (fsvn-expand-file new-name dir))
       (message "Renaming done.(%s -> %s)" orig-name new-name))))
@@ -632,17 +639,17 @@ Argument FILES ."
   (let ((tmpfile (fsvn-make-temp-file)))
     (with-temp-buffer
       (let ((coding-system-for-write (fsvn-file-name-coding-system)))
-	(mapc
-	 (lambda (f)
-	   (let ((file (fsvn-url-escape-revision-mark f)))
-	     (insert (funcall (or fsvn-targets-file-converter 'identity) file) "\n")))
-	 files)
-	(write-region (point-min) (point-max) tmpfile nil 'no-msg)))
+        (mapc
+         (lambda (f)
+           (let ((file (fsvn-url-escape-revision-mark f)))
+             (insert (funcall (or fsvn-targets-file-converter 'identity) file) "\n")))
+         files)
+        (write-region (point-min) (point-max) tmpfile nil 'no-msg)))
     tmpfile))
 
 (defun fsvn-get-prop-temp-file (propname value)
   (let ((tmpfile (fsvn-make-temp-file))
-	(coding-system-for-write (fsvn-prop-file-coding-system propname)))
+        (coding-system-for-write (fsvn-prop-file-coding-system propname)))
     (write-region value nil tmpfile nil 'no-msg)
     tmpfile))
 
@@ -660,19 +667,19 @@ Argument FILES ."
    (mapc
     (lambda (subdir)
       (when (fsvn-url-contains-p directory (car subdir))
-	(setq fsvn-browse-buffer-directories-status-process proc)))
+        (setq fsvn-browse-buffer-directories-status-process proc)))
     fsvn-browse-subdir-alist)))
 
 (defun fsvn-recursive-status-running-process (directory)
   (let* ((dirname (directory-file-name directory))
-	 prop)
+         prop)
     (catch 'yes
       (mapc
        (lambda (p)
-	 (setq prop (process-get p 'fsvn-recursive-status-top-directory))
-	 (when (and prop (or (string-match (concat "^" (regexp-quote prop) "/") dirname)
-			     (string= dirname prop)))
-	   (throw 'yes p)))
+         (setq prop (process-get p 'fsvn-recursive-status-top-directory))
+         (when (and prop (or (string-match (concat "^" (regexp-quote prop) "/") dirname)
+                             (string= dirname prop)))
+           (throw 'yes p)))
        (process-list))
       nil)))
 
@@ -681,7 +688,7 @@ Argument FILES ."
    (fsvn-mapitem
     (lambda (dir)
       (when (fsvn-url-contains-p topdir dir)
-	dir))
+        dir))
     (fsvn-browse-directories))
    (lambda (d1 d2)
      (> (length d1) (length d2)))))
@@ -689,7 +696,7 @@ Argument FILES ."
 (defun fsvn-recursive-status-sentinel (proc event)
   (fsvn-process-exit-handler proc event
     (let ((parsed (nreverse fsvn-recursive-status-parsed))
-	  directories topdir info)
+          directories topdir info)
       ;; todo when changelist exists.
       (setq topdir (process-get proc 'fsvn-recursive-status-top-directory))
       (setq directories (fsvn-recursive-status-sort-directories topdir))
@@ -703,21 +710,21 @@ Argument FILES ."
    (lambda (dir)
      (let (files dirs)
        (mapc
-	(lambda (status-info)
-	  (let ((file (nth 0 status-info))
-		(status (nth 1 status-info)))
-	    (when (fsvn-url-grand-child-p dir file)
-	      (let ((d (fsvn-url-only-child dir file))
-		    cell)
-		(unless (setq cell (assoc d dirs))
-		  (setq cell (cons d nil))
-		  (setq dirs (cons cell dirs)))
-		(setcdr cell (fsvn-status-dir-status-stronger  
-			      (fsvn-status-string-to-dir-status status)
-			      (cdr cell)))))
-	    (when (fsvn-url-child-p dir file)
-	      (setq files (cons (cons file status) files)))))
-	parsed-info)
+        (lambda (status-info)
+          (let ((file (nth 0 status-info))
+                (status (nth 1 status-info)))
+            (when (fsvn-url-grand-child-p dir file)
+              (let ((d (fsvn-url-only-child dir file))
+                    cell)
+                (unless (setq cell (assoc d dirs))
+                  (setq cell (cons d nil))
+                  (setq dirs (cons cell dirs)))
+                (setcdr cell (fsvn-status-dir-status-stronger  
+                              (fsvn-status-string-to-dir-status status)
+                              (cdr cell)))))
+            (when (fsvn-url-child-p dir file)
+              (setq files (cons (cons file status) files)))))
+        parsed-info)
        (cons dir (list (cons 'files files) (cons 'dirs dirs)))))
    directories))
 
@@ -725,47 +732,47 @@ Argument FILES ."
   (mapc
    (lambda (dir-status)
      (let ((dir (car dir-status))
-	   (files-status (cdr (assq 'files dir-status)))
-	   (dirs-status (cdr (assq 'dirs dir-status))))
+           (files-status (cdr (assq 'files dir-status)))
+           (dirs-status (cdr (assq 'dirs dir-status))))
        (fsvn-save-browse-directory-excursion dir
-	 (let (buffer-read-only)
-	   ;; set to file status
-	   ;; --show-updates `status' vs recursive `status'
-	   (unless (fsvn-file= topdir dir)
-	     (mapc
-	      (lambda (status-cell)
-		(let ((file (car status-cell))
-		      (status (cdr status-cell)))
-		  (when (fsvn-browse-goto-file file)
-		    (setq status (fsvn-browse-status-string-to-display-status status))
-		    (fsvn-browse-draw-status-string-this-line status))))
-	      files-status))
-	   ;; initialize directory status column
-	   (fsvn-browse-each-file file dir
-	     (when (fsvn-browse-point-directory-p)
-	       (fsvn-browse-draw-dir-status-this-line)))
-	   ;; set to directory column
-	   (mapc
-	    (lambda (status-cell)
-	      (let ((file (car status-cell))
-		    (status (cdr status-cell)))
-		(when (fsvn-browse-goto-file file)
-		  (fsvn-browse-draw-dir-status-this-line status))))
-	    dirs-status)
-	   (set-buffer-modified-p nil)))))
+         (let (buffer-read-only)
+           ;; set to file status
+           ;; --show-updates `status' vs recursive `status'
+           (unless (fsvn-file= topdir dir)
+             (mapc
+              (lambda (status-cell)
+                (let ((file (car status-cell))
+                      (status (cdr status-cell)))
+                  (when (fsvn-browse-goto-file file)
+                    (setq status (fsvn-browse-status-string-to-display-status status))
+                    (fsvn-browse-draw-status-string-this-line status))))
+              files-status))
+           ;; initialize directory status column
+           (fsvn-browse-each-file file dir
+             (when (fsvn-browse-point-directory-p)
+               (fsvn-browse-draw-dir-status-this-line)))
+           ;; set to directory column
+           (mapc
+            (lambda (status-cell)
+              (let ((file (car status-cell))
+                    (status (cdr status-cell)))
+                (when (fsvn-browse-goto-file file)
+                  (fsvn-browse-draw-dir-status-this-line status))))
+            dirs-status)
+           (set-buffer-modified-p nil)))))
    status-alist))
 
 (defun fsvn-recursive-status-filter (proc event)
   (with-current-buffer (process-buffer proc)
     (let ((start (point))
-	  file status)
+          file status)
       (insert event)
       (goto-char start)
       (while (re-search-forward fsvn-svn-status-versioned-regexp nil t)
-	(setq status (match-string 1)
-	      file (match-string 2))
-	(setq fsvn-recursive-status-parsed 
-	      (cons (list (fsvn-expand-file file) status) fsvn-recursive-status-parsed))))))
+        (setq status (match-string 1)
+              file (match-string 2))
+        (setq fsvn-recursive-status-parsed 
+              (cons (list (fsvn-expand-file file) status) fsvn-recursive-status-parsed))))))
 
 
 
