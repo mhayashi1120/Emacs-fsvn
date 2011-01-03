@@ -132,7 +132,7 @@ proplist --recursive
 
 ** TODO dired-mode remove vc-find-file-hook from find-file-hook
 
-** fsvn-blame-minor-mode more efficient UI
+** fsvn-blame-minor-mode color
 
 ** fsvn-blame-minor-mode accept revision range
 

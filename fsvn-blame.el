@@ -289,18 +289,19 @@ Keybindings: none
        (overlay-put o 'face (overlay-get o 'fsvn-blame-face)))))
    (overlays-in (point-min) (point-max))))
 
+;; FIXME ouch. my eyes.
 (defun fsvn-blame-make-buffer-overlay (blame-logs diff-alist)
-  (let ((colors (defined-colors))
-        (line 0)
-        foreground background
-        face-alist)
+  (let* ((foreground "black")
+         (colors (remove foreground (defined-colors)))
+         (line 0)
+         background
+         face-alist)
     (fsvn-blame-clear-all-overlay)
     (mapc
      (lambda (entry)
        (let ((rev (fsvn-xml-log->logentry.revision entry)))
          (unless (assq rev face-alist)
-           (setq foreground (nth (% rev (length colors)) colors))
-           (setq background (fsvn-get-background-color foreground colors))
+           (setq background (nth (% rev (length colors)) colors))
            (setq face-alist
                  (cons
                   (cons rev (list
