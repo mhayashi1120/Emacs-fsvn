@@ -289,24 +289,49 @@ Keybindings: none
        (overlay-put o 'face (overlay-get o 'fsvn-blame-face)))))
    (overlays-in (point-min) (point-max))))
 
-;; FIXME ouch. my eyes.
+(defun fsvn-blame-defined-colors ()
+  "return (fore-color . background-colors)"
+  (let ((bgmode (cdr (assoc 'background-mode (frame-parameters)))))
+    (if (eq bgmode 'dark)
+	(cons "white" (fsvn-blame-color-scale "0c" "04" "24" "1c" "2c" "34" "14" "3c"))
+      (cons "black" (fsvn-blame-color-scale "c4" "d4" "cc" "dc" "f4" "e4" "fc" "ec")))))
+
+;; copy from git-blame.el
+(defun fsvn-blame-color-scale (&rest elements)
+  "Given a list, returns a list of triples formed with each
+elements of the list.
+
+a b => bbb bba bab baa abb aba aaa aab"
+  (let (ret)
+    (mapc 
+     (lambda (a)
+       (mapc
+        (lambda (b)
+          (mapc
+           (lambda (c)
+             (setq ret (cons (concat "#" a b c) ret)))
+           elements))
+        elements))
+     elements)
+    ret))
+
 (defun fsvn-blame-make-buffer-overlay (blame-logs diff-alist)
-  (let* ((foreground "black")
-         (colors (remove foreground (defined-colors)))
+  (let* ((colors (fsvn-blame-defined-colors))
+         (fgcolor (car colors))
+         (bgcolors (cdr colors))
          (line 0)
-         background
-         face-alist)
+         bgcolor face-alist)
     (fsvn-blame-clear-all-overlay)
     (mapc
      (lambda (entry)
        (let ((rev (fsvn-xml-log->logentry.revision entry)))
          (unless (assq rev face-alist)
-           (setq background (nth (% rev (length colors)) colors))
+           (setq bgcolor (nth (% rev (length bgcolors)) bgcolors))
            (setq face-alist
                  (cons
                   (cons rev (list
-                             (cons 'foreground-color foreground)
-                             (cons 'background-color background)))
+                             (cons 'foreground-color fgcolor)
+                             (cons 'background-color bgcolor)))
                   face-alist)))))
      blame-logs)
     (fsvn-blame-group-by-revision blame-logs face-alist diff-alist)))

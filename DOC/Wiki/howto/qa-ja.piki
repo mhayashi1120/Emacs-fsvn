@@ -34,6 +34,17 @@
 ! A. M-x fsvn-toggle-feature
 }
 
+# Browse mode question
+{Q-browse-0001
+? Q. ファイル名を変更したい。
+! A. C-c C-v m
+}
+
+{Q-browse-0002
+? Q. リポジトリブラウザを起動したい。
+! A. z o
+}
+
 # Property question
 {Q-prop-0001
 ? Q. 再帰的に `propset' 実行するときは？

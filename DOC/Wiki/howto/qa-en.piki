@@ -33,6 +33,17 @@
 ! A. M-x fsvn-toggle-feature
 }
 
+# Browse mode question
+{Q-browse-0001
+? Q. How to change the file name?
+! A. C-c C-v m
+}
+
+{Q-browse-0002
+? Q. How to execute repository browser?
+! A. z o
+}
+
 # Property question
 {Q-prop-0001
 ? Q. How to execute `propset' recursively?
@@ -41,7 +52,7 @@
 
 # Configuration question
 {Q-config-0001
-? Q. Change fsvn-svn-command, fsvn-svnadmin-command but no effect.
+? Q. Have changed fsvn-svn-command, fsvn-svnadmin-command but no effect.
 ! A. M-x fsvn-initialize-loading
 }
 
