@@ -1662,6 +1662,15 @@ PATH is each executed path."
           (args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
      (list file args))))
 
+(defun fsvn-browse-cmd-read-diff-local ()
+  (fsvn-browse-cmd-wc-only
+   (let* ((src-file (fsvn-browse-cmd-this-wc-file))
+          (dest-file (fsvn-read-file-name "Local file: " nil nil t))
+          (args (if (stringp diff-switches)
+                    diff-switches
+                  (mapconcat 'identity diff-switches " "))))
+     (list src-file dest-file args))))
+
 (defun fsvn-browse-cmd-read-resolve-selected ()
   "Return selected files in working copy and `resolve' --accept args."
   (fsvn-browse-cmd-wc-only
@@ -2348,16 +2357,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
    (let* ((urlrev (fsvn-url-urlrev (fsvn-browse-current-directory-url) "BASE")))
      (fsvn-ediff-between-urlrevs urlrev (fsvn-browse-current-directory-url) t))))
 
-(defun fsvn-browse-diff-local (file)
+(defun fsvn-browse-diff-local (src-file dest-file &optional switches)
   "Same as `dired-diff'."
-  (interactive (fsvn-browse-cmd-read-wc-this-file))
+  (interactive (fsvn-browse-cmd-read-diff-local))
   (fsvn-browse-wc-only
-   (let ((file2 (fsvn-read-file-name "Local file: " nil nil t))
-         (switches
-          (if (stringp diff-switches)
-              diff-switches
-            (mapconcat 'identity diff-switches " "))))
-     (diff file2 file switches))))
+   (diff src-file dest-file switches)))
 
 (defun fsvn-browse-rename-case-missing-file (file)
   "This occation if windows environment."
