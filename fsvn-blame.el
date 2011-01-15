@@ -46,13 +46,11 @@
     (font-lock-verbose)
     ))
 
-(defvar fsvn-blame-subwindow-font-lock-keywords nil)
-
-(setq fsvn-blame-subwindow-font-lock-keywords
-      (list
-       (list "^\\(\\(?:Revision\\|Date\\|Author\\):\\) \\(.*\\)" 
-             '(1 fsvn-header-key-face) '(2 fsvn-header-face))
-       ))
+(defvar fsvn-blame-subwindow-font-lock-keywords 
+  (list
+   (list "^\\(\\(?:Revision\\|Date\\|Author\\):\\) \\(.*\\)" 
+         '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   ))
 
 (defun fsvn-blame-subwindow-mode ()
   "Major mode for viewing Subversion log message that is related `fsvn-blame-minor-mode'.
@@ -293,8 +291,10 @@ Keybindings: none
   "return (fore-color . background-colors)"
   (let ((bgmode (cdr (assoc 'background-mode (frame-parameters)))))
     (if (eq bgmode 'dark)
-	(cons "white" (fsvn-blame-color-scale "0c" "04" "24" "1c" "2c" "34" "14" "3c"))
-      (cons "black" (fsvn-blame-color-scale "c4" "d4" "cc" "dc" "f4" "e4" "fc" "ec")))))
+	(cons "white" (fsvn-blame-color-scale
+                       "0c" "04" "24" "1c" "2c" "34" "14" "3c"))
+      (cons "black" (fsvn-blame-color-scale
+                     "c4" "d4" "cc" "dc" "f4" "e4" "fc" "ec")))))
 
 ;; copy from git-blame.el
 (defun fsvn-blame-color-scale (&rest elements)

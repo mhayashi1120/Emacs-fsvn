@@ -1,3 +1,7 @@
+2011-01-13  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: setting font lock keywords by `setq'
+
 2011-01-03  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: Blame minor mode accept changings.

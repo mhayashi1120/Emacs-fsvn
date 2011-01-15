@@ -43,4 +43,40 @@ Delete previous release files. (after a while)
 ** fsvn-test Emacs command line option -q
 ** checkdoc (?)
 ** checkdoc-message-text
+** Explicit argument MUST be long option.
+** do not use fsvn-test namespace.
+** name definition
+  url -+- filename of local directory (e.g. c:/hoge /hoge )
+       +- real url (e.g.  svn://* http:// like string)
 
+  path -+- filename of local directory (e.g. c:/hoge /hoge )
+        +- path to repository object.  only directory.  contains first `/'
+
+  * path is unique in a fsvn-browse-mode buffer.
+
+
+** fsvn-xml-* name definition todo not completed
+     => : access to children's first node (unique one)
+     -> : access to children
+     $  : text node.
+     .  : attribute node.
+
+
+
+
+* Other resources
+http://svn.apache.org/repos/asf/subversion/trunk/
+http://tortoisesvn.tigris.org/svn/tortoisesvn/trunk
+http://svn.meadowy.org/Meadow/trunk/
+
+* major-mode and brief description
+** fsvn-browse-mode (dired like interface)
+** fsvn-select-file-mode (Select multiple files)
+** fsvn-message-edit-mode (Edit log message and commit it)
+** fsvn-popup-result-mode (Show svn command output)
+** fsvn-proplist-mode (Property list view)
+** fsvn-propedit-mode (`fsvn-proplist-mode' subwindow property selected)
+** fsvn-log-list-mode (Log list)
+** fsvn-log-sibling-mode (`fsvn-log-list-mode' subwindow revision changed file list)
+** fsvn-log-message-mode (`fsvn-log-list-mode' subwindow revision log message)
+** fsvn-process-list-mode (Process list view)

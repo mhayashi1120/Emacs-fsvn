@@ -60,16 +60,15 @@
   "logentry of has been shown. sorted by revision.")
 (defvar fsvn-log-list-isarch-history nil)
 
-(defvar fsvn-log-list-font-lock-keywords nil)
-(setq fsvn-log-list-font-lock-keywords
-      (list
-       (list fsvn-log-list-re-terms '(1 fsvn-header-key-face) '(2 fsvn-header-face))
-       (list fsvn-log-list-re-target '(1 fsvn-header-key-face) '(2 fsvn-header-face))
-       (list "^. \\( *[0-9]+\\)" '(1 fsvn-keyname-face))
-       (list fsvn-log-list-re-mark '(0 fsvn-mark-face))
-       (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
-             '(".+" (fsvn-log-list-move-to-date) nil (0 fsvn-marked-face)))
-       ))
+(defvar fsvn-log-list-font-lock-keywords 
+  (list
+   (list fsvn-log-list-re-terms '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   (list fsvn-log-list-re-target '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   (list "^. \\( *[0-9]+\\)" '(1 fsvn-keyname-face))
+   (list fsvn-log-list-re-mark '(0 fsvn-mark-face))
+   (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
+         '(".+" (fsvn-log-list-move-to-date) nil (0 fsvn-marked-face)))
+   ))
 
 (defvar fsvn-log-list-diff-mode-map nil)
 (unless fsvn-log-list-diff-mode-map

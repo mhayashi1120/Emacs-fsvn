@@ -104,49 +104,48 @@
 (defvar fsvn-browse-file-name-function 'fsvn-browse-point-urlrev) ;; TODO obsolete
 (defvar fsvn-browse-revision nil)
 
-(defvar fsvn-browse-font-lock-keywords nil)
-(setq fsvn-browse-font-lock-keywords
-      (list
+(defvar fsvn-browse-font-lock-keywords 
+  (list
 
-       ;; Directory headers.
-       (list fsvn-browse-re-root '(1 fsvn-header-key-face) '(2 fsvn-header-face))
-       (list fsvn-browse-re-revision '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   ;; Directory headers.
+   (list fsvn-browse-re-root '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   (list fsvn-browse-re-revision '(1 fsvn-header-key-face) '(2 fsvn-header-face))
 
-       (list fsvn-browse-re-subdir '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   (list fsvn-browse-re-subdir '(1 fsvn-header-key-face) '(2 fsvn-header-face))
 
-       ;; Fsvn marks.
-       (list fsvn-browse-re-mark '(0 fsvn-mark-face))
+   ;; Fsvn marks.
+   (list fsvn-browse-re-mark '(0 fsvn-mark-face))
 
-       ;; We make heavy use of MATCH-ANCHORED, since the regexps don't identify the
-       ;; file name itself.  We search for Fsvn defined regexps, and then use the
-       ;; Fsvn defined function `fsvn-move-to-filename' before searching for the
-       ;; simple regexp ".+".  It is that regexp which matches the file name.
-       ;;
-       ;; Marked files.
-       (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-marked-face)))
+   ;; We make heavy use of MATCH-ANCHORED, since the regexps don't identify the
+   ;; file name itself.  We search for Fsvn defined regexps, and then use the
+   ;; Fsvn defined function `fsvn-move-to-filename' before searching for the
+   ;; simple regexp ".+".  It is that regexp which matches the file name.
+   ;;
+   ;; Marked files.
+   (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-marked-face)))
 
-       ;; Flagged files.
-       (list (concat "^[" (char-to-string fsvn-mark-delete-char) "]")
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-flagged-face)))
+   ;; Flagged files.
+   (list (concat "^[" (char-to-string fsvn-mark-delete-char) "]")
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-flagged-face)))
 
-       ;; Locked by other user.
-       (list fsvn-browse-re-locked-user '(1 fsvn-warning-face))
+   ;; Locked by other user.
+   (list fsvn-browse-re-locked-user '(1 fsvn-warning-face))
 
-       ;; People who are paranoid about security would consider this more
-       ;; important than other things such as whether it is a directory.
-       ;; But we don't want to encourage paranoia, so our default
-       ;; should be what's most useful for non-paranoids. -- rms.
-       ;; Subdirectories.
-       (list fsvn-browse-re-dir
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-directory-face)))
+   ;; People who are paranoid about security would consider this more
+   ;; important than other things such as whether it is a directory.
+   ;; But we don't want to encourage paranoia, so our default
+   ;; should be what's most useful for non-paranoids. -- rms.
+   ;; Subdirectories.
+   (list fsvn-browse-re-dir
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-directory-face)))
 
-       (list fsvn-browse-re-symlink
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-symlink-face)))
+   (list fsvn-browse-re-symlink
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-symlink-face)))
 
-       (list fsvn-browse-re-status-ignored
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-ignored-face)))
-       ))
+   (list fsvn-browse-re-status-ignored
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-ignored-face)))
+   ))
 
 (defvar fsvn-browse-diff-map nil)
 (unless fsvn-browse-diff-map

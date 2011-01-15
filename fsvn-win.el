@@ -253,11 +253,11 @@
       (setq args (list tree (unix-to-dos-filename dir))))
      (t
       (setq args (list tree "/select" (unix-to-dos-filename (expand-file-name file dir))))))
-    (setq args (mapconcat 'identity args ","))
-    (message "Starting explorer...")
-    ;; for meadow
-    (let ((default-process-argument-editing-function (lambda (x) (mapconcat 'identity x " "))))
-      (call-process "explorer" nil 0 nil args))))
+    (let ((argument (mapconcat 'identity args ",")))
+      (message "Starting explorer...")
+      ;; for meadow
+      (let ((default-process-argument-editing-function (lambda (x) (mapconcat 'identity x " "))))
+        (call-process "explorer" nil 0 nil argument)))))
 
 (add-hook 'fsvn-browse-mode-hook
           (lambda ()

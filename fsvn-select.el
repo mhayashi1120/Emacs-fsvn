@@ -50,18 +50,17 @@
 (defvar fsvn-select-file-msgedit-buffer nil)
 (defvar fsvn-select-file-draw-list-function nil)
 
-(defvar fsvn-select-file-font-lock-keywords nil)
-(setq fsvn-select-file-font-lock-keywords
-      (list
-       (list fsvn-select-file-re-root '(1 fsvn-header-key-face) '(2 fsvn-header-face))
-       (list fsvn-select-file-re-mark '(0 fsvn-mark-face))
-       (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-marked-face)))
-       (list fsvn-select-file-re-dir
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-directory-face)))
-       (list fsvn-select-file-re-symlink
-             '(".+" (fsvn-move-to-filename) nil (0 fsvn-symlink-face)))
-       ))
+(defvar fsvn-select-file-font-lock-keywords 
+  (list
+   (list fsvn-select-file-re-root '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   (list fsvn-select-file-re-mark '(0 fsvn-mark-face))
+   (list (concat "^[" (char-to-string fsvn-mark-mark-char) "]")
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-marked-face)))
+   (list fsvn-select-file-re-dir
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-directory-face)))
+   (list fsvn-select-file-re-symlink
+         '(".+" (fsvn-move-to-filename) nil (0 fsvn-symlink-face)))
+   ))
 
 (defvar fsvn-select-file-diff-map nil)
 (defvar fsvn-select-file-mode-map nil)
