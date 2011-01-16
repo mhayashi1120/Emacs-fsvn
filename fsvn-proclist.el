@@ -44,25 +44,24 @@
     ("PWD" -50)
     ("Command")))
 
-(defvar fsvn-process-list-font-lock-keywords nil)
-(setq fsvn-process-list-font-lock-keywords
-      (list
+(defvar fsvn-process-list-font-lock-keywords 
+  (list
 
-       (list (concat "\\`" (car (car fsvn-process-list-column-alist)))
-             '(".+" (forward-line 0) nil (0 fsvn-header-key-face)))
+   (list (concat "\\`" (car (car fsvn-process-list-column-alist)))
+         '(".+" (forward-line 0) nil (0 fsvn-header-key-face)))
 
-       (list (concat "^-[- ]+" )
-             '(".+" (forward-line 0) nil (0 fsvn-header-face)))
+   (list (concat "^-[- ]+" )
+         '(".+" (forward-line 0) nil (0 fsvn-header-face)))
 
-       ;; Fsvn marks.
-       (list fsvn-process-list-re-mark '(0 fsvn-mark-face))
+   ;; Fsvn marks.
+   (list fsvn-process-list-re-mark '(0 fsvn-mark-face))
 
-       (list (format fsvn-process-list-re-mark-format (char-to-string fsvn-mark-mark-char))
-             '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-marked-face)))
+   (list (format fsvn-process-list-re-mark-format (char-to-string fsvn-mark-mark-char))
+         '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-marked-face)))
 
-       (list (format fsvn-process-list-re-mark-format (char-to-string fsvn-mark-delete-char))
-             '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-flagged-face)))
-       ))
+   (list (format fsvn-process-list-re-mark-format (char-to-string fsvn-mark-delete-char))
+         '(".+" (fsvn-process-list-move-to-command-line) nil (0 fsvn-flagged-face)))
+   ))
 
 (defvar fsvn-process-list-mode-map nil)
 (unless fsvn-process-list-mode-map

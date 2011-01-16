@@ -180,6 +180,10 @@ This is what the do-commands look for, and what the mark-commands store.")
         (rest (member foreground colors)))
     ;;FIXME
     (nth (% (+ (length rest) 100) count) colors)))
+
+
+(defun fsvn-ui-symlink-trailer (linkp)
+  (if linkp (concat " -> " linkp) ""))
 
 
 

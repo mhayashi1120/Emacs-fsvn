@@ -13,7 +13,7 @@
 ;; destination url -> msgedit
 ;; mv -> switch
 (defun fsvn-browse-move-this-in-repository (src-file to-url &optional args)
-  "Execute `move' for repository file corresponding local file.
+  "Execute `move' to repository file corresponding local file.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive)
@@ -21,7 +21,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 ;;TODO
 ;; (defun fsvn-browse-copy-path-in-repository (to-url &optional args)
-;;   "Execute `copy' for repository file corresponding current directory.
+;;   "Execute `copy' to repository file corresponding current directory.
 ;; Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 ;; This makes faster copy than in working copy.
@@ -101,6 +101,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
                 (fsvn-stash-pop-directory-times directory))))
     (completing-read "TODO: " times)))
 
+;;TODO stash-push and change and commit files.
+;;     merge with stashed files
+;;    patch and merge??
 (defun fsvn-stash-pop (directory &optional time)
   (let* ((stashdir (fsvn-stash-pop-directory directory time)))
     (unless stashdir
@@ -282,18 +285,6 @@ How to send a bug report:
               "Please delete manually. OK? " ))
       (set-buffer-modified-p nil)
       (kill-buffer (current-buffer)))))
-
-
-
-(defconst fsvn-select-file-mode-menu-spec
-  '("fsvn"
-
-    ))
-
-(easy-menu-define fsvn-select-file-mode-menu
-  fsvn-select-file-mode-map
-  "Menu used in Fsvn File Select mode."
-  fsvn-select-file-mode-menu-spec)
 
 
 

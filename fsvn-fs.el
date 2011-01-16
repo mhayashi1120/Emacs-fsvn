@@ -75,7 +75,8 @@ IGNORE-DOT-SVN non-nil means do not copy subversion meta directory (Probablly .s
   (eq t (car (file-attributes file))))
 
 (defun fsvn-file-symlink-p (file)
-  (file-symlink-p file))
+  (let ((attr (file-attributes file)))
+    (and (stringp (car attr)) (car attr))))
 
 (defun fsvn-file-size (file)
   (nth 7 (file-attributes file)))

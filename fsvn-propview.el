@@ -48,15 +48,14 @@
 (defvar fsvn-proplist-target-mode nil
   "`revprop', `properties'")
 
-(defvar fsvn-proplist-font-lock-keywords nil)
-(setq fsvn-proplist-font-lock-keywords
-      (list
-       (list fsvn-proplist-re-header '(1 fsvn-header-key-face) '(2 fsvn-header-face))
-       (list (concat "^[" (char-to-string fsvn-mark-delete-char) "]")
-             '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-flagged-face)))
-       (list "^.."
-             '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-keyname-face)))
-       ))
+(defvar fsvn-proplist-font-lock-keywords 
+  (list
+   (list fsvn-proplist-re-header '(1 fsvn-header-key-face) '(2 fsvn-header-face))
+   (list (concat "^[" (char-to-string fsvn-mark-delete-char) "]")
+         '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-flagged-face)))
+   (list "^.."
+         '(".+" (fsvn-proplist-move-to-propname) nil (0 fsvn-keyname-face)))
+   ))
 
 (defvar fsvn-proplist-mode-map nil)
 (unless fsvn-proplist-mode-map
