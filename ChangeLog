@@ -1,3 +1,9 @@
+2011-01-16  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: easymenu (file-select)
+
+	* Fix: Display symlink arrow.
+
 2011-01-13  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: setting font lock keywords by `setq'

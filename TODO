@@ -43,11 +43,11 @@ inhibit path completion.
 
 
 * browse-mode
-** Draw symbolic link like dired buffer.
 ** Enable Move file (in repository)
 
 ** move case wrong file by svn `move'
 
+on windows 
 fsvn-browse.*move-in-repository
 
 ** in repository C-x C-f or something bound to open by url function
@@ -56,20 +56,8 @@ fsvn-browse.*move-in-repository
 
 from other repository
 
-** rename multiple file that have same filename
-
-SomeFile.Designer.cs -> AnyFile.Designer.cs
-SomeFile.cs          -> AnyFile.cs
-
-
-** fsvn-select/ fsvn-msgedit generate-buffer function
-
-generate to get change buffer name to commit target filename?
-
 
 * select-file-mode
-** symbolic link
-
 ** TODO when commit file-select buffer has svn:external file.
 ** Instant viewer that for modified file or changed directory hierarchy.
   currently `*' mark is display commited files, not manupulated file.
@@ -131,8 +119,7 @@ proplist --recursive
 ** improve UI about read arguments (ex --targets like argument not necessary in completion)
 
 ** TODO dired-mode remove vc-find-file-hook from find-file-hook
-
-** fsvn-blame-minor-mode color
+what is this mean?
 
 ** fsvn-blame-minor-mode accept revision range
 

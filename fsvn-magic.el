@@ -196,7 +196,8 @@ FIXME Does Emacs have list like this? "
               (when entry
                 (fsvn-magic-insert-directory-entry entry)))))
           nil)
-      (fsvn-magic-insert-directory-entry (fsvn-magic-get-list/info-entry url)))))
+      (fsvn-magic-insert-directory-entry
+       (fsvn-magic-get-list/info-entry url)))))
 
 (defun fsvn-magic-insert-directory-entry (entry)
   (let ((dirp (eq (fsvn-magic-xml-list/info-entry.kind entry) 'dir))
@@ -206,8 +207,11 @@ FIXME Does Emacs have list like this? "
                     (if dirp ?d fsvn-space-char)
                     (fsvn-magic-ls-revision entry)
                     (fsvn-magic-ls-author-column entry)
-                    (fsvn-generic-format-file-size (fsvn-safe-xml-lists->list->entry=>size$ entry))
-                    (format-time-string fsvn-generic-datetime-format (fsvn-magic-xml-list/info-entry=>commit=date entry))
+                    (fsvn-generic-format-file-size
+                     (fsvn-safe-xml-lists->list->entry=>size$ entry))
+                    (format-time-string
+                     fsvn-generic-datetime-format 
+                     (fsvn-magic-xml-list/info-entry=>commit=date entry))
                     filename
                     )))
   (save-excursion

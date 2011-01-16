@@ -650,7 +650,7 @@ from is marked point, to is current point."
 ;; * fsvn-log-list-mode interactive commands
 
 (defun fsvn-log-list-propview-this (urlrev)
-  "Execute `proplist' by `fsvn-proplist-mode' for point URLREV"
+  "Execute `proplist' by `fsvn-proplist-mode' to point URLREV"
   (interactive (fsvn-log-list-cmd-read-urlrev))
   (fsvn-open-propview-mode fsvn-buffer-repos-root 
                            urlrev
@@ -1205,14 +1205,14 @@ Keybindings:
   (fsvn-working-copy (file-name-directory filename)))
 
 (defun fsvn-log-sibling-copy-this (src-urlrev dest-file &optional args)
-  "Execute `copy' for point SRC-URLREV to DEST-FILE.
+  "Execute `copy' from SRC-URLREV to DEST-FILE.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-log-sibling-cmd-read-copy-file))
   (fsvn-popup-start-copy/move-process "copy" (list src-urlrev) dest-file args))
 
 (defun fsvn-log-sibling-propview-this (urlrev)
-  "Execute `proplist' by `fsvn-proplist-mode' for point URLREV"
+  "Execute `proplist' by `fsvn-proplist-mode' to point URLREV"
   (interactive (fsvn-log-sibling-cmd-read-propview-this))
   (let ((info (fsvn-get-info-entry urlrev)))
     (fsvn-open-propview-mode fsvn-buffer-repos-root 

@@ -334,17 +334,17 @@ Keybindings:
          (status2 (fsvn-status-get-status-2 entry))
          (mark (or (memq status1 '(?R ?A ?M ?D)) (memq status2 '(?M))))
          (filename (fsvn-select-file-filename entry))
+         (dirp (fsvn-file-exact-directory-p filename))
+         (linkp (fsvn-file-symlink-p filename))
          cell buffer-read-only)
     (fsvn-select-file-buffer!status entry)
     (fsvn-select-file-set-filename-property filename)
-    (insert (format "%c %c %s %s\n"
+    (insert (format "%c %c %s %s%s\n"
                     (if mark fsvn-mark-mark-char fsvn-space-char)
-                    (cond 
-                     ((fsvn-file-exact-directory-p filename) ?d)
-                     ((fsvn-file-symlink-p filename) ?l)
-                     (t fsvn-space-char))
+                    (cond (dirp ?d) (linkp ?l) (t fsvn-space-char))
                     status
-                    filename))
+                    filename
+                    (fsvn-ui-symlink-trailer linkp)))
     (when (and (file-directory-p filename)
                (eq status1 ??))
       (fsvn-select-file-draw-unversioned-directory-files entry))
@@ -356,12 +356,15 @@ Keybindings:
          (files (fsvn-select-file-recursive-files dirname)))
     (mapc
      (lambda (filename)
-       (fsvn-select-file-set-filename-property filename)
-       (insert (format "%c %c %s %s\n"
-                       fsvn-space-char
-                       (if (file-directory-p filename) ?d fsvn-space-char)
-                       (fsvn-string-rpad "?" fsvn-svn-status-length ?.)
-                       filename)))
+       (let ((dirp (fsvn-file-exact-directory-p filename))
+             (linkp (fsvn-file-symlink-p filename)))
+         (fsvn-select-file-set-filename-property filename)
+         (insert (format "%c %c %s %s%s\n"
+                         fsvn-space-char
+                         (cond (dirp ?d) (linkp ?l) (t fsvn-space-char))
+                         (fsvn-string-rpad "?" fsvn-svn-status-length ?.)
+                         filename
+                         (fsvn-ui-symlink-trailer linkp)))))
      files)))
 
 (defun fsvn-select-file-filename (entry)
@@ -437,12 +440,14 @@ Keybindings:
     (fsvn-view-buffer buffer)))
 
 (defun fsvn-select-file-diff-base (file &optional args)
+  "Execute `svn diff' file with base version."
   (interactive (fsvn-select-file-cmd-file "diff" fsvn-default-args-diff))
   (let (diff-args)
     (setq diff-args (list file args))
     (fsvn-diff-start-process diff-args)))
 
 (defun fsvn-select-file-ediff-base (file)
+  "Execute ediff file with base version."
   (interactive (fsvn-select-file-command-file))
   (let* ((urlrev (fsvn-url-urlrev file "BASE"))
          (directory-p (file-directory-p file)))
@@ -459,6 +464,7 @@ Keybindings:
   (fsvn-select-file-next-file))
 
 (defun fsvn-select-file-ignore-this (file)
+  "Append to `svn:ignore' property the FILE."
   (interactive (fsvn-select-file-cmd-file))
   (let ((dir (fsvn-file-name-directory2 file)))
     (fsvn-add-prop-svn:ignore
@@ -469,6 +475,9 @@ Keybindings:
     (fsvn-move-to-filename)))
 
 (defun fsvn-select-file-revert-this (file &optional args)
+  "Execute `revert' to point FILE.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (fsvn-select-file-cmd-file "revert" fsvn-default-args-revert))
   (when (y-or-n-p "Svn: Revert? ")
     (let (buffer reverted)
@@ -480,6 +489,7 @@ Keybindings:
        reverted))))
 
 (defun fsvn-select-file-do-delete-this (file)
+  "Delete FILE from file-system."
   (interactive (list (fsvn-expand-file (fsvn-current-filename))))
   (when (or (not (fsvn-interactive-p))
             (fsvn-confirm-prompt 'fsvn-select-file-do-delete-this "Delete this file? "))
@@ -489,7 +499,7 @@ Keybindings:
     (fsvn-select-file-remove-file file)))
 
 (defun fsvn-select-file-delete-this (file &optional args)
-  "Execute `delete' for point FILE.
+  "Execute `delete' to point FILE.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 This is usefull for missing file (marked `!')
@@ -505,6 +515,7 @@ This is usefull for missing file (marked `!')
     (message "(No svn Delete performed)")))
 
 (defun fsvn-select-file-copy-filename ()
+  "Copy file name"
   (interactive)
   (let ((file (fsvn-current-filename)))
     (if (null file)
@@ -519,6 +530,33 @@ This is usefull for missing file (marked `!')
 
 (defalias 'fsvn-select-file-next-file 'fsvn-next-file)
 (defalias 'fsvn-select-file-previous-file 'fsvn-previous-file)
+
+
+
+(defconst fsvn-select-file-mode-menu-spec
+  '("fsvn"
+    ("File At Point"
+     ["View" fsvn-select-file-view-file t]
+     ["Diff" fsvn-select-file-diff-base t]
+     ["Ediff" fsvn-select-file-ediff-base t]
+     ["Mark" fsvn-select-file-mark t]
+     ["Unmark" fsvn-select-file-mark-clear t]
+     ["Ignore" fsvn-select-file-ignore-this t]
+     ["Revert" fsvn-select-file-revert-this t]
+     ["Delete" fsvn-select-file-delete-this t]
+     ["Rename Case Changed File" fsvn-select-file-rename-case-missing-file t])
+
+    ("General"
+     ["Next" fsvn-select-file-next-file t]
+     ["Previous" fsvn-select-file-previous-file t]
+     ["Copy filename" fsvn-select-file-copy-filename t]
+     ["Delete from Filesystem" fsvn-select-file-do-delete-this t])
+    ))
+
+(easy-menu-define fsvn-select-file-mode-menu
+  fsvn-select-file-mode-map
+  "Menu used in Fsvn File Select mode."
+  fsvn-select-file-mode-menu-spec)
 
 
 

@@ -401,7 +401,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 ;; * vc like global utility.
 
 (defun fsvn-vc-print-log ()
-  "Execute `log' for current file."
+  "Execute `log' to current file."
   (interactive)
   (unless buffer-file-name
     (error "Buffer is not associated with a file"))
@@ -428,7 +428,7 @@ Default value is same as vc.el"
   )
 
 (defun fsvn-vc-commit-non-query (&optional args)
-  "Execute `commit' for editing file.
+  "Execute `commit' to editing file.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
