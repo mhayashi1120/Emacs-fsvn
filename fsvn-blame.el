@@ -112,6 +112,7 @@ Keybindings:
     (fsvn-blame-log-data)
     (fsvn-blame-spent-time . (cons (float-time) nil))
     (fsvn-blame-subwindow-message-list)
+    (fsvn-blame-revision-range)
     ))
 
 (defvar fsvn-blame-blame-logs nil)
@@ -121,9 +122,17 @@ Keybindings:
 (defvar fsvn-blame-timer nil)
 (defvar fsvn-blame-spent-time nil)
 (defvar fsvn-blame-subwindow-buffer nil)
+(defvar fsvn-blame-revision-range nil)
+(defvar fsvn-blame-revision-let-range nil)
+
+(defun fsvn-blame-minor-cmd-read-with-range-args ()
+  (list
+   (fsvn-completing-read-revision-range 
+    1 "HEAD" 
+    (fsvn-blame-buffer-urlrev))))
 
 (define-minor-mode fsvn-blame-minor-mode 
-  "Minor mode for visualized Subversion annotate/blame/praise output.
+  "Minor mode for visualized Subversion annotate/blame/praise interface.
 
 Keybindings: none
 
@@ -136,9 +145,16 @@ Keybindings: none
       (fsvn-blame-minor-mode-start)
     (fsvn-blame-minor-mode-quit)))
 
+(defun fsvn-blame-minor-mode-with-range (range)
+  "Enter `fsvn-blame-minor-mode ' with revision RANGE."
+  (interactive (fsvn-blame-minor-cmd-read-with-range-args))
+  (let ((fsvn-blame-revision-let-range range))
+    (fsvn-blame-minor-mode 1)))
+
 (defun fsvn-blame-minor-mode-start ()
-  (fsvn-blame-file-logs)
+  (fsvn-blame-file-logs fsvn-blame-revision-let-range)
   (fsvn-make-buffer-variables-internal fsvn-blame-minor-buffer-local-variables)
+  (setq fsvn-blame-revision-range fsvn-blame-revision-let-range)
   (add-to-list (make-local-variable 'after-change-functions)
                'fsvn-blame-after-change-function)
   (fsvn-blame-activate-timer)
@@ -252,7 +268,7 @@ Keybindings: none
                        (> (buffer-size) 0))) ;; do nothing
                  (t
                   (erase-buffer)
-                  (let ((entry (fsvn-logs-find-logentry data rev))
+                  (let ((entry (fsvn-blame-logs-find-logentry data rev))
                         msg date)
                     (setq msg (fsvn-xml-log->logentry=>msg$ entry))
                     (setq date (format-time-string fsvn-generic-datetime-format 
@@ -277,14 +293,23 @@ Keybindings: none
         (fsvn-blame-highlight-revision rev)))
       (setq fsvn-blame-previous-revision rev))))
 
+(defun fsvn-blame-logs-find-logentry (data rev)
+  (fsvn-find-first
+   (lambda (key item)
+     (when item
+       (= key (fsvn-xml-log->logentry.revision item))))
+   rev data))
+
 (defun fsvn-blame-highlight-revision (rev)
   (mapc
    (lambda (o)
-     (cond
-      ((eq (overlay-get o 'fsvn-blame-revision) rev)
-       (overlay-put o 'face 'highlight))
-      (t
-       (overlay-put o 'face (overlay-get o 'fsvn-blame-face)))))
+     (let ((orev (overlay-get o 'fsvn-blame-revision)))
+       (cond
+        ((null orev))
+        ((eq orev rev)
+         (overlay-put o 'face 'highlight))
+        (t
+         (overlay-put o 'face (overlay-get o 'fsvn-blame-face))))))
    (overlays-in (point-min) (point-max))))
 
 (defun fsvn-blame-defined-colors ()
@@ -325,14 +350,15 @@ a b => bbb bba bab baa abb aba aaa aab"
     (mapc
      (lambda (entry)
        (let ((rev (fsvn-xml-log->logentry.revision entry)))
-         (unless (assq rev face-alist)
-           (setq bgcolor (nth (% rev (length bgcolors)) bgcolors))
-           (setq face-alist
-                 (cons
-                  (cons rev (list
-                             (cons 'foreground-color fgcolor)
-                             (cons 'background-color bgcolor)))
-                  face-alist)))))
+         (when rev
+           (unless (assq rev face-alist)
+             (setq bgcolor (nth (% rev (length bgcolors)) bgcolors))
+             (setq face-alist
+                   (cons
+                    (cons rev (list
+                               (cons 'foreground-color fgcolor)
+                               (cons 'background-color bgcolor)))
+                    face-alist))))))
      blame-logs)
     (fsvn-blame-group-by-revision blame-logs face-alist diff-alist)))
 
@@ -365,7 +391,7 @@ a b => bbb bba bab baa abb aba aaa aab"
               (setq blame-logs (cdr blame-logs))
               (setq blame-line (1+ blame-line))
               (setq curr-rev (fsvn-xml-log->logentry.revision entry)))
-            (when (or (null blame-logs) (and prev-rev (/= curr-rev prev-rev)))
+            (when (or (null blame-logs) (and prev-rev (not (eq curr-rev prev-rev))))
               (fsvn-blame-create-overlay-internal prev-end (point) prev-rev face-alist)
               (setq prev-end (point)))))
           (forward-line 1)
@@ -429,7 +455,7 @@ a b => bbb bba bab baa abb aba aaa aab"
      (delete-process p))
    (fsvn-blame-get-processes)))
 
-(defun fsvn-blame-file-logs (&optional rev-range)
+(defun fsvn-blame-file-logs (rev-range)
   "Execute `log' and `blame' asynchronous process."
   (let ((log (fsvn-make-temp-buffer))
         (blame (fsvn-make-temp-buffer))

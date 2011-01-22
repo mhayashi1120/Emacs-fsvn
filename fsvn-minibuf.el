@@ -176,9 +176,10 @@ The value of DEFAULT is not a number, allow to enter a nil value."
               (fsvn-revision-number-p value))
           (throw 'done value)))))))
 
-(defun fsvn-completing-read-revision-range (current)
-  (let* ((from (fsvn-completing-read-revision "Revision From: " (cdr current)))
-         (to (fsvn-completing-read-revision (format "Revision %s -> Revision To: " from) (car current))))
+(defun fsvn-completing-read-revision-range (initial-from initial-to &optional url)
+  (let* ((from (fsvn-completing-read-revision "Revision From: " initial-from nil url))
+         (to (fsvn-completing-read-revision 
+              (format "Revision %s -> Revision To: " from) initial-to nil url)))
     (cons from to)))
 
 

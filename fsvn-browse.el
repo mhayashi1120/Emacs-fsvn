@@ -364,7 +364,9 @@ Keybindings:
     (setq buf-name (nth 0 message)
           prompt (nth 1 message))
     (dired-mark-pop-up
-     buf-name op-symbol file-list (or confirmer 'y-or-n-p)
+     buf-name op-symbol file-list 
+     `(lambda (prompt) (let ((default-directory ,default-directory))
+                         (funcall ',(or confirmer dired-deletion-confirmer) prompt)))
      (format prompt (dired-mark-prompt t file-list)))))
 
 (defun fsvn-browse-status-draw-status (target=cl)
