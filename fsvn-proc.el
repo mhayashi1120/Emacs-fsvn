@@ -267,7 +267,9 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
          (setq ret (append (nreverse (fsvn-command-args-canonicalize x)) ret)))
         ((stringp x)
          (when (fsvn-url-p x)
-           (setq x (fsvn-url-escape-revision-mark x)))
+           ;; ediff temp file has @ file name...
+           (unless (fsvn-url-descendant-p (fsvn-ediff-directory) x)
+             (setq x (fsvn-url-escape-revision-mark x))))
          (cond
           ((fsvn-url-repository-p x)
            (setq ret (cons (fsvn-url-encode-string x) ret)))

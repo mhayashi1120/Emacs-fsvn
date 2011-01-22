@@ -628,7 +628,7 @@ from is marked point, to is current point."
 
 (defun fsvn-log-list-cmd-read-reload-with-revision ()
   (let* ((range (fsvn-log-list-current-revision-range))
-         (new-range (fsvn-completing-read-revision-range range)))
+         (new-range (fsvn-completing-read-revision-range (cdr range) (car range))))
     (list new-range)))
 
 (defun fsvn-log-list-cmd-read-merged-import ()

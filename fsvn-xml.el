@@ -478,7 +478,7 @@
 ;; svn log --xml --verbose start
 
 (defun fsvn-xml-log->logentry.revision (node)
-  (fsvn-xml-get-attribute node 'revision))
+  (fsvn-xml-get-attribute-or-nil node 'revision))
 
 (defun fsvn-xml-log->logentry=>author$ (node)
   (fsvn-xml-get-atom-child node 'author))
@@ -519,7 +519,7 @@
   (fsvn-xml-get-child node 'commit))
 
 (defun fsvn-xml-blame->target->entry=>commit.revision (node)
-  (fsvn-xml-get-attribute
+  (fsvn-xml-get-attribute-or-nil
    (fsvn-xml-blame->target->entry=>commit node)
    'revision))
 
