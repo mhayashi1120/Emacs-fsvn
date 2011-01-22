@@ -15,7 +15,7 @@
 
 
 
-(defvar minor-mode-alist)
+(defvar current-prefix-arg)
 
 
 
