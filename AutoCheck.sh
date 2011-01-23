@@ -11,6 +11,7 @@ function check ()
 	bin_dir=${1%/}
 	emacs_command=${2}
 	sample=${3}
+	direction=${4:-check}
 
 	if [ -z "${emacs_command}" ] ; then
 		return;
@@ -54,7 +55,7 @@ EOF
 		fi
 	done < ${sample}
 
-	make -f ${makefile} check || exit 1
+	make -f ${makefile} ${direction} || exit 1
 }
 
 # for Unix (Linux)
@@ -95,6 +96,16 @@ else
 	check ${WIN_SVN_1_4_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23
 	check ${WIN_SVN_1_5_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23
 	check ${WIN_SVN_1_6_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23
+
+	check ${WIN_SVN_1_4_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32   check-in-console
+	check ${WIN_SVN_1_5_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32	check-in-console
+	check ${WIN_SVN_1_6_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32	check-in-console
+	check ${WIN_SVN_1_4_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt	check-in-console
+	check ${WIN_SVN_1_5_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt	check-in-console
+	check ${WIN_SVN_1_6_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt	check-in-console
+	check ${WIN_SVN_1_4_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23	check-in-console
+	check ${WIN_SVN_1_5_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23	check-in-console
+	check ${WIN_SVN_1_6_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23 check-in-console
 fi
 
 make clean -f ${makefile}

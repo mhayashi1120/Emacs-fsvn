@@ -249,6 +249,8 @@ To show and see result.
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c") "http://a/b/c/")
 (fsvn-test-equal (fsvn-url-as-directory "http://a/b/c/") "http://a/b/c/")
 
+(fsvn-test-equal (fsvn-url-escape-revision-mark "svn://localhost/hoge") "svn://localhost/hoge")
+(fsvn-test-equal (fsvn-url-escape-revision-mark "svn://localhost/hoge@") "svn://localhost/hoge@@")
 (fsvn-test-equal (fsvn-url-escape-revision-mark "svn://localhost/hoge@HEAD") "svn://localhost/hoge@HEAD@")
 (fsvn-test-equal (fsvn-url-escape-revision-mark "svn://localhost/hoge@HEAD@") "svn://localhost/hoge@HEAD@@")
 (fsvn-test-equal (fsvn-url-escape-revision-mark (fsvn-url-urlrev "svn://localhost/hoge" "HEAD")) "svn://localhost/hoge@HEAD")
