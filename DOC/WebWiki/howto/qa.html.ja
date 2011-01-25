@@ -57,6 +57,18 @@ svn+ssh を使う場合は可能な限り ssh-agent を使ってください。W
 <dd>A. M-x fsvn-toggle-feature</dd>
 </dl>
 </div>
+<div id="q-browse-0001">
+<dl>
+<dt>Q. ファイル名を変更したい。</dt>
+<dd>A. C-c C-v m</dd>
+</dl>
+</div>
+<div id="q-browse-0002">
+<dl>
+<dt>Q. リポジトリブラウザを起動したい。</dt>
+<dd>A. z o</dd>
+</dl>
+</div>
 <div id="q-prop-0001">
 <dl>
 <dt>Q. 再帰的に `propset' 実行するときは？</dt>
@@ -98,7 +110,7 @@ svn+ssh を使う場合は可能な限り ssh-agent を使ってください。W
 <div id="q-about-0002">
 <dl>
 <dt>Q. 読んだけど分からない。不具合がある。</dt>
-<dd>A. <a href="mailto:mhayashi1120@gmail.com">作者まで</a>。順次追加します。</dd>
+<dd>A. fsvn に関するいかなる要望、ご意見も歓迎します。<a href="mailto:mhayashi1120@gmail.com">作者まで</a>。</dd>
 </dl>
 </div>
 
