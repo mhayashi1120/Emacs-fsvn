@@ -259,7 +259,7 @@ Keybindings: none
                   (if (null (fsvn-blame-get-processes target-buffer))
                       (fsvn-blame-subwindow-insert-message nil "Process exited.")
                     (fsvn-blame-subwindow-insert-message 
-                     0 (format "Spent %d seconds." (- (float-time) start)))))
+                     0 (format "Progressing%s" (make-string (truncate (- (float-time) start)) ?.)))))
                  ((or (null overlay)
                       (null (setq rev (overlay-get overlay 'fsvn-blame-revision))))
                   (erase-buffer)

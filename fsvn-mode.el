@@ -191,8 +191,7 @@
     (set var value)))
 
 (defun fsvn-buffer-major-mode (buffer)
-  (with-current-buffer buffer
-    major-mode))
+  (buffer-local-value 'major-mode buffer))
 
 (defmacro fsvn-each-buffer-mode (major &rest form)
   `(let (RET)

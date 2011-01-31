@@ -422,7 +422,7 @@ Keybindings:
           (fsvn-xml-log->logentry.revision last))))
 
 (defun fsvn-log-list-diff-with-region (args)
-  (let ((revs (fsvn-log-list-region-revision))
+  (let ((revs (fsvn-log-list-region-revision t))
         diff-args)
     (setq diff-args (list
                      (format "--new=%s" (cdr revs))
@@ -430,7 +430,7 @@ Keybindings:
     (fsvn-diff-start-process diff-args args)))
 
 (defun fsvn-log-list-ediff-with-region ()
-  (let* ((revs (fsvn-log-list-region-revision)))
+  (let* ((revs (fsvn-log-list-region-revision t)))
     (fsvn-ediff-between-urlrevs (car revs) (cdr revs) fsvn-logview-target-directory-p)))
 
 (defun fsvn-log-list-create-patch-region (patch-file)

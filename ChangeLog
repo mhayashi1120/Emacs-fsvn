@@ -1,3 +1,7 @@
+2011-01-28  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Diff between region respect order between region begin and end in log list mode.
+
 2011-01-23  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Again misunderstanding of url @
