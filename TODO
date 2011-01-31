@@ -1,5 +1,7 @@
 # -*- mode: org; -*-
 * General
+** piki and html
+add updated date and time
 ** annoying fsvn-result buffer.
 
 ** `merge' can use ediff-merge
@@ -100,6 +102,7 @@ revision range and log base url
 ** log-sibling return to specific revision file. (use magic file name)
 ** patch
 property is changed created patch wrong??
+
 
 * prop-mode
 

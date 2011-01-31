@@ -57,6 +57,18 @@ If possible, to use ssh-agent program when access by svn+ssh protcol. If using w
 <dd>A. M-x fsvn-toggle-feature</dd>
 </dl>
 </div>
+<div id="q-browse-0001">
+<dl>
+<dt>Q. How to change the file name?</dt>
+<dd>A. C-c C-v m</dd>
+</dl>
+</div>
+<div id="q-browse-0002">
+<dl>
+<dt>Q. How to execute repository browser?</dt>
+<dd>A. z o</dd>
+</dl>
+</div>
 <div id="q-prop-0001">
 <dl>
 <dt>Q. How to execute `propset' recursively?</dt>
@@ -65,7 +77,7 @@ If possible, to use ssh-agent program when access by svn+ssh protcol. If using w
 </div>
 <div id="q-config-0001">
 <dl>
-<dt>Q. Change fsvn-svn-command, fsvn-svnadmin-command but no effect.</dt>
+<dt>Q. Have changed fsvn-svn-command, fsvn-svnadmin-command but no effect.</dt>
 <dd>A. M-x fsvn-initialize-loading</dd>
 </dl>
 </div>
@@ -98,7 +110,7 @@ If possible, to use ssh-agent program when access by svn+ssh protcol. If using w
 <div id="q-about-0002">
 <dl>
 <dt>Q. In spite of reading this document, I can't understand. Or there is bug.</dt>
-<dd>A. <a href="mailto:mhayashi1120@gmail.com">Send mail to author</a> Will be added new QA.</dd>
+<dd>A. I welcome any comments or requests about fsvn! <a href="mailto:mhayashi1120@gmail.com">Send mail to author</a></dd>
 </dl>
 </div>
 
