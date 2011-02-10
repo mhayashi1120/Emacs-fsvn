@@ -14,7 +14,7 @@ add updated date and time
 
 ** some help mode (command brief description)
 
-** file-select, message-edit can kill-buffer when commiting.
+** file-select, message-edit can kill-buffer when committing.
 
 ** Bugreport
 
@@ -32,7 +32,7 @@ buffer name start with ` ' (space)
 
 ** search log diff and message
 
-** describe doc about process-list 
+** describe document about process-list 
 enable send password
 freezing processes.
 
@@ -45,7 +45,7 @@ inhibit path completion.
 
 
 * browse-mode
-** Enable Move file (in repository)
+** Enable Move file (in a repository)
 
 ** move case wrong file by svn `move'
 
@@ -61,8 +61,8 @@ from other repository
 
 * select-file-mode
 ** TODO when commit file-select buffer has svn:external file.
-** Instant viewer that for modified file or changed directory hierarchy.
-  currently `*' mark is display commited files, not manupulated file.
+** An instant viewer that for modified file or changed directory hierarchy.
+  currently `*' mark is display committed files, not manipulated file.
 
 ** enable resolved
 
@@ -70,7 +70,7 @@ from other repository
 ** parasite-*-execute command accept optional argument
 
 * completion
-** fsvn-completing-url to parse previous segment
+** fsvn-completing-url to parse a previous segment
 ** fsvn-completing-read-url behavior different general Emacs one.
 ** completing read implementation cleaning.
 ** fsvn-file-select hide/show non selected files.
@@ -79,7 +79,7 @@ from other repository
 * General (refactor)
 ** fsvn-command-args-canonicalize move to more critical point.
 ** fsvn-url-encode-string more critical point.
-** case sensitive when windows filesystem only. (ex: fsvn-url-belongings-p)
+** case-sensitive when windows file-system only. (ex: fsvn-url-belongings-p)
 ** fsvn-magic-* inspect how to implements.
 
 ** fsvn-prop* code clean.
@@ -94,7 +94,7 @@ cache log xml file to ~/.fsvn/cache/logs/{md5}
 each file contains one revision
 revision range and log base url
 
-** fsvn-log-list-mode gui viewer.
+** fsvn-log-list-mode GUI viewer.
  call tortoise viewer (Windows)
 ** logview-mode diff with non visible revision.
 
@@ -119,7 +119,7 @@ proplist --recursive
 
 
 * Other
-** improve UI about read arguments (ex --targets like argument not necessary in completion)
+** improve the UI about read arguments (ex --targets like argument not necessary in completion)
 
 ** TODO dired-mode remove vc-find-file-hook from find-file-hook
 what is this mean?
@@ -164,9 +164,9 @@ not works on windows
 
 * popup-result-mode
 
-** `update' `merge' output 
+** `update' `merge' output
 
-Currently buffer's point is not move from (point-min)
+Currently buffer's point is not moved from (point-min)
 Sometime prompt stop process, so cannot notice the prompt without scrolling.
-move to point-max? only update or merge (switch?)
+Move to point-max? only update or merge (switch?)
 

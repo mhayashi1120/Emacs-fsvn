@@ -4,7 +4,7 @@
 
 2. If you have `make' command, `cd' to the directory where you unpacked fsvn.
 
-  a. Edit MAKE-CFG.el and Makefiler.
+  a. Edit MAKE-CFG.el and Makefile.
 
   b. Optionally invoke the following command show installed files where to go:
 
@@ -14,6 +14,6 @@
 
      make install
 
-  ** On NTEmacs read the mw32cmp.el header and complete the instalattion. **
+  ** On NTEmacs read the mw32cmp.el header and complete the installation. **
 
 3. If you have no `make' command simply copy *.el files to `load-path' where you want.

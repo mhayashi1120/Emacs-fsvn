@@ -12,6 +12,8 @@
 
 
 (require 'fsvn-mode)
+(require 'fsvn-xml)
+(require 'fsvn-url)
 
 
 
@@ -401,7 +403,9 @@ Keybindings:
   (fsvn-log-list-move-to-message)
   (when (fsvn-log-list-subwindow-display-p)
     (fsvn-log-list-draw-details)
-    (fsvn-log-list-set-subwindow-config)))
+    (fsvn-log-list-set-subwindow-config)
+    ;; to save activated mark
+    (setq deactivate-mark nil)))
 
 (defun fsvn-logview-cmd-read-diff-args ()
   (list (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
@@ -600,7 +604,9 @@ from is marked point, to is current point."
   (let ((path fsvn-logview-target-urlrev)
         (urlrev (fsvn-log-list-cmd-urlrev)))
     (unless (fsvn-url-local-p path)
-      (error "This log has no local relation."))
+      (error "This log has no local relation"))
+    (when (file-directory-p path)
+      (error "Cannot revert directory"))
     (unless (y-or-n-p (format 
                        "Revert `%s' to revision %s? " 
                        (fsvn-file-name-nondirectory path)

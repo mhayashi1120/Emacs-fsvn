@@ -750,7 +750,8 @@ $"
 (defun fsvn-parse-result-cmd-commit-modified (file)
   (fsvn-save-browse-file-excursion file
     ;;FIXME lock column, user column
-    (fsvn-browse-draw-status-this-line)))
+    (fsvn-browse-draw-status-this-line))
+  (fsvn-redraw-file-fancy-status file))
 
 (defun fsvn-parse-result-cmd-commit-deleted (file)
   (fsvn-save-browse-file-excursion file
@@ -758,7 +759,8 @@ $"
 
 (defun fsvn-parse-result-cmd-commit-added (file)
   (fsvn-save-browse-file-excursion file
-    (fsvn-browse-draw-status-this-line)))
+    (fsvn-browse-draw-status-this-line))
+  (fsvn-redraw-file-fancy-status file))
 
 (defconst fsvn-parse-result-cmd-commit-behavior-alist
   '(
@@ -794,13 +796,14 @@ $"
 
 ;; * subcommand `update' utility.
 
-(defcustom fsvn-popup-result-update-parsed-threshold 1000
+;;TODO make obsolete
+(defcustom fsvn-popup-result-update-parsed-threshold 1000000000
   "*Threshold of `update' output size for parsing.
 Huge value makes Emacs slow down."
   :group 'fsvn
   :type 'integer)
 
-(defconst fsvn-process-filter-update-actor-alist
+(defconst fsvn-process-filter-update-action-alist
   '(
     (?A . fsvn-process-filter-update-for-added)
     (?D . fsvn-process-filter-update-for-deleted)
@@ -814,7 +817,7 @@ Huge value makes Emacs slow down."
 
 (defun fsvn-process-filter-for-update (proc event)
   (fsvn-process-event-handler proc event
-    (let ((prev (or fsvn-process-filter-for-update-parsed-end 0))
+    (let ((prev (or fsvn-process-filter-for-update-parsed-end (point-min)))
           end line matched-obj)
       (when (< prev fsvn-popup-result-update-parsed-threshold)
         (goto-char (or prev (point-min)))
@@ -826,7 +829,7 @@ Huge value makes Emacs slow down."
             (let ((direction (string-to-char (fsvn-regexp-matched matched-obj 1)))
                   (file (fsvn-expand-file (fsvn-regexp-matched matched-obj 2)))
                   actor-cell)
-              (setq actor-cell (assq direction fsvn-process-filter-update-actor-alist))
+              (setq actor-cell (assq direction fsvn-process-filter-update-action-alist))
               (unless actor-cell
                 (error "Assertion failed (Non defined mark)"))
               (funcall (cdr actor-cell) file)))

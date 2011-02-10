@@ -10,6 +10,8 @@
 ;;; Code:
 
 (require 'fsvn-proc)
+(require 'fsvn-xml)
+(require 'fsvn-url)
 
 
 
@@ -472,7 +474,7 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
      (t
       (setq dest-wc 
             (if (fsvn-url-local-p dest-url)
-                dest-url
+                (fsvn-url-dirname dest-url)
               (fsvn-get-temporary-wc (fsvn-url-dirname dest-url))))
       (setq merging-file (fsvn-expand-file (fsvn-url-filename src-url) dest-wc))))
     (setq buffer (fsvn-browse-wc-noselect dest-wc))
@@ -481,7 +483,7 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
           (catch 'conflicted
             (unwind-protect
                 (with-current-buffer buffer
-                  (fsvn-merged-import-with-log-entries 
+                  (fsvn-merged-import-with-log-entries
                    log-entries src-root 
                    src-url src-path src-directoryp merging-file popup-buffer)
                   (message "Successfully finished merging rev.%s to rev.%s." (car rev-range) (cdr rev-range))
@@ -492,7 +494,9 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
       (switch-to-buffer buffer)
       (error "Conflicted when merging %s. Resolve commit it" conflict-urlrev))))
 
-(defun fsvn-merged-import-with-log-entries (log-entries src-root src-url src-path src-directoryp merging-file popup-buffer)
+(defun fsvn-merged-import-with-log-entries 
+  (log-entries src-root src-url src-path src-directoryp
+               merging-file popup-buffer)
   (mapc
    (lambda (entry)
      (let* ((rev (fsvn-xml-log->logentry.revision entry))
@@ -500,15 +504,17 @@ If ignore all conflict (DEST-URL subordinate to SRC-URL), use `fsvn-overwrite-im
             (url (fsvn-expand-url path src-root))
             (urlrev (fsvn-url-urlrev url rev))
             (log-message (fsvn-import-with-log-formatted-message url entry))
-            message status-entries add-files)
-       (setq message (fsvn-merged-import-create-log-message log-message))
+            (message (fsvn-merged-import-create-log-message log-message))
+            add-files)
        (message "Merging %s at %d..." url rev)
        (cond
         (src-directoryp
          (setq add-files (fsvn-merged-import-export-non-tree-files src-root src-url entry))
-         (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
+         (fsvn-call-command-display "merge" popup-buffer
+                                    "--accept" "postpone" "--change" rev urlrev merging-file))
         ((file-exists-p merging-file)
-         (fsvn-call-command-display "merge" popup-buffer "--accept" "postpone" "--change" rev urlrev merging-file))
+         (fsvn-call-command-display "merge" popup-buffer
+                                    "--accept" "postpone" "--change" rev urlrev merging-file))
         (t
          (fsvn-call-command-discard "export" "--force" urlrev merging-file)
          (fsvn-call-command-display "add" popup-buffer merging-file)))

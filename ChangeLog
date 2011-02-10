@@ -1,3 +1,19 @@
+2011-02-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Save mark activated status in log list mode
+
+2011-02-09  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improve: Cleanup window when `fsvn-global-cleanup-buffer'
+
+2011-02-08  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: redraw fancy status when committing
+
+2011-02-04  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: fsvn-merged-import-with-log DEST-URL is file, cannot import.
+
 2011-01-28  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Diff between region respect order between region begin and end in log list mode.

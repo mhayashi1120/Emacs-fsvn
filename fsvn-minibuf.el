@@ -12,6 +12,7 @@
 
 
 (require 'fsvn-deps)
+(require 'fsvn-url)
 
 
 
