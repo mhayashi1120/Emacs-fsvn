@@ -1,5 +1,7 @@
 2011-02-10  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Fix: `fsvn-browse-diff-local' sequence is wrong.
+
 	* Fix: Save mark activated status in log list mode
 
 2011-02-09  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
