@@ -2362,7 +2362,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   "Same as `dired-diff'."
   (interactive (fsvn-browse-cmd-read-diff-local))
   (fsvn-browse-wc-only
-   (diff src-file dest-file switches)))
+   (diff dest-file src-file switches)))
 
 (defun fsvn-browse-rename-case-missing-file (file)
   "This occation if windows environment."

@@ -86,8 +86,9 @@
   (interactive)
   (when (y-or-n-p "Cleanup waste (non-active) buffer? ")
     (let ((count 0))
-      (setq count (+ count (fsvn-cleanup-temp-buffer)))
-      (setq count (+ count (fsvn-cleanup-result-buffer)))
+      (fsvn-window-with-cleanup
+        (setq count (+ count (fsvn-cleanup-temp-buffer)))
+        (setq count (+ count (fsvn-cleanup-result-buffer))))
       (cond
        ((= count 0)
         (message "No buffer was killed."))
@@ -553,6 +554,12 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
            (throw 'found b)))
        (buffer-list))
       nil)))
+
+(defun fsvn-redraw-file-fancy-status (file)
+  (let ((buffer (get-file-buffer file)))
+    (when buffer
+      (with-current-buffer buffer
+        (fsvn-ui-fancy-redraw)))))
 
 (defun fsvn-open-logview-mode (urlrev directory-p &optional rev-range count)
   "Open URLREV log buffer.

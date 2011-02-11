@@ -16,6 +16,7 @@
 (require 'fsvn-ui)
 (require 'fsvn-browse)
 (require 'fsvn-url)
+(require 'fsvn-xml)
 
 
 

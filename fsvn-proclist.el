@@ -391,7 +391,7 @@ Keybindings:
     (when process
       (let ((buffer (process-buffer process)))
         (unless buffer
-          (error "This process has not buffer"))
+          (error "This process has no buffer"))
         (display-buffer buffer)
         (with-current-buffer buffer
           (goto-char (point-max))

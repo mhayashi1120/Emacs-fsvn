@@ -12,6 +12,7 @@
 
 
 (require 'fsvn-mode)
+(require 'fsvn-url)
 
 
 

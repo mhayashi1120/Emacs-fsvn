@@ -32,21 +32,11 @@ freeze? deadlock?
 
 
 * logview-mode
-** fsvn-log-list-mode mark-active odd when showing details.
-
-log-list has function that edit message and sibling buffers when move line.
-This causes turning off `mark-active'.
-
-
 ** fsvn-open-logview-mode previous window setting makes odd.
 
 ** fsvn-log-view-mode after C-c C-k then return previous buffer, but previous fsvn-log-message-mode shown.
 
 ** restore window when another urlrev target
-
-** fsvn-log-list-revert-buffer
-
-revert forcely.
 
 ** fsvn-log-sibling-ediff-previous
 for directory

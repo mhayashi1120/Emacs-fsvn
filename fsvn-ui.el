@@ -629,6 +629,42 @@ Elements of the alist are:
    (or length 10)))
 
 
+;;
+;; window management
+;;
+
+(defun fsvn-window-setting ()
+  (mapcar 
+   (lambda (win)
+     (list win (window-buffer win))) 
+   (window-list)))
+
+(defun fsvn-window-setting-equal (s1 s2)
+  (equal s1 s2))
+
+(defun fsvn-window-setting-subtract (s1 s2)
+  (fsvn-mapitem
+   (lambda (x)
+     (unless (member x s2) x))
+   s1))
+
+(defun fsvn-window-cleanup (settings)
+  (mapc
+   (lambda (setting)
+     (let* ((win (nth 0 setting))
+            (buf (nth 1 setting)))
+       (unless (buffer-live-p buf)
+         (when (window-live-p win)
+           (delete-window win)))))
+   settings))
+
+(defmacro fsvn-window-with-cleanup (&rest form)
+  (declare (indent 0))
+  `(let ((SETTINGS (fsvn-window-setting)))
+     ,@form
+     (fsvn-window-cleanup SETTINGS)))
+
+
 
 ;;
 ;; mode line status (from psvn.el)
