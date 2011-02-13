@@ -653,8 +653,10 @@ Elements of the alist are:
    (lambda (setting)
      (let* ((win (nth 0 setting))
             (buf (nth 1 setting)))
-       (unless (buffer-live-p buf)
-         (when (window-live-p win)
+       (unless (or (buffer-live-p buf)
+                   (minibufferp buf))
+         (when (and (window-live-p win)
+                    (> (length (window-list)) 1))
            (delete-window win)))))
    settings))
 

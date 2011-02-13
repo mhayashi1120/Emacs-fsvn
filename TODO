@@ -117,6 +117,7 @@ proplist --recursive
 ** diff directory
 ** diff binary file invoke filter program. (Like OpenOffice file)
 
+** ediff different coding-system
 
 * Other
 ** improve the UI about read arguments (ex --targets like argument not necessary in completion)
