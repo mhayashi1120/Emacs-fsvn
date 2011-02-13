@@ -643,7 +643,8 @@ referenced mew-complete.el"
   (with-current-buffer buffer
     (save-excursion
       (goto-char (point-max))
-      (insert string))))
+      (let (buffer-read-only)
+        (insert string)))))
 
 (defun fsvn-text-buffer-line-as-list (&optional all)
   (let ((regexp (if all "^.*$" "^.+$"))

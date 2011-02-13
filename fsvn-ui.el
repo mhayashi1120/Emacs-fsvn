@@ -42,7 +42,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for directory headers."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-header-face 'fsvn-header-face
+
+(defvar fsvn-header-face 'fsvn-header-face
   "Face name used for directory headers.")
 
 (defface fsvn-header-key-face
@@ -51,7 +52,7 @@ This is what the do-commands look for, and what the mark-commands store.")
   :group 'fsvn-faces
   :version "22.1")
 
-(defconst fsvn-header-key-face 'fsvn-header-key-face
+(defvar fsvn-header-key-face 'fsvn-header-key-face
   "Face name used for directory headers.")
 
 (defface fsvn-mark-face
@@ -59,7 +60,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for fsvn marks."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-mark-face 'fsvn-mark-face
+
+(defvar fsvn-mark-face 'fsvn-mark-face
   "Face name used for fsvn marks.")
 
 (defface fsvn-marked-face
@@ -67,7 +69,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for marked files."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-marked-face 'fsvn-marked-face
+
+(defvar fsvn-marked-face 'fsvn-marked-face
   "Face name used for marked files.")
 
 (defface fsvn-flagged-face
@@ -75,7 +78,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for flagged files."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-flagged-face 'fsvn-flagged-face
+
+(defvar fsvn-flagged-face 'fsvn-flagged-face
   "Face name used for flagged files.")
 
 (defface fsvn-warning-face
@@ -83,7 +87,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used to highlight a part of a buffer that needs user attention."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-warning-face 'fsvn-warning-face
+
+(defvar fsvn-warning-face 'fsvn-warning-face
   "Face name used for a part of a buffer that needs user attention.")
 
 (defface fsvn-directory-face
@@ -91,7 +96,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for subdirectories."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-directory-face 'fsvn-directory-face
+
+(defvar fsvn-directory-face 'fsvn-directory-face
   "Face name used for subdirectories.")
 
 (defface fsvn-symlink-face
@@ -99,7 +105,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for subdirectories."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-symlink-face 'fsvn-symlink-face
+
+(defvar fsvn-symlink-face 'fsvn-symlink-face
   "Face name used for subdirectories.")
 
 (defface fsvn-ignored-face
@@ -107,7 +114,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for files suffixed with `completion-ignored-extensions'."
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-ignored-face 'fsvn-ignored-face
+
+(defvar fsvn-ignored-face 'fsvn-ignored-face
   "Face name used for files suffixed with `completion-ignored-extensions'.")
 
 (defface fsvn-keyname-face
@@ -115,7 +123,8 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for revision"
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-keyname-face 'fsvn-keyname-face
+
+(defvar fsvn-keyname-face 'fsvn-keyname-face
   "Face name used for revision.")
 
 (defface fsvn-link-face
@@ -123,8 +132,31 @@ This is what the do-commands look for, and what the mark-commands store.")
   "Face used for any link"
   :group 'fsvn-faces
   :version "22.1")
-(defconst fsvn-link-face 'fsvn-link-face
+
+(defvar fsvn-link-face 'fsvn-link-face
   "Face used for any link.")
+
+(defface fsvn-diff-add-face
+  '((((class color) (background light))
+     :foreground "blue1")
+    (((class color) (background dark))
+     :foreground "white"))
+  "Face for lines in a diff that have been added."
+  :group 'fsvn)
+
+(defvar fsvn-diff-add-face 'fsvn-diff-add-face
+  "Face used for added line in diff-mode")
+
+(defface fsvn-diff-delete-face
+  '((((class color) (background light))
+     :foreground "red")
+    (((class color) (background dark))
+     :foreground "OrangeRed"))
+  "Face for lines in a diff that have been deleted."
+  :group 'fsvn)
+
+(defvar fsvn-diff-delete-face 'fsvn-diff-delete-face
+  "Face used for deleted line in diff-mode")
 
 
 

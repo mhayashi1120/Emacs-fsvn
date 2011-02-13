@@ -1,3 +1,9 @@
+2011-02-13  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: diff buffer to read-only
+
+	* Add: Bit colorize diff
+
 2011-02-12  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Cleanup window error.
