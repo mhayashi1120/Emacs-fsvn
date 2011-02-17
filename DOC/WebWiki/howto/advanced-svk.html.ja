@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="ja" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-	<meta name="Content-Language" content="en"/>
+	<meta name="Content-Language" content="ja"/>
 	<meta http-equiv="Content-Style-Type" content="text/css"/>
 	<meta http-equiv="Content-Script-Type" content="text/javascript"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -15,47 +15,18 @@
 	<link rel="stylesheet" type="text/css" href="http://static.sourceforge.jp/css/print.css" media="print"/>
 	<link rel="stylesheet" href="default.css" media="all" />
 
-	<title>Install</title>
+	<title>fsvn での svk の使い方</title>
 
   </head>
   <body>
 	<a href="../index.html">Top</a>
 
-<h1>Install</h1>
-<h2>If you download archived file</h2>
-<h3>First of all, unpack archive file</h3>
+<h1>fsvn での svk の使い方</h1>
+<h2>設定</h2>
 <pre>
-tar xzf fsvn-(version).tar.gz
+(require 'fsvn-svk)
 </pre>
-<h3>If you have `make' command, `cd' to the directory where you unpacked fsvn.</h3>
-<h4>When to use on NTEmacs, read mw32cmp.el header to prepare.</h4>
-<h4>Edit MAKE-CFG.el and Makefile.</h4>
-<h4>Optionally invoke the following command show installed files where to go.</h4>
-<pre>
-make what-where
-</pre>
-<h4>Invoke the following command.</h4>
-<pre>
-make install
-</pre>
-<h3>If you have no `make' command simply copy *.el files to `load-path' where you want.</h3>
-<h2>If you download fsvn.el</h2>
-<h3>Copy the fsvn.el to load-path'ed directory.</h3>
-<h2>If you download fsvn.el.gz, fsvn.el.bz2.</h2>
-<h3>Unpack the archive file</h3>
-<pre>
-tar xzf fsvn.el.gz
-</pre>
-<h3>Copy the fsvn.el to load-path'ed directory.</h3>
-<h3>When to use on NTEmacs, read mw32cmp.el header to prepare.</h3>
-<h2>Settings of .emacs</h2>
-<pre>
-(require 'fsvn)
-</pre>
-<h2>Settings of .emacs (Option)</h2>
-<p><a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn">dot.sample</a></p>
-<h2>For more information.</h2>
-<p><a href="qa.html.en">Q and A</a></p>
+<h2>TODO</h2>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

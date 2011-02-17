@@ -31,6 +31,53 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
+;;TODO easy menu
+
+(defun fsvn-browse-cmd-read-diff-between-repository ()
+  (let ((default (fsvn-browse-point-repository-urlrev))
+        urlrev1 urlrev2 args)
+    (fsvn-brief-message-showing 
+     (setq urlrev1 (fsvn-completing-read-urlrev "URL1: " default t))
+     (fsvn-brief-message-add-message (format "URL1: %s" urlrev1))
+     (setq urlrev2 (fsvn-completing-read-urlrev "URL2: " urlrev1 t))
+     (fsvn-brief-message-add-message (format "URL2: %s" urlrev2))
+     (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
+     (list urlrev1 urlrev2 args))))
+
+(defun fsvn-browse-cmd-read-diff-with-branch ()
+  ;;TODO can change local filename.
+  (let* ((url1 (fsvn-browse-point-url))
+         (urlrev2 (fsvn-browse-point-repository-urlrev))
+         args)
+    (fsvn-brief-message-showing 
+     (fsvn-brief-message-add-message (format "Trunk: %s" url1))
+     (setq urlrev2 (fsvn-completing-read-urlrev "Branch: " urlrev2 t))
+     (fsvn-brief-message-add-message (format "Branch: %s" urlrev2))
+     (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
+     (list url1 urlrev2 args))))
+
+;; bound to = b
+(defun fsvn-browse-diff-with-branch (trunk branch-urlrev &optional args)
+  (interactive (fsvn-browse-cmd-read-diff-with-branch))
+  (fsvn-diff-start-files-process branch-urlrev trunk args))
+
+;; bound to = r
+(defun fsvn-browse-diff-between-repository (src-urlrev dest-urlrev &optional args)
+  (interactive (fsvn-browse-cmd-read-diff-between-repository))
+  (fsvn-diff-start-process dest-urlrev src-urlrev args))
+
+(add-hook 'fsvn-browse-mode-hook
+          (lambda ()
+            (define-key fsvn-browse-diff-map "r" 'fsvn-browse-diff-between-repository)
+            (define-key fsvn-browse-diff-map "b" 'fsvn-browse-diff-with-branch)))
+
+;;TODO
+(defun fsvn-browse-merge-from-branch ()
+  (interactive)
+  )
+
+
+
 (defcustom fsvn-browse-guessed-moved-parent-threshold 4
   "*"
   :group 'fsvn
@@ -250,12 +297,17 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
+;; TODO grep svn log 
+;;  async incremental search? what ui is?
+
+
+
 (defvar fsvn-bugreport-mail-address "mhayashi1120@gmail.com")
 
 ;;TODO
 (defvar fsvn-bugreport-salutation
   "
-# If you are a Japanese, please write in Japanese:-)
+# If you are a Japanese, please write in Japanese.
 
 Describe bug below, using a precise recipe.
 
@@ -362,21 +414,31 @@ How to send a bug report:
 
 
 
+(define-minor-mode fsvn-log-diff-minor-mode 
+  ""
+  nil nil nil
+  )
+
+;;TODO advice to fsvn-log-list-draw-details?
+;; fsvn-log-list-subwindow-display-p
+;; fsvn-log-list-draw-details
+;; fsvn-log-list-set-subwindow-config
+
+(defun fsvn-log-diff-turn-on ()
+  ;;TODO
+  )
+
+(define-globalized-minor-mode fsvn-log-diff-global-minor-mode fsvn-log-diff-minor-mode 
+  fsvn-log-diff-turn-on
+  )
+
+
+
 ;;TODO git -> svn
 ;; change svn:date revprop
 ;; this means can sort to svn:date in log-list
 
 
-
-(defmacro fsvn-test-buffer-has (buffer regexp)
-  `(with-current-buffer ,buffer
-     (save-excursion
-       (goto-char (point-min))
-       (unless (re-search-forward ,regexp nil t)
-         (error "Assertion failed Expected %s have not found" ,regexp)))))
-
-
-
 
 ;; background gardian
 ;; status `preparing' `prepared' `invoking'?? `done'

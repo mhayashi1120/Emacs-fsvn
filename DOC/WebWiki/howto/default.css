@@ -4,7 +4,7 @@ body {
         left: 20px;
         margin-top: 20px;
         margin-left: 0px;
-        width: 600px;
+        width: 800px;
         font-family: sans-serif;
         }
 
@@ -22,23 +22,23 @@ h2 {
      }
 
 h3 {
-     padding: 0px 0px 0px 20px;
+     padding: 0px 0px 0px 10px;
      font-size: normal;
      }
 
 h4 {
-     padding: 0px 0px 0px 30px;
+     padding: 0px 0px 0px 20px;
      font-size: normal;
      }
 
 h5 {
-     padding: 0px 0px 0px 35px;
+     padding: 0px 0px 0px 25px;
      font-size: normal;
      }
 
 h6 {
      font-weight: normal;
-     padding: 0px 0px 0px 40px;
+     padding: 0px 0px 0px 30px;
      font-size: small;
      }
 

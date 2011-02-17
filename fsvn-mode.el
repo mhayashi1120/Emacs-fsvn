@@ -194,6 +194,7 @@
   (buffer-local-value 'major-mode buffer))
 
 (defmacro fsvn-each-buffer-mode (major &rest form)
+  (declare (indent 1))
   `(let (RET)
      (mapc
       (lambda (b)
@@ -313,6 +314,7 @@ Optional prefix ARG says how many lines to move; default is one line."
 (defmacro fsvn-save-browse-directory-excursion (dir &rest form)
   "Goto DIR and execute FORM with no point move.
 "
+  (declare (indent 1))
   `(let ((PREV-MARKER (point-marker))
          (BUFFER (fsvn-local-directory-buffer ,dir)))
      (when BUFFER
@@ -328,6 +330,7 @@ Optional prefix ARG says how many lines to move; default is one line."
 (defmacro fsvn-save-browse-file-excursion (file &rest form)
   "Goto FILE and execute FORM with no point move.
 "
+  (declare (indent 1))
   `(let ((DIR (fsvn-file-name-directory ,file)))
      (fsvn-save-browse-directory-excursion DIR
        (save-excursion
@@ -403,12 +406,6 @@ Optional prefix ARG says how many lines to move; default is one line."
                   (kill-buffer buffer)
                   (when (buffer-live-p ,(current-buffer))
                     (switch-to-buffer ,(current-buffer))))))
-
-
-
-(put 'fsvn-save-browse-directory-excursion 'lisp-indent-function 1)
-(put 'fsvn-save-browse-file-excursion 'lisp-indent-function 1)
-(put 'fsvn-each-buffer-mode  'lisp-indent-function 1)
 
 
 

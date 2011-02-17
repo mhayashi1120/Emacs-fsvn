@@ -265,7 +265,7 @@ Please call `fsvn-initialize-loading' function.
               args applicant)
           (when arg
             (save-excursion
-              (let ((start (save-excursion (forward-line 0) (point)))
+              (let ((start (line-beginning-position))
                     (end
                      (if (re-search-forward "^[ ]\\{2\\}-" nil t)
                          (progn (forward-line 0) (point))

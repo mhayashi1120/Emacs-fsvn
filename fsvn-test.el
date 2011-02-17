@@ -33,6 +33,32 @@
        (error "Assertion failed Expected non-nil but `nil'"))
      RET))
 
+(defmacro fsvn-test-buffer-has (buffer regexp)
+  `(progn
+     (with-current-buffer ,(cond ((processp buffer) (process-buffer buffer)) (t buffer))
+       (save-excursion
+         (goto-char (point-min))
+         (unless (re-search-forward ,regexp nil t)
+           (error "Assertion failed Expected %s have not found" ,regexp))))
+     buffer))
+
+(defmacro fsvn-test-new-popup-buffer-has (regexp &rest form)
+  (declare (indent 1))
+  `(let ((FIRST (buffer-list)))
+     (progn ,@form)
+     (let ((popup
+            (catch 'found
+              (mapc
+               (lambda (b)
+                 (unless (memq b FIRST)
+                   (with-current-buffer b
+                     (when (eq major-mode 'fsvn-popup-result-mode)
+                       (throw 'found b)))))
+               (buffer-list))
+              nil)))
+       (when (bufferp popup)
+         (fsvn-test-buffer-has popup ,regexp)))))
+
 (defvar fsvn-test-keep-buffers nil)
 (defvar fsvn-test-sit-for-interval 0)
 
@@ -389,14 +415,14 @@ To show and see result.
     (write-region "ignore" nil ignore-file)
     (fsvn-browse-prop-add-svn:ignore-selected (list ignore-file))
     (fsvn-browse-add-selected (nreverse list))
-    (fsvn-test-quick-commit "add file" wc1-dir)  ;; revision 1
+    (fsvn-test-quick-commit "add file" wc1-dir) ;; revision 1
     (revert-buffer)
     (fsvn-browse-goto-file file1)
     (fsvn-browse-info-path)
     (fsvn-test-sit-for)
     (fsvn-browse-next-file 1) ;; move to file2
     (fsvn-test-sit-for)
-    (fsvn-browse-mark-file-mark) ;; mark file2
+    (fsvn-browse-mark-file-mark)   ;; mark file2
     (fsvn-browse-mark-file-delete) ;; delete mark file3
     (fsvn-test-sit-for)
     (fsvn-test-equal (fsvn-browse-cmd-selected-urls) (list file2))
@@ -416,14 +442,14 @@ To show and see result.
     (fsvn-browse-mkdir dir2)
     ;; delete a file
     (fsvn-browse-delete-selected (list file1))
-    (fsvn-test-quick-commit "delete file" wc1-dir)  ;; revision 2
+    (fsvn-test-quick-commit "delete file" wc1-dir) ;; revision 2
     (revert-buffer)
     (fsvn-test-sit-for)
     ;; modify a file
     (write-region "Z" nil file2 t)
     (fsvn-browse-diff-this file2)
-    (fsvn-test-quick-commit "modify file" wc1-dir)  ;; revision 3
-    (revert-buffer)
+    (fsvn-test-quick-commit "modify file" wc1-dir) ;; revision 3
+    (call-interactively 'revert-buffer)
     (fsvn-test-sit-for)
     ;; revert a file
     (write-region "Y" nil file3 t)
@@ -435,9 +461,11 @@ To show and see result.
     (fsvn-browse-toggle-sort)
     (fsvn-test-sit-for)
     ;; lock and unlock file
-    (fsvn-browse-lock-selected (list file3))
+    (fsvn-test-new-popup-buffer-has "locked"
+      (fsvn-browse-lock-selected (list file3)))
     (fsvn-test-sit-for)
-    (fsvn-browse-unlock-selected (list file3))
+    (fsvn-test-new-popup-buffer-has "unlocked"
+      (fsvn-browse-unlock-selected (list file3)))
     (fsvn-test-sit-for)
     ;; info
     (fsvn-browse-info-path)
@@ -494,8 +522,8 @@ To show and see result.
         (fsvn-test-non-nil (file-regular-p magic2))
         (fsvn-test-non-nil (file-remote-p magic2))
         (fsvn-test-nil (file-writable-p magic2))
-;;      (file-executable-p           magic2)
-;;      (fsvn-test-nil (file-symlink-p magic2))
+        ;;      (file-executable-p           magic2)
+        ;;      (fsvn-test-nil (file-symlink-p magic2))
         (insert-file-contents magic2)
         (fsvn-test-equal (buffer-string) "B")
         )
@@ -546,26 +574,70 @@ To show and see result.
     (insert "z")
     (save-buffer)
     ;;todo
-;;     (let ((proc (fsvn-browse-update-path)))
-;;       (while (eq (process-status proc) 'run)
-;;      (sit-for 0.5))
-;;       (process-send-string proc "p"))
-      ;;todo
-      ;;       (fsvn-set-revprop-value (fsvn-url-urlrev url 2) 
+    ;;     (let ((proc (fsvn-browse-update-path)))
+    ;;       (while (eq (process-status proc) 'run)
+    ;;      (sit-for 0.5))
+    ;;       (process-send-string proc "p"))
+    ;;todo
+    ;;       (fsvn-set-revprop-value (fsvn-url-urlrev url 2) 
     )
    (fsvn-test-async
+    ;; open by browse-mode
     (dired wc3-dir)
+    (fsvn-test-equal major-mode 'dired-mode)
     (fsvn-checkout repos-url)
+    ;; switch to fsvn-browse-mode
     (fsvn-dired-toggle-browser)
+    (fsvn-test-equal major-mode 'fsvn-browse-mode)
     (fsvn-test-sit-for)
+    ;; switch to dired
+    (fsvn-dired-toggle-browser)
+    (fsvn-test-equal major-mode 'dired-mode)
+    (fsvn-dired-toggle-browser)
+    ;; check Log List Mode executable
     (fsvn-browse-logview-path)
     (fsvn-test-sit-for)
+    (call-interactively 'fsvn-log-list-next-line)
+    (fsvn-test-sit-for)
+    (call-interactively 'fsvn-log-list-previous-line)
+    (fsvn-test-sit-for)
+    ;; mark two
+    (fsvn-log-list-mark-put-mark)
+    (fsvn-log-list-mark-put-mark)
+    ;; first of mark
+    (fsvn-log-list-previous-line 3)
+    ;; skip mark
+    (fsvn-log-list-next-mark)
+    (fsvn-log-list-next-mark)
+    (fsvn-log-list-previous-mark)
+    (fsvn-log-list-previous-mark)
+    ;; unmark all
+    (fsvn-log-list-mark-unmark)
+    (fsvn-log-list-mark-unmark)
+    ;; show log details
+    (fsvn-log-list-previous-line 2)
+    ;; TODO cannot noninteractive test?
+    ;; (call-interactively 'fsvn-log-list-show-details)
+    (call-interactively 'fsvn-log-list-propview-this)
+    (call-interactively 'fsvn-restore-previous-window-setting)
+    ;; quit log list
     (fsvn-log-list-quit)
     (fsvn-test-sit-for)
+    ;; check Property List Mode executable
     (fsvn-browse-propview-path)
     (fsvn-test-sit-for)
-    (fsvn-restore-previous-window-setting)
+    (call-interactively 'fsvn-proplist-next-line)
     (fsvn-test-sit-for)
+    (call-interactively 'fsvn-proplist-previous-line)
+    (fsvn-test-sit-for)
+    (call-interactively 'fsvn-proplist-show-value)
+    (fsvn-test-sit-for)
+    (call-interactively 'fsvn-restore-previous-window-setting)
+    (fsvn-test-sit-for)
+    ;; back to browse buffer
+    (call-interactively 'fsvn-browse-propview-this)
+    (call-interactively 'fsvn-restore-previous-window-setting)
+    ;; check Commit buffer
     (fsvn-browse-commit-path)
     (fsvn-test-sit-for)
     (fsvn-parasite-quit)

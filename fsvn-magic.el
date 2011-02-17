@@ -273,6 +273,7 @@ FIXME Does Emacs have list like this? "
     nil)))
 
 (defmacro fsvn-magic-each-directory-entry (directory ls-var &rest form)
+  (declare (indent 2))
   `(let ((DIR (fsvn-magic-parse-file-name ,directory))
          LIST RET TMP)
      (when (fsvn-magic-file-directory-p ,directory)
@@ -876,10 +877,6 @@ But `fsvn-magic-get-ls-entry' is not perfect for under repository root directori
     (when (and buffer-file-name (fsvn-magic-file-name-absolute-p buffer-file-name))
       (setq find-file-hook nil))
     ad-do-it))
-
-
-
-(put 'fsvn-magic-each-directory-entry 'lisp-indent-function 2)
 
 
 

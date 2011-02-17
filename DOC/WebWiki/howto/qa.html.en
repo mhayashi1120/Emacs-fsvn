@@ -33,6 +33,12 @@
 If possible, to use ssh-agent program when access by svn+ssh protcol. If using windows and putty, should be pageant.</p>
 </div>
 </div>
+<div id="q-auth-0002">
+<dl>
+<dt>Q. Not works authentication on Windows.</dt>
+<dd>A. I can't do well about windows terminal. You would have boot cmd.exe and execute svn command manually, to cache password information. Note: I use fsvn on NTEmacs 23 and Meadow 3, so you can. ;-) For more information, please read the source code.</dd>
+</dl>
+</div>
 <div id="q-general-0001">
 <dl>
 <dt>Q. A lot of buffer are too noisy.</dt>
@@ -55,6 +61,12 @@ If possible, to use ssh-agent program when access by svn+ssh protcol. If using w
 <dl>
 <dt>Q. How to disable fsvn feature?</dt>
 <dd>A. M-x fsvn-toggle-feature</dd>
+</dl>
+</div>
+<div id="q-general-0005">
+<dl>
+<dt>Q. Slow down Emacs when commit a lot of files.</dt>
+<dd>A. That is known bug.</dd>
 </dl>
 </div>
 <div id="q-browse-0001">

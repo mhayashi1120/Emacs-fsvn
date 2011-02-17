@@ -42,6 +42,7 @@ Argument SEQUENCE see `mapcar'."
 
 (defmacro fsvn-loop (loop-count &rest form)
   "Execute FORM LOOP-COUNT times. LOOP-IDX is bound in FORM."
+  (declare (indent 1))
   `(let ((LOOP-IDX 0))
      (while (< LOOP-IDX ,loop-count)
        ,@form
@@ -56,6 +57,7 @@ Argument SEQUENCE see `mapcar'."
 (defmacro fsvn-save-window-only (window &rest form)
   "Execute FORM just like `progn' in WINDOW.
 Save selected window, not contain point."
+  (declare (indent 1))
   `(let ((RETURN-WINDOW (get-buffer-window (current-buffer))))
      (unwind-protect
          (progn
@@ -402,6 +404,7 @@ Use %% to put a single % into the output.
      spec)))
 
 (defmacro fsvn-defstruct (type &rest spec)
+  (declare (indent 1))
   `(progn
      (fsvn-defstruct-constructor ,type ,@spec)
      (fsvn-defstruct-s/getter ,type ,@spec)))
@@ -527,7 +530,7 @@ Use %% to put a single % into the output.
 (defun fsvn-make-temp-buffer ()
   (let (tmp ret)
     (while (get-buffer (setq tmp (make-temp-name fsvn-temp-buffer-prefix))))
-    (setq ret (generate-new-buffer tmp))
+    (setq ret (get-buffer-create tmp))
     (with-current-buffer ret
       (set (make-local-variable 'fsvn-temp-buffer-p) t))
     ret))
@@ -648,7 +651,7 @@ referenced mew-complete.el"
 
 (defun fsvn-text-buffer-line-as-list (&optional all)
   (let ((regexp (if all "^.*$" "^.+$"))
-        ret )
+        ret)
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
@@ -676,10 +679,6 @@ referenced mew-complete.el"
 (put 'fsvn-command-error 'error-message "Executing error.")
 
 
-
-(put 'fsvn-loop 'lisp-indent-function 1)
-(put 'fsvn-defstruct 'lisp-indent-function 1)
-(put 'fsvn-save-window-only 'lisp-indent-function 1)
 
 (provide 'fsvn-env)
 

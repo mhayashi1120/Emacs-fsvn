@@ -1,4 +1,38 @@
+2011-02-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Remove calling font-lock function as long as i can.
+
+2011-02-17  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: Move all run-mode-hooks to switching major-mode function.
+
+	* Add: Instead of that, all fsvn major-mode have MAJOR-MODE-prepared-hook
+	       that run after set buffer-local-variable and displayed buffer contents.
+
+	   New features are followings
+		fsvn-browse-mode-prepared-hook
+		fsvn-log-list-mode-prepared-hook
+		fsvn-log-message-mode-prepared-hook
+		fsvn-log-sibling-mode-prepared-hook
+		fsvn-message-edit-mode-prepared-hook
+		fsvn-process-list-mode-prepared-hook
+		fsvn-proplist-mode-prepared-hook
+		fsvn-select-file-mode-prepared-hook
+
+	* Fix: misunderstand url that contains `@'.
+
+2011-02-14  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Refactor: Highlighting sibling use overlay.
+	            Devide to functions drawing list.
+
 2011-02-13  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improve: Asynchronous log list.
+
+	* Fix: Violate conventions. `post-command-hook' to local variable.
+
+	* Change: Only guessed coding-system in local file system.
 
 	* Change: diff buffer to read-only
 

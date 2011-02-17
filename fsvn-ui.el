@@ -488,7 +488,7 @@ Keybindings:
 (defun fsvn-electric-next-line (&optional arg)
   (interactive "p")
   (forward-line arg)
-  (when (and (= (point-max) (point)) fsvn-electric-next-data-function)
+  (when fsvn-electric-next-data-function
     (fsvn-electric-call-next-data)))
 
 
@@ -557,6 +557,7 @@ Elements of the alist are:
      files)))
 
 (defmacro fsvn-electric-fs-prepare-list (base-directory prompt &rest form)
+  (declare (indent 2))
   `(let ((buffer (get-buffer-create fsvn-electric-select-file-list-buffer-name)))
      (with-current-buffer buffer
        (set (make-local-variable 'font-lock-defaults)
@@ -568,7 +569,7 @@ Elements of the alist are:
          ,@form)
        (font-lock-mode 1)
        (font-lock-fontify-buffer)
-       (run-mode-hooks 'fsvn-electric-line-select-mode-hook))
+       (run-hooks 'fsvn-electric-line-select-mode-hook))
      (fsvn-electric-line-select buffer ,prompt)))
 
 (defun fsvn-electric-select-file-current-name ()
@@ -670,15 +671,6 @@ Elements of the alist are:
    (lambda (win)
      (list win (window-buffer win))) 
    (window-list)))
-
-(defun fsvn-window-setting-equal (s1 s2)
-  (equal s1 s2))
-
-(defun fsvn-window-setting-subtract (s1 s2)
-  (fsvn-mapitem
-   (lambda (x)
-     (unless (member x s2) x))
-   s1))
 
 (defun fsvn-window-cleanup (settings)
   (mapc
@@ -820,8 +812,6 @@ static char * data[] = {
      ,var))
 
 
-
-(put 'fsvn-electric-fs-prepare-list 'lisp-indent-function 2)
 
 (provide 'fsvn-ui)
 

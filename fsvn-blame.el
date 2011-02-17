@@ -379,7 +379,7 @@ a b => bbb bba bab baa abb aba aaa aab"
             (when flg
               (fsvn-blame-create-overlay-internal 
                prev-end
-               (save-excursion (forward-line -1) (point)) prev-rev face-alist)
+               (line-beginning-position 0) prev-rev face-alist)
               (setq flg nil))
             (setq prev-end (point)))
            (t
@@ -542,7 +542,7 @@ a b => bbb bba bab baa abb aba aaa aab"
 (defun fsvn-blame-get-subwindow-buffer ()
   (let ((buffer fsvn-blame-subwindow-buffer))
     (unless (and buffer (buffer-live-p buffer))
-      (setq buffer (generate-new-buffer fsvn-blame-subwindow-buffer-name))
+      (setq buffer (get-buffer-create fsvn-blame-subwindow-buffer-name))
       (with-current-buffer buffer
         (fsvn-blame-subwindow-mode)))
     (setq fsvn-blame-subwindow-buffer buffer)))

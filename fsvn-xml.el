@@ -77,10 +77,6 @@
      (property
       ((name . identity) (encoding . identity))))))
 
-(defconst fsvn-xml-proplist-multiple-nodes
-  '((properties target)
-    (properties target property)))
-
 (defconst fsvn-xml-info-dtd-alist
   '(info
     nil
@@ -100,9 +96,6 @@
       (schedule nil . intern)
       (depth nil . intern)))))
 
-(defconst fsvn-xml-info-multiple-nodes
-  '((info entry)))
-
 (defconst fsvn-xml-ls-dtd-alist
   '(lists
     nil
@@ -121,9 +114,6 @@
        (token nil . t)
        (owner nil . t)
        (created nil . fsvn-svn-parse-date))))))
-
-(defconst fsvn-xml-ls-multiple-nodes
-  '((lists list entry)))
 
 (defconst fsvn-xml-status-entry-dtd-alist
   '(entry
@@ -163,28 +153,23 @@
      (against
       ((revision . string-to-number))))))
 
-(defconst fsvn-xml-status-multiple-nodes
-  '((status target)
-    (status changelist)))
+(defconst fsvn-xml-logentry-dtd-alist
+  '(logentry
+    ((revision . string-to-number))
+    (date nil . fsvn-svn-parse-date)
+    (author nil . t)
+    (paths
+     nil
+     (path
+      ((action . identity)
+       (copyfrom-rev . string-to-number))
+      . t))
+    (msg nil . t)))
 
 (defconst fsvn-xml-log-dtd-alist
-  '(log
+  `(log
     nil
-    (logentry
-     ((revision . string-to-number))
-     (date nil . fsvn-svn-parse-date)
-     (author nil . t)
-     (paths
-      nil
-      (path
-       ((action . identity)
-        (copyfrom-rev . string-to-number))
-       . t))
-     (msg nil . t))))
-
-(defconst fsvn-xml-log-multiple-nodes
-  '((log logentry)
-    (log logentry paths)))
+    ,fsvn-xml-logentry-dtd-alist))
 
 (defconst fsvn-xml-blame-dtd-alist
   '(blame
@@ -197,10 +182,6 @@
        ((revision . string-to-number))
        (author nil . t)
        (date nil . fsvn-svn-parse-date))))))
-
-(defconst fsvn-xml-blame-multiple-nodes
-  '((blame target)
-    (blame target entry)))
 
 
 
@@ -604,6 +585,10 @@ if dtd is list call this function recursively.
              (throw 'found matched))))))
      (fsvn-xml-node-children node))
     nil))
+
+(defun fsvn-xml-parse-logentry-item (start end)
+  (let ((node (xml-parse-region start end)))
+    (fsvn-xml-processor (car node) fsvn-xml-logentry-dtd-alist)))
 
 (defun fsvn-xml-parse-logentry ()
   (let ((xml (xml-parse-region (point-min) (point-max))))

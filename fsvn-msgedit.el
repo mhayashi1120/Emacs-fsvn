@@ -57,6 +57,11 @@
   :group 'fsvn
   :type 'hook)
 
+(defcustom fsvn-message-edit-mode-prepared-hook nil
+  "*Run at the very end of `fsvn-message-edit-mode' is prepared."
+  :group 'fsvn
+  :type 'hook)
+
 ;; * fsvn-message-edit-mode internal function
 
 (defun fsvn-message-edit-mode ()
@@ -75,7 +80,8 @@ Keybindings:
   (setq buffer-undo-list nil)
   (setq buffer-read-only nil)
   (fsvn-make-buffer-variables fsvn-message-edit-buffer-local-variables)
-  (erase-buffer))
+  (erase-buffer)
+  (run-mode-hooks 'fsvn-message-edit-mode-hook))
 
 (defun fsvn-message-edit-generate-buffer ()
   (generate-new-buffer fsvn-message-edit-buffer-name))

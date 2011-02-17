@@ -291,6 +291,11 @@
   :group 'fsvn
   :type 'hook)
 
+(defcustom fsvn-browse-mode-prepared-hook nil
+  "*Run at the very end of `fsvn-browse-mode' is prepared."
+  :group 'fsvn
+  :type 'hook)
+
 (defcustom fsvn-browse-before-commit-hook nil
   "*Run before prepared file-select-buffer.  Called with a list argument as filenames."
   ;; TODO called one arg then type is not hook?
@@ -320,8 +325,7 @@ Keybindings:
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-browse-buffer-local-variables)
   (fsvn-browse-setup-mode-line)
-  (font-lock-mode 1)
-  (font-lock-fontify-buffer))
+  (run-mode-hooks 'fsvn-browse-mode-hook))
 
 (defconst fsvn-browse-dired-confirm-alist
   '(
@@ -524,6 +528,17 @@ STATUS `t' means force to add entry."
         (fsvn-browse-add-wc-raw-entry dir filename file status-entry)
         nil))))
 
+(defun fsvn-browse-add-file-entry (file)
+  (save-excursion
+    (unless (fsvn-current-filename)
+      (unless (fsvn-browse-goto-first-file)
+        (goto-char (point-max))))
+    (forward-line 0)
+    (let (buffer-read-only)
+      (fsvn-browse-ls-insert-wc-entry file))
+    (fsvn-move-to-filename)
+    (set-buffer-modified-p nil)))
+
 (defun fsvn-browse-add-wc-raw-entry (dir filename file &optional status-entry)
   (catch 'done
     (fsvn-browse-each-file f dir
@@ -544,11 +559,8 @@ STATUS `t' means force to add entry."
       (fsvn-browse-remove-current-entry))))
 
 (defun fsvn-browse-remove-current-entry ()
-  (let (buffer-read-only start end)
-    (forward-line 0)
-    (setq start (point))
-    (setq end (save-excursion (forward-line 1) (point)))
-    (delete-region start end)))
+  (let (buffer-read-only)
+    (delete-region (line-beginning-position) (line-beginning-position 2))))
 
 (defun fsvn-browse-ls-insert-repos-entry (entry)
   (let ((dirp (eq (fsvn-xml-lists->list->entry.kind entry) 'dir))
@@ -636,6 +648,7 @@ STATUS `t' means force to add entry."
   "Move point and execute FORM.
 VAR set `fsvn-current-filename'
 PATH is each executed path."
+  (declare (indent 2))
   `(save-excursion
      (let (,var RET)
        (when (fsvn-browse-goto-directory (or ,path (fsvn-browse-current-path)))
@@ -829,6 +842,7 @@ PATH is each executed path."
   (fsvn-browse-put-status-internal file mark 5))
 
 (defmacro fsvn-browse-with-move-status (file column &rest form)
+  (declare (indent 2))
   `(save-excursion
      (when (fsvn-browse-goto-file ,file)
        (forward-line 0)
@@ -935,7 +949,7 @@ PATH is each executed path."
   (set-visited-file-modtime (current-time))
   (setq buffer-read-only t)
   (switch-to-buffer (current-buffer))
-  (run-mode-hooks 'fsvn-browse-mode-hook))
+  (run-hooks 'fsvn-browse-mode-prepared-hook))
 
 (defun fsvn-browse-draw-repos-directory (directory-urlrev &optional type)
   (let (buffer info comparer)
@@ -1223,6 +1237,7 @@ PATH is each executed path."
     t))
 
 (defmacro fsvn-browse-open-message-edit (buffer &rest form)
+  (declare (indent 1))
   `(let ((ROOT fsvn-buffer-repos-root)
          (WIN-CONFIGURE (current-window-configuration)))
      (with-current-buffer ,buffer
@@ -1230,7 +1245,7 @@ PATH is each executed path."
        (setq fsvn-previous-window-configuration WIN-CONFIGURE)
        (setq fsvn-buffer-repos-root ROOT)
        ,@form
-       (run-mode-hooks 'fsvn-message-edit-mode-hook))))
+       (run-hooks 'fsvn-message-edit-mode-prepared-hook))))
 
 (defmacro fsvn-browse-quick-message-edit (&rest form)
   `(let ((buffer (fsvn-message-edit-generate-buffer)))
@@ -1252,7 +1267,7 @@ PATH is each executed path."
       (fsvn-parasite-add-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
-      (run-mode-hooks 'fsvn-select-file-mode-hook))
+      (run-hooks 'fsvn-select-file-mode-prepared-hook))
     (fsvn-parasite-add-setup-window select-buffer)))
 
 (defun fsvn-browse-commit-mode (files args)
@@ -1274,7 +1289,7 @@ PATH is each executed path."
       (fsvn-parasite-commit-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
-      (run-mode-hooks 'fsvn-select-file-mode-hook))
+      (run-hooks 'fsvn-select-file-mode-prepared-hook))
     (fsvn-browse-open-message-edit msgedit-buffer
       (setq fsvn-message-edit-file-select-buffer select-buffer)
       (fsvn-parasite-commit-mode 1)
@@ -1728,13 +1743,13 @@ PATH is each executed path."
    (let ((args (fsvn-cmd-read-subcommand-args "mergeinfo" fsvn-default-args-mergeinfo)))
      (list args))))
 
-(defun fsvn-browse-cmd-read-branch/tag (default-dirname)
+(defun fsvn-browse-cmd-read-branch/tag (prompt default-dirname)
   (let ((repos-url (fsvn-browse-current-repository-url))
         dest-url args)
-    (setq repos-url (fsvn-read-url-with-revision "URL: "  repos-url))
+    (setq repos-url (fsvn-read-url-with-revision "Source URL: "  repos-url))
     (when (string-match "^\\(.*\\)/trunk" repos-url)
       (setq dest-url (concat (match-string 1 repos-url) "/" default-dirname "/")))
-    (setq dest-url (fsvn-completing-read-url "Branch/Tag URL: " dest-url t))
+    (setq dest-url (fsvn-completing-read-url (format "New %s URL: " prompt) dest-url t))
     (setq args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy))
     (list repos-url dest-url args)))
 
@@ -2172,14 +2187,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   "Create branch executing `copy'.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
-  (interactive (fsvn-browse-cmd-read-branch/tag "branches"))
+  (interactive (fsvn-browse-cmd-read-branch/tag "Branch" "branches"))
   (fsvn-browse-copy-this-in-repository urlrev branch-url args))
 
 (defun fsvn-browse-create-tag (urlrev tag-url &optional args)
   "Create tag executing `copy'.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
-  (interactive (fsvn-browse-cmd-read-branch/tag "tags"))
+  (interactive (fsvn-browse-cmd-read-branch/tag "Tag" "tags"))
   (fsvn-browse-copy-this-in-repository urlrev tag-url args))
 
 (defun fsvn-browse-copy-this-in-repository (from-url to-url &optional args)
@@ -2536,10 +2551,6 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
   fsvn-browse-mode-menu-spec)
 
 
-
-(put 'fsvn-browse-each-file 'lisp-indent-function 2)
-(put 'fsvn-browse-with-move-status 'lisp-indent-function 2)
-(put 'fsvn-browse-open-message-edit 'lisp-indent-function 1)
 
 (provide 'fsvn-browse)
 

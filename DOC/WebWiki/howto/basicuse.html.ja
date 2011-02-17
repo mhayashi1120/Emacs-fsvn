@@ -23,16 +23,34 @@
 
 <h1>基本的な使い方</h1>
 <h2>まず最初に</h2>
-<p>リポジトリへのアクセスにパスワードが必要な場合、認証情報を svn コマンドにキャッシュしてもらわないと動作しません。</p>
+<h3>.emacs 設定</h3>
+<p>可能であれば以下のファイルの設定を .emacs にしてください。
+<a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn">dot.sample</a></p>
+<h3>認証</h3>
+<p>fsvn はリポジトリへのアクセスにパスワードが必要な場合、認証情報を svn コマンドにキャッシュしてもらわないと動作しません。</p>
 <pre>
 M-x fsvn-authenticate-repository
 </pre>
 <p>で操作する対象のリポジトリ(URL)を指定し、パスワードを入力してください。</p>
-<h2>`fsvn-browse-mode'でよく使うコマンド</h2>
+<h3>基本操作1</h3>
+<p>fsvn は出力結果を表示するバッファを大量に作ります。作られたバッファをまとめて削除するには以下のコマンドを実行してください。</p>
+<pre>
+M-x fsvn-global-cleanup-buffer
+</pre>
+<p>サンプルの設定では C-x v M-c に設定されています。</p>
+<h2>Fsvn Browse</h2>
+<h3>概要</h3>
+<p>ディレクトリに .svn ディレクトリが含まれる場合に dired の替わりに起動します。
+dired の操作に似せていますが、完全に同じ訳ではありません。</p>
+<h3>よく使うコマンド</h3>
 <table>
 <tr>
-<td>z U (C-c C-u)</td>
+<td>C-c C-u</td>
 <td>現在のディレクトリを更新する (update)</td>
+</tr>
+<tr>
+<td>C-c C-c</td>
+<td>現在のディレクトリ配下にあるファイルを commit するための確認バッファ `Fsvn Select File' を開く (commit)</td>
 </tr>
 <tr>
 <td>z a</td>
@@ -44,23 +62,19 @@ M-x fsvn-authenticate-repository
 </tr>
 <tr>
 <td>z c</td>
-<td>カーソル位置、またはマークしたファイルの確認バッファ `fsvn-select-file-mode' を開く (commit)</td>
-</tr>
-<tr>
-<td>z C (C-c C-c)</td>
-<td>現在のディレクトリの確認バッファ `fsvn-select-file-mode' を開く (commit)</td>
+<td>カーソル位置、またはマークしたファイルの確認バッファ `Fsvn Select File' を開く (commit)</td>
 </tr>
 <tr>
 <td>z L</td>
-<td>現在のディレクトリのログを `fsvn-log-view-mode' で表示する (log)</td>
+<td>現在のディレクトリのログを `Fsvn Log View' で表示する (log)</td>
 </tr>
 <tr>
 <td>z l</td>
-<td>カーソル位置のファイルのログを `fsvn-log-view-mode' で表示する (log)</td>
+<td>カーソル位置のファイルのログを `Fsvn Log View' で表示する (log)</td>
 </tr>
 <tr>
 <td>z p</td>
-<td>`fsvn-proplist-mode' によるカーソル位置のファイルのプロパティの表示する (proplist)</td>
+<td>`Fsvn Proplist' によるカーソル位置のファイルのプロパティの表示する (proplist)</td>
 </tr>
 <tr>
 <td>C-c C-v C-c</td>
@@ -95,7 +109,12 @@ M-x fsvn-authenticate-repository
 <td>`dired-mode' へ切り替える</td>
 </tr>
 </table>
-<h2>`fsvn-message-edit-mode', `fsvn-select-file-mode'でよく使うコマンド (commit 時など)</h2>
+<h3>詳細な使い方</h3>
+<p><a href="advanced-browse.html.ja">Browse Mode の詳しい使い方</a></p>
+<h2>Fsvn Message Edit, Fsvn Select File (commit 時など)</h2>
+<h3>概要</h3>
+<p>ファイルを選択して commit 用メッセージを入力することができます。</p>
+<h3>よく使うコマンド</h3>
 <table>
 <tr>
 <td>C-c C-c</td>
@@ -111,14 +130,17 @@ M-x fsvn-authenticate-repository
 </tr>
 <tr>
 <td>= =</td>
-<td>対象ファイルがバージョン管理下にある場合に diff を実行する (`fsvn-select-file-mode' のみ)</td>
+<td>対象ファイルがバージョン管理下にある場合に diff を実行する (`Fsvn Select File' のみ)</td>
 </tr>
 <tr>
 <td>= e</td>
 <td>= = と同じだが ediff を使用する</td>
 </tr>
 </table>
-<h2>`fsvn-log-view-mode' でよく使うコマンド</h2>
+<h2>Fsvn Log View</h2>
+<h3>概要</h3>
+<p>ファイル、ディレクトリのログを確認できます。</p>
+<h3>よく使うコマンド</h3>
 <table>
 <tr>
 <td>= =</td>
@@ -129,19 +151,24 @@ M-x fsvn-authenticate-repository
 <td>= = と同じだが ediff を使用する</td>
 </tr>
 <tr>
-<td>&gt;</td>
-<td>表示中よりも過去のログを表示する</td>
+<td>n</td>
+<td>下の行へ移動し、必要があれば過去のログをリポジトリから取得する</td>
 </tr>
 <tr>
-<td>&lt;</td>
-<td>表示中よりも未来のログを表示する</td>
+<td>p</td>
+<td>上の行へ移動する</td>
 </tr>
 <tr>
 <td>C-c C-k</td>
 <td>終了する</td>
 </tr>
 </table>
-<h2>`fsvn-proplist-mode' でよく使うコマンド</h2>
+<h3>詳細な使い方</h3>
+<p><a href="advanced-logview.html.ja">Log View Mode の詳しい使い方</a></p>
+<h2>Fsvn Proplist</h2>
+<h3>概要</h3>
+<p>ファイル、ディレクトリの svn プロパティを確認、追加、削除できます。</p>
+<h3>よく使うコマンド</h3>
 <table>
 <tr>
 <td>C-m</td>
@@ -176,7 +203,10 @@ M-x fsvn-authenticate-repository
 <td>終了する</td>
 </tr>
 </table>
-<h2>`fsvn-propedit-mode' でよく使うコマンド</h2>
+<h2>Fsvn Propedit</h2>
+<h3>概要</h3>
+<p>Fsvn Proplist で選択したプロパティの内容を表示し、場合によっては編集できます。</p>
+<h3>よく使うコマンド</h3>
 <table>
 <tr>
 <td>C-c C-c</td>
@@ -188,14 +218,18 @@ M-x fsvn-authenticate-repository
 </tr>
 <tr>
 <td>C-c C-o</td>
-<td>`fsvn-proplist-mode'へ移動する</td>
+<td>`Fsvn Proplist' へ戻る</td>
 </tr>
 <tr>
 <td>C-c C-r</td>
 <td>編集内容を保存するときに再帰的に保存するようマークをつける</td>
 </tr>
 </table>
-<h2>`fsvn-process-list-mode' でよく使うコマンド</h2>
+<h2>Fsvn Processes</h2>
+<h3>概要</h3>
+<p>Emacs 配下で動作するプロセスを一覧表示し操作します。
+デフォルトでは fsvn により起動されたプロセスのみ表示します。</p>
+<h3>よく使うコマンド</h3>
 <table>
 <tr>
 <td>d</td>
@@ -230,6 +264,8 @@ M-x fsvn-authenticate-repository
 <td>終了する</td>
 </tr>
 </table>
+<h2>その他</h2>
+<p><a href="advanced-svk.html.ja">fsvn での svk の使い方</a></p>
 <h2>わからないことは</h2>
 <p><a href="qa.html.ja">Q and A</a></p>
 

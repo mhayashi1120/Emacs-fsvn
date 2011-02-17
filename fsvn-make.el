@@ -193,7 +193,7 @@
         (if (member form forms)
             (delete-region prev (point))
           (setq forms (cons form forms)))
-        (setq prev (save-excursion (forward-line 1) (point)))))))
+        (setq prev (line-beginning-position 2))))))
 
 (defun single-file-remove-blank-lines ()
   (save-excursion
@@ -204,7 +204,7 @@
          ((not (looking-at "\n"))
           (setq count 0))
          ((= count 1)
-          (delete-region (point) (save-excursion (forward-line 1) (point)))
+          (delete-region (point) (line-beginning-position 2))
           (forward-line -1))
          (t
           (setq count (1+ count))))

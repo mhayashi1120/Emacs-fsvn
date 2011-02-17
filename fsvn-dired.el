@@ -146,15 +146,7 @@ This function suppress this behavior."
        ;;FIXME when tramp like remote directory makes error in `dired-move-to-end-of-filename'
        (dired-add-file (expand-file-name file) marker-char)
      (error))
-   (let (buffer-read-only)
-     (save-excursion
-       (unless (fsvn-current-filename)
-         (unless (fsvn-browse-goto-first-file)
-           (goto-char (point-max))))
-       (forward-line 0)
-       (fsvn-browse-ls-insert-wc-entry file))
-     (fsvn-move-to-filename)
-     (set-buffer-modified-p nil))))
+   (fsvn-browse-add-file-entry file)))
 
 
 

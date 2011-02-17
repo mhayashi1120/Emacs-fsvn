@@ -257,17 +257,17 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
     (setq url (fsvn-completing-read-url "Mirrored URL: " url t))
     (list url)))
 
-(defun fsvn-svk-confirm (op-symbol)
-  (let ((message (cdr (assq op-symbol fsvn-svk-confirm-alist))))
-    (unless (y-or-n-p (nth 0 message))
-      (signal 'quit nil))))
-
 (defconst fsvn-svk-confirm-alist
   '(
     (fsvn-svk-browse-push "Push to mirrored repository? ")
     (fsvn-svk-browse-pull "Pull from mirrored repository? ")
     (fsvn-svk-browse-resync "Synchronize mirrored repository and mirroring path? ")
     ))
+
+(defun fsvn-svk-confirm (op-symbol)
+  (let ((message (cdr (assq op-symbol fsvn-svk-confirm-alist))))
+    (unless (y-or-n-p (nth 0 message))
+      (signal 'quit nil))))
 
 (defun fsvn-svk-depotmap-init (buffer)
   (let ((proc (fsvn-svk-start-command "depotmap" buffer "--init")))

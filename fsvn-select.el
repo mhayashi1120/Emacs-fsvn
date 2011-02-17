@@ -113,6 +113,11 @@
   :group 'fsvn
   :type 'hook)
 
+(defcustom fsvn-select-file-mode-prepared-hook nil
+  "*Run at the very end of `fsvn-select-file-mode' is prepared."
+  :group 'fsvn
+  :type 'hook)
+
 ;; * fsvn-select-file-mode internal function
 
 (defun fsvn-select-file-mode ()
@@ -131,8 +136,7 @@ Keybindings:
   (setq truncate-lines t)
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-select-file-buffer-local-variables)
-  (font-lock-mode 1)
-  (font-lock-fontify-buffer))
+  (run-mode-hooks 'fsvn-select-file-mode-hook))
 
 (defun fsvn-select-file-generate-buffer ()
   (generate-new-buffer fsvn-select-file-buffer-name))
@@ -171,6 +175,7 @@ Keybindings:
       (list file))))
 
 (defmacro fsvn-select-file-each-file (var &rest form)
+  (declare (indent 1))
   `(save-excursion
      (let (,var RET)
        (fsvn-select-file-first-file)
@@ -405,10 +410,8 @@ Keybindings:
 (defun fsvn-select-file-remove-file (file)
   (save-excursion
     (when (fsvn-select-file-goto-file file)
-      (let ((buffer-read-only)
-            (start (save-excursion (forward-line 0) (point)))
-            (end (save-excursion (forward-line 1) (point))))
-        (delete-region start end))))
+      (let ((buffer-read-only))
+        (delete-region (line-beginning-position) (line-beginning-position 2)))))
   (fsvn-move-to-filename))
 
 (defun fsvn-select-file-remove-file-hierarchy (file)
@@ -559,8 +562,6 @@ This is usefull for missing file (marked `!')
   fsvn-select-file-mode-menu-spec)
 
 
-
-(put 'fsvn-select-file-each-file 'lisp-indent-function 1)
 
 (provide 'fsvn-select)
 

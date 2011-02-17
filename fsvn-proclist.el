@@ -20,7 +20,7 @@
     (fsvn-process-list-showing-process)
     (fsvn-process-list-processes . fsvn-process-list-processes)
     (fsvn-process-list-timer)
-    (post-command-hook . '(fsvn-process-list-after-move))
+    
     (font-lock-defaults . '(fsvn-process-list-font-lock-keywords nil nil nil beginning-of-line))
     (revert-buffer-function . 'fsvn-process-list-revert-buffer)
     (kill-buffer-hook . kill-buffer-hook)
@@ -94,6 +94,11 @@
   :group 'fsvn
   :type 'hook)
 
+(defcustom fsvn-process-list-mode-prepared-hook nil
+  "*Run at the very end of `fsvn-process-list-mode' is prepared."
+  :group 'fsvn
+  :type 'hook)
+
 (defun fsvn-process-list-mode ()
   "Major mode to control fsvn background processes.
 
@@ -108,7 +113,9 @@ Keybindings:
   (setq truncate-lines t)
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-process-list-buffer-local-variables)
-  (fsvn-browse-setup-mode-line))
+  (add-hook 'post-command-hook 'fsvn-process-list-after-move nil t)
+  (fsvn-browse-setup-mode-line)
+  (run-mode-hooks 'fsvn-process-list-mode-hook))
 
 (defun fsvn-process-list-prepared-buffer ()
   (fsvn-sole-major-mode 'fsvn-process-list-mode))
@@ -126,6 +133,7 @@ Keybindings:
     nil))
 
 (defmacro fsvn-process-list-retrieve-mark (column &rest form)
+  (declare (indent 1))
   `(save-excursion
      (let (overlays buffer-read-only)
        (forward-line 0)
@@ -174,7 +182,7 @@ Keybindings:
       (setq fsvn-process-list-processes processes)
       ;; Buffer name that starts with space must do this.
       (font-lock-fontify-buffer)
-      (run-mode-hooks 'fsvn-process-list-mode-hook))))
+      (run-hooks 'fsvn-process-list-mode-prepared-hook))))
 
 (defun fsvn-process-list-insert-process (process)
   (forward-line 0)
@@ -459,8 +467,6 @@ Keybindings:
   fsvn-process-list-mode-menu-spec)
 
 
-
-(put 'fsvn-process-list-retrieve-mark 'lisp-indent-function 1)
 
 (provide 'fsvn-proclist)
 

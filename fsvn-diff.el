@@ -12,6 +12,7 @@
 
 
 (require 'diff)
+(require 'diff-mode)
 (require 'fsvn-deps)
 
 
@@ -93,6 +94,7 @@
     (fsvn-ediff-files file1 file2)))
 
 ;;FIXME not well designed
+;;    ex: after async process, suddenly prompt to minibuffer "Execute ediff?"
 (defun fsvn-ediff-urlrev-directories (urlrev1 urlrev2)
   (cond
    ((and (fsvn-url-urlrev-p urlrev1)
@@ -144,6 +146,12 @@
       (fsvn-diff-setup-mode buffer args)
       (fsvn-buffer-popup-as-information buffer)
       (set-process-sentinel proc (lambda (proc event))))))
+
+(defun fsvn-diff-start-files-process (new-file old-file &rest args)
+  (let ((diff-args (list
+                    (format "--new=%s" new-file)
+                    (format "--old=%s" old-file))))
+    (fsvn-diff-start-process diff-args args)))
 
 (defun fsvn-diff-get-buffer (diff-args)
   (let ((args (fsvn-command-args-canonicalize diff-args))

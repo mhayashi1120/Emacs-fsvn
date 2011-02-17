@@ -28,9 +28,13 @@ buffer name start with ` ' (space)
 
 ** tool-bar
 
-** to configure ex: C-c C-u
 
 ** search log diff and message
+
+Sometime want to grep svn history.
+Search full of repository is bad idea. that is too heavy.
+Cache repository? or cache diff output that between 1- revision?
+
 
 ** describe document about process-list 
 enable send password
@@ -51,8 +55,6 @@ inhibit path completion.
 
 on windows 
 fsvn-browse.*move-in-repository
-
-** in repository C-x C-f or something bound to open by url function
 
 ** fsvn-browse-svn:externals-selected
 
@@ -96,44 +98,45 @@ revision range and log base url
 
 ** fsvn-log-list-mode GUI viewer.
  call tortoise viewer (Windows)
-** logview-mode diff with non visible revision.
 
 
-** log-sibling return to specific revision file. (use magic file name)
 ** patch
 property is changed created patch wrong??
 
 
-* prop-mode
+** async revert buffer
 
+default range is current-revision 
+1. target-path is /path/to/hoge@1234 range is 1000 - 1234
+ this case failed if specify range 1000 - HEAD
+ 1000 - 1235 were succeed if rev.1235 is exists
+2. target-path is /path/to/foo
+ MINIMUM REVISION to HEAD is more specific. 
+
+* prop-mode
 ** prop-recursive-mode
 
 proplist --recursive
 
 ** propedit and not changed value but want to apply recursively
 
+
 * diff
-** ediff directory
-** diff directory
 ** diff binary file invoke filter program. (Like OpenOffice file)
 
 ** ediff different coding-system
 
+** create diff minor-mode?
+C-c C-k kill diff process
+
 * Other
 ** improve the UI about read arguments (ex --targets like argument not necessary in completion)
-
-** TODO dired-mode remove vc-find-file-hook from find-file-hook
-what is this mean?
-
-** fsvn-blame-minor-mode accept revision range
 
 
 ** fsvn-blae-minor-mode highlight specific revisions.
 
     fsvn-blame-minor-highlight-specific-revisions
     fsvn-blame-minor-highlight-log-regexp
-
-** parse result threshold
 
 ** tsvn:lockmsgminsize, tsvn:logsummary, tsvn:projectlanguage
 
