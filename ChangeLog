@@ -1,5 +1,7 @@
 2011-02-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Add: set UUID in all buffers.
+
 	* Fix: Remove calling font-lock function as long as i can.
 
 2011-02-17  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>

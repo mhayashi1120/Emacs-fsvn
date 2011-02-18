@@ -41,8 +41,8 @@ If possible, to use ssh-agent program when access by svn+ssh protcol. If using w
 </div>
 <div id="q-general-0001">
 <dl>
-<dt>Q. A lot of buffer are too noisy.</dt>
-<dd>A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)</dd>
+<dt>Q. A lot of buffers are too noisy.</dt>
+<dd>A. C-x v M-c (or M-x fsvn-global-cleanup-buffer)</dd>
 </dl>
 </div>
 <div id="q-general-0002">

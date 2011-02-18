@@ -42,7 +42,7 @@ svn+ssh を使う場合は可能な限り ssh-agent を使ってください。W
 <div id="q-general-0001">
 <dl>
 <dt>Q. バッファがたくさんできて欝陶しい。</dt>
-<dd>A. M-x fsvn-global-cleanup-buffer (or type C-x v M-c)</dd>
+<dd>A. C-x v M-c (or M-x fsvn-global-cleanup-buffer)</dd>
 </dl>
 </div>
 <div id="q-general-0002">

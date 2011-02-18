@@ -75,7 +75,7 @@
     (fsvn-browse-buffer-files-status-process)
     (fsvn-browse-buffer-directories-status-process)
     (fsvn-browse-buffer-cleanup-process)
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-browse-revision)
     (fsvn-browse-ls-comparer)
     (dired-directory)
@@ -1063,14 +1063,14 @@ PATH is each executed path."
     (setq dired-directory default-directory)))
 
 (defun fsvn-browse-set-repos-local-variables (info)
-  (setq fsvn-buffer-repos-root (fsvn-xml-info->entry=>repository=>root$ info))
+  (setq fsvn-buffer-repos-info (fsvn-buffer-xml-info->repos-info info))
   (setq fsvn-browse-revision (fsvn-xml-info->entry.revision info))
   (setq fsvn-browse-repos-p t)
   (let* ((subdir (fsvn-browse-subdir (fsvn-info-repos-path info) t)))
     (fsvn-browse-subdir!info subdir info)))
 
 (defun fsvn-browse-set-wc-local-variables (info directory)
-  (setq fsvn-buffer-repos-root (fsvn-xml-info->entry=>repository=>root$ info))
+  (setq fsvn-buffer-repos-info (fsvn-buffer-xml-info->repos-info info))
   (setq fsvn-browse-revision (fsvn-xml-info->entry.revision info))
   (setq fsvn-browse-repos-p nil)
   (let* ((subdir (fsvn-browse-subdir directory nil)))
@@ -1174,12 +1174,12 @@ PATH is each executed path."
     (nreverse ret)))
 
 (defun fsvn-browse-propview-mode (file directory-p)
-  (let ((root fsvn-buffer-repos-root)
+  (let ((info fsvn-buffer-repos-info)
         (working-dir
          (if (fsvn-url-local-p file)
              (fsvn-browse-current-directory-url)
            (fsvn-browse-current-magic-directory))))
-    (fsvn-open-propview-mode root file directory-p working-dir)))
+    (fsvn-open-propview-mode info file directory-p working-dir)))
 
 (defun fsvn-browse-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))
@@ -1238,12 +1238,12 @@ PATH is each executed path."
 
 (defmacro fsvn-browse-open-message-edit (buffer &rest form)
   (declare (indent 1))
-  `(let ((ROOT fsvn-buffer-repos-root)
+  `(let ((INFO fsvn-buffer-repos-info)
          (WIN-CONFIGURE (current-window-configuration)))
      (with-current-buffer ,buffer
        (fsvn-message-edit-mode)
        (setq fsvn-previous-window-configuration WIN-CONFIGURE)
-       (setq fsvn-buffer-repos-root ROOT)
+       (setq fsvn-buffer-repos-info INFO)
        ,@form
        (run-hooks 'fsvn-message-edit-mode-prepared-hook))))
 
@@ -1255,7 +1255,7 @@ PATH is each executed path."
 
 (defun fsvn-browse-add-file-select (files args)
   (let* ((win-configure (current-window-configuration))
-         (root fsvn-buffer-repos-root)
+         (info fsvn-buffer-repos-info)
          (select-buffer (fsvn-parasite-add-get-buffer files))
          win)
     (with-current-buffer select-buffer
@@ -1263,7 +1263,7 @@ PATH is each executed path."
       (setq fsvn-previous-window-configuration win-configure)
       (fsvn-parasite-add-mode 1)
       (setq fsvn-parasite-add-subcommand-args args)
-      (fsvn-select-file-draw-root root)
+      (fsvn-select-file-draw-root info)
       (fsvn-parasite-add-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
@@ -1273,7 +1273,7 @@ PATH is each executed path."
 (defun fsvn-browse-commit-mode (files args)
   (let* ((browse-buffer (current-buffer))
          (win-configure (current-window-configuration))
-         (root fsvn-buffer-repos-root)
+         (info fsvn-buffer-repos-info)
          (buffers (fsvn-parasite-commit-get-buffers files))
          (select-buffer (car buffers))
          (msgedit-buffer (cdr buffers))
@@ -1285,7 +1285,7 @@ PATH is each executed path."
       (setq fsvn-select-file-draw-list-function 'fsvn-parasite-commit-draw-list)
       (setq fsvn-select-file-msgedit-buffer msgedit-buffer)
       (fsvn-parasite-commit-mode 1)
-      (fsvn-select-file-draw-root root)
+      (fsvn-select-file-draw-root info)
       (fsvn-parasite-commit-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
@@ -1294,7 +1294,7 @@ PATH is each executed path."
       (setq fsvn-message-edit-file-select-buffer select-buffer)
       (fsvn-parasite-commit-mode 1)
       (fsvn-parasite-commit-set-subcommand-args args)
-      (when (fsvn-config-tortoise-property-use root)
+      (when (fsvn-config-tortoise-property-use (fsvn-buffer-repos-root info))
         (fsvn-tortoise-commit-initialize)))
     (fsvn-parasite-commit-setup-window msgedit-buffer select-buffer)))
 
@@ -1361,7 +1361,7 @@ PATH is each executed path."
        file
        (fsvn-expand-url
         (fsvn-browse-current-path)
-        (fsvn-browse-current-root)))))))
+        (fsvn-buffer-repos-root)))))))
 
 (defun fsvn-browse-point-urlrev ()
   (let ((url (fsvn-browse-point-url)))
@@ -1399,10 +1399,6 @@ PATH is each executed path."
           (re-search-forward fsvn-browse-re-subdir nil t))
       (match-string-no-properties 2)))))
 
-(defun fsvn-browse-current-root ()
-  "Current buffer's repository root."
-  fsvn-buffer-repos-root)
-
 (defun fsvn-browse-current-info ()
   "Current point source info."
   (let ((subdir (fsvn-string-assoc (fsvn-browse-current-path) fsvn-browse-subdir-alist)))
@@ -1427,7 +1423,7 @@ PATH is each executed path."
    (t
     (fsvn-expand-url
      (fsvn-browse-current-path)
-     (fsvn-browse-current-root)))))
+     (fsvn-buffer-repos-root)))))
 
 (defun fsvn-browse-current-directory-urlrev ()
   "Current point URL."
@@ -1443,7 +1439,7 @@ PATH is each executed path."
   (if fsvn-browse-repos-p
       (fsvn-expand-url
        (fsvn-browse-current-path)
-       (fsvn-browse-current-root))
+       (fsvn-buffer-repos-root))
     (let* ((subdir (fsvn-browse-subdir (fsvn-browse-current-path) nil))
            (info (fsvn-browse-subdir.info subdir)))
       (fsvn-xml-info->entry=>url$ info))))

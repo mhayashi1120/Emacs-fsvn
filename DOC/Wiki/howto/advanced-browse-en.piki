@@ -1,3 +1,15 @@
 * Advanced use of Browse Mode
 
-TODO magic, repository browser
+TODO
+
+** Repository Browser
+
+There are two features about Repository browser.
+
+*** dired extension (Magic file name)
+
+You can browse, edit, adding file on the repository as if local file same as tramp. Generally editable file must have HEAD revision, but BE CAREFUL to edit!
+
+*** fsvn feature
+Show svn logs that viewing revision as starting point.
+

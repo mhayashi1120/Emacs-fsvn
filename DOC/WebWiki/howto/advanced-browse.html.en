@@ -23,6 +23,12 @@
 
 <h1>Advanced use of Browse Mode</h1>
 <p>TODO</p>
+<h2>Repository Browser</h2>
+<p>There are two features about Repository browser.</p>
+<h3>dired extension (Magic file name)</h3>
+<p>You can browse, edit, adding file on the repository as if local file same as tramp. Generally editable file must have HEAD revision, but BE CAREFUL to edit!</p>
+<h3>fsvn feature</h3>
+<p>Show svn logs that viewing revision as starting point.</p>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

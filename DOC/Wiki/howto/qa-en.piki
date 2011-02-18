@@ -19,8 +19,8 @@
 
 # General question
 {Q-general-0001
-? Q. A lot of buffer are too noisy.
-! A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)
+? Q. A lot of buffers are too noisy.
+! A. C-x v M-c (or M-x fsvn-global-cleanup-buffer)
 }
 
 {Q-general-0002

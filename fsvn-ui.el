@@ -13,6 +13,9 @@
 
 (require 'dired)
 (require 'fsvn-deps)
+(require 'fsvn-url)
+(require 'fsvn-xml)
+(require 'fsvn-cmd)
 
 
 

@@ -17,6 +17,7 @@
 (require 'fsvn-env)
 (require 'fsvn-ui)
 (require 'fsvn-proc)
+(require 'fsvn-cmd)
 
 (defvar directory-listing-before-filename-regexp)
 
@@ -138,8 +139,6 @@
 (defvar fsvn-previous-window-configuration nil)
 (defvar fsvn-default-window-configuration nil)
 
-(defvar fsvn-buffer-repos-root nil)
-
 (defmacro fsvn-restore-window-buffer (&rest form)
   "Set window setting according to variable `fsvn-previous-window-configuration' after evaluate FORM."
   `(let ((WIN-CONFIGURE fsvn-previous-window-configuration))
@@ -168,6 +167,36 @@
       (set-window-configuration fsvn-default-window-configuration))
     (when (get-buffer-window prev)
       (set-frame-selected-window (selected-frame) (get-buffer-window prev)))))
+
+(defvar fsvn-buffer-repos-info nil)
+
+(defun fsvn-buffer-repos-info (&optional buffer)
+  (or
+   (and buffer (buffer-local-value 'fsvn-buffer-repos-info buffer))
+   fsvn-buffer-repos-info))
+
+(defun fsvn-buffer-repos-uuid (&optional info)
+  (let ((info (or info fsvn-buffer-repos-info)))
+    (aref info 0)))
+
+(defun fsvn-buffer-repos-root (&optional info)
+  (let ((info (or info fsvn-buffer-repos-info)))
+    (aref info 1)))
+
+(defun fsvn-buffer-new-repos-info (url)
+  (let ((info (fsvn-get-info-entry url)))
+    (when info
+      (fsvn-buffer-xml-info->repos-info info))))
+
+(defun fsvn-buffer-xml-info->repos-info (info)
+  (let ((v (make-vector 2 nil)))
+    (aset v 0 (fsvn-xml-info->entry=>repository=>uuid$ info))
+    (aset v 1 (fsvn-xml-info->entry=>repository=>root$ info))
+    v))
+
+(defun fsvn-buffer-new-repos-info-upward (url)
+  (let ((info (fsvn-get-info-upward url)))
+    (fsvn-buffer-xml-info->repos-info info)))
 
 (defun fsvn-make-buffer-variables (variables)
   (fsvn-make-buffer-variables-internal fsvn-global-buffer-local-variables)

@@ -31,7 +31,7 @@
   '(
     (fsvn-select-file-files-status)
     (fsvn-select-file-draw-list-function)
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (font-lock-defaults . '(fsvn-select-file-font-lock-keywords t nil nil beginning-of-line))
 
     (fsvn-select-file-msgedit-buffer)
@@ -275,15 +275,16 @@ Keybindings:
       (when (string-match regexp f)
         (fsvn-select-file-point-put-mark-internal mark)))))
 
-(defun fsvn-select-file-draw-root (root)
-  (let (buffer-read-only)
+(defun fsvn-select-file-draw-root (info)
+  (let ((root (fsvn-buffer-repos-root info))
+        buffer-read-only)
     (save-excursion
       (goto-char (point-min))
       (when (looking-at "^ Root: .*\n")
         (replace-match "" nil nil nil 0))
       (insert (format " Root: %s\n" root))
       (insert "\n")
-      (setq fsvn-buffer-repos-root root))))
+      (setq fsvn-buffer-repos-info info))))
 
 (defun fsvn-select-file-draw-applicant (files msg no-msg)
   (setq fsvn-select-file-files-status nil)

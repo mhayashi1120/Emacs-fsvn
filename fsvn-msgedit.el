@@ -30,7 +30,7 @@
   '(
     (fsvn-message-edit-file-select-buffer)
     (fsvn-message-edit-last-message)
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     ))
 
 (defvar fsvn-message-edit-file-encoding fsvn-svn-common-coding-system)
@@ -164,7 +164,8 @@ Keybindings:
 
 
 (defun fsvn-message-edit-get-message-directory ()
-  (let ((dir (fsvn-expand-file (md5 fsvn-buffer-repos-root) (fsvn-logmessage-directory))))
+  ;;TODO how about use uuid????
+  (let ((dir (fsvn-expand-file (md5 (fsvn-buffer-repos-root)) (fsvn-logmessage-directory))))
     (unless (fsvn-file-exact-directory-p dir)
       (make-directory dir t))
     dir))
@@ -174,7 +175,7 @@ Keybindings:
     (error "Can't execute this function in this mode"))
   (let (tmpfile)
     (if (= (buffer-size) 0)
-        (when (fsvn-config-log-empty-warnings fsvn-buffer-repos-root)
+        (when (fsvn-config-log-empty-warnings (fsvn-buffer-repos-root))
           (unless (y-or-n-p "Log message is empty.  Really commit? ")
             (error "No log messages")))
       (setq tmpfile (fsvn-message-edit-make-message-file))

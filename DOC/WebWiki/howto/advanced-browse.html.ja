@@ -23,6 +23,13 @@
 
 <h1>Browse Mode の詳しい使い方</h1>
 <p>TODO</p>
+<h2>リポジトリブラウザ (Repository Browser)</h2>
+<p>リポジトリブラウザとして使える機能は２つに分類されます。</p>
+<h3>dired の拡張</h3>
+<p>tramp と同じようにリポジトリのファイルをローカルにあるように閲覧、編集、ファイルの追加などができます。編集できるファイルは基本的に revision が HEAD のときだけですが、十分に注意して編集してください。</p>
+<h3>fsvn のオリジナル機能</h3>
+<p>閲覧しているリビジョンを起点にしたログの参照、</p>
+<p>TODO 途中</p>
 
 	<!-- Google Analytics -->
 	<script type="text/javascript">

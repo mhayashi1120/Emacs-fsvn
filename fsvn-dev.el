@@ -71,6 +71,18 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
             (define-key fsvn-browse-diff-map "r" 'fsvn-browse-diff-between-repository)
             (define-key fsvn-browse-diff-map "b" 'fsvn-browse-diff-with-branch)))
 
+
+
+;;TODO bound to C-c ! fsvn-command to which key?
+
+(defun fsvn-browse-do-command (subcommand args)
+  "Execute `svn SUBCOMMAND ARGS'"
+  (interactive (let* ((subcommand (fsvn-read-svn-subcommand))
+                      (args (fsvn-read-svn-subcommand-args subcommand)))
+                 (list subcommand args)))
+  (fsvn-popup-start-process subcommand args))
+
+
 ;;TODO
 (defun fsvn-browse-merge-from-branch ()
   (interactive)

@@ -21,7 +21,7 @@
 # General question
 {Q-general-0001
 ? Q. バッファがたくさんできて欝陶しい。
-! A. M-x fsvn-global-cleanup-buffer (or type C-x v M-c)
+! A. C-x v M-c (or M-x fsvn-global-cleanup-buffer)
 }
 
 {Q-general-0002

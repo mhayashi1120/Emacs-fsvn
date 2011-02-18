@@ -39,7 +39,7 @@
   '(
     (font-lock-defaults . '(fsvn-proplist-font-lock-keywords t nil nil beginning-of-line))
     (revert-buffer-function . 'fsvn-proplist-revert-buffer)
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-propview-target-urlrev)
     (fsvn-propview-target-directory-p)
     (fsvn-proplist-target-mode)
@@ -287,14 +287,14 @@ Keybindings:
         (buffer (fsvn-propedit-get-buffer))
         (dirp fsvn-propview-target-directory-p)
         (win-config fsvn-default-window-configuration)
-        (root fsvn-buffer-repos-root)
+        (info fsvn-buffer-repos-info)
         (working-dir default-directory)
         value)
     (with-current-buffer buffer
       (fsvn-propedit-mode)
       (setq fsvn-previous-window-configuration prev-config)
       (setq fsvn-default-window-configuration win-config)
-      (setq fsvn-buffer-repos-root root)
+      (setq fsvn-buffer-repos-info info)
       (setq fsvn-propview-target-urlrev file)
       (setq fsvn-propview-target-directory-p dirp)
       (setq fsvn-propedit-propname propname)
@@ -416,7 +416,7 @@ Keybindings:
 (defconst fsvn-propedit-buffer-name "*Fsvn propedit*")
 (defconst fsvn-propedit-buffer-local-variables
   '(
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-propview-target-urlrev)
     (fsvn-propview-target-directory-p)
     (fsvn-propedit-propname)

@@ -34,7 +34,7 @@
 (defconst fsvn-log-list-buffer-local-variables
   '(
     (font-lock-defaults . '(fsvn-log-list-font-lock-keywords t nil nil beginning-of-line))
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-logview-target-urlrev)
     (fsvn-logview-target-directory-p)
     (fsvn-log-list-target-path)
@@ -209,7 +209,7 @@ Keybindings:
 (defun fsvn-log-list-draw-details (&optional revision)
   (let* ((rev (or revision (fsvn-log-list-point-revision)))
          (dir default-directory)
-         (root fsvn-buffer-repos-root)
+         (info fsvn-buffer-repos-info)
          (path (fsvn-log-list-point-path))
          (main-buffer (current-buffer))
          logentry)
@@ -219,7 +219,7 @@ Keybindings:
       (fsvn-log-message-mode)
       (fsvn-set-default-directory dir)
       (fsvn-log-message-draw-message logentry)
-      (setq fsvn-buffer-repos-root root)
+      (setq fsvn-buffer-repos-info info)
       (setq fsvn-log-source-buffer main-buffer)
       (setq fsvn-log-message-revision rev)
       (setq buffer-read-only t)
@@ -228,7 +228,7 @@ Keybindings:
       (fsvn-log-sibling-mode)
       (fsvn-set-default-directory dir)
       (fsvn-log-sibling-draw-list logentry path)
-      (setq fsvn-buffer-repos-root root)
+      (setq fsvn-buffer-repos-info info)
       (setq fsvn-log-source-buffer main-buffer)
       (setq fsvn-log-sibling-target-path path)
       (setq fsvn-log-sibling-logentry logentry)
@@ -244,9 +244,9 @@ Keybindings:
    (fsvn-log-list-no-more-log nil)
    (t
     (let ((lines (count-lines (point) (point-max)))
-          (count (fsvn-config-log-limit-count fsvn-buffer-repos-root)))
+          (count (fsvn-config-log-limit-count (fsvn-buffer-repos-root))))
       (or (< lines 10)
-          (and fsvn-buffer-repos-root
+          (and (fsvn-buffer-repos-root)
                ;; check rest of lines are over count
                (< lines (* count 0.5))))))))
 
@@ -470,7 +470,7 @@ from is marked point, to is current point."
 
 (defun fsvn-log-list-region-revision (&optional as-is)
   (let ((path fsvn-log-list-target-path)
-        (root fsvn-buffer-repos-root)
+        (root (fsvn-buffer-repos-root))
         from-rev to-rev
         from-urlrev to-urlrev
         beg fin)
@@ -503,7 +503,7 @@ from is marked point, to is current point."
     (fsvn-url-urlrev (fsvn-expand-url (fsvn-urlrev-url found) root) rev)))
 
 (defun fsvn-log-list-repository-url ()
-  (fsvn-expand-url fsvn-log-list-target-path fsvn-buffer-repos-root))
+  (fsvn-expand-url fsvn-log-list-target-path (fsvn-buffer-repos-root)))
 
 (defun fsvn-log-list-point-urlrev ()
   (let ((rev (fsvn-log-list-point-revision))
@@ -512,7 +512,7 @@ from is marked point, to is current point."
       (fsvn-url-urlrev url rev))))
 
 (defun fsvn-log-list-point-url ()
-  (let ((root fsvn-buffer-repos-root)
+  (let ((root (fsvn-buffer-repos-root))
         (target-path (fsvn-log-list-point-path)))
     (when target-path
       (fsvn-expand-url target-path root))))
@@ -529,7 +529,7 @@ from is marked point, to is current point."
 (defun fsvn-log-list-set-subwindow-config ()
   (let* ((subconf fsvn-log-list-subwindow-settings)
          (prevconf fsvn-default-window-configuration)
-         (root fsvn-buffer-repos-root))
+         (root (fsvn-buffer-repos-root)))
     (with-current-buffer (fsvn-log-sibling-get-buffer)
       (setq fsvn-default-window-configuration subconf)
       (setq fsvn-previous-window-configuration prevconf))
@@ -541,7 +541,7 @@ from is marked point, to is current point."
         (fsvn-tortoise-fontify-buffer)))))
 
 (defun fsvn-log-list-collect-log-range (rev-range &optional count)
-  (let* ((root fsvn-buffer-repos-root)
+  (let* ((root (fsvn-buffer-repos-root))
          (urlrev fsvn-logview-target-urlrev)
          (count (or count (fsvn-config-log-limit-count root))))
     (setq fsvn-log-list-main-process 
@@ -725,7 +725,7 @@ from is marked point, to is current point."
 (defun fsvn-log-list-propview-this (urlrev)
   "Execute `proplist' by `fsvn-proplist-mode' to point URLREV"
   (interactive (fsvn-log-list-cmd-read-urlrev))
-  (fsvn-open-propview-mode fsvn-buffer-repos-root 
+  (fsvn-open-propview-mode fsvn-buffer-repos-info
                            urlrev
                            fsvn-logview-target-directory-p
                            default-directory))
@@ -1012,7 +1012,7 @@ LOCAL-FILE can be any file in local file system.
   '(
     (font-lock-defaults . '(fsvn-log-sibling-font-lock-keywords t nil nil beginning-of-line))
     (fsvn-log-sibling-paths)
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-log-source-buffer)
     (fsvn-log-sibling-target-path)
     (fsvn-log-sibling-logentry)
@@ -1108,7 +1108,9 @@ Keybindings:
            (lambda (regexp)
              (list regexp '(1 fsvn-header-key-face)))
            regexps))
-    (font-lock-refresh-defaults)))
+    (if (fboundp 'font-lock-refresh-defaults)
+        (font-lock-refresh-defaults)
+      (setq font-lock-set-defaults nil))))
 
 (defun fsvn-log-sibling-point-status ()
   (save-excursion
@@ -1117,7 +1119,7 @@ Keybindings:
 
 (defun fsvn-log-sibling-point-url ()
   (let ((path (fsvn-log-sibling-point-path))
-        (root (directory-file-name fsvn-buffer-repos-root)))
+        (root (directory-file-name (fsvn-buffer-repos-root))))
     (when path
       (concat root path))))
 
@@ -1141,7 +1143,7 @@ Keybindings:
            (rev (fsvn-xml-log->logentry->paths->path.copyfrom-rev path-entry))
            url)
       (when (and path rev)
-        (setq url (fsvn-expand-url path fsvn-buffer-repos-root))
+        (setq url (fsvn-expand-url path (fsvn-buffer-repos-root)))
         (fsvn-url-urlrev url rev))))))
 
 (defun fsvn-log-sibling-point-entry ()
@@ -1298,7 +1300,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   "Execute `proplist' by `fsvn-proplist-mode' to point URLREV"
   (interactive (fsvn-log-sibling-cmd-read-propview-this))
   (let ((info (fsvn-get-info-entry urlrev)))
-    (fsvn-open-propview-mode fsvn-buffer-repos-root 
+    (fsvn-open-propview-mode fsvn-buffer-repos-info
                              urlrev
                              (eq (fsvn-xml-info->entry.kind info) 'dir)
                              default-directory)))
@@ -1308,7 +1310,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defconst fsvn-log-message-buffer-name "*Fsvn Message*")
 (defconst fsvn-log-message-buffer-local-variables
   '(
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-log-source-buffer)
     (fsvn-log-message-revision)
     ))
@@ -1425,7 +1427,7 @@ Keybindings:
                              "--file" tmpfile
                              "--revprop" "svn:log"
                              "--revision" fsvn-log-message-revision
-                             fsvn-buffer-repos-root)))
+                             (fsvn-buffer-repos-root))))
 
 
 
@@ -1462,16 +1464,17 @@ Keybindings:
 (defun fsvn-electric-select-log (urlrev)
   (let* ((buffer (get-buffer-create fsvn-electric-log-list-buffer-name)))
     (unwind-protect
-        (let (info root)
+        (let (info root repos-info)
           (message "Getting info...")
           (setq info (fsvn-get-info-entry urlrev))
           (setq root (fsvn-xml-info->entry=>repository=>root$ info))
+          (setq repos-info (fsvn-buffer-xml-info->repos-info info))
           (message "Getting log from repository...")
           (with-current-buffer buffer
             (fsvn-log-list-mode)
             (let (buffer-read-only)
               (erase-buffer)
-              (setq fsvn-buffer-repos-root root)
+              (setq fsvn-buffer-repos-info repos-info)
               (setq fsvn-logview-target-urlrev urlrev)
               (setq fsvn-log-list-target-path 
                     (fsvn-repository-path root (fsvn-xml-info->entry=>url$ info)))

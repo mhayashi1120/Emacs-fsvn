@@ -101,7 +101,7 @@ revision range and log base url
 
 
 ** patch
-property is changed created patch wrong??
+When property is changed, created patch wrong??
 
 
 ** async revert buffer
@@ -113,6 +113,10 @@ default range is current-revision
 2. target-path is /path/to/foo
  MINIMUM REVISION to HEAD is more specific. 
 
+** revert buffer
+
+when svn:log or svn:date was changed
+   
 * prop-mode
 ** prop-recursive-mode
 
