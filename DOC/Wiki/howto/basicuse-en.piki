@@ -2,6 +2,13 @@
 
 ** First of all
 
+*** .emacs
+
+Please put following settings to your .emacs if you can.
+[dot.sample http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn]
+
+*** Repository authentication
+
 Must have cache a password to svn command, when you need to authorize repository.
 
 >|
@@ -10,16 +17,33 @@ M-x fsvn-authenticate-repository
 
 input repository url and password.
 
-** Often use command in `fsvn-browse-mode'
+*** Basic operation 1
 
-|z U (C-c C-u)|Update current directory (update)|
+fsvn create many buffers to output the svn command results. If you want to remove all these buffers, execute following command.
+
+>|
+M-x fsvn-global-cleanup-buffer
+|<
+
+Sample of setting indicate a key settings to C-x v M-c 
+
+** Fsvn Browse
+
+*** Summary
+
+Boot if directory have .svn directory instead of `dired'
+Similar to `dired' but not exactly equals that one.
+
+*** Often used commands
+
+|C-c C-u|Update current directory (update)|
+|C-c C-c|Prepare commit buffer for current directory by `Fsvn Select File' (commit)|
 |z a|Add cursor file or marked files (add)|
 |z d|Mark as delete for cursor file or marked files (delete)|
-|z c|Prepare commit buffer for cursor file or marked files `fsvn-select-file-mode' (commit)|
-|z C (C-c C-c)|Prepare commit buffer for current directory `fsvn-select-file-mode' (commit)|
-|z L|Prepare `fsvn-log-view-mode' buffer for current directory (log)|
-|z l|Prepare `fsvn-log-view-mode' buffer for cursor file (log)|
-|z p|Prepare `fsvn-proplist-mode' buffer for cursor file (proplist)|
+|z c|Prepare commit buffer for cursor file or marked files `Fsvn Select File' (commit)|
+|z L|Prepare `Fsvn Log View' buffer for current directory (log)|
+|z l|Prepare `Fsvn Log View' buffer for cursor file (log)|
+|z p|Prepare `Fsvn Proplist' buffer for cursor file (proplist)|
 |C-c C-v C-c|Copy cursor file or marked files (copy)|
 |C-c C-m C-m|Move cursor file or marked files (move)|
 |C-c C-v c|Copy cursor file (copy)|
@@ -29,23 +53,50 @@ input repository url and password.
 |z K|Unlock cursor file or marked files (unlock)|
 |C-c C-d|Switch to `dired-mode'|
 
-** Often use command in `fsvn-message-edit-mode', `fsvn-select-file-mode' (when commit)
+*** Advanced use
+
+["Advanced use of Browse Mode" advanced-browse.html.en]
+
+
+** Fsvn Message Edit, Fsvn Select File (when commit)
+
+*** Summary
+
+Can select commit files and input the commit log message.
+
+*** Often used commands
 
 |C-c C-c|Finish edit and commit|
 |C-c C-k|Discard all edit|
 |C-c C-o|Switch related buffer if exists|
-|= =|Execute diff if cursor file is under subversion (Only `fsvn-select-file-mode')|
+|= =|Execute diff if cursor file is under subversion (Only `Fsvn Select File')|
 |= e|Same as `= =' but using ediff|
 
-** Often use command in `fsvn-log-view-mode'
+** Fsvn Log View
+
+*** Advanced use
+
+["Advanced use of Log View Mode" advanced-logview.html.en]
+
+*** Summary
+
+Listing svn log file or directory.
+
+*** Often used commands
 
 |= = |Execute diff working copy. When region activated, diff with region terminated point revision|
 |= e|Same as `= =' but using ediff|
-|>|Backward to log|
-|<|Forward to log|
+|n|Move to next line and get old log if need|
+|p|Move to previous line|
 |C-c C-k|Finish log|
 
-** Often use command in `fsvn-proplist-mode'
+** Fsvn Proplist
+
+*** Summary
+
+Can show, add, delete svn properties.
+
+*** Often used commands
 
 |C-m|Display cursor property value|
 |a|Add svn property|
@@ -56,14 +107,27 @@ input repository url and password.
 |x|Execute all marks|
 |C-c C-k|Finish property list|
 
-** Often use command in `fsvn-propedit-mode'
+** Fsvn Propedit
+
+*** Summary
+
+Can show, edit svn property.
+
+*** Often used commands
 
 |C-c C-c|Save editing|
 |C-c C-k|Discard editing|
-|C-c C-o|Move to `fsvn-proplist-mode' buffer|
+|C-c C-o|Back to Fsvn Proplist buffer|
 |C-c C-r|Mark to buffer as recursive|
 
-** Often use command in `fsvn-process-list-mode'
+** Fsvn Processes
+
+*** Summary
+
+Listing Emacs processes and execute operations.
+On default settings, only showing the fsvn processes.
+
+*** Often used commands
 
 |d|Mark as delete to cursor process|
 |m|Mark to cursor process|
@@ -73,6 +137,10 @@ input repository url and password.
 |C-c C-p|Send password to marked files|
 |C-m|Display process buffer (Careful to edit|
 |C-c C-k|Finish listing|
+
+** Other
+
+["How to use of svk on fsvn" advanced-svk.html.en]
 
 ** For more information.
 

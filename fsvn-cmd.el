@@ -91,23 +91,19 @@
       (when (= (apply 'fsvn-call-command "list" t args) 0)
         (fsvn-xml-parse-lists-entries)))))
 
-(defun fsvn-get-uuid (url)
-  (let ((info (fsvn-get-info-entry url)))
-    (fsvn-xml-info->entry=>repository=>uuid$ info)))
-
 (defun fsvn-get-root (url)
   (let ((info (fsvn-get-info-entry url)))
     (fsvn-xml-info->entry=>repository=>root$ info)))
 
-(defun fsvn-get-root-upward (url)
+(defun fsvn-get-info-upward (url)
   (let ((tmp url)
-        root)
-    (while (and tmp (null root))
+        info)
+    (while (and tmp (null info))
       (condition-case err
-          (setq root (fsvn-xml-info->entry=>repository=>root$ (fsvn-get-info-entry tmp)))
+          (setq info (fsvn-get-info-entry tmp))
         (error))
       (setq tmp (fsvn-url-dirname tmp)))
-    root))
+    info))
 
 (defun fsvn-get-ls-entry (urlrev)
   (let ((entries (fsvn-get-ls (fsvn-urlrev-dirname urlrev))))

@@ -47,6 +47,9 @@ for directory
 cannot revert directory
 
 
+** when electric log
+suppress C-c C-k like C-c prefixed key.
+
 * popup-result-mode
 
 ** sometime running process exists but hide mode-line process running

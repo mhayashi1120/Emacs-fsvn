@@ -33,10 +33,16 @@
 svn+ssh を使う場合は可能な限り ssh-agent を使ってください。Windows で putty を使う場合は pageant です。</p>
 </div>
 </div>
+<div id="q-auth-0002">
+<dl>
+<dt>Q. Windows で認証がうまくいかない。</dt>
+<dd>A. 端末の扱いが unix と違っていて汎用的にうまくいく方法が思いつきません。うまく動かないときは自分で cmd.exe などを起動して svn コマンドを使って認証情報をキャッシュしてください。ちなみに、私は NTEmacs 23.1, Meadow 3 で動作させています。これ以上の情報はソースを読んでください。&lt;_o_&gt;</dd>
+</dl>
+</div>
 <div id="q-general-0001">
 <dl>
 <dt>Q. バッファがたくさんできて欝陶しい。</dt>
-<dd>A. M-x fsvn-global-cleanup-buffer (or type C-x v M-c)</dd>
+<dd>A. C-x v M-c (or M-x fsvn-global-cleanup-buffer)</dd>
 </dl>
 </div>
 <div id="q-general-0002">
@@ -55,6 +61,12 @@ svn+ssh を使う場合は可能な限り ssh-agent を使ってください。W
 <dl>
 <dt>Q. fsvn の機能を off にしたい。</dt>
 <dd>A. M-x fsvn-toggle-feature</dd>
+</dl>
+</div>
+<div id="q-general-0005">
+<dl>
+<dt>Q. 大量のファイルをコミットするときに遅くなる。</dt>
+<dd>A. 既知のバグです。</dd>
 </dl>
 </div>
 <div id="q-browse-0001">

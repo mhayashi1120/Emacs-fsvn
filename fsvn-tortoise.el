@@ -87,6 +87,7 @@
        userproperties))))
 
 (defmacro fsvn-tortoise-bugtraq:*-exec (dir &rest form)
+  (declare (indent 1))
   `(let ((URL (fsvn-get-directory-parent-property ,dir "bugtraq:url"))
          (MESSAGE (fsvn-get-directory-parent-property ,dir "bugtraq:message"))
          (LOGREGEX (fsvn-get-directory-parent-property ,dir "bugtraq:logregex"))
@@ -287,8 +288,6 @@
           (setq real-url (fsvn-tortoise-bugtraq-create-url url (match-string 1))))
         (put-text-property (match-beginning 0) (match-end 0) 'face fsvn-link-face)
         (put-text-property (match-beginning 0) (match-end 0) 'fsvn-url-link real-url)))))
-
-(put 'fsvn-tortoise-bugtraq:*-exec 'lisp-indent-function 1)
 
 (provide 'fsvn-tortoise)
 

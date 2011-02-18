@@ -9,8 +9,11 @@ tar xzf fsvn-(version).tar.gz
 |<
 
 *** `make' コマンドのある環境の場合は fsvn を展開したディレクトリに `cd' して、後述の手順に従ってください。
+
 **** NTEmacs で動作させる場合は mw32cmp.el のヘッダを読んで準備をしてください。
+
 **** MAKE-CFG と Makefile をエディタで編集してください。
+
 **** ファイルがどこにインストールされるか確認する場合は以下のコマンドを実行してください。
 
 >|
@@ -38,6 +41,7 @@ tar xzf fsvn.el.gz
 |<
 
 *** `load-path' の通ったところへ fsvn.el をコピーしてください。
+
 *** NTEmacs で動作させる場合は mw32cmp.el のヘッダを読んで必要な物を `load-path' へコピーしてください。
 
 ** .emacs の設定

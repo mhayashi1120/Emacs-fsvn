@@ -83,6 +83,7 @@
   "reg.exe specification cannot determine key default value.")
 
 (defmacro mw32cmp-pseudo-registry-narrow (key &rest form)
+  (declare (indent 1))
   `(let ((MW32CMP-KEY-REGEX (concat "^" (regexp-quote ,key)))
          MW32CMP-START MW32CMP-END)
      (goto-char (point-min))
@@ -96,8 +97,6 @@
      (narrow-to-region MW32CMP-START MW32CMP-END)
      (goto-char (point-min))
      ,@form))
-
-(put 'mw32cmp-pseudo-registry-narrow 'lisp-indent-function 1)
 
 ;;todo registry key and value contains space?
 ;;todo REG_SZ like string must be contains in this regexp.

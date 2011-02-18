@@ -12,10 +12,15 @@
 }
 }
 
+{Q-auth-0002
+? Q. Not works authentication on Windows.
+! A. I can't do well about windows terminal. You would have boot cmd.exe and execute svn command manually, to cache password information. Note: I use fsvn on NTEmacs 23 and Meadow 3, so you can. ;-) For more information, please read the source code.
+}
+
 # General question
 {Q-general-0001
-? Q. A lot of buffer are too noisy.
-! A. M-x fsvn-global-cleanup-buffer (or C-x v M-c)
+? Q. A lot of buffers are too noisy.
+! A. C-x v M-c (or M-x fsvn-global-cleanup-buffer)
 }
 
 {Q-general-0002
@@ -31,6 +36,11 @@
 {Q-general-0004
 ? Q. How to disable fsvn feature?
 ! A. M-x fsvn-toggle-feature
+}
+
+{Q-general-0005
+? Q. Slow down Emacs when commit a lot of files.
+! A. That is known bug.
 }
 
 # Browse mode question

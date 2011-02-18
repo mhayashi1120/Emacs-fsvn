@@ -217,7 +217,7 @@ Keybindings:
 
 (defun fsvn-parasite-commit-check (files)
   (let ((dir default-directory))
-    (when (fsvn-config-tortoise-property-use fsvn-buffer-repos-root)
+    (when (fsvn-config-tortoise-property-use (fsvn-buffer-repos-root))
       (fsvn-tortoise-commit-check files dir))))
 
 (defun fsvn-parasite-commit-gather-marked-files ()
@@ -243,7 +243,7 @@ Keybindings:
   (delete-other-windows)
   (let* ((log-win (split-window))
          (fselect-win (selected-window))
-         (root fsvn-buffer-repos-root)
+         (root (fsvn-buffer-repos-root))
          sel-buffer sel-window)
     (set-window-buffer log-win log)
     (set-window-buffer fselect-win fselect)

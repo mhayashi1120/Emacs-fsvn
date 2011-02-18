@@ -660,6 +660,8 @@ The value of DEFAULT is not a number, allow to enter a nil value."
               (setq tmp (fsvn-subcommand-assoc-argument x (cdr fsvn-complete-reading-subcommand))))
          ;; get long option
          (caar tmp))
+        ((fsvn-url-repository-p x)
+         (fsvn-url-string-to-urlrev x))
         (t
          x)))
      (fsvn-complete-reading-split-arguments string))))

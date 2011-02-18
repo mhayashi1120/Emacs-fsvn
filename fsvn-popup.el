@@ -70,7 +70,8 @@ Keybindings:
   (setq mode-name "Fsvn Result")
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-popup-result-buffer-local-variables)
-  (fsvn-popup-result-setup-mode-line))
+  (fsvn-popup-result-setup-mode-line)
+  (run-mode-hooks 'fsvn-popup-result-mode-hook))
 
 (defun fsvn-popup-result-setup-mode-line ()
   (or (assq 'fsvn-popup-result-process mode-line-process)
@@ -88,10 +89,9 @@ Keybindings:
 (defun fsvn-popup-result-create-buffer ()
   (let (tmp ret)
     (while (get-buffer (setq tmp (format-time-string "*Fsvn Result %H:%M:%S"))))
-    (setq ret (generate-new-buffer tmp))
+    (setq ret (get-buffer-create tmp))
     (with-current-buffer ret
-      (fsvn-popup-result-mode)
-      (run-mode-hooks 'fsvn-popup-result-mode-hook))
+      (fsvn-popup-result-mode))
     ret))
 
 ;; * fsvn-popup-result-mode interactive commands

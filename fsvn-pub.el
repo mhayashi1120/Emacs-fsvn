@@ -147,7 +147,7 @@
         (fsvn-browse-draw-local-directory dir)
         (set-visited-file-modtime (current-time))
         (setq buffer-read-only t)
-        (run-mode-hooks 'fsvn-browse-mode-hook)
+        (run-hooks 'fsvn-browse-mode-prepared-hook)
         (current-buffer)))))
 
 (defun fsvn-save-file (urlrev file &optional no-msg revision)
@@ -274,21 +274,21 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-cmd-read-import-args))
-  (let ((root (fsvn-get-root-upward url))
+  (let ((info (fsvn-buffer-new-repos-info-upward url))
         (browse-buffer (current-buffer))
         (win-configure (current-window-configuration))
         (msgedit-buffer (fsvn-message-edit-generate-buffer)))
-    (unless root
+    (unless info
       (error "Unable to get root repository"))
     (with-current-buffer msgedit-buffer
       (fsvn-message-edit-mode)
-      (setq fsvn-buffer-repos-root root)
+      (setq fsvn-buffer-repos-info info)
       (fsvn-parasite-import-mode 1)
       (setq fsvn-parasite-import-target-path file)
       (setq fsvn-parasite-import-target-url url)
       (setq fsvn-parasite-import-subcommand-args args)
       (setq fsvn-previous-window-configuration win-configure)
-      (run-mode-hooks 'fsvn-message-edit-mode-hook))
+      (run-hooks 'fsvn-message-edit-mode-prepared-hook))
     (fsvn-parasite-setup-message-edit-window msgedit-buffer)))
 
 (defun fsvn-open-repository (urlrev)
@@ -416,8 +416,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
   (fsvn-vc-check-before-commit)
-  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory)))
-    (unless fsvn-buffer-repos-root
+  (let* ((info (fsvn-buffer-new-repos-info default-directory))
+         (fsvn-buffer-repos-info info))
+    (unless fsvn-buffer-repos-info
       (error "Buffer file is not under versioned"))
     (fsvn-browse-commit-mode (list buffer-file-name) args)))
 
@@ -434,9 +435,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (list (fsvn-cmd-read-subcommand-args "commit" fsvn-default-args-commit)))
   (fsvn-vc-check-before-commit)
-  (let ((fsvn-buffer-repos-root (fsvn-get-root default-directory))
-        (file buffer-file-name))
-    (unless (and fsvn-buffer-repos-root
+  (let* ((fsvn-buffer-repos-info (fsvn-buffer-new-repos-info default-directory))
+         (file buffer-file-name))
+    (unless (and fsvn-buffer-repos-info
                  (not (fsvn-file-unversioned-p file)))
       (error "Buffer file is not under versioned"))
     (unless (member "--message" args)
@@ -518,7 +519,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      ((fsvn-url-repository-p urlrev)
       (fsvn-each-browse-buffer
        (let ((url (fsvn-urlrev-url urlrev)))
-         (when (string-match (concat "^" (regexp-quote fsvn-buffer-repos-root) "\\(.*\\)") url)
+         (when (string-match (concat "^" (regexp-quote (fsvn-buffer-repos-root)) "\\(.*\\)") url)
            (let ((regexp (format fsvn-browse-re-format-subdir (match-string 1 url))))
              (save-excursion
                (goto-char (point-min))
@@ -566,64 +567,43 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Argument REV-RANGE revision range cons cell `(start . end)'
 Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings.
 "
-  (let ((root (or (and fsvn-buffer-repos-root
-                       (fsvn-url-contains-p fsvn-buffer-repos-root urlrev)
-                       fsvn-buffer-repos-root)
-                  (fsvn-get-root urlrev)))
-        entries buffer win-config prev-entries)
-    (setq buffer (fsvn-log-list-get-buffer urlrev))
-    (cond
-     ((eq buffer (current-buffer))
-      (setq win-config fsvn-previous-window-configuration)
-      (setq prev-entries fsvn-log-list-all-entries))
-     (t
-      (setq win-config (current-window-configuration))))
-    (setq entries (fsvn-log-list-cmd urlrev root rev-range count))
-    (if (null entries)
-        (if prev-entries
-            (message "No more log entry.")
-          (message "No log entry."))
-      (set-buffer buffer)
-      (let ((first (car (last entries)))
-            (last (car entries))
-            buffer-read-only)
-        (when (> (fsvn-xml-log->logentry.revision first)
-                 (fsvn-xml-log->logentry.revision last))
-          (setq entries (nreverse entries))
-          (setq first (car (last entries))
-                last (car entries)))
-        (fsvn-log-list-mode)
+  (let* ((buffer (fsvn-log-list-get-buffer urlrev))
+         ;;FIXME if open log when any other repository..
+         (info (fsvn-buffer-repos-info buffer))
+         root/uuid proc win-config)
+    (unless info
+      (setq info (fsvn-buffer-new-repos-info urlrev)))
+    (unless info
+      (error "Not a subversion repository"))
+    (setq win-config (buffer-local-value 'fsvn-previous-window-configuration buffer))
+    (unless win-config
+      (setq win-config (current-window-configuration)))
+    (with-current-buffer buffer
+      (let (buffer-read-only)
+        (setq fsvn-buffer-repos-info info)
         (setq fsvn-logview-target-directory-p directory-p)
         (setq fsvn-logview-target-urlrev urlrev)
-        (setq fsvn-buffer-repos-root root)
         (setq fsvn-previous-window-configuration win-config)
-        (setq fsvn-log-list-all-entries (fsvn-logs-unique-merge entries prev-entries))
         (setq fsvn-log-list-target-path
               (if (fsvn-url-local-p urlrev)
                   (fsvn-wc-file-repository-path urlrev)
-                (fsvn-repository-path root urlrev)))
-        (setq fsvn-log-list-entries entries)
-        (erase-buffer)
-        (fsvn-log-list-insert-header-entry urlrev first last)
-        (mapc
-         (lambda (entry)
-           (fsvn-log-list-insert-entry entry))
-         entries)
-        (fsvn-log-list-goto-first-revision))
+                (fsvn-repository-path (fsvn-buffer-repos-root info) urlrev))))
       (setq buffer-read-only t)
       (set-buffer-modified-p nil)
-      (switch-to-buffer buffer)
-      (fsvn-log-list-setup-window)))
-  (run-mode-hooks 'fsvn-log-list-mode-hook))
+      (setq proc (fsvn-log-list-collect-log-range rev-range count)))
+    (switch-to-buffer buffer)
+    (fsvn-log-list-setup-window)
+    (run-hooks 'fsvn-log-list-mode-prepared-hook)
+    proc))
 
 
 
-(defun fsvn-open-propview-mode (root urlrev directory-p working-dir)
+(defun fsvn-open-propview-mode (info urlrev directory-p working-dir)
   (let ((win-configure (current-window-configuration)))
     ;; for proplist mode
     (with-current-buffer (fsvn-proplist-get-buffer)
       (fsvn-proplist-mode)
-      (setq fsvn-buffer-repos-root root)
+      (setq fsvn-buffer-repos-info info)
       (setq fsvn-propview-target-urlrev urlrev)
       (setq fsvn-propview-target-directory-p directory-p)
       (setq fsvn-previous-window-configuration win-configure)
@@ -635,7 +615,7 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
       (fsvn-proplist-draw-list urlrev)
       (fsvn-proplist-goto-first-property)
       (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
-      (run-mode-hooks 'fsvn-proplist-mode-hook))
+      (run-hooks 'fsvn-proplist-mode-prepared-hook))
     (switch-to-buffer (fsvn-proplist-get-buffer))))
 
 

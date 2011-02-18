@@ -12,6 +12,7 @@
 
 
 (require 'diff)
+(require 'diff-mode)
 (require 'fsvn-deps)
 
 
@@ -93,6 +94,7 @@
     (fsvn-ediff-files file1 file2)))
 
 ;;FIXME not well designed
+;;    ex: after async process, suddenly prompt to minibuffer "Execute ediff?"
 (defun fsvn-ediff-urlrev-directories (urlrev1 urlrev2)
   (cond
    ((and (fsvn-url-urlrev-p urlrev1)
@@ -145,6 +147,12 @@
       (fsvn-buffer-popup-as-information buffer)
       (set-process-sentinel proc (lambda (proc event))))))
 
+(defun fsvn-diff-start-files-process (new-file old-file &rest args)
+  (let ((diff-args (list
+                    (format "--new=%s" new-file)
+                    (format "--old=%s" old-file))))
+    (fsvn-diff-start-process diff-args args)))
+
 (defun fsvn-diff-get-buffer (diff-args)
   (let ((args (fsvn-command-args-canonicalize diff-args))
         buffer)
@@ -153,8 +161,10 @@
        (lambda (b)
          (with-current-buffer b
            (when (equal fsvn-diff-buffer-subcommand-args args)
-             (erase-buffer)
-             (throw 'found b))))
+             (let ((inhibit-read-only t)
+                   buffer-read-only)
+               (erase-buffer)
+               (throw 'found b)))))
        (buffer-list))
       (generate-new-buffer (format "*Fsvn diff %s*" (fsvn-diff-buffer-key-name args))))))
 
@@ -162,8 +172,11 @@
   (with-current-buffer buffer
     (diff-mode)
     (let ((real-args (fsvn-command-args-canonicalize args)))
+      (set (make-local-variable 'diff-added-face) fsvn-diff-add-face)
+      (set (make-local-variable 'diff-removed-face) fsvn-diff-delete-face)
       (set (make-local-variable 'fsvn-popup-result-buffer-p) t)
-      (set (make-local-variable 'fsvn-diff-buffer-subcommand-args) real-args))))
+      (set (make-local-variable 'fsvn-diff-buffer-subcommand-args) real-args))
+    (setq buffer-read-only t)))
 
 (defun fsvn-diff-buffer-key-name (args)
   (catch 'decide

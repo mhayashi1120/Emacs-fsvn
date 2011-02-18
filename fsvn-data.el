@@ -255,6 +255,17 @@ This list sorted revision descending.
      all)
     (nreverse ret)))
 
+(defun fsvn-logs-terminate-entries (entries)
+  (when entries
+    (let ((first (car (last entries)))
+          (last (car entries)))
+      (when (> (fsvn-xml-log->logentry.revision first)
+               (fsvn-xml-log->logentry.revision last))
+        (setq entries (nreverse entries))
+        (setq first (car (last entries))
+              last (car entries)))
+      (cons first last))))
+
 (defun fsvn-find-status-entry (status-entries file)
   (fsvn-find-first
    (lambda (key item)

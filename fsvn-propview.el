@@ -39,7 +39,7 @@
   '(
     (font-lock-defaults . '(fsvn-proplist-font-lock-keywords t nil nil beginning-of-line))
     (revert-buffer-function . 'fsvn-proplist-revert-buffer)
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-propview-target-urlrev)
     (fsvn-propview-target-directory-p)
     (fsvn-proplist-target-mode)
@@ -90,6 +90,11 @@
   :group 'fsvn
   :type 'hook)
 
+(defcustom fsvn-proplist-mode-prepared-hook nil
+  "*Run at the very end of `fsvn-proplist-mode' is prepared."
+  :group 'fsvn
+  :type 'hook)
+
 ;; * fsvn-proplist-mode internal function
 
 (defun fsvn-proplist-mode ()
@@ -107,8 +112,7 @@ Keybindings:
   (setq truncate-lines t)
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-proplist-buffer-local-variables)
-  (font-lock-mode 1)
-  (font-lock-fontify-buffer))
+  (run-mode-hooks 'fsvn-proplist-mode-hook))
 
 (defmacro fsvn-proplist-wc-only (&rest form)
   `(if (fsvn-url-repository-p fsvn-propview-target-urlrev)
@@ -139,8 +143,7 @@ Keybindings:
 (defun fsvn-proplist-delete-entry (propname)
   (when (fsvn-proplist-goto-propname propname)
     (let (buffer-read-only)
-      (forward-line 0)
-      (delete-region (point) (save-excursion (forward-line 1) (point))))))
+      (delete-region (line-beginning-position) (line-beginning-position 2)))))
 
 (defun fsvn-proplist-goto-propname (propname)
   (let ((saved (point))
@@ -276,8 +279,7 @@ Keybindings:
     (or (and propname
              (fsvn-proplist-goto-propname propname))
         (goto-char opoint))
-    (fsvn-proplist-draw-value (fsvn-proplist-current-propname))
-    (run-mode-hooks 'fsvn-proplist-mode-hook)))
+    (fsvn-proplist-draw-value (fsvn-proplist-current-propname))))
 
 (defun fsvn-proplist-draw-value (propname)
   (let ((file fsvn-propview-target-urlrev)
@@ -285,14 +287,14 @@ Keybindings:
         (buffer (fsvn-propedit-get-buffer))
         (dirp fsvn-propview-target-directory-p)
         (win-config fsvn-default-window-configuration)
-        (root fsvn-buffer-repos-root)
+        (info fsvn-buffer-repos-info)
         (working-dir default-directory)
         value)
     (with-current-buffer buffer
       (fsvn-propedit-mode)
       (setq fsvn-previous-window-configuration prev-config)
       (setq fsvn-default-window-configuration win-config)
-      (setq fsvn-buffer-repos-root root)
+      (setq fsvn-buffer-repos-info info)
       (setq fsvn-propview-target-urlrev file)
       (setq fsvn-propview-target-directory-p dirp)
       (setq fsvn-propedit-propname propname)
@@ -307,7 +309,7 @@ Keybindings:
           (when value
             (insert value)))
         (set-buffer-modified-p nil))
-      (run-mode-hooks 'fsvn-propedit-mode-hook))))
+      (run-hooks 'fsvn-propedit-mode-prepared-hook))))
 
 (defun fsvn-proplist-command-propname ()
   (let ((propname (fsvn-proplist-current-propname)))
@@ -414,7 +416,7 @@ Keybindings:
 (defconst fsvn-propedit-buffer-name "*Fsvn propedit*")
 (defconst fsvn-propedit-buffer-local-variables
   '(
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-propview-target-urlrev)
     (fsvn-propview-target-directory-p)
     (fsvn-propedit-propname)
@@ -443,6 +445,11 @@ Keybindings:
   :group 'fsvn
   :type 'hook)
 
+(defcustom fsvn-propedit-mode-prepared-hook nil
+  "*Run at the very end of `fsvn-propedit-mode' is prepared."
+  :group 'fsvn
+  :type 'hook)
+
 ;; * fsvn-propedit-mode internal function
 
 (defun fsvn-propedit-mode ()
@@ -459,7 +466,8 @@ Keybindings:
   (setq mode-name '("Fsvn Property Edit" (:eval fsvn-propedit-recursive-save)))
   (setq truncate-lines t)
   (setq buffer-undo-list nil)
-  (fsvn-make-buffer-variables fsvn-propedit-buffer-local-variables))
+  (fsvn-make-buffer-variables fsvn-propedit-buffer-local-variables)
+  (run-mode-hooks 'fsvn-propedit-mode-hook))
 
 (defun fsvn-propedit-prepared-buffer ()
   (fsvn-sole-major-mode 'fsvn-propedit-mode))

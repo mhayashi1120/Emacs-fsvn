@@ -23,16 +23,34 @@
 
 <h1>Basic use of fsvn.el</h1>
 <h2>First of all</h2>
+<h3>.emacs</h3>
+<p>Please put following settings to your .emacs if you can.
+<a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn">dot.sample</a></p>
+<h3>Repository authentication</h3>
 <p>Must have cache a password to svn command, when you need to authorize repository.</p>
 <pre>
 M-x fsvn-authenticate-repository
 </pre>
 <p>input repository url and password.</p>
-<h2>Often use command in `fsvn-browse-mode'</h2>
+<h3>Basic operation 1</h3>
+<p>fsvn create many buffers to output the svn command results. If you want to remove all these buffers, execute following command.</p>
+<pre>
+M-x fsvn-global-cleanup-buffer
+</pre>
+<p>Sample of setting indicate a key settings to C-x v M-c</p>
+<h2>Fsvn Browse</h2>
+<h3>Summary</h3>
+<p>Boot if directory have .svn directory instead of `dired'
+Similar to `dired' but not exactly equals that one.</p>
+<h3>Often used commands</h3>
 <table>
 <tr>
-<td>z U (C-c C-u)</td>
+<td>C-c C-u</td>
 <td>Update current directory (update)</td>
+</tr>
+<tr>
+<td>C-c C-c</td>
+<td>Prepare commit buffer for current directory by `Fsvn Select File' (commit)</td>
 </tr>
 <tr>
 <td>z a</td>
@@ -44,23 +62,19 @@ M-x fsvn-authenticate-repository
 </tr>
 <tr>
 <td>z c</td>
-<td>Prepare commit buffer for cursor file or marked files `fsvn-select-file-mode' (commit)</td>
-</tr>
-<tr>
-<td>z C (C-c C-c)</td>
-<td>Prepare commit buffer for current directory `fsvn-select-file-mode' (commit)</td>
+<td>Prepare commit buffer for cursor file or marked files `Fsvn Select File' (commit)</td>
 </tr>
 <tr>
 <td>z L</td>
-<td>Prepare `fsvn-log-view-mode' buffer for current directory (log)</td>
+<td>Prepare `Fsvn Log View' buffer for current directory (log)</td>
 </tr>
 <tr>
 <td>z l</td>
-<td>Prepare `fsvn-log-view-mode' buffer for cursor file (log)</td>
+<td>Prepare `Fsvn Log View' buffer for cursor file (log)</td>
 </tr>
 <tr>
 <td>z p</td>
-<td>Prepare `fsvn-proplist-mode' buffer for cursor file (proplist)</td>
+<td>Prepare `Fsvn Proplist' buffer for cursor file (proplist)</td>
 </tr>
 <tr>
 <td>C-c C-v C-c</td>
@@ -95,7 +109,12 @@ M-x fsvn-authenticate-repository
 <td>Switch to `dired-mode'</td>
 </tr>
 </table>
-<h2>Often use command in `fsvn-message-edit-mode', `fsvn-select-file-mode' (when commit)</h2>
+<h3>Advanced use</h3>
+<p><a href="advanced-browse.html.en">Advanced use of Browse Mode</a></p>
+<h2>Fsvn Message Edit, Fsvn Select File (when commit)</h2>
+<h3>Summary</h3>
+<p>Can select commit files and input the commit log message.</p>
+<h3>Often used commands</h3>
 <table>
 <tr>
 <td>C-c C-c</td>
@@ -111,14 +130,19 @@ M-x fsvn-authenticate-repository
 </tr>
 <tr>
 <td>= =</td>
-<td>Execute diff if cursor file is under subversion (Only `fsvn-select-file-mode')</td>
+<td>Execute diff if cursor file is under subversion (Only `Fsvn Select File')</td>
 </tr>
 <tr>
 <td>= e</td>
 <td>Same as `= =' but using ediff</td>
 </tr>
 </table>
-<h2>Often use command in `fsvn-log-view-mode'</h2>
+<h2>Fsvn Log View</h2>
+<h3>Advanced use</h3>
+<p><a href="advanced-logview.html.en">Advanced use of Log View Mode</a></p>
+<h3>Summary</h3>
+<p>Listing svn log file or directory.</p>
+<h3>Often used commands</h3>
 <table>
 <tr>
 <td>= =</td>
@@ -129,19 +153,22 @@ M-x fsvn-authenticate-repository
 <td>Same as `= =' but using ediff</td>
 </tr>
 <tr>
-<td>&gt;</td>
-<td>Backward to log</td>
+<td>n</td>
+<td>Move to next line and get old log if need</td>
 </tr>
 <tr>
-<td>&lt;</td>
-<td>Forward to log</td>
+<td>p</td>
+<td>Move to previous line</td>
 </tr>
 <tr>
 <td>C-c C-k</td>
 <td>Finish log</td>
 </tr>
 </table>
-<h2>Often use command in `fsvn-proplist-mode'</h2>
+<h2>Fsvn Proplist</h2>
+<h3>Summary</h3>
+<p>Can show, add, delete svn properties.</p>
+<h3>Often used commands</h3>
 <table>
 <tr>
 <td>C-m</td>
@@ -176,7 +203,10 @@ M-x fsvn-authenticate-repository
 <td>Finish property list</td>
 </tr>
 </table>
-<h2>Often use command in `fsvn-propedit-mode'</h2>
+<h2>Fsvn Propedit</h2>
+<h3>Summary</h3>
+<p>Can show, edit svn property.</p>
+<h3>Often used commands</h3>
 <table>
 <tr>
 <td>C-c C-c</td>
@@ -188,14 +218,18 @@ M-x fsvn-authenticate-repository
 </tr>
 <tr>
 <td>C-c C-o</td>
-<td>Move to `fsvn-proplist-mode' buffer</td>
+<td>Back to Fsvn Proplist buffer</td>
 </tr>
 <tr>
 <td>C-c C-r</td>
 <td>Mark to buffer as recursive</td>
 </tr>
 </table>
-<h2>Often use command in `fsvn-process-list-mode'</h2>
+<h2>Fsvn Processes</h2>
+<h3>Summary</h3>
+<p>Listing Emacs processes and execute operations.
+On default settings, only showing the fsvn processes.</p>
+<h3>Often used commands</h3>
 <table>
 <tr>
 <td>d</td>
@@ -230,6 +264,8 @@ M-x fsvn-authenticate-repository
 <td>Finish listing</td>
 </tr>
 </table>
+<h2>Other</h2>
+<p><a href="advanced-svk.html.en">How to use of svk on fsvn</a></p>
 <h2>For more information.</h2>
 <p><a href="qa.html.en">Q and A</a></p>
 

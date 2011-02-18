@@ -75,7 +75,7 @@
     (fsvn-browse-buffer-files-status-process)
     (fsvn-browse-buffer-directories-status-process)
     (fsvn-browse-buffer-cleanup-process)
-    (fsvn-buffer-repos-root)
+    (fsvn-buffer-repos-info)
     (fsvn-browse-revision)
     (fsvn-browse-ls-comparer)
     (dired-directory)
@@ -291,6 +291,11 @@
   :group 'fsvn
   :type 'hook)
 
+(defcustom fsvn-browse-mode-prepared-hook nil
+  "*Run at the very end of `fsvn-browse-mode' is prepared."
+  :group 'fsvn
+  :type 'hook)
+
 (defcustom fsvn-browse-before-commit-hook nil
   "*Run before prepared file-select-buffer.  Called with a list argument as filenames."
   ;; TODO called one arg then type is not hook?
@@ -320,8 +325,7 @@ Keybindings:
   (setq buffer-undo-list t)
   (fsvn-make-buffer-variables fsvn-browse-buffer-local-variables)
   (fsvn-browse-setup-mode-line)
-  (font-lock-mode 1)
-  (font-lock-fontify-buffer))
+  (run-mode-hooks 'fsvn-browse-mode-hook))
 
 (defconst fsvn-browse-dired-confirm-alist
   '(
@@ -524,6 +528,17 @@ STATUS `t' means force to add entry."
         (fsvn-browse-add-wc-raw-entry dir filename file status-entry)
         nil))))
 
+(defun fsvn-browse-add-file-entry (file)
+  (save-excursion
+    (unless (fsvn-current-filename)
+      (unless (fsvn-browse-goto-first-file)
+        (goto-char (point-max))))
+    (forward-line 0)
+    (let (buffer-read-only)
+      (fsvn-browse-ls-insert-wc-entry file))
+    (fsvn-move-to-filename)
+    (set-buffer-modified-p nil)))
+
 (defun fsvn-browse-add-wc-raw-entry (dir filename file &optional status-entry)
   (catch 'done
     (fsvn-browse-each-file f dir
@@ -544,11 +559,8 @@ STATUS `t' means force to add entry."
       (fsvn-browse-remove-current-entry))))
 
 (defun fsvn-browse-remove-current-entry ()
-  (let (buffer-read-only start end)
-    (forward-line 0)
-    (setq start (point))
-    (setq end (save-excursion (forward-line 1) (point)))
-    (delete-region start end)))
+  (let (buffer-read-only)
+    (delete-region (line-beginning-position) (line-beginning-position 2))))
 
 (defun fsvn-browse-ls-insert-repos-entry (entry)
   (let ((dirp (eq (fsvn-xml-lists->list->entry.kind entry) 'dir))
@@ -636,6 +648,7 @@ STATUS `t' means force to add entry."
   "Move point and execute FORM.
 VAR set `fsvn-current-filename'
 PATH is each executed path."
+  (declare (indent 2))
   `(save-excursion
      (let (,var RET)
        (when (fsvn-browse-goto-directory (or ,path (fsvn-browse-current-path)))
@@ -829,6 +842,7 @@ PATH is each executed path."
   (fsvn-browse-put-status-internal file mark 5))
 
 (defmacro fsvn-browse-with-move-status (file column &rest form)
+  (declare (indent 2))
   `(save-excursion
      (when (fsvn-browse-goto-file ,file)
        (forward-line 0)
@@ -935,7 +949,7 @@ PATH is each executed path."
   (set-visited-file-modtime (current-time))
   (setq buffer-read-only t)
   (switch-to-buffer (current-buffer))
-  (run-mode-hooks 'fsvn-browse-mode-hook))
+  (run-hooks 'fsvn-browse-mode-prepared-hook))
 
 (defun fsvn-browse-draw-repos-directory (directory-urlrev &optional type)
   (let (buffer info comparer)
@@ -1049,14 +1063,14 @@ PATH is each executed path."
     (setq dired-directory default-directory)))
 
 (defun fsvn-browse-set-repos-local-variables (info)
-  (setq fsvn-buffer-repos-root (fsvn-xml-info->entry=>repository=>root$ info))
+  (setq fsvn-buffer-repos-info (fsvn-buffer-xml-info->repos-info info))
   (setq fsvn-browse-revision (fsvn-xml-info->entry.revision info))
   (setq fsvn-browse-repos-p t)
   (let* ((subdir (fsvn-browse-subdir (fsvn-info-repos-path info) t)))
     (fsvn-browse-subdir!info subdir info)))
 
 (defun fsvn-browse-set-wc-local-variables (info directory)
-  (setq fsvn-buffer-repos-root (fsvn-xml-info->entry=>repository=>root$ info))
+  (setq fsvn-buffer-repos-info (fsvn-buffer-xml-info->repos-info info))
   (setq fsvn-browse-revision (fsvn-xml-info->entry.revision info))
   (setq fsvn-browse-repos-p nil)
   (let* ((subdir (fsvn-browse-subdir directory nil)))
@@ -1160,12 +1174,12 @@ PATH is each executed path."
     (nreverse ret)))
 
 (defun fsvn-browse-propview-mode (file directory-p)
-  (let ((root fsvn-buffer-repos-root)
+  (let ((info fsvn-buffer-repos-info)
         (working-dir
          (if (fsvn-url-local-p file)
              (fsvn-browse-current-directory-url)
            (fsvn-browse-current-magic-directory))))
-    (fsvn-open-propview-mode root file directory-p working-dir)))
+    (fsvn-open-propview-mode info file directory-p working-dir)))
 
 (defun fsvn-browse-revert-buffer (ignore-auto noconfirm)
   (let ((file (fsvn-current-filename))
@@ -1223,14 +1237,15 @@ PATH is each executed path."
     t))
 
 (defmacro fsvn-browse-open-message-edit (buffer &rest form)
-  `(let ((ROOT fsvn-buffer-repos-root)
+  (declare (indent 1))
+  `(let ((INFO fsvn-buffer-repos-info)
          (WIN-CONFIGURE (current-window-configuration)))
      (with-current-buffer ,buffer
        (fsvn-message-edit-mode)
        (setq fsvn-previous-window-configuration WIN-CONFIGURE)
-       (setq fsvn-buffer-repos-root ROOT)
+       (setq fsvn-buffer-repos-info INFO)
        ,@form
-       (run-mode-hooks 'fsvn-message-edit-mode-hook))))
+       (run-hooks 'fsvn-message-edit-mode-prepared-hook))))
 
 (defmacro fsvn-browse-quick-message-edit (&rest form)
   `(let ((buffer (fsvn-message-edit-generate-buffer)))
@@ -1240,7 +1255,7 @@ PATH is each executed path."
 
 (defun fsvn-browse-add-file-select (files args)
   (let* ((win-configure (current-window-configuration))
-         (root fsvn-buffer-repos-root)
+         (info fsvn-buffer-repos-info)
          (select-buffer (fsvn-parasite-add-get-buffer files))
          win)
     (with-current-buffer select-buffer
@@ -1248,17 +1263,17 @@ PATH is each executed path."
       (setq fsvn-previous-window-configuration win-configure)
       (fsvn-parasite-add-mode 1)
       (setq fsvn-parasite-add-subcommand-args args)
-      (fsvn-select-file-draw-root root)
+      (fsvn-select-file-draw-root info)
       (fsvn-parasite-add-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
-      (run-mode-hooks 'fsvn-select-file-mode-hook))
+      (run-hooks 'fsvn-select-file-mode-prepared-hook))
     (fsvn-parasite-add-setup-window select-buffer)))
 
 (defun fsvn-browse-commit-mode (files args)
   (let* ((browse-buffer (current-buffer))
          (win-configure (current-window-configuration))
-         (root fsvn-buffer-repos-root)
+         (info fsvn-buffer-repos-info)
          (buffers (fsvn-parasite-commit-get-buffers files))
          (select-buffer (car buffers))
          (msgedit-buffer (cdr buffers))
@@ -1270,16 +1285,16 @@ PATH is each executed path."
       (setq fsvn-select-file-draw-list-function 'fsvn-parasite-commit-draw-list)
       (setq fsvn-select-file-msgedit-buffer msgedit-buffer)
       (fsvn-parasite-commit-mode 1)
-      (fsvn-select-file-draw-root root)
+      (fsvn-select-file-draw-root info)
       (fsvn-parasite-commit-draw-applicant files)
       (setq buffer-read-only t)
       (fsvn-select-file-first-file)
-      (run-mode-hooks 'fsvn-select-file-mode-hook))
+      (run-hooks 'fsvn-select-file-mode-prepared-hook))
     (fsvn-browse-open-message-edit msgedit-buffer
       (setq fsvn-message-edit-file-select-buffer select-buffer)
       (fsvn-parasite-commit-mode 1)
       (fsvn-parasite-commit-set-subcommand-args args)
-      (when (fsvn-config-tortoise-property-use root)
+      (when (fsvn-config-tortoise-property-use (fsvn-buffer-repos-root info))
         (fsvn-tortoise-commit-initialize)))
     (fsvn-parasite-commit-setup-window msgedit-buffer select-buffer)))
 
@@ -1346,7 +1361,7 @@ PATH is each executed path."
        file
        (fsvn-expand-url
         (fsvn-browse-current-path)
-        (fsvn-browse-current-root)))))))
+        (fsvn-buffer-repos-root)))))))
 
 (defun fsvn-browse-point-urlrev ()
   (let ((url (fsvn-browse-point-url)))
@@ -1384,10 +1399,6 @@ PATH is each executed path."
           (re-search-forward fsvn-browse-re-subdir nil t))
       (match-string-no-properties 2)))))
 
-(defun fsvn-browse-current-root ()
-  "Current buffer's repository root."
-  fsvn-buffer-repos-root)
-
 (defun fsvn-browse-current-info ()
   "Current point source info."
   (let ((subdir (fsvn-string-assoc (fsvn-browse-current-path) fsvn-browse-subdir-alist)))
@@ -1412,7 +1423,7 @@ PATH is each executed path."
    (t
     (fsvn-expand-url
      (fsvn-browse-current-path)
-     (fsvn-browse-current-root)))))
+     (fsvn-buffer-repos-root)))))
 
 (defun fsvn-browse-current-directory-urlrev ()
   "Current point URL."
@@ -1428,7 +1439,7 @@ PATH is each executed path."
   (if fsvn-browse-repos-p
       (fsvn-expand-url
        (fsvn-browse-current-path)
-       (fsvn-browse-current-root))
+       (fsvn-buffer-repos-root))
     (let* ((subdir (fsvn-browse-subdir (fsvn-browse-current-path) nil))
            (info (fsvn-browse-subdir.info subdir)))
       (fsvn-xml-info->entry=>url$ info))))
@@ -1728,13 +1739,13 @@ PATH is each executed path."
    (let ((args (fsvn-cmd-read-subcommand-args "mergeinfo" fsvn-default-args-mergeinfo)))
      (list args))))
 
-(defun fsvn-browse-cmd-read-branch/tag (default-dirname)
+(defun fsvn-browse-cmd-read-branch/tag (prompt default-dirname)
   (let ((repos-url (fsvn-browse-current-repository-url))
         dest-url args)
-    (setq repos-url (fsvn-read-url-with-revision "URL: "  repos-url))
+    (setq repos-url (fsvn-read-url-with-revision "Source URL: "  repos-url))
     (when (string-match "^\\(.*\\)/trunk" repos-url)
       (setq dest-url (concat (match-string 1 repos-url) "/" default-dirname "/")))
-    (setq dest-url (fsvn-completing-read-url "Branch/Tag URL: " dest-url t))
+    (setq dest-url (fsvn-completing-read-url (format "New %s URL: " prompt) dest-url t))
     (setq args (fsvn-cmd-read-subcommand-args "copy" fsvn-default-args-copy))
     (list repos-url dest-url args)))
 
@@ -2172,14 +2183,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   "Create branch executing `copy'.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
-  (interactive (fsvn-browse-cmd-read-branch/tag "branches"))
+  (interactive (fsvn-browse-cmd-read-branch/tag "Branch" "branches"))
   (fsvn-browse-copy-this-in-repository urlrev branch-url args))
 
 (defun fsvn-browse-create-tag (urlrev tag-url &optional args)
   "Create tag executing `copy'.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
-  (interactive (fsvn-browse-cmd-read-branch/tag "tags"))
+  (interactive (fsvn-browse-cmd-read-branch/tag "Tag" "tags"))
   (fsvn-browse-copy-this-in-repository urlrev tag-url args))
 
 (defun fsvn-browse-copy-this-in-repository (from-url to-url &optional args)
@@ -2536,10 +2547,6 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
   fsvn-browse-mode-menu-spec)
 
 
-
-(put 'fsvn-browse-each-file 'lisp-indent-function 2)
-(put 'fsvn-browse-with-move-status 'lisp-indent-function 2)
-(put 'fsvn-browse-open-message-edit 'lisp-indent-function 1)
 
 (provide 'fsvn-browse)
 

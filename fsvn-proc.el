@@ -133,6 +133,7 @@ If error occur in process (exit status with non zero value) then raise error."
 BODY each form that return process object stopping remaining BODY.
 Execute remaining BODY in process-sentinel if process exited normally.
 Like `let' binding, varlist bound while executing BODY. (sentinel and filter too)"
+  (declare (indent 1))
   `(let ,varlist
      (let (fsvn-var-list)
        (mapc
@@ -248,11 +249,13 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
     strategies)))
 
 (defmacro fsvn-process-event-handler (proc event &rest form)
+  (declare (indent 2))
   `(with-current-buffer (process-buffer ,proc)
      (save-excursion
        ,@form)))
 
 (defmacro fsvn-process-exit-handler (proc event &rest form)
+  (declare (indent 2))
   `(when (eq (process-status ,proc) 'exit)
      (fsvn-process-event-handler ,proc ,event
        ,@form)))
@@ -308,12 +311,14 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
           ((string-match fsvn-diff-subcommand-arg-regexp arg)
            (let ((url (match-string 2 arg))
                  cs magic-name)
-             (when (fsvn-url-repository-p url)
+             (cond
+              ((fsvn-url-repository-p url)
                (when (setq cs (fsvn-config-repository-default-coding-system url))
-                 (throw 'guessed cs))
-               (setq magic-name (fsvn-magic-create-name url))
-               (unless (file-directory-p magic-name)
-                 (fsvn-file-guessed-coding-system magic-name)))))
+                 (throw 'guessed cs)))
+              ((fsvn-url-local-p url)
+               (unless (file-directory-p url)
+                 (when (setq cs (fsvn-file-guessed-coding-system url))
+                   (throw 'guessed cs)))))))
           ((string-match "^--[a-zA-Z]" arg)
            (setq ignore (assoc arg '("--targets" "--file"))))
           ((not (fsvn-url-local-p arg)))
@@ -323,12 +328,6 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
                (throw 'guessed (fsvn-file-guessed-coding-system file)))))))
        flatten-args)
       (default-value 'buffer-file-coding-system))))
-
-
-
-(put 'fsvn-process-event-handler 'lisp-indent-function 2)
-(put 'fsvn-process-exit-handler 'lisp-indent-function 2)
-(put 'fsvn-async-let 'lisp-indent-function 1)
 
 
 
