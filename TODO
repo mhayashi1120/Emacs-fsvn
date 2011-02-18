@@ -44,6 +44,10 @@ freezing processes.
 
 inhibit path completion.
 
+
+** Consider using uuid string as message id directory
+fsvn-message-edit-get-message-directory
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 

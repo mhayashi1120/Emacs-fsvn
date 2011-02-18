@@ -164,7 +164,6 @@ Keybindings:
 
 
 (defun fsvn-message-edit-get-message-directory ()
-  ;;TODO how about use uuid????
   (let ((dir (fsvn-expand-file (md5 (fsvn-buffer-repos-root)) (fsvn-logmessage-directory))))
     (unless (fsvn-file-exact-directory-p dir)
       (make-directory dir t))
