@@ -21,6 +21,7 @@
 
 (defvar text-mode-map)
 (defvar current-prefix-arg)
+(defvar deactivate-mark)
 
 
 

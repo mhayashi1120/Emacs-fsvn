@@ -1,4 +1,4 @@
-VERSION = 0.9.9
+VERSION = 0.9.10
 
 RELEASE_FILES = \
 	fsvn*.el \

@@ -1,3 +1,7 @@
+2011-02-19  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Release: 0.9.10
+
 2011-02-18  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: set UUID in all buffers.
