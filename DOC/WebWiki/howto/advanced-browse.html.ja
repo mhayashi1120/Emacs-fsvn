@@ -21,6 +21,12 @@
   <body>
 	<a href="../index.html">Top</a>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
+
 <h1>Browse Mode の詳しい使い方</h1>
 <p>TODO</p>
 <h2>リポジトリブラウザ (Repository Browser)</h2>
@@ -31,6 +37,11 @@
 <p>閲覧しているリビジョンを起点にしたログの参照、</p>
 <p>TODO 途中</p>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
 	<!-- Google Analytics -->
 	<script type="text/javascript">
 

@@ -76,14 +76,16 @@
       (fsvn-publish-replace-in-buffer 
        "[ \t]*<html lang=\"\\(\\)\""
        1 lang)
+      (fsvn-publish-replace-in-buffer 
+       "^[ \t]*Published: TODO"
+       0 (format "Published: %s" (format-time-string "%Y-%m-%d %H:%M")))
       (write-region (point-min) (point-max) html nil 'no-msg))))
 
 (defun fsvn-publish-replace-in-buffer (regexp subexp new-text)
   (save-excursion
     (goto-char (point-min))
-    (unless (re-search-forward regexp nil t)
-      (error "Error! No string is matched"))
-    (replace-match new-text nil nil nil subexp)))
+    (while (re-search-forward regexp nil t)
+      (replace-match new-text nil nil nil subexp))))
 
 (provide 'fsvn-publish)
 

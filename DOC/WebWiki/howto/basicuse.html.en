@@ -21,6 +21,12 @@
   <body>
 	<a href="../index.html">Top</a>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
+
 <h1>Basic use of fsvn.el</h1>
 <h2>First of all</h2>
 <h3>.emacs</h3>
@@ -269,6 +275,11 @@ On default settings, only showing the fsvn processes.</p>
 <h2>For more information.</h2>
 <p><a href="qa.html.en">Q and A</a></p>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
 	<!-- Google Analytics -->
 	<script type="text/javascript">
 

@@ -21,6 +21,12 @@
   <body>
 	<a href="../index.html">Top</a>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
+
 <h1>Install</h1>
 <h2>If you download archived file</h2>
 <h3>First of all, unpack archive file</h3>
@@ -57,6 +63,11 @@ tar xzf fsvn.el.gz
 <h2>For more information.</h2>
 <p><a href="qa.html.en">Q and A</a></p>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
 	<!-- Google Analytics -->
 	<script type="text/javascript">
 

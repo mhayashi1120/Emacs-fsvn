@@ -21,6 +21,12 @@
   <body>
 	<a href="../index.html">Top</a>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
+
 <h1>Question and Answer</h1>
 <h6>This description based on <a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn">sample key settings</a>.</h6>
 <div id="q-auth-0001">
@@ -126,6 +132,11 @@ If possible, to use ssh-agent program when access by svn+ssh protcol. If using w
 </dl>
 </div>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
 	<!-- Google Analytics -->
 	<script type="text/javascript">
 
