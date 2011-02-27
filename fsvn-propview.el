@@ -249,9 +249,9 @@ Keybindings:
 
 (defun fsvn-proplist-check-propedit-status ()
   (when (fsvn-propedit-buffer-modified-p)
-    (if (y-or-n-p "Propedit buffer is changed.  Discard it? ")
-        (fsvn-propedit-buffer-discard-changes)
-      (error "Discard postponed"))))
+    (unless (y-or-n-p "Propedit buffer is changed.  Discard it? ")
+      (fsvn-quit "Discard postponed"))
+    (fsvn-propedit-buffer-discard-changes)))
 
 (defun fsvn-proplist-current-propname ()
   (save-excursion

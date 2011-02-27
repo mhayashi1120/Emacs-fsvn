@@ -690,7 +690,7 @@ from is marked point, to is current point."
                        "Revert `%s' to revision %s? " 
                        (fsvn-file-name-nondirectory path)
                        (fsvn-urlrev-revision urlrev)))
-      (signal 'quit nil))
+      (fsvn-quit))
     (list urlrev path)))
   
 (defun fsvn-log-list-cmd-read-urlrev ()
@@ -825,7 +825,7 @@ Otherwise diff at point revision with working copy file or directory.
   (interactive (fsvn-logview-cmd-read-diff-args))
   (let ((file fsvn-logview-target-urlrev)
         (rev (fsvn-log-list-point-revision))
-        buffer diff-args)
+        diff-args)
     (setq diff-args (list "--revision" rev file))
     (fsvn-diff-start-process diff-args args)))
 
@@ -1384,7 +1384,7 @@ Keybindings:
    ((not (buffer-modified-p))
     (error "Message is not changed."))
    ((not (y-or-n-p "Really commit changed log? "))
-    (signal 'quit nil))))
+    (fsvn-quit))))
 
 (defun fsvn-log-message-cmd-read-quit-edit ()
   ;;TODO consider specific
@@ -1443,7 +1443,7 @@ Keybindings:
     (setq file (read-file-name "Save as: " nil nil nil rev-name))
     (when (and (file-exists-p file)
                (not (y-or-n-p "File exists. overwrite? ")))
-      (signal 'quit nil))
+      (fsvn-quit))
     (fsvn-expand-file file)))
 
 (defun fsvn-log-subwindow-switch-to-view ()

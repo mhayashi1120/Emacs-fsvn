@@ -1,3 +1,21 @@
+2011-02-25  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: Read url with revision.
+
+	* Fix: fsvn-browse-goto-first-file
+
+	* Add: fsvn-pkg.el and reconstruct install process for package.el (But Not works yet)
+
+2011-02-24  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: error to `quit' signal. If canceled by user.
+
+	* Change: Suppress illegal conventions command message.
+
+2011-02-20  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: Diff with current directory in browse buffer (bound to `= D')
+
 2011-02-19  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Release: 0.9.10

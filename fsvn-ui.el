@@ -735,6 +735,7 @@ static char * data[] = {
                       :ascent center)))
 
 (defun fsvn-ui-fancy-install-state-mark (color)
+  (add-hook 'after-revert-hook 'fsvn-ui-fancy-redraw nil t)
   (let ((mode `(fsvn-ui-fancy-modeline
                 ,(fsvn-ui-fancy-modeline-picture color))))
     (unless (assq 'fsvn-ui-fancy-modeline mode-line-format)
@@ -742,6 +743,7 @@ static char * data[] = {
     (force-mode-line-update t)))
 
 (defun fsvn-ui-fancy-uninstall-state-mark ()
+  (remove-hook 'after-revert-hook 'fsvn-ui-fancy-redraw t)
   (setq mode-line-format
         (assq-delete-all 'fsvn-ui-fancy-modeline
                          mode-line-format))
@@ -763,12 +765,6 @@ static char * data[] = {
 (defadvice vc-find-file-hook (after fsvn-ui-fancy-vc-find-file-hook disable)
   "vc-find-file-hook advice for synchronizing psvn with vc-svn interface"
   (fsvn-ui-fancy-redraw))
-
-(defadvice vc-find-file-hook (after fsvn-ui-fancy-vc-find-file-hook-revert disable)
-  "Add hook to `revert-buffer'"
-  ;; `revert-buffer-function' is not considered.
-  ;; Almost case, that variable is used in non text editing modes.
-  (add-hook 'after-revert-hook 'fsvn-ui-fancy-redraw nil t))
 
 (defadvice vc-after-save (after fsvn-ui-fancy-vc-after-save disable)
   "vc-after-save advice for synchronizing psvn when saving buffer"

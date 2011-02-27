@@ -1,10 +1,16 @@
 VERSION = 0.9.10
 
 RELEASE_FILES = \
-	fsvn*.el \
-	mw32cmp.el mw32cmp-test.el \
-	Makefile MAKE-CFG.el MAKE-TARGETS.mk \
-	BUG INSTALL TODO ChangeLog
+	fsvn-admin.el fsvn-blame.el fsvn-browse.el fsvn-cmd.el fsvn-config.el \
+	fsvn-data.el fsvn-debug.el fsvn-deps.el fsvn-dev.el fsvn-diff.el \
+	fsvn-dired.el fsvn-env.el fsvn-fs.el fsvn-logview.el fsvn-magic.el \
+	fsvn-make.el fsvn-minibuf.el fsvn-mode.el fsvn-msgedit.el \
+	fsvn-parasite.el fsvn-pkg.el fsvn-popup.el fsvn-proc.el \
+	fsvn-proclist.el fsvn-propview.el fsvn-pub.el fsvn-select.el \
+	fsvn-svk.el fsvn-test.el fsvn-tortoise.el fsvn-ui.el fsvn-url.el \
+	fsvn-win.el fsvn-xml.el fsvn.el \
+	mw32cmp.el mw32cmp-test.el Makefile \
+	MAKE-CFG.el MAKE-TARGETS.mk BUG INSTALL README TODO ChangeLog
 
 RELEASE_SAMPLES = \
 	Samples/Makefile* Samples/MAKE-CFG.el*

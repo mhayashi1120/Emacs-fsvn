@@ -154,6 +154,8 @@
           (suppress-keymap map)
           (define-key map "=" 'fsvn-browse-diff-this)
           (define-key map "l" 'fsvn-browse-diff-local)
+          (define-key map "d" 'fsvn-browse-diff-this)
+          (define-key map "D" 'fsvn-browse-diff-path)
           (define-key map "e" 'fsvn-browse-ediff-this)
           (define-key map "E" 'fsvn-browse-ediff-path)
           (define-key map "p" 'fsvn-browse-create-patch-selected)
@@ -235,19 +237,7 @@
           (define-key map "\ei" 'fsvn-browse-prop-add-svn:ignore-selected)
           (define-key map "\er" 'fsvn-browse-resolve-selected)
 
-          (map-keymap 
-           (lambda (key command)
-             (when (fsvn-characterp key)
-               (define-key map (char-to-string key) 
-                 `(lambda () 
-                    (interactive)
-                    (error (concat 
-                            "Sorry... Type "
-                            (substitute-command-keys (concat "`\\[" (symbol-name ',command) "]'"))
-                            " to continue. "
-                            "This command sequence is obsoleted because of violating Major Mode conventions." ))))))
-           fsvn-browse-often-use-map)
-
+          ;; C-c C-v * -> z v *
           (map-keymap
            (lambda (key command)
              ;; only C-v map
@@ -780,12 +770,14 @@ PATH is each executed path."
 
 (defun fsvn-browse-goto-first-file ()
   (let ((saved (point)))
-    (when (or (re-search-backward fsvn-browse-re-subdir nil t)
-              (save-excursion (forward-line 0) (looking-at fsvn-browse-re-subdir)))
+    (goto-char (point-min))
+    (cond
+     ((re-search-forward fsvn-browse-re-subdir nil t)
       (forward-line 2)
       (or (fsvn-move-to-filename)
           (and (goto-char saved)
-               nil)))))
+               nil)))
+     (t (goto-char saved)))))
 
 (defun fsvn-browse-move-to-dir-status ()
   (forward-line 0)
@@ -1660,7 +1652,7 @@ PATH is each executed path."
        ((file-directory-p to-file)
         (error "Destination directory exists"))
        ((not (y-or-n-p "Desitination file exists. Really overwrite? "))
-        (signal 'quit nil))))
+        (fsvn-quit))))
     (list file to-file args)))
 
 (defun fsvn-browse-cmd-read-export-path ()
@@ -1673,6 +1665,11 @@ PATH is each executed path."
    (let* ((file (fsvn-browse-cmd-this-wc-file))
           (args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
      (list file args))))
+
+(defun fsvn-browse-cmd-read-diff-path ()
+  (fsvn-browse-cmd-wc-only
+   (let* ((args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
+     (list args))))
 
 (defun fsvn-browse-cmd-read-diff-local ()
   (fsvn-browse-cmd-wc-only
@@ -1721,9 +1718,9 @@ PATH is each executed path."
   (fsvn-browse-cmd-wc-only
    (fsvn-brief-message-showing
     (let (from to args)
-      (setq from (fsvn-read-url-with-revision "URL1: "))
+      (setq from (fsvn-completing-read-urlrev "URL1: "))
       (fsvn-brief-message-add-message (format "URL1: %s" from))
-      (setq to (fsvn-read-url-with-revision "URL2: " (fsvn-urlrev-url from)))
+      (setq to (fsvn-completing-read-urlrev "URL2: " (fsvn-urlrev-url from)))
       (fsvn-brief-message-add-message (format "URL2: %s" to))
       (setq args (fsvn-cmd-read-subcommand-args "merge" fsvn-default-args-merge))
       (list from to args)))))
@@ -1742,7 +1739,7 @@ PATH is each executed path."
 (defun fsvn-browse-cmd-read-branch/tag (prompt default-dirname)
   (let ((repos-url (fsvn-browse-current-repository-url))
         dest-url args)
-    (setq repos-url (fsvn-read-url-with-revision "Source URL: "  repos-url))
+    (setq repos-url (fsvn-completing-read-urlrev "Source URL: "  repos-url))
     (when (string-match "^\\(.*\\)/trunk" repos-url)
       (setq dest-url (concat (match-string 1 repos-url) "/" default-dirname "/")))
     (setq dest-url (fsvn-completing-read-url (format "New %s URL: " prompt) dest-url t))
@@ -1753,7 +1750,7 @@ PATH is each executed path."
   (fsvn-browse-cmd-wc-only
    (let ((dir (fsvn-read-directory-name "New Source: " nil nil t)))
      (unless (y-or-n-p "This takes many seconds. ok? ")
-       (signal 'quit nil))
+       (fsvn-quit))
      (list dir))))
 
 (defun fsvn-browse-cmd-read-paste-properties-to-this ()
@@ -2354,6 +2351,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
    (let ((diff-args (list file args)))
      (fsvn-diff-start-process diff-args))))
 
+(defun fsvn-browse-diff-path (&optional args)
+  (interactive (fsvn-browse-cmd-read-diff-path))
+  "Execute `diff' for current directory.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
+  (fsvn-browse-wc-only
+   (fsvn-diff-start-process (fsvn-browse-current-path) args)))
+
 (defun fsvn-browse-ediff-this (file)
   "Ediff for point FILE."
   (interactive (fsvn-browse-cmd-read-wc-this-file))
@@ -2466,6 +2471,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      ["Cleanup" fsvn-browse-cleanup-path t]
      ["Commit" fsvn-browse-commit-path t]
      ["Export" fsvn-browse-export-path t]
+     ["Diff" fsvn-browse-diff-path t]
      ["Ediff" fsvn-browse-ediff-path t]
      ["Info" fsvn-browse-info-path t]
      ["Log" fsvn-browse-logview-path t]

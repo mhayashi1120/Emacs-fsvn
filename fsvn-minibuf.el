@@ -125,15 +125,6 @@ The value of DEFAULT is not a number, allow to enter a nil value."
       (error "Accept arg must be selected"))
     ret))
 
-(defun fsvn-read-url-with-revision (&optional prompt default-urlrev only-repository)
-  (let* ((default-url (and default-urlrev (fsvn-urlrev-url default-urlrev)))
-         (default-rev (and default-urlrev (fsvn-urlrev-revision default-urlrev)))
-         (url (fsvn-completing-read-url prompt default-url only-repository))
-         (rev (fsvn-completing-read-revision 
-               (format "%s%s Revision: " (or prompt "URL: ") url)
-               default-rev nil url)))
-    (fsvn-url-urlrev url rev)))
-
 
 
 (defvar fsvn-revision-read-history nil)
@@ -212,8 +203,14 @@ The value of DEFAULT is not a number, allow to enter a nil value."
                  'fsvn-completing-read-repository-history)))
     (fsvn-expand-url url-string)))
 
-(defun fsvn-completing-read-urlrev (&optional prompt default only-repository)
-  (fsvn-url-string-to-urlrev (fsvn-completing-read-url prompt default only-repository)))
+(defun fsvn-completing-read-urlrev (&optional prompt default-urlrev only-repository)
+  (let* ((default-url (and default-urlrev (fsvn-urlrev-url default-urlrev)))
+         (default-rev (and default-urlrev (fsvn-urlrev-revision default-urlrev)))
+         (url (fsvn-completing-read-url prompt default-url only-repository))
+         (rev (fsvn-completing-read-revision 
+               (format "%s%s Revision: " (or prompt "URL: ") url)
+               default-rev nil url)))
+    (fsvn-url-urlrev url rev)))
 
 (defun fsvn-completing-read-url-initialize ()
   (setq fsvn-complete-completion-repository-cache nil))

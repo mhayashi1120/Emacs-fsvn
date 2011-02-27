@@ -160,7 +160,8 @@
       (mapc
        (lambda (b)
          (with-current-buffer b
-           (when (equal fsvn-diff-buffer-subcommand-args args)
+           (when (and fsvn-diff-buffer-subcommand-args
+                      (equal fsvn-diff-buffer-subcommand-args args))
              (let ((inhibit-read-only t)
                    buffer-read-only)
                (erase-buffer)
@@ -184,6 +185,8 @@
      (lambda (x)
        (cond
         ((fsvn-url-local-p x)
+         (throw 'decide (fsvn-url-filename x)))
+        ((fsvn-url-repository-p x)
          (throw 'decide (fsvn-url-filename x)))
         ((string-match fsvn-diff-subcommand-arg-regexp x)
          (throw 'decide (fsvn-urlrev-filename (match-string 2 x))))))

@@ -3,7 +3,7 @@
 
 ;; Author: Hayashi Masahiro <mhayashi1120@gmail.com>
 ;; URL: http://fsvn.sourceforge.jp/
-;; Keywords: Emacs, Subversion, Frontend
+;; Keywords: subversion, svn
 ;; Version: 0.9.10
 
 ;; fsvn.el is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 
 ;; fsvn supports
 ;;  * GNU Emacs 23.x or later.
-;;  * Subversion 1.5.x or later. (1.4.x works but some restriction)
+;;  * Subversion 1.5.x or later. (1.4.x works but some restrictions)
 
 ;; fsvn has TortoiseSVN like user interface by using `svn' command.
 ;;  Have following advantages of other Emacs svn client.

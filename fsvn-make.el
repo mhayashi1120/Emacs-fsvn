@@ -221,17 +221,17 @@
 (defun single-file-remove-provide ()
   (save-excursion
     (goto-char (point-min))
-    (when (re-search-forward "^[ \t]*(provide '.*")
+    (when (re-search-forward "^[ \t]*(provide '.*" nil t)
       (replace-match ""))))
 
 (defun single-file-remove-comments ()
   (save-excursion
     (goto-char (point-min))
-    (unless (re-search-forward "^;;; Code.*")
+    (unless (re-search-forward "^;;; Code.*" nil t)
       (error "Unable find header"))
     (forward-line 1)
     (delete-region (point-min) (point))
-    (unless (re-search-forward "^;;; .*\\.el ends here$")
+    (unless (re-search-forward "^;;; .*\\.el ends here$" nil t)
       (error "Unable find footer"))
     (forward-line 0)
     (delete-region (point) (point-max))))

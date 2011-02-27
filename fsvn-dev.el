@@ -10,6 +10,10 @@
 
 
 
+;; cherry-pick
+
+
+
 ;; destination url -> msgedit
 ;; mv -> switch
 (defun fsvn-browse-move-this-in-repository (src-file to-url &optional args)
@@ -31,8 +35,6 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
-;;TODO easy menu
-
 (defun fsvn-browse-cmd-read-diff-between-repository ()
   (let ((default (fsvn-browse-point-repository-urlrev))
         urlrev1 urlrev2 args)
@@ -44,32 +46,64 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
      (list urlrev1 urlrev2 args))))
 
-(defun fsvn-browse-cmd-read-diff-with-branch ()
-  ;;TODO can change local filename.
-  (let* ((url1 (fsvn-browse-point-url))
-         (urlrev2 (fsvn-browse-point-repository-urlrev))
-         args)
-    (fsvn-brief-message-showing 
-     (fsvn-brief-message-add-message (format "Trunk: %s" url1))
-     (setq urlrev2 (fsvn-completing-read-urlrev "Branch: " urlrev2 t))
-     (fsvn-brief-message-add-message (format "Branch: %s" urlrev2))
-     (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
-     (list url1 urlrev2 args))))
-
-;; bound to = b
-(defun fsvn-browse-diff-with-branch (trunk branch-urlrev &optional args)
-  (interactive (fsvn-browse-cmd-read-diff-with-branch))
-  (fsvn-diff-start-files-process branch-urlrev trunk args))
-
+;;TODO between different repository
+;;TODO easy menu
 ;; bound to = r
 (defun fsvn-browse-diff-between-repository (src-urlrev dest-urlrev &optional args)
+  "Execute `diff' between SRC-URLREV and DEST-URLREV.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (fsvn-browse-cmd-read-diff-between-repository))
-  (fsvn-diff-start-process dest-urlrev src-urlrev args))
+  (fsvn-diff-start-process src-urlrev dest-urlrev args))
+
+;;TODO easy menu and doc
+(defun fsvn-browse-diff-this-with-previous (file &optional args)
+  "Execute `diff' between current directory andith previous commited revision.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+Like `git show'
+"
+  (interactive (fsvn-browse-cmd-read-diff-this))
+  (fsvn-browse-wc-only
+   (let ((diff-args (list file args "--revision" "PREV")))
+     (fsvn-diff-start-process diff-args))))
+
+;;TODO easy menu and doc
+(defun fsvn-browse-diff-path-with-previous (&optional args)
+  "Execute `diff' between current directory and previous commited revision.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+Like `git show'
+"
+  (interactive (fsvn-browse-cmd-read-diff-path))
+  (fsvn-browse-wc-only
+   (let ((diff-args (list args "--revision" "PREV")))
+     (fsvn-diff-start-process (fsvn-browse-current-path) diff-args))))
 
 (add-hook 'fsvn-browse-mode-hook
           (lambda ()
             (define-key fsvn-browse-diff-map "r" 'fsvn-browse-diff-between-repository)
-            (define-key fsvn-browse-diff-map "b" 'fsvn-browse-diff-with-branch)))
+            (define-key fsvn-browse-diff-map "V" 'fsvn-browse-diff-path-with-previous)
+            (define-key fsvn-browse-diff-map "v" 'fsvn-browse-diff-this-with-previous)))
+
+(add-hook 'fsvn-log-list-mode-hook
+          (lambda ()
+            (define-key fsvn-log-list-diff-mode-map "v" 'fsvn-log-list-diff-previous)))
+
+;;TODO easy menu and doc
+(defun fsvn-log-list-diff-previous (&optional args)
+  "Execute `diff' between current point revision and previous version.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+Like `git show'
+"
+  (interactive (fsvn-logview-cmd-read-diff-args))
+  (let* ((path fsvn-log-list-target-path)
+         (root (fsvn-buffer-repos-root))
+         (rev (fsvn-log-list-point-revision))
+         (urlrev (fsvn-log-list-revision-path root path rev))
+         (prev-urlrev (fsvn-log-list-revision-path root path (1- rev))))
+    (fsvn-diff-start-files-process urlrev prev-urlrev args)))
 
 
 

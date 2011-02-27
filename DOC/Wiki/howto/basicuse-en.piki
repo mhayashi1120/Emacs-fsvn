@@ -52,6 +52,8 @@ Similar to `dired' but not exactly equals that one.
 |z k|Lock cursor file or marked files (lock)|
 |z K|Unlock cursor file or marked files (unlock)|
 |C-c C-d|Switch to `dired-mode'|
+|= =|Execute diff between working copy and previous revision (diff)|
+# |= v|Execute diff between current revision and previous commited revision (diff).|
 
 *** Advanced use
 
@@ -84,7 +86,8 @@ Listing svn log file or directory.
 
 *** Often used commands
 
-|= = |Execute diff working copy. When region activated, diff with region terminated point revision|
+|= =|Execute diff with working copy. When region activated, diff with region terminated point revision|
+# |= v|Execute diff between point and previous revision.|
 |= e|Same as `= =' but using ediff|
 |n|Move to next line and get old log if need|
 |p|Move to previous line|

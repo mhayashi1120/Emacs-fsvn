@@ -176,7 +176,7 @@ Keybindings:
     (if (= (buffer-size) 0)
         (when (fsvn-config-log-empty-warnings (fsvn-buffer-repos-root))
           (unless (y-or-n-p "Log message is empty.  Really commit? ")
-            (error "No log messages")))
+            (fsvn-quit "Empty message")))
       (setq tmpfile (fsvn-message-edit-make-message-file))
       (let ((coding-system-for-write fsvn-message-edit-file-encoding))
         (write-region (point-min) (point-max) tmpfile nil 'no-msg))

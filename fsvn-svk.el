@@ -267,7 +267,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
 (defun fsvn-svk-confirm (op-symbol)
   (let ((message (cdr (assq op-symbol fsvn-svk-confirm-alist))))
     (unless (y-or-n-p (nth 0 message))
-      (signal 'quit nil))))
+      (fsvn-quit))))
 
 (defun fsvn-svk-depotmap-init (buffer)
   (let ((proc (fsvn-svk-start-command "depotmap" buffer "--init")))

@@ -40,7 +40,6 @@
     (dired-goto-file around fsvn-dired-goto-file-ad)
     (after-find-file around fsvn-after-find-file)
     (vc-find-file-hook after fsvn-ui-fancy-vc-find-file-hook)
-    (vc-find-file-hook after fsvn-ui-fancy-vc-find-file-hook-revert)
     (vc-after-save after fsvn-ui-fancy-vc-after-save)
     (ediff-refresh-mode-lines around fsvn-ui-fancy-ediff-modeline-fixup)
     ))
@@ -84,7 +83,7 @@
 (defun fsvn-global-cleanup-buffer ()
   "Cleanup popuped non-active buffers."
   (interactive)
-  (when (y-or-n-p "Cleanup waste (non-active) buffer? ")
+  (when (y-or-n-p "Cleanup popup (process finished) buffer? ")
     (let ((count 0))
       (fsvn-window-with-cleanup
         (setq count (+ count (fsvn-cleanup-temp-buffer)))
@@ -377,7 +376,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (let* ((patch (fsvn-read-file-name "Patch file: ")))
     (when (file-exists-p patch)
       (unless (y-or-n-p "File exists. Overwrite? ")
-        (signal 'quit nil)))
+        (fsvn-quit "File already exists")))
     (list (fsvn-expand-file patch))))
 
 (defun fsvn-cmd-read-checkout-args ()
