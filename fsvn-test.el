@@ -416,14 +416,15 @@ To show and see result.
     (fsvn-browse-prop-add-svn:ignore-selected (list ignore-file))
     (fsvn-browse-add-selected (nreverse list))
     (fsvn-test-quick-commit "add file" wc1-dir) ;; revision 1
-    (revert-buffer)
+    (call-interactively 'revert-buffer)
     (fsvn-browse-goto-file file1)
     (fsvn-browse-info-path)
     (fsvn-test-sit-for)
-    (fsvn-browse-next-file 1) ;; move to file2
+    (call-interactively 'fsvn-browse-next-file) ;; move to file2
+    (fsvn-test-equal (fsvn-current-filename) "b")
     (fsvn-test-sit-for)
-    (fsvn-browse-mark-file-mark)   ;; mark file2
-    (fsvn-browse-mark-file-delete) ;; delete mark file3
+    (call-interactively 'fsvn-browse-mark-file-mark)   ;; mark file2
+    (call-interactively 'fsvn-browse-mark-file-delete) ;; delete mark file3
     (fsvn-test-sit-for)
     (fsvn-test-equal (fsvn-browse-cmd-selected-urls) (list file2))
     (fsvn-test-equal (fsvn-browse-cmd-selected-urlrevs) (list file2))
@@ -432,10 +433,10 @@ To show and see result.
     (fsvn-test-equal (fsvn-browse-cmd-this-urlrev) file2)
     (fsvn-test-equal (fsvn-browse-cmd-this-wc-file) file2)
     (fsvn-test-sit-for)
-    (fsvn-browse-mark-file-unmark) ;; unmark file2
-    (fsvn-browse-mark-file-unmark) ;; unmark file3
+    (call-interactively 'fsvn-browse-mark-file-unmark) ;; unmark file2
+    (call-interactively 'fsvn-browse-mark-file-unmark) ;; unmark file3
     (fsvn-test-sit-for)
-    (fsvn-previous-file 1)
+    (call-interactively 'fsvn-previous-file)
     (fsvn-test-sit-for)
     ;; mkdir
     (setq dir2 (expand-file-name "y" wc1-dir))
@@ -443,7 +444,7 @@ To show and see result.
     ;; delete a file
     (fsvn-browse-delete-selected (list file1))
     (fsvn-test-quick-commit "delete file" wc1-dir) ;; revision 2
-    (revert-buffer)
+    (call-interactively 'revert-buffer)
     (fsvn-test-sit-for)
     ;; modify a file
     (write-region "Z" nil file2 t)
@@ -456,9 +457,9 @@ To show and see result.
     (fsvn-browse-revert-selected (list file3))
     (revert-buffer)
     ;; sort
-    (fsvn-browse-toggle-sort)
+    (call-interactively 'fsvn-browse-toggle-sort)
     (fsvn-test-sit-for)
-    (fsvn-browse-toggle-sort)
+    (call-interactively 'fsvn-browse-toggle-sort)
     (fsvn-test-sit-for)
     ;; lock and unlock file
     (fsvn-test-new-popup-buffer-has "locked"

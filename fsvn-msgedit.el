@@ -53,12 +53,12 @@
           map)))
 
 (defcustom fsvn-message-edit-mode-hook nil
-  "*Run at the very end of `fsvn-message-edit-mode'."
+  "Run at the very end of `fsvn-message-edit-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-message-edit-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-message-edit-mode' is prepared."
+  "Run at the very end of `fsvn-message-edit-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 

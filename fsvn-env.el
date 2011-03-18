@@ -24,7 +24,7 @@
 
 (defcustom fsvn-home-directory
   (expand-file-name "~/.fsvn/" )
-  "*Directory of this package.  Must be set before load this file."
+  "Directory of this package.  Must be set before load this file."
   :group 'fsvn
   :type  'directory)
 

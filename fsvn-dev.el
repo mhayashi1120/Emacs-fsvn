@@ -56,54 +56,52 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive (fsvn-browse-cmd-read-diff-between-repository))
   (fsvn-diff-start-process src-urlrev dest-urlrev args))
 
-;;TODO easy menu and doc
-(defun fsvn-browse-diff-this-with-previous (file &optional args)
-  "Execute `diff' between current directory andith previous commited revision.
-Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
-
-Like `git show'
-"
-  (interactive (fsvn-browse-cmd-read-diff-this))
-  (fsvn-browse-wc-only
-   (let ((diff-args (list file args "--revision" "PREV")))
-     (fsvn-diff-start-process diff-args))))
-
-;;TODO easy menu and doc
-(defun fsvn-browse-diff-path-with-previous (&optional args)
-  "Execute `diff' between current directory and previous commited revision.
-Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
-
-Like `git show'
-"
-  (interactive (fsvn-browse-cmd-read-diff-path))
-  (fsvn-browse-wc-only
-   (let ((diff-args (list args "--revision" "PREV")))
-     (fsvn-diff-start-process (fsvn-browse-current-path) diff-args))))
-
 (add-hook 'fsvn-browse-mode-hook
           (lambda ()
-            (define-key fsvn-browse-diff-map "r" 'fsvn-browse-diff-between-repository)
-            (define-key fsvn-browse-diff-map "V" 'fsvn-browse-diff-path-with-previous)
-            (define-key fsvn-browse-diff-map "v" 'fsvn-browse-diff-this-with-previous)))
+            (define-key fsvn-browse-diff-map "r" 'fsvn-browse-diff-between-repository)))
 
 (add-hook 'fsvn-log-list-mode-hook
           (lambda ()
-            (define-key fsvn-log-list-diff-mode-map "v" 'fsvn-log-list-diff-previous)))
+            (define-key fsvn-log-list-mode-map "\C-c\C-s" 'fsvn-log-list-diff-search-backward)
+            ))
 
-;;TODO easy menu and doc
-(defun fsvn-log-list-diff-previous (&optional args)
-  "Execute `diff' between current point revision and previous version.
-Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
 
-Like `git show'
-"
-  (interactive (fsvn-logview-cmd-read-diff-args))
-  (let* ((path fsvn-log-list-target-path)
-         (root (fsvn-buffer-repos-root))
-         (rev (fsvn-log-list-point-revision))
-         (urlrev (fsvn-log-list-revision-path root path rev))
-         (prev-urlrev (fsvn-log-list-revision-path root path (1- rev))))
-    (fsvn-diff-start-files-process urlrev prev-urlrev args)))
+;;TODO make async
+;; cleanup buffer
+(defun fsvn-log-list-diff-search-backward (regexp)
+  (interactive 
+   (list (fsvn-log-list-read-search-regexp)))
+  (catch 'found
+    (while (and (fsvn-log-list-point-revision)
+                (not (eobp)))
+      (let* ((buffers (buffer-list))
+             (proc (fsvn-log-list-diff-previous))
+             (buffer (process-buffer proc)))
+        (while (not (memq (process-status proc) '(exit signal)))
+          (sit-for 0.2))
+        ;;TODO log message too? sibling filename too?
+        (when (buffer-live-p buffer)
+          (with-current-buffer buffer
+            (goto-char (point-min))
+            (when (re-search-forward regexp nil t)
+              ;;TODO colorlize?
+              (message "Match found.")
+              (throw 'found t)))
+          (unless (memq buffer buffers)
+            (kill-buffer buffer)))
+        (fsvn-log-list-next-line)))
+    (message "Not found.")))
+
+
+
+(defun fsvn-vc-diff ()
+  "Diff current file or current directory."
+  (interactive)
+  (let ((file (or buffer-file-name
+                  default-directory)))
+    (fsvn-diff-start-process file)))
+
 
 
 
@@ -125,7 +123,7 @@ Like `git show'
 
 
 (defcustom fsvn-browse-guessed-moved-parent-threshold 4
-  "*"
+  ""
   :group 'fsvn
   :type 'integer)
 

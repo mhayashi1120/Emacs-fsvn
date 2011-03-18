@@ -49,7 +49,7 @@
           map)))
 
 (defcustom fsvn-popup-result-mode-hook nil
-  "*Run at the very end of `fsvn-popup-result-mode'."
+  "Run at the very end of `fsvn-popup-result-mode'."
   :group 'fsvn
   :type 'hook)
 

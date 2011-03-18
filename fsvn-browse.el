@@ -160,6 +160,8 @@
           (define-key map "E" 'fsvn-browse-ediff-path)
           (define-key map "p" 'fsvn-browse-create-patch-selected)
           (define-key map "P" 'fsvn-browse-create-patch-path)
+          (define-key map "V" 'fsvn-browse-diff-path-with-previous)
+          (define-key map "v" 'fsvn-browse-diff-this-with-previous)
           map)))
 
 (defvar fsvn-browse-often-use-map nil)
@@ -277,23 +279,23 @@
           map)))
 
 (defcustom fsvn-browse-mode-hook nil
-  "*Run at the very end of `fsvn-browse-mode'."
+  "Run at the very end of `fsvn-browse-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-browse-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-browse-mode' is prepared."
+  "Run at the very end of `fsvn-browse-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-browse-before-commit-hook nil
-  "*Run before prepared file-select-buffer.  Called with a list argument as filenames."
+  "Run before prepared file-select-buffer.  Called with a list argument as filenames."
   ;; TODO called one arg then type is not hook?
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-browse-cleanup-buffer t
-  "*Kill `fsvn-browse-mode' buffer,  when leave.
+  "Kill `fsvn-browse-mode' buffer,  when leave.
 Effected `fsvn-browse-up-directory' or `fsvn-browse-file-this' to directory."
   :group 'fsvn
   :type 'boolean)
@@ -2359,6 +2361,28 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (fsvn-browse-wc-only
    (fsvn-diff-start-process (fsvn-browse-current-path) args)))
 
+(defun fsvn-browse-diff-this-with-previous (file &optional args)
+  "Execute `diff' between current directory andith previous commited revision.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+Like `git show'
+"
+  (interactive (fsvn-browse-cmd-read-diff-this))
+  (fsvn-browse-wc-only
+   (let ((diff-args (list file args "--revision" "PREV")))
+     (fsvn-diff-start-process diff-args))))
+
+(defun fsvn-browse-diff-path-with-previous (&optional args)
+  "Execute `diff' between current directory and previous commited revision.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+Like `git show'
+"
+  (interactive (fsvn-browse-cmd-read-diff-path))
+  (fsvn-browse-wc-only
+   (let ((diff-args (list args "--revision" "PREV")))
+     (fsvn-diff-start-process (fsvn-browse-current-path) diff-args))))
+
 (defun fsvn-browse-ediff-this (file)
   "Ediff for point FILE."
   (interactive (fsvn-browse-cmd-read-wc-this-file))
@@ -2378,7 +2402,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   "Same as `dired-diff'."
   (interactive (fsvn-browse-cmd-read-diff-local))
   (fsvn-browse-wc-only
-   (diff dest-file src-file switches)))
+   (fsvn-diff-files dest-file src-file switches)))
 
 (defun fsvn-browse-rename-case-missing-file (file)
   "This occation if windows environment."
@@ -2451,12 +2475,14 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
 (defun fsvn-browse-create-patch-path (patch-file)
   "Create PATCH-FILE for current directory."
   (interactive (fsvn-cmd-read-patch-file))
-  (fsvn-browse-create-patch-selected (list (fsvn-browse-current-directory-url)) patch-file))
+  (fsvn-browse-wc-only
+   (fsvn-browse-create-patch-selected (list (fsvn-browse-current-directory-url)) patch-file)))
 
 (defun fsvn-browse-create-patch-selected (files patch-file)
   "Create PATCH-FILE for for selected FILES."
   (interactive (fsvn-browse-cmd-read-create-patch-selected))
-  (fsvn-diff-create-patch patch-file (mapcar 'fsvn-file-relative files)))
+  (fsvn-browse-wc-only
+   (fsvn-diff-create-patch patch-file (mapcar 'fsvn-file-relative files))))
 
 
 
@@ -2472,6 +2498,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      ["Commit" fsvn-browse-commit-path t]
      ["Export" fsvn-browse-export-path t]
      ["Diff" fsvn-browse-diff-path t]
+     ["Diff Show" fsvn-browse-diff-path-with-previous t]
      ["Ediff" fsvn-browse-ediff-path t]
      ["Info" fsvn-browse-info-path t]
      ["Log" fsvn-browse-logview-path t]
@@ -2510,6 +2537,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      ["Copy in repository" fsvn-browse-copy-this-in-repository t]
      ["Copy" fsvn-browse-copy-this t]
      ["Diff" fsvn-browse-diff-this t]
+     ["Diff Show" fsvn-browse-diff-this-with-previous t]
      ["EDiff" fsvn-browse-ediff-this t]
      ["Export" fsvn-browse-export-this t]
      ["Fix Filename Case" fsvn-browse-rename-case-missing-file t]

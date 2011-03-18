@@ -86,12 +86,12 @@
           map)))
 
 (defcustom fsvn-proplist-mode-hook nil
-  "*Run at the very end of `fsvn-proplist-mode'."
+  "Run at the very end of `fsvn-proplist-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-proplist-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-proplist-mode' is prepared."
+  "Run at the very end of `fsvn-proplist-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
@@ -441,12 +441,12 @@ Keybindings:
           map)))
 
 (defcustom fsvn-propedit-mode-hook nil
-  "*Run at the very end of `fsvn-propedit-mode'."
+  "Run at the very end of `fsvn-propedit-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-propedit-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-propedit-mode' is prepared."
+  "Run at the very end of `fsvn-propedit-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 

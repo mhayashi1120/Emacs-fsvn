@@ -52,6 +52,12 @@ fsvn-message-edit-get-message-directory
 
 Too complicated!
 
+** global command
+C-c v N command when git repository duplicated... switch like vc??
+
+** create vc new backend?
+fsvn-vc
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 

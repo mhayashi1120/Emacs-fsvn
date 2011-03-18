@@ -564,23 +564,23 @@ if dtd is list call this function recursively.
            attrs
            (nreverse ret)))))
 
-(defun fsvn-xml-text-matched (node string)
+(defun fsvn-xml-text-matched (node regexp)
   (catch 'found
     (mapc
      (lambda (attr)
        (when (and (stringp (cdr attr))
-                  (string-match string (cdr attr)))
+                  (string-match regexp (cdr attr)))
          (throw 'found node)))
      (fsvn-xml-node-attributes node))
     (mapc
      (lambda (x)
        (cond
         ((stringp x)
-         (when (string-match string x)
+         (when (string-match regexp x)
            (throw 'found x)))
         ((and (listp x)
               (symbolp (car x)))
-         (let ((matched (fsvn-xml-text-matched x string)))
+         (let ((matched (fsvn-xml-text-matched x regexp)))
            (when matched
              (throw 'found matched))))))
      (fsvn-xml-node-children node))

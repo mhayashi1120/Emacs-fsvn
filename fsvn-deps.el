@@ -35,7 +35,7 @@
 (defvar fsvn-prop-file-default-coding-system fsvn-svn-common-coding-system)
 
 (defcustom fsvn-svn-command "svn"
-  "*Subversion command. Must be set before loading this file.
+  "Subversion command. Must be set before loading this file.
 If are problems while executing this command, check `exec-path' or PATH environment variable.
 Otherwise set absolute path.
 
@@ -48,7 +48,7 @@ Please call `fsvn-initialize-loading' function.
            file))
 
 (defcustom fsvn-svnadmin-command "svnadmin"
-  "*Subversion Administrator command. Must be set before loading this file.
+  "Subversion Administrator command. Must be set before loading this file.
 If are problems while executing this command, check `exec-path' or PATH environment variable.
 Otherwise set absolute path.
 
@@ -798,7 +798,7 @@ $"
 
 ;;TODO make obsolete
 (defcustom fsvn-popup-result-update-parsed-threshold 1000000000
-  "*Threshold of `update' output size for parsing.
+  "Threshold of `update' output size for parsing.
 Huge value makes Emacs slow down."
   :group 'fsvn
   :type 'integer)

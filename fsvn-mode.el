@@ -24,107 +24,107 @@
 
 
 (defcustom fsvn-default-args-commit nil
-  "*Default args for `commit'"
+  "Default args for `commit'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-update nil
-  "*Default args for `update'"
+  "Default args for `update'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-info nil
-  "*Default args for `info'"
+  "Default args for `info'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-revert nil
-  "*Default args for `revert'"
+  "Default args for `revert'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-cleanup nil
-  "*Default args for `cleanup'"
+  "Default args for `cleanup'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-resolved nil
-  "*Default args for `resolved'"
+  "Default args for `resolved'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-lock nil
-  "*Default args for `lock'"
+  "Default args for `lock'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-unlock nil
-  "*Default args for `unlock'"
+  "Default args for `unlock'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-blame nil
-  "*Default args for `blame'"
+  "Default args for `blame'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-diff nil
-  "*Default args for `diff'"
+  "Default args for `diff'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-add nil
-  "*Default args for `add'"
+  "Default args for `add'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-delete nil
-  "*Default args for `delete'"
+  "Default args for `delete'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-switch nil
-  "*Default args for `switch'"
+  "Default args for `switch'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-export nil
-  "*Default args for `export'"
+  "Default args for `export'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-move nil
-  "*Default args for `move'"
+  "Default args for `move'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-copy nil
-  "*Default args for `copy'"
+  "Default args for `copy'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-merge nil
-  "*Default args for `merge'"
+  "Default args for `merge'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-mergeinfo nil
-  "*Default args for `mergeinfo'"
+  "Default args for `mergeinfo'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-mkdir nil
-  "*Default args for `mkdir'"
+  "Default args for `mkdir'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-import nil
-  "*Default args for `import'"
+  "Default args for `import'"
   :group 'fsvn
   :type '(list string))
 
 (defcustom fsvn-default-args-checkout nil
-  "*Default args for `checkout'"
+  "Default args for `checkout'"
   :group 'fsvn
   :type '(list string))
 
@@ -235,7 +235,7 @@
      (nreverse RET)))
 
 (defcustom fsvn-no-confirm nil
-  "*Control hide confirm prompt.
+  "Control hide confirm prompt.
 `t' means completely ignore all.
 List of command symbol means, each of command's prompt will not be shown."
   :group 'fsvn

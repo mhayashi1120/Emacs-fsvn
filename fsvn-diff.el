@@ -14,6 +14,7 @@
 (require 'diff)
 (require 'diff-mode)
 (require 'fsvn-deps)
+(require 'fsvn-ui)
 
 
 
@@ -133,6 +134,10 @@
        (let ((inhibit-quit t))
          (when (y-or-n-p "Execute ediff? ")
            (fsvn-ediff-directories ,dir1 ,dir2))))))
+
+(defun fsvn-diff-files (file1 file2 switches)
+  (let ((buffer (diff file1 file2 switches)))
+    (fsvn-diff-setup-mode buffer (list file1 file2 switches))))
 
 ;; subcommand `diff' utility
 

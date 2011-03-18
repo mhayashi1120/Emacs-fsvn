@@ -31,7 +31,6 @@
 (defvar current-prefix-arg)
 (defvar find-directory-functions)
 (defvar file-name-handler-alist)
-(defvar system-type)
 
 
 
@@ -373,7 +372,8 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 (defun fsvn-cmd-read-patch-file ()
-  (let* ((patch (fsvn-read-file-name "Patch file: ")))
+  (let* ((default ".patch")
+         (patch (fsvn-read-file-name "Patch file: " nil nil nil default)))
     (when (file-exists-p patch)
       (unless (y-or-n-p "File exists. Overwrite? ")
         (fsvn-quit "File already exists")))
@@ -422,7 +422,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (fsvn-browse-commit-mode (list buffer-file-name) args)))
 
 (defcustom fsvn-vc-commit-non-query-message "*** empty log message ***"
-  "*Commit message when \\[fsvn-vc-commit-non-query]
+  "Commit message when \\[fsvn-vc-commit-non-query]
 Default value is same as vc.el"
   :group 'fsvn
   :type  'string

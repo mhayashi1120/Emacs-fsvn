@@ -1,3 +1,21 @@
+2011-03-08  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: fsvn-log-list-mark-searched -> fsvn-log-list-mark-regexp
+
+	* Change: fsvn-log-list-isarch-history -> fsvn-log-list-sarch-history
+
+	* Change: fsvn-log-list-isearch-text -> fsvn-log-list-search-regexp
+
+2011-03-02  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Illegal key conventions.
+
+	* Improvement: diff colorized local file.
+
+2011-03-01  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: Set default file name, when reading patch filename.
+
 2011-02-25  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Change: Read url with revision.

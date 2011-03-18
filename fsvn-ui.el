@@ -20,12 +20,12 @@
 
 
 (defcustom fsvn-generic-datetime-format "%Y-%m-%d %H:%M"
-  "*Date and time format in any."
+  "Date and time format in any."
   :group 'fsvn
   :type 'string)
 
 (defcustom fsvn-help-locale nil
-  "*Locale of your favorite."
+  "Locale of your favorite."
   :group 'fsvn
   :type 'string)
 
@@ -164,7 +164,7 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 
 (defcustom fsvn-dired-copy-filename-separator " "
-  "*String value of separate multiple filenames when killing."
+  "String value of separate multiple filenames when killing."
   :group 'fsvn-dired
   :type 'string)
 
@@ -299,7 +299,9 @@ This is what the do-commands look for, and what the mark-commands store.")
           (define-key map "U" 'fsvn-electric-line-unmark-all)
           (define-key map "\C-]" 'fsvn-electric-line-select-quit)
           (define-key map "\C-c" nil)
-          (define-key map "\C-c\C-c" 'fsvn-electric-line-select-quit)
+          (define-key map "\C-c\C-c" 'fsvn-electric-line-select-select)
+          (define-key map "\C-c\C-k" 'fsvn-electric-line-select-quit)
+          (define-key map "\C-c\C-q" 'fsvn-electric-line-select-quit)
           (define-key map "\C-m" 'fsvn-electric-line-select-select)
           (define-key map "\C-n" 'fsvn-electric-next-line)
           (define-key map "\C-p" 'fsvn-electric-previous-line)
@@ -336,7 +338,7 @@ This is what the do-commands look for, and what the mark-commands store.")
     ))
 
 (defcustom fsvn-electric-line-select-mode-hook nil
-  "*Run at the very end of `fsvn-electric-line-select-mode'."
+  "Run at the very end of `fsvn-electric-line-select-mode'."
   :group 'fsvn
   :type 'hook)
 
@@ -703,7 +705,7 @@ Elements of the alist are:
 (defvar fsvn-ui-fancy-tooltip nil) ; modeline tooltip display
 
 (defcustom fsvn-ui-fancy-file-state-in-modeline t
-  "*Show a color dot in the modeline that describes the state of the current file."
+  "Show a color dot in the modeline that describes the state of the current file."
   :type 'boolean
   :group 'fsvn)
 

@@ -41,24 +41,24 @@
   :group 'fsvn)
 
 (defcustom fsvn-svk-perl-command nil
-  "*Perl command that executing `fsvn-svk-script'.
+  "Perl command that executing `fsvn-svk-script'.
 If there is executing problem in windows/cygwin then set path to perl.exe."
   :group 'fsvn-svk)
 
 (defcustom fsvn-svk-script "svk"
-  "*Perl script file of `svk'"
+  "Perl script file of `svk'"
   :group 'fsvn-svk)
 
 (defcustom fsvn-svk-perllib (getenv "PERLLIB")
-  "*Environment variable `PERLLIB' value when executing `svk' command"
+  "Environment variable `PERLLIB' value when executing `svk' command"
   :group 'fsvn-svk)
 
 (defcustom fsvn-svk-mirror-depot "mirror"
-  "*Name of path to `svk' mirroring repository. (Generally \"mirror\")"
+  "Name of path to `svk' mirroring repository. (Generally \"mirror\")"
   :group 'fsvn-svk)
 
 (defcustom fsvn-svk-working-depot "working"
-  "*Name of path to `svk' working repository. (Generally \"\" but I recommend \"working\")"
+  "Name of path to `svk' working repository. (Generally \"\" but I recommend \"working\")"
   :group 'fsvn-svk)
 
 (defcustom fsvn-svk-editor-command
@@ -67,7 +67,7 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
    (and (featurep 'meadow)
         (executable-find "gnuclient.exe"))
    "emacsclient")
-  "*Client program for edit conflicted file."
+  "Client program for edit conflicted file."
   :group 'fsvn-svk)
 
 (defvar fsvn-svk-browse-map nil)
