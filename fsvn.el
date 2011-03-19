@@ -4,7 +4,7 @@
 ;; Author: Hayashi Masahiro <mhayashi1120@gmail.com>
 ;; URL: http://fsvn.sourceforge.jp/
 ;; Keywords: subversion, svn
-;; Version: 0.9.10
+;; Version: 0.9.11
 
 ;; fsvn.el is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@
   :group 'tools
   :prefix "fsvn-")
 
-(defconst fsvn-version "0.9.10"
+(defconst fsvn-version "0.9.11"
   "Version of fsvn.")
 
 

@@ -1,4 +1,4 @@
-VERSION = 0.9.10
+VERSION = 0.9.11
 
 RELEASE_FILES = \
 	fsvn-admin.el fsvn-blame.el fsvn-browse.el fsvn-cmd.el fsvn-config.el \
