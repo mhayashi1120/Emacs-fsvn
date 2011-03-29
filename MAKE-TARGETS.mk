@@ -12,8 +12,12 @@ RELEASE_FILES = \
 	mw32cmp.el mw32cmp-test.el Makefile \
 	MAKE-CFG.el MAKE-TARGETS.mk BUG INSTALL README TODO ChangeLog
 
+
 RELEASE_SAMPLES = \
 	Samples/Makefile* Samples/MAKE-CFG.el*
+
+RELEASE_IMAGES = \
+	images/*.xpm
 
 ARCHIVE_DIR_PREFIX = ..
 
@@ -49,10 +53,12 @@ release: archive single-file
 archive:
 	rm -rf /tmp/fsvn-$(VERSION)
 	mkdir /tmp/fsvn-$(VERSION)
-	cp -p $(RELEASE_FILES) /tmp/fsvn-$(VERSION)
+	cp -pr $(RELEASE_FILES) /tmp/fsvn-$(VERSION)
 	chmod 644 /tmp/fsvn-$(VERSION)/*
 	mkdir /tmp/fsvn-$(VERSION)/Samples
 	cp -p $(RELEASE_SAMPLES) /tmp/fsvn-$(VERSION)/Samples
+	mkdir /tmp/fsvn-$(VERSION)/images
+	cp -p $(RELEASE_IMAGES) /tmp/fsvn-$(VERSION)/images
 	chmod 744 /tmp/fsvn-$(VERSION)/Samples
 	cd /tmp ; tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION)
 	cd /tmp ; tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)

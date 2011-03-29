@@ -121,13 +121,12 @@
 (defun fsvn-make-install (&optional just-print)
   (unless (or just-print (file-directory-p INSTALL-DIR))
     (make-directory INSTALL-DIR t))
-  (let (src dest elc el)
-    (mapc
-     (lambda (m)
-       (setq el m)
-       (setq elc (concat m "c"))
-       (setq dest-el (expand-file-name el INSTALL-DIR))
-       (setq dest-elc (expand-file-name elc INSTALL-DIR))
+  (mapc
+   (lambda (m)
+     (let* ((el m)
+            (elc (concat m "c"))
+            (dest-el (expand-file-name el INSTALL-DIR))
+            (dest-elc (expand-file-name elc INSTALL-DIR)))
        (princ (format "%s -> %s\n" el dest-el))
        (princ (format "%s -> %s\n" elc dest-elc))
        (unless just-print
@@ -139,8 +138,19 @@
                 (error "%s not exists." src))
               (copy-file src dest t)
               (set-file-modes dest ?\644)))
-          (list (cons el dest-el) (cons elc dest-elc)))))
-     ALL-MODULES)))
+          (list (cons el dest-el) (cons elc dest-elc))))))
+   ALL-MODULES)
+  (mapc
+   (lambda (img)
+     (let ((src (concat "images/" img))
+           (dest (expand-file-name img (expand-file-name "images" INSTALL-DIR))))
+       (princ (format "%s -> %s\n" src dest))
+       (unless just-print
+         (unless (file-exists-p src)
+           (error "%s not exists." src))
+         (copy-file src dest t)
+         (set-file-modes dest ?\644))))
+   (directory-files "./images" nil "\\.xpm$")))
 
 (defun fsvn-make-test ()
   (mapc

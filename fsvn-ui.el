@@ -703,18 +703,36 @@ Elements of the alist are:
 
 (defvar fsvn-ui-fancy-modeline t) ; modeline mark display or not
 (defvar fsvn-ui-fancy-tooltip nil) ; modeline tooltip display
+(defvar fsvn-ui-image-directory
+  (ignore-errors
+    (expand-file-name "images" (file-name-directory (locate-library "fsvn-ui")))))
 
 (defcustom fsvn-ui-fancy-file-state-in-modeline t
   "Show a color dot in the modeline that describes the state of the current file."
   :type 'boolean
   :group 'fsvn)
 
-(defun fsvn-ui-fancy-modeline-picture (color)
-  (propertize "    "
-              'help-echo 'fsvn-ui-fancy-tooltip
-              'display
-              `(image :type xpm
-                      :data ,(format "/* XPM */
+(defvar fsvn-ui-fancy-object-picture-alist nil)
+  
+(defun fsvn-ui-fancy-object-picture (color)
+  (let ((cell (assoc color fsvn-ui-fancy-object-picture-alist)))
+    (cond
+     (cell (cdr cell))
+     (t
+      (setq cell (cons color nil))
+      (setq fsvn-ui-fancy-object-picture-alist
+            (cons cell fsvn-ui-fancy-object-picture-alist))
+      (when fsvn-ui-image-directory
+        (let ((file (expand-file-name (concat color ".xpm") fsvn-ui-image-directory)))
+          (when (file-exists-p file)
+            (with-temp-buffer
+              (insert-file-contents file)
+              (setcdr cell (buffer-string))))))
+      (cdr cell)))))
+
+(defun fsvn-ui-fancy-get-picture (color)
+  (or (fsvn-ui-fancy-object-picture color)
+      (format "/* XPM */
 static char * data[] = {
 \"18 13 3 1\",
 \"  c None\",
@@ -733,7 +751,14 @@ static char * data[] = {
 \"      +.....+     \",
 \"       +++++      \",
 \"                  \"};"
-                                     color)
+              color)))
+
+(defun fsvn-ui-fancy-modeline-picture (color)
+  (propertize "    "
+              'help-echo 'fsvn-ui-fancy-tooltip
+              'display
+              `(image :type xpm
+                      :data ,(fsvn-ui-fancy-get-picture color)
                       :ascent center)))
 
 (defun fsvn-ui-fancy-install-state-mark (color)
