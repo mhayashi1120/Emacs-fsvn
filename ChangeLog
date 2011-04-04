@@ -1,3 +1,11 @@
+2011-03-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: advice problem.
+
+2011-03-30  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: Create `uninstall' target
+
 2011-03-29  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: More elegant fancy mode-line.

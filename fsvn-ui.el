@@ -705,7 +705,12 @@ Elements of the alist are:
 (defvar fsvn-ui-fancy-tooltip nil) ; modeline tooltip display
 (defvar fsvn-ui-image-directory
   (ignore-errors
-    (expand-file-name "images" (file-name-directory (locate-library "fsvn-ui")))))
+    (let ((validator (lambda (file) (and (eq (car (file-attributes file)) t) file))))
+      (or
+       (funcall validator
+                (expand-file-name "images" (file-name-directory (locate-library "fsvn-ui"))))
+       (funcall validator
+                (expand-file-name "images/fsvn" data-directory))))))
 
 (defcustom fsvn-ui-fancy-file-state-in-modeline t
   "Show a color dot in the modeline that describes the state of the current file."

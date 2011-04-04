@@ -37,6 +37,9 @@ what-where:
 install: elc
 	$(EMACS) $(FLAGS) -f install-fsvn $(CONFIG)
 
+uninstall:
+	$(EMACS) $(FLAGS) -f uninstall-fsvn $(CONFIG)
+
 clean:
 	-$(RM) $(GOMI)
 

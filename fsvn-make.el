@@ -81,15 +81,20 @@
   (fsvn-make-initialize)
   (fsvn-make-install))
 
+(defun uninstall-fsvn ()
+  (fsvn-make-initialize)
+  (fsvn-make-uninstall))
+
 (defun what-where-fsvn ()
   (fsvn-make-initialize)
   (fsvn-make-install t))
 
-(defun fsvn-make-initialize ()
+(defun fsvn-make-initialize (&optional suppress-warnings)
   (let ((config (or (car command-line-args-left) "MAKE-CFG")))
     (setq load-path (cons "." load-path))
     (load config)
-    (when (and (eq system-type 'windows-nt)
+    (when (and (not suppress-warnings)
+               (eq system-type 'windows-nt)
                (not (featurep 'meadow)))
       (unless (and (file-exists-p "mw32script.el"))
         ;; for NTEmacs
@@ -118,6 +123,30 @@
        (message (replace-regexp-in-string "%" "%%" (buffer-string)))))
    ALL-MODULES))
 
+(defun fsvn-make-uninstall ()
+  (unless (file-directory-p INSTALL-DIR)
+    (error "fsvn is not installed"))
+  (fsvn-make-delete-directory INSTALL-DIR)
+  (fsvn-make-delete-directory INSTALL-IMAGE-DIR))
+
+(defun fsvn-make-delete-directory (dir)
+  (princ (format "Delete recursively %s...\n" dir))
+  (mapc
+   (lambda (file)
+     (cond
+      ((not (eq (car (file-attributes file)) t))
+       (princ (format "Deleting %s\n" file))
+       (condition-case err
+           (delete-file file)
+         (princ (format "Failed to delete %s\n" file))))
+      (t
+       (fsvn-make-delete-directory file))))
+   (directory-files dir t "^[^.][^.]"))
+  (princ (format "Deleting %s\n" dir))
+  (condition-case err
+      (delete-directory dir)
+    (princ (format "Failed to delete %s\n" dir))))
+
 (defun fsvn-make-install (&optional just-print)
   (unless (or just-print (file-directory-p INSTALL-DIR))
     (make-directory INSTALL-DIR t))
@@ -140,10 +169,12 @@
               (set-file-modes dest ?\644)))
           (list (cons el dest-el) (cons elc dest-elc))))))
    ALL-MODULES)
+  (unless (or just-print (file-directory-p INSTALL-IMAGE-DIR))
+    (make-directory INSTALL-IMAGE-DIR t))
   (mapc
    (lambda (img)
      (let ((src (concat "images/" img))
-           (dest (expand-file-name img (expand-file-name "images" INSTALL-DIR))))
+           (dest (expand-file-name img INSTALL-IMAGE-DIR)))
        (princ (format "%s -> %s\n" src dest))
        (unless just-print
          (unless (file-exists-p src)

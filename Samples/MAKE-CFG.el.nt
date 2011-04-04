@@ -8,6 +8,7 @@
 (setq fsvn-svnadmin-command "c:/usr/local/subversion/bin/svnadmin.exe")
 
 (setq INSTALL-DIR (expand-file-name "../site-lisp/fsvn" (invocation-directory)))
+(setq INSTALL-IMAGE-DIR (expand-file-name "images/fsvn" data-directory))
 
 ;; (setq load-path (cons "~/.emacs.d/meadow" load-path))
 

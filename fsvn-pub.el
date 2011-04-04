@@ -323,12 +323,10 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      (lambda (x)
        (let (enabler activator)
          (if feature
-             (setq enabler 'ad-enable-advice
-                   activator 'ad-activate)
-           (setq enabler 'ad-disable-advice
-                 activator 'ad-deactivate))
+             (setq enabler 'ad-enable-advice)
+           (setq enabler 'ad-disable-advice))
          (funcall enabler (nth 0 x) (nth 1 x) (nth 2 x))
-         (funcall activator (nth 0 x))))
+         (funcall 'ad-activate (nth 0 x))))
      fsvn-advised-alist)
     (setq file-handler (assoc fsvn-magic-file-name-regexp file-name-handler-alist))
     (setq auto-mode (list (concat "@\\(?:" fsvn-revision-regexp "\\)$") 'ignore t))
