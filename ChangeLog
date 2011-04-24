@@ -1,3 +1,7 @@
+2011-04-24  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improvement: Use `libxml-parse-xml-region' if exists.
+
 2011-03-31  Hayashi Masahiro (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: advice problem.

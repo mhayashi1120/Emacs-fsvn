@@ -61,6 +61,15 @@
 (defun fsvn-xml-node-children (node)
   (xml-node-children node))
 
+
+(defalias 'fsvn-xml-parse-region
+  (if (fboundp 'libxml-parse-xml-region)
+      'libxml-parse-xml-region
+    'fsvn-xml-parse-region->libxml))
+
+(defun fsvn-xml-parse-region->libxml (start end)
+  (car (xml-parse-region start end)))
+
 
 
 ;; xml definition
@@ -587,55 +596,54 @@ if dtd is list call this function recursively.
     nil))
 
 (defun fsvn-xml-parse-logentry-item (start end)
-  (let ((node (xml-parse-region start end)))
-    (fsvn-xml-processor (car node) fsvn-xml-logentry-dtd-alist)))
+  (let ((xml (fsvn-xml-parse-region start end)))
+    (fsvn-xml-processor xml fsvn-xml-logentry-dtd-alist)))
 
 (defun fsvn-xml-parse-logentry ()
-  (let ((xml (xml-parse-region (point-min) (point-max))))
+  (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
     (fsvn-xml-get-children
-     (fsvn-xml-processor (car xml) fsvn-xml-log-dtd-alist)
+     (fsvn-xml-processor xml fsvn-xml-log-dtd-alist)
      'logentry)))
 
 (defun fsvn-xml-parse-proplist ()
-  (let ((xml (xml-parse-region (point-min) (point-max))))
+  (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
     (fsvn-xml-get-children
-     (fsvn-xml-processor (car xml) fsvn-xml-proplist-dtd-alist)
+     (fsvn-xml-processor xml fsvn-xml-proplist-dtd-alist)
      'target)))
 
 (defun fsvn-xml-parse-revprops ()
-  (let ((xml (xml-parse-region (point-min) (point-max))))
+  (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
     (fsvn-xml-get-children
-     (fsvn-xml-processor (car xml) fsvn-xml-proplist-dtd-alist)
+     (fsvn-xml-processor xml fsvn-xml-proplist-dtd-alist)
      'revprops)))
 
 (defun fsvn-xml-parse-info ()
-  (let ((xml (xml-parse-region (point-min) (point-max))))
+  (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
     (fsvn-xml-get-children
-     (fsvn-xml-processor (car xml) fsvn-xml-info-dtd-alist)
+     (fsvn-xml-processor xml fsvn-xml-info-dtd-alist)
      'entry)))
 
 (defun fsvn-xml-parse-blame ()
-  (let ((xml (xml-parse-region (point-min) (point-max))))
+  (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
     (fsvn-xml-get-children
-     (fsvn-xml-processor (car xml) fsvn-xml-blame-dtd-alist)
+     (fsvn-xml-processor xml fsvn-xml-blame-dtd-alist)
      'target)))
 
 (defun fsvn-xml-parse-lists-entries ()
   (let ((xml (fsvn-xml-parse-lists)))
-    (fsvn-xml-node-children (car xml))))
+    (fsvn-xml-node-children xml)))
 
 (defun fsvn-xml-parse-lists ()
-  (let ((xml (xml-parse-region (point-min) (point-max)))
-        ret)
+  (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
     ;; ignore rootnode, attribute, newline
     (fsvn-xml-get-children
-     (fsvn-xml-processor (car xml) fsvn-xml-ls-dtd-alist)
+     (fsvn-xml-processor xml fsvn-xml-ls-dtd-alist)
      'list)))
 
 (defun fsvn-xml-parse-status ()
-  (let ((xml (xml-parse-region (point-min) (point-max))))
+  (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
     (fsvn-xml-node-children
-     (fsvn-xml-processor (car xml) fsvn-xml-status-dtd-alist))))
+     (fsvn-xml-processor xml fsvn-xml-status-dtd-alist))))
 
 
 

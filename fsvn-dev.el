@@ -10,6 +10,44 @@
 
 
 
+
+(defvar fsvn-log-analyze-alist
+  '(
+    ("day" "%y-%m-%d" "%m-%d")
+    ("week" "%y-%W" "%y(%W)")
+    ))
+;;TODO chart by date, commit-user
+
+;;TODO sort
+;;     fill empty date.
+(defun fsvn-log-analyze (key-format disp-format)
+  (interactive
+   (let ((setting (assoc 
+                   (completing-read "Analyze type: " fsvn-log-analyze-alist)
+                   fsvn-log-analyze-alist)))
+     (list (nth 1 setting) (nth 2 setting))))
+  (require 'chart)
+  (let (alist)
+    (mapcar
+     (lambda (logentry)
+       (let* ((date (fsvn-xml-log->logentry=>date$ logentry))
+              (key (format-time-string key-format date))
+              (disp (format-time-string disp-format date))
+              (cell (assoc key alist)))
+         (unless cell
+           (setq cell (list key disp 0))
+           (setq alist (cons cell alist)))
+         ;; update count cell
+         (setcar (nthcdr 2 cell) (incf (nth 2 cell)))))
+     fsvn-log-list-entries)
+    (chart-bar-quickie 
+     'vertical "Fsvn Log Analyze"
+     (mapcar (lambda (x) (nth 1 x)) alist) "Date"
+     (mapcar (lambda (x) (nth 2 x)) alist) "Commit Count"
+     200)))
+
+
+
 ;; cherry-pick
 
 
