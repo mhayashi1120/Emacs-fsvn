@@ -53,12 +53,12 @@
           map)))
 
 (defcustom fsvn-message-edit-mode-hook nil
-  "*Run at the very end of `fsvn-message-edit-mode'."
+  "Run at the very end of `fsvn-message-edit-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-message-edit-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-message-edit-mode' is prepared."
+  "Run at the very end of `fsvn-message-edit-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
@@ -176,7 +176,7 @@ Keybindings:
     (if (= (buffer-size) 0)
         (when (fsvn-config-log-empty-warnings (fsvn-buffer-repos-root))
           (unless (y-or-n-p "Log message is empty.  Really commit? ")
-            (error "No log messages")))
+            (fsvn-quit "Empty message")))
       (setq tmpfile (fsvn-message-edit-make-message-file))
       (let ((coding-system-for-write fsvn-message-edit-file-encoding))
         (write-region (point-min) (point-max) tmpfile nil 'no-msg))

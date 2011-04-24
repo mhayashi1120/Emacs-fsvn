@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Test tool
 #
@@ -62,7 +62,7 @@ EOF
 UNIX_SVN_1_4_BIN=~/src/subversion-dev/inst-1.4.x/bin
 UNIX_SVN_1_5_BIN=~/src/subversion-dev/inst-1.5.x/bin
 UNIX_SVN_1_6_BIN=~/src/subversion-dev/inst-1.6.x/bin
-EMACS_22_BIN=emacs-22.3
+# EMACS_22_BIN=emacs-22.3
 EMACS_23_BIN=emacs-23.2
 EMACS_CURRENT_BIN=emacs-current
 

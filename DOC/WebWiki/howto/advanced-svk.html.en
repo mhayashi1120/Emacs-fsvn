@@ -21,6 +21,12 @@
   <body>
 	<a href="../index.html">Top</a>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
+
 <h1>How to use of svk on fsvn</h1>
 <h2>Configuration</h2>
 <pre>
@@ -28,6 +34,11 @@
 </pre>
 <h2>TODO</h2>
 
+<div class="right">
+Author: mhayashi1120<br/>
+Published: 2011-02-19 22:12<br/>
+<i>powered by piki</i><br/>
+</div>
 	<!-- Google Analytics -->
 	<script type="text/javascript">
 

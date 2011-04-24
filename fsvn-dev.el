@@ -10,6 +10,48 @@
 
 
 
+
+(defvar fsvn-log-analyze-alist
+  '(
+    ("day" "%y-%m-%d" "%m-%d")
+    ("week" "%y-%W" "%y(%W)")
+    ))
+;;TODO chart by date, commit-user
+
+;;TODO sort
+;;     fill empty date.
+(defun fsvn-log-analyze (key-format disp-format)
+  (interactive
+   (let ((setting (assoc 
+                   (completing-read "Analyze type: " fsvn-log-analyze-alist)
+                   fsvn-log-analyze-alist)))
+     (list (nth 1 setting) (nth 2 setting))))
+  (require 'chart)
+  (let (alist)
+    (mapcar
+     (lambda (logentry)
+       (let* ((date (fsvn-xml-log->logentry=>date$ logentry))
+              (key (format-time-string key-format date))
+              (disp (format-time-string disp-format date))
+              (cell (assoc key alist)))
+         (unless cell
+           (setq cell (list key disp 0))
+           (setq alist (cons cell alist)))
+         ;; update count cell
+         (setcar (nthcdr 2 cell) (incf (nth 2 cell)))))
+     fsvn-log-list-entries)
+    (chart-bar-quickie 
+     'vertical "Fsvn Log Analyze"
+     (mapcar (lambda (x) (nth 1 x)) alist) "Date"
+     (mapcar (lambda (x) (nth 2 x)) alist) "Commit Count"
+     200)))
+
+
+
+;; cherry-pick
+
+
+
 ;; destination url -> msgedit
 ;; mv -> switch
 (defun fsvn-browse-move-this-in-repository (src-file to-url &optional args)
@@ -31,8 +73,6 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
-;;TODO easy menu
-
 (defun fsvn-browse-cmd-read-diff-between-repository ()
   (let ((default (fsvn-browse-point-repository-urlrev))
         urlrev1 urlrev2 args)
@@ -44,32 +84,62 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
      (list urlrev1 urlrev2 args))))
 
-(defun fsvn-browse-cmd-read-diff-with-branch ()
-  ;;TODO can change local filename.
-  (let* ((url1 (fsvn-browse-point-url))
-         (urlrev2 (fsvn-browse-point-repository-urlrev))
-         args)
-    (fsvn-brief-message-showing 
-     (fsvn-brief-message-add-message (format "Trunk: %s" url1))
-     (setq urlrev2 (fsvn-completing-read-urlrev "Branch: " urlrev2 t))
-     (fsvn-brief-message-add-message (format "Branch: %s" urlrev2))
-     (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
-     (list url1 urlrev2 args))))
-
-;; bound to = b
-(defun fsvn-browse-diff-with-branch (trunk branch-urlrev &optional args)
-  (interactive (fsvn-browse-cmd-read-diff-with-branch))
-  (fsvn-diff-start-files-process branch-urlrev trunk args))
-
+;;TODO between different repository
+;;TODO easy menu
 ;; bound to = r
 (defun fsvn-browse-diff-between-repository (src-urlrev dest-urlrev &optional args)
+  "Execute `diff' between SRC-URLREV and DEST-URLREV.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
   (interactive (fsvn-browse-cmd-read-diff-between-repository))
-  (fsvn-diff-start-process dest-urlrev src-urlrev args))
+  (fsvn-diff-start-process src-urlrev dest-urlrev args))
 
 (add-hook 'fsvn-browse-mode-hook
           (lambda ()
-            (define-key fsvn-browse-diff-map "r" 'fsvn-browse-diff-between-repository)
-            (define-key fsvn-browse-diff-map "b" 'fsvn-browse-diff-with-branch)))
+            (define-key fsvn-browse-diff-map "r" 'fsvn-browse-diff-between-repository)))
+
+(add-hook 'fsvn-log-list-mode-hook
+          (lambda ()
+            (define-key fsvn-log-list-mode-map "\C-c\C-s" 'fsvn-log-list-diff-search-backward)
+            ))
+
+
+
+;;TODO make async
+;; cleanup buffer
+(defun fsvn-log-list-diff-search-backward (regexp)
+  (interactive 
+   (list (fsvn-log-list-read-search-regexp)))
+  (catch 'found
+    (while (and (fsvn-log-list-point-revision)
+                (not (eobp)))
+      (let* ((buffers (buffer-list))
+             (proc (fsvn-log-list-diff-previous))
+             (buffer (process-buffer proc)))
+        (while (not (memq (process-status proc) '(exit signal)))
+          (sit-for 0.2))
+        ;;TODO log message too? sibling filename too?
+        (when (buffer-live-p buffer)
+          (with-current-buffer buffer
+            (goto-char (point-min))
+            (when (re-search-forward regexp nil t)
+              ;;TODO colorlize?
+              (message "Match found.")
+              (throw 'found t)))
+          (unless (memq buffer buffers)
+            (kill-buffer buffer)))
+        (fsvn-log-list-next-line)))
+    (message "Not found.")))
+
+
+
+(defun fsvn-vc-diff ()
+  "Diff current file or current directory."
+  (interactive)
+  (let ((file (or buffer-file-name
+                  default-directory)))
+    (fsvn-diff-start-process file)))
+
 
 
 
@@ -91,7 +161,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 (defcustom fsvn-browse-guessed-moved-parent-threshold 4
-  "*"
+  ""
   :group 'fsvn
   :type 'integer)
 

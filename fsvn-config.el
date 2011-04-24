@@ -56,7 +56,7 @@ This configuration switch by repository root by `fsvn-repository-alist'."
     nil))
 
 (defcustom fsvn-repository-alist nil
-  "*Repository root and any settings.
+  "Repository root and any settings.
 Key is repository root url.
 cdr is any settings.
 See variables below.
@@ -84,46 +84,46 @@ If not matched any settings, then use `fsvn-config-' prefixed variable will be u
                  (list symbol)))
 
 (defcustom fsvn-config-browse-show-update t
-  "*Control `fsvn-browse-mode' access to repository or not.
+  "Control `fsvn-browse-mode' access to repository or not.
 This is usefull for slow repository cause of far network.
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'boolean)
 
 (defcustom fsvn-config-repository-default-coding-system nil
-  "*Repository file's default coding system.
+  "Repository file's default coding system.
 nil value means access to repository and guess each file coding-system.
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'coding-system)
 
 (defcustom fsvn-config-magic-remote-commit-message "Remote commit."
-  "*When modify repository using fsvn magic interface, automatically set this as log message.
+  "When modify repository using fsvn magic interface, automatically set this as log message.
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'string)
 
 (defcustom fsvn-config-commit-default-file-select-p t
-  "*When `fsvn-select-file-mode' and `fsvn-log-message-mode' was prepared,
+  "When `fsvn-select-file-mode' and `fsvn-log-message-mode' was prepared,
 move focus to file select buffer.
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'boolean)
 
 (defcustom fsvn-config-log-empty-warnings t
-  "*Warn or not if log message is empty when commit file(s).
+  "Warn or not if log message is empty when commit file(s).
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'boolean)
 
 (defcustom fsvn-config-log-limit-count 50
-  "*Log entry limit in `fsvn-log-list-mode'
+  "Log entry limit in `fsvn-log-list-mode'
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'integer)
 
 (defcustom fsvn-config-tortoise-property-use t
-  "*Use or not TortoiseSVN custom property (bugtraq:* tsvn:*)
+  "Use or not TortoiseSVN custom property (bugtraq:* tsvn:*)
 This variable overwritten by `fsvn-repository-alist'"
   :group 'fsvn-config
   :type 'boolean)

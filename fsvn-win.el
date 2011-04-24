@@ -37,7 +37,7 @@
 
 (defcustom tortoise-interface-program
   "c:/Program Files/TortoiseSVN/bin/TortoiseProc.exe"
-  "*"
+  ""
   :group 'tortoise)
 
 (defun tortoise-call-program (command &optional path)
@@ -54,7 +54,7 @@
 
 (defcustom tortoise-merge-program
   "c:/Program Files/TortoiseSVN/bin/TortoiseMerge.exe"
-  "*"
+  ""
   :group 'tortoise)
 
 (defun tortoise-diff-program (fromfile tofile &optional switches)

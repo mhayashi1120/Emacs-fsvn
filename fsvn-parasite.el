@@ -117,12 +117,12 @@
 (defvar fsvn-parasite-commit-target-files nil)
 
 (defcustom fsvn-parasite-commit-before-commit-hook nil
-  "*"
+  ""
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-parasite-commit-after-commit-hook nil
-  "*"
+  ""
   :group 'fsvn
   :type 'hook)
 

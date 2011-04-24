@@ -20,12 +20,12 @@
 
 
 (defcustom fsvn-generic-datetime-format "%Y-%m-%d %H:%M"
-  "*Date and time format in any."
+  "Date and time format in any."
   :group 'fsvn
   :type 'string)
 
 (defcustom fsvn-help-locale nil
-  "*Locale of your favorite."
+  "Locale of your favorite."
   :group 'fsvn
   :type 'string)
 
@@ -164,7 +164,7 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 
 (defcustom fsvn-dired-copy-filename-separator " "
-  "*String value of separate multiple filenames when killing."
+  "String value of separate multiple filenames when killing."
   :group 'fsvn-dired
   :type 'string)
 
@@ -299,7 +299,9 @@ This is what the do-commands look for, and what the mark-commands store.")
           (define-key map "U" 'fsvn-electric-line-unmark-all)
           (define-key map "\C-]" 'fsvn-electric-line-select-quit)
           (define-key map "\C-c" nil)
-          (define-key map "\C-c\C-c" 'fsvn-electric-line-select-quit)
+          (define-key map "\C-c\C-c" 'fsvn-electric-line-select-select)
+          (define-key map "\C-c\C-k" 'fsvn-electric-line-select-quit)
+          (define-key map "\C-c\C-q" 'fsvn-electric-line-select-quit)
           (define-key map "\C-m" 'fsvn-electric-line-select-select)
           (define-key map "\C-n" 'fsvn-electric-next-line)
           (define-key map "\C-p" 'fsvn-electric-previous-line)
@@ -336,7 +338,7 @@ This is what the do-commands look for, and what the mark-commands store.")
     ))
 
 (defcustom fsvn-electric-line-select-mode-hook nil
-  "*Run at the very end of `fsvn-electric-line-select-mode'."
+  "Run at the very end of `fsvn-electric-line-select-mode'."
   :group 'fsvn
   :type 'hook)
 
@@ -701,18 +703,41 @@ Elements of the alist are:
 
 (defvar fsvn-ui-fancy-modeline t) ; modeline mark display or not
 (defvar fsvn-ui-fancy-tooltip nil) ; modeline tooltip display
+(defvar fsvn-ui-image-directory
+  (ignore-errors
+    (let ((validator (lambda (file) (and (eq (car (file-attributes file)) t) file))))
+      (or
+       (funcall validator
+                (expand-file-name "images" (file-name-directory (locate-library "fsvn-ui"))))
+       (funcall validator
+                (expand-file-name "images/fsvn" data-directory))))))
 
 (defcustom fsvn-ui-fancy-file-state-in-modeline t
-  "*Show a color dot in the modeline that describes the state of the current file."
+  "Show a color dot in the modeline that describes the state of the current file."
   :type 'boolean
   :group 'fsvn)
 
-(defun fsvn-ui-fancy-modeline-picture (color)
-  (propertize "    "
-              'help-echo 'fsvn-ui-fancy-tooltip
-              'display
-              `(image :type xpm
-                      :data ,(format "/* XPM */
+(defvar fsvn-ui-fancy-object-picture-alist nil)
+  
+(defun fsvn-ui-fancy-object-picture (color)
+  (let ((cell (assoc color fsvn-ui-fancy-object-picture-alist)))
+    (cond
+     (cell (cdr cell))
+     (t
+      (setq cell (cons color nil))
+      (setq fsvn-ui-fancy-object-picture-alist
+            (cons cell fsvn-ui-fancy-object-picture-alist))
+      (when fsvn-ui-image-directory
+        (let ((file (expand-file-name (concat color ".xpm") fsvn-ui-image-directory)))
+          (when (file-exists-p file)
+            (with-temp-buffer
+              (insert-file-contents file)
+              (setcdr cell (buffer-string))))))
+      (cdr cell)))))
+
+(defun fsvn-ui-fancy-get-picture (color)
+  (or (fsvn-ui-fancy-object-picture color)
+      (format "/* XPM */
 static char * data[] = {
 \"18 13 3 1\",
 \"  c None\",
@@ -731,10 +756,18 @@ static char * data[] = {
 \"      +.....+     \",
 \"       +++++      \",
 \"                  \"};"
-                                     color)
+              color)))
+
+(defun fsvn-ui-fancy-modeline-picture (color)
+  (propertize "    "
+              'help-echo 'fsvn-ui-fancy-tooltip
+              'display
+              `(image :type xpm
+                      :data ,(fsvn-ui-fancy-get-picture color)
                       :ascent center)))
 
 (defun fsvn-ui-fancy-install-state-mark (color)
+  (add-hook 'after-revert-hook 'fsvn-ui-fancy-redraw nil t)
   (let ((mode `(fsvn-ui-fancy-modeline
                 ,(fsvn-ui-fancy-modeline-picture color))))
     (unless (assq 'fsvn-ui-fancy-modeline mode-line-format)
@@ -742,6 +775,7 @@ static char * data[] = {
     (force-mode-line-update t)))
 
 (defun fsvn-ui-fancy-uninstall-state-mark ()
+  (remove-hook 'after-revert-hook 'fsvn-ui-fancy-redraw t)
   (setq mode-line-format
         (assq-delete-all 'fsvn-ui-fancy-modeline
                          mode-line-format))
@@ -763,12 +797,6 @@ static char * data[] = {
 (defadvice vc-find-file-hook (after fsvn-ui-fancy-vc-find-file-hook disable)
   "vc-find-file-hook advice for synchronizing psvn with vc-svn interface"
   (fsvn-ui-fancy-redraw))
-
-(defadvice vc-find-file-hook (after fsvn-ui-fancy-vc-find-file-hook-revert disable)
-  "Add hook to `revert-buffer'"
-  ;; `revert-buffer-function' is not considered.
-  ;; Almost case, that variable is used in non text editing modes.
-  (add-hook 'after-revert-hook 'fsvn-ui-fancy-redraw nil t))
 
 (defadvice vc-after-save (after fsvn-ui-fancy-vc-after-save disable)
   "vc-after-save advice for synchronizing psvn when saving buffer"

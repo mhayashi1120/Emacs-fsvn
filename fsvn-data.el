@@ -337,7 +337,7 @@ This list sorted revision descending.
    mode (buffer-list)))
 
 (defcustom fsvn-common-property-list nil
-  "*List of variable symbol of completing applicant list."
+  "List of variable symbol of completing applicant list."
   :group 'fsvn
   :type '(list symbol))
 

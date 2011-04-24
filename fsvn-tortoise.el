@@ -55,7 +55,7 @@
     (when logminsize
       (unless (>= (buffer-size) logminsize)
         (unless (y-or-n-p (format "tsvn:logminsize is %d. Really commit? " logminsize))
-          (error "Log min size error."))))
+          (fsvn-quit "Log min size error."))))
     (when logwidthmarker
       (when (catch 'width-over
               (save-excursion
@@ -67,7 +67,7 @@
                     (throw 'width-over t))
                   (forward-line 1))))
         (unless (y-or-n-p (format "tsvn:logwidthmarker is %d. Really commit? " logwidthmarker))
-          (error "Fill buffer."))))))
+          (fsvn-quit "Fill buffer."))))))
 
 (defun fsvn-tortoise-tsvn:user*properties (target-file)
   (let* ((parent-dir (fsvn-file-name-directory2 target-file))
@@ -137,7 +137,7 @@
             (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
                         (null WARNIFNOISSUE)
                         (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
-              (error "Miss \"%s\" in Log message" real-label)))))
+              (fsvn-quit "Miss \"%s\" in Log message" real-label)))))
        (MESSAGE-REGEX
         (save-excursion
           (goto-char (point-min))
@@ -145,10 +145,10 @@
             (unless (or (fsvn-tortoise-bugtraq-commit-set-bugid MESSAGE NUMBER real-label APPEND)
                         (null WARNIFNOISSUE)
                         (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label)))
-              (error "Miss \"%s\" in Log message" real-label)))))
+              (fsvn-quit "Miss \"%s\" in Log message" real-label)))))
        (LABEL
         (unless (y-or-n-p (format "Log message contains no \"%s\". Really commit? " real-label))
-          (error "Set property `bugtraq:logregex' or `bugtraq:message' correctly")))))))
+          (fsvn-quit "Set property `bugtraq:logregex' or `bugtraq:message' correctly")))))))
 
 (defun fsvn-tortoise-bugtraq-create-message-regexp (message append number)
   (when (and message (string-match "%BUGID%" message))

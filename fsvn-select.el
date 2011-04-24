@@ -109,12 +109,12 @@
           map)))
 
 (defcustom fsvn-select-file-mode-hook nil
-  "*Run at the very end of `fsvn-select-file-mode'."
+  "Run at the very end of `fsvn-select-file-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-select-file-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-select-file-mode' is prepared."
+  "Run at the very end of `fsvn-select-file-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
@@ -483,7 +483,7 @@ Keybindings:
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (interactive (fsvn-select-file-cmd-file "revert" fsvn-default-args-revert))
-  (when (y-or-n-p "Svn: Revert? ")
+  (when (y-or-n-p "Svn: Revert this file? ")
     (let (buffer reverted)
       (setq buffer (fsvn-popup-call-process "revert" args file))
       (setq reverted (fsvn-parse-result-cmd-revert buffer))

@@ -35,7 +35,7 @@
 (defvar fsvn-prop-file-default-coding-system fsvn-svn-common-coding-system)
 
 (defcustom fsvn-svn-command "svn"
-  "*Subversion command. Must be set before loading this file.
+  "Subversion command. Must be set before loading this file.
 If are problems while executing this command, check `exec-path' or PATH environment variable.
 Otherwise set absolute path.
 
@@ -48,7 +48,7 @@ Please call `fsvn-initialize-loading' function.
            file))
 
 (defcustom fsvn-svnadmin-command "svnadmin"
-  "*Subversion Administrator command. Must be set before loading this file.
+  "Subversion Administrator command. Must be set before loading this file.
 If are problems while executing this command, check `exec-path' or PATH environment variable.
 Otherwise set absolute path.
 
@@ -105,11 +105,11 @@ Please call `fsvn-initialize-loading' function.
                     name val-length value start c)
                 (forward-line 1)
                 (unless (looking-at "^\\(.+\\)$")
-                  (error "Unrecognized format."))
+                  (signal 'fsvn-parsing-error '("Unrecognized format.")))
                 (setq name (match-string 1))
                 (forward-line 1)
                 (unless (looking-at "^V \\([0-9]+\\)$")
-                  (error "Unrecognized format."))
+                  (signal 'fsvn-parsing-error '("Unrecognized format.")))
                 (setq val-length (string-to-number (match-string 1)))
                 (forward-line 1)
                 (setq start (point))
@@ -798,7 +798,7 @@ $"
 
 ;;TODO make obsolete
 (defcustom fsvn-popup-result-update-parsed-threshold 1000000000
-  "*Threshold of `update' output size for parsing.
+  "Threshold of `update' output size for parsing.
 Huge value makes Emacs slow down."
   :group 'fsvn
   :type 'integer)
@@ -831,7 +831,7 @@ Huge value makes Emacs slow down."
                   actor-cell)
               (setq actor-cell (assq direction fsvn-process-filter-update-action-alist))
               (unless actor-cell
-                (error "Assertion failed (Non defined mark)"))
+                (signal 'fsvn-parsing-error `("Assertion failed (Non defined mark)")))
               (funcall (cdr actor-cell) file)))
           (forward-line 1))
         (setq fsvn-process-filter-for-update-parsed-end end)))))

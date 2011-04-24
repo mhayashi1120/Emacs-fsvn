@@ -86,12 +86,12 @@
           map)))
 
 (defcustom fsvn-proplist-mode-hook nil
-  "*Run at the very end of `fsvn-proplist-mode'."
+  "Run at the very end of `fsvn-proplist-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-proplist-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-proplist-mode' is prepared."
+  "Run at the very end of `fsvn-proplist-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
@@ -249,9 +249,9 @@ Keybindings:
 
 (defun fsvn-proplist-check-propedit-status ()
   (when (fsvn-propedit-buffer-modified-p)
-    (if (y-or-n-p "Propedit buffer is changed.  Discard it? ")
-        (fsvn-propedit-buffer-discard-changes)
-      (error "Discard postponed"))))
+    (unless (y-or-n-p "Propedit buffer is changed.  Discard it? ")
+      (fsvn-quit "Discard postponed"))
+    (fsvn-propedit-buffer-discard-changes)))
 
 (defun fsvn-proplist-current-propname ()
   (save-excursion
@@ -441,12 +441,12 @@ Keybindings:
           map)))
 
 (defcustom fsvn-propedit-mode-hook nil
-  "*Run at the very end of `fsvn-propedit-mode'."
+  "Run at the very end of `fsvn-propedit-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-propedit-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-propedit-mode' is prepared."
+  "Run at the very end of `fsvn-propedit-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 

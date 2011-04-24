@@ -29,14 +29,14 @@
           map)))
 
 (defcustom fsvn-blame-subwindow-mode-hook nil
-  "*Run at the very end of `fsvn-blame-subwindow-mode'."
+  "Run at the very end of `fsvn-blame-subwindow-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defconst fsvn-blame-subwindow-buffer-name " *Fsvn Blame Control*")
 
 (defcustom fsvn-blame-subwindow-height 10
-  "*Blame minor mode control window height."
+  "Blame minor mode control window height."
   :group 'fsvn
   :type 'integer)
 

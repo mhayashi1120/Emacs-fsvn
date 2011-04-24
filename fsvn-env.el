@@ -24,7 +24,7 @@
 
 (defcustom fsvn-home-directory
   (expand-file-name "~/.fsvn/" )
-  "*Directory of this package.  Must be set before load this file."
+  "Directory of this package.  Must be set before load this file."
   :group 'fsvn
   :type  'directory)
 
@@ -368,6 +368,11 @@ Use %% to put a single % into the output.
 
 
 
+(defun fsvn-quit (&optional string &rest args)
+  (signal 'quit (when string (list (apply 'format string args)))))
+
+
+
 (defun fsvn-vc-mode-p ()
   "Is vc-svn active?"
   (defvar vc-mode)
@@ -677,6 +682,9 @@ referenced mew-complete.el"
 
 (put 'fsvn-command-error 'error-conditions '(fsvn-command-error error))
 (put 'fsvn-command-error 'error-message "Executing error.")
+
+(put 'fsvn-parsing-error 'error-conditions '(fsvn-parsing-error error))
+(put 'fsvn-parsing-error 'error-message "Parsing error.")
 
 
 

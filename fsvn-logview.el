@@ -21,6 +21,7 @@
 
 (defvar text-mode-map)
 (defvar current-prefix-arg)
+(defvar deactivate-mark)
 
 
 
@@ -66,7 +67,7 @@
 (defvar fsvn-log-list-subwindow-settings nil)
 (defvar fsvn-log-list-entries nil
   "Shown logs sorted by revision.")
-(defvar fsvn-log-list-isarch-history nil)
+(defvar fsvn-log-list-sarch-history nil)
 (defvar fsvn-log-list-main-process nil)
 (defvar fsvn-log-list-no-more-log nil
   "Set `t' if past log is not exists")
@@ -90,8 +91,9 @@
           (define-key map "=" 'fsvn-log-list-diff-generic)
           (define-key map "e" 'fsvn-log-list-ediff-generic)
           (define-key map "l" 'fsvn-log-list-ediff-local)
-          (define-key map "w" 'fsvn-log-list-diff-with-wc)
           (define-key map "p" 'fsvn-log-list-create-patch-generic)
+          (define-key map "v" 'fsvn-log-list-diff-previous)
+          (define-key map "w" 'fsvn-log-list-diff-with-wc)
 
           map)))
 
@@ -105,7 +107,7 @@
 
           (define-key map " " 'fsvn-log-list-scroll-message-up)
           (define-key map "%" (make-sparse-keymap))
-          (define-key map "%m" 'fsvn-log-list-mark-searched)
+          (define-key map "%m" 'fsvn-log-list-mark-regexp)
           (define-key map "=" fsvn-log-list-diff-mode-map)
           (define-key map "N" 'fsvn-log-list-next-mark)
           (define-key map "P" 'fsvn-log-list-previous-mark)
@@ -124,7 +126,7 @@
           (define-key map "n" 'fsvn-log-list-next-line)
           (define-key map "p" 'fsvn-log-list-previous-line)
           (define-key map "q" 'fsvn-log-list-quit)
-          (define-key map "s" 'fsvn-log-list-isearch-text)
+          (define-key map "s" 'fsvn-log-list-search-regexp)
           (define-key map "u" 'fsvn-log-list-mark-unmark)
           (define-key map "v" 'fsvn-log-list-toggle-details)
           (define-key map "w" 'fsvn-log-list-copy-urlrev)
@@ -138,12 +140,12 @@
           map)))
 
 (defcustom fsvn-log-list-mode-hook nil
-  "*Run at the very end of `fsvn-log-list-mode'."
+  "Run at the very end of `fsvn-log-list-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-log-list-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-log-list-mode' is prepared."
+  "Run at the very end of `fsvn-log-list-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
@@ -437,11 +439,11 @@ Keybindings:
 (defun fsvn-logview-cmd-read-diff-args ()
   (list (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
 
-(defun fsvn-log-list-matched-entries (text)
+(defun fsvn-log-list-matched-entries (regexp)
   (let (ret)
     (mapc
      (lambda (entry)
-       (when (fsvn-xml-text-matched entry text)
+       (when (fsvn-xml-text-matched entry regexp)
          (setq ret (cons entry ret))))
      fsvn-log-list-entries)
     (nreverse ret)))
@@ -689,7 +691,7 @@ from is marked point, to is current point."
                        "Revert `%s' to revision %s? " 
                        (fsvn-file-name-nondirectory path)
                        (fsvn-urlrev-revision urlrev)))
-      (signal 'quit nil))
+      (fsvn-quit))
     (list urlrev path)))
   
 (defun fsvn-log-list-cmd-read-urlrev ()
@@ -719,6 +721,14 @@ from is marked point, to is current point."
     (setq local-file (fsvn-read-file-name "File: "))
     (setq args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff))
     (list local-file args)))
+
+(defun fsvn-log-list-read-search-regexp ()
+  (let* ((prompt (format "Search Regexp (%s): " (or (car fsvn-log-list-sarch-history) "")))
+         (reg (read-from-minibuffer prompt
+                                    nil nil nil 'fsvn-log-list-sarch-history)))
+    (if (string= reg "") 
+        (car fsvn-log-list-sarch-history)
+      reg)))
 
 ;; * fsvn-log-list-mode interactive commands
 
@@ -808,6 +818,20 @@ Otherwise diff at point revision with working copy file or directory.
    (t
     (fsvn-log-list-diff-with-wc args))))
 
+(defun fsvn-log-list-diff-previous (&optional args)
+  "Execute `diff' between current point revision and previous version.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+
+Like `git show'
+"
+  (interactive (fsvn-logview-cmd-read-diff-args))
+  (let* ((path fsvn-log-list-target-path)
+         (root (fsvn-buffer-repos-root))
+         (rev (fsvn-log-list-point-revision))
+         (urlrev (fsvn-log-list-revision-path root path rev))
+         (prev-urlrev (fsvn-log-list-revision-path root path (1- rev))))
+    (fsvn-diff-start-files-process urlrev prev-urlrev args)))
+
 (defun fsvn-log-list-ediff-generic ()
   "Act like `fsvn-log-list-diff-generic' except directory."
   (interactive)
@@ -824,7 +848,7 @@ Otherwise diff at point revision with working copy file or directory.
   (interactive (fsvn-logview-cmd-read-diff-args))
   (let ((file fsvn-logview-target-urlrev)
         (rev (fsvn-log-list-point-revision))
-        buffer diff-args)
+        diff-args)
     (setq diff-args (list "--revision" rev file))
     (fsvn-diff-start-process diff-args args)))
 
@@ -857,14 +881,11 @@ Otherwise diff at point revision with working copy file or directory.
       (delete-other-windows)
     (fsvn-log-list-show-details (fsvn-log-list-cmd-revision))))
 
-(defun fsvn-log-list-isearch-text (text)
-  "isearch TEXT in log all contents.
-see `fsvn-log-list-mark-searched'"
+(defun fsvn-log-list-search-regexp (regexp)
+  "isearch REGEXP in log all contents.
+see `fsvn-log-list-mark-regexp'"
   (interactive
-   (let* ((prompt (format "Search Text (%s): " (or (car fsvn-log-list-isarch-history) "")))
-          (readed (read-from-minibuffer prompt
-                                        nil nil nil 'fsvn-log-list-isarch-history)))
-     (list (if (string= readed "") (car fsvn-log-list-isarch-history) readed))))
+   (list (fsvn-log-list-read-search-regexp)))
   (let ((saved (point))
         (lst fsvn-log-list-entries)
         rev entry)
@@ -872,18 +893,18 @@ see `fsvn-log-list-mark-searched'"
               (fsvn-log-list-next-line)
               (while (setq rev (fsvn-log-list-point-revision))
                 (setq entry (fsvn-log-list-find-entry rev))
-                (when (fsvn-xml-text-matched entry text)
+                (when (fsvn-xml-text-matched entry regexp)
                   (throw 'exit t))
                 (fsvn-log-list-next-line)))
       (goto-char saved)
       (message "No message was matched."))))
 
-(defun fsvn-log-list-mark-searched (text)
-  "Mark revision that have TEXT.
-see `fsvn-log-list-isearch-text'"
-  (interactive (list (read-from-minibuffer
-                      "Search Text: " nil nil nil 'fsvn-log-list-isarch-history)))
-  (let ((entries (fsvn-log-list-matched-entries text)))
+(defun fsvn-log-list-mark-regexp (regexp)
+  "Mark revision that have REGEXP.
+see `fsvn-log-list-search-regexp'"
+  (interactive
+   (list (fsvn-log-list-read-search-regexp)))
+  (let ((entries (fsvn-log-list-matched-entries regexp)))
     (save-excursion
       (mapc
        (lambda (entry)
@@ -994,12 +1015,12 @@ LOCAL-FILE can be any file in local file system.
           map)))
 
 (defcustom fsvn-log-sibling-mode-hook nil
-  "*Run at the very end of `fsvn-log-sibling-mode'."
+  "Run at the very end of `fsvn-log-sibling-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-log-sibling-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-log-sibling-mode' is prepared."
+  "Run at the very end of `fsvn-log-sibling-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
@@ -1110,7 +1131,8 @@ Keybindings:
            regexps))
     (if (fboundp 'font-lock-refresh-defaults)
         (font-lock-refresh-defaults)
-      (setq font-lock-set-defaults nil))))
+      ;; FIXME To suppress the warnings
+      (set 'font-lock-set-defaults nil))))
 
 (defun fsvn-log-sibling-point-status ()
   (save-excursion
@@ -1339,12 +1361,12 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
           map)))
 
 (defcustom fsvn-log-message-mode-hook nil
-  "*Run at the very end of `fsvn-log-message-mode'."
+  "Run at the very end of `fsvn-log-message-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-log-message-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-log-message-mode' is prepared."
+  "Run at the very end of `fsvn-log-message-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
@@ -1383,7 +1405,7 @@ Keybindings:
    ((not (buffer-modified-p))
     (error "Message is not changed."))
    ((not (y-or-n-p "Really commit changed log? "))
-    (signal 'quit nil))))
+    (fsvn-quit))))
 
 (defun fsvn-log-message-cmd-read-quit-edit ()
   ;;TODO consider specific
@@ -1442,7 +1464,7 @@ Keybindings:
     (setq file (read-file-name "Save as: " nil nil nil rev-name))
     (when (and (file-exists-p file)
                (not (y-or-n-p "File exists. overwrite? ")))
-      (signal 'quit nil))
+      (fsvn-quit))
     (fsvn-expand-file file)))
 
 (defun fsvn-log-subwindow-switch-to-view ()
@@ -1517,13 +1539,14 @@ Keybindings:
     ("Diff"
      ["Diff" fsvn-log-list-diff-generic t]
      ["Diww with wc" fsvn-log-list-diff-with-wc t]
+     ["Diff with previous" fsvn-log-list-diff-previous t]
      ["Ediff with base" fsvn-log-list-ediff-with-base t]
      ["Ediff" fsvn-log-list-ediff-generic t]
      ["Patch" fsvn-log-list-create-patch-generic t]
      )
     ("Search"
-     ["ISearch and Jump" fsvn-log-list-isearch-text t]
-     ["Search and Mark" fsvn-log-list-mark-searched t]
+     ["ISearch and Jump" fsvn-log-list-search-regexp t]
+     ["Search and Mark" fsvn-log-list-mark-regexp t]
      )
     ("Edit"
      ["Copy to wc" fsvn-log-list-copy-urlrev t]

@@ -26,7 +26,7 @@ Delete previous release files. (after a while)
 
 *** TODO 1.n.o or later
 
-When first release of major version up, make branch like BR-m.x (ex BR-1.x)
+When first release of major version up, make branch like BR-m.n.x (ex: BR-1.0.x, BR-1.1.x)
 Commit all changes in branch working copy.
 Change version to release version in this working copy.
 Describe ChangeLog about this release.

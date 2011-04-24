@@ -31,7 +31,6 @@
 (defvar current-prefix-arg)
 (defvar find-directory-functions)
 (defvar file-name-handler-alist)
-(defvar system-type)
 
 
 
@@ -40,7 +39,6 @@
     (dired-goto-file around fsvn-dired-goto-file-ad)
     (after-find-file around fsvn-after-find-file)
     (vc-find-file-hook after fsvn-ui-fancy-vc-find-file-hook)
-    (vc-find-file-hook after fsvn-ui-fancy-vc-find-file-hook-revert)
     (vc-after-save after fsvn-ui-fancy-vc-after-save)
     (ediff-refresh-mode-lines around fsvn-ui-fancy-ediff-modeline-fixup)
     ))
@@ -84,7 +82,7 @@
 (defun fsvn-global-cleanup-buffer ()
   "Cleanup popuped non-active buffers."
   (interactive)
-  (when (y-or-n-p "Cleanup waste (non-active) buffer? ")
+  (when (y-or-n-p "Cleanup popup (process finished) buffer? ")
     (let ((count 0))
       (fsvn-window-with-cleanup
         (setq count (+ count (fsvn-cleanup-temp-buffer)))
@@ -325,12 +323,10 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      (lambda (x)
        (let (enabler activator)
          (if feature
-             (setq enabler 'ad-enable-advice
-                   activator 'ad-activate)
-           (setq enabler 'ad-disable-advice
-                 activator 'ad-deactivate))
+             (setq enabler 'ad-enable-advice)
+           (setq enabler 'ad-disable-advice))
          (funcall enabler (nth 0 x) (nth 1 x) (nth 2 x))
-         (funcall activator (nth 0 x))))
+         (funcall 'ad-activate (nth 0 x))))
      fsvn-advised-alist)
     (setq file-handler (assoc fsvn-magic-file-name-regexp file-name-handler-alist))
     (setq auto-mode (list (concat "@\\(?:" fsvn-revision-regexp "\\)$") 'ignore t))
@@ -374,10 +370,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 (defun fsvn-cmd-read-patch-file ()
-  (let* ((patch (fsvn-read-file-name "Patch file: ")))
+  (let* ((default ".patch")
+         (patch (fsvn-read-file-name "Patch file: " nil nil nil default)))
     (when (file-exists-p patch)
       (unless (y-or-n-p "File exists. Overwrite? ")
-        (signal 'quit nil)))
+        (fsvn-quit "File already exists")))
     (list (fsvn-expand-file patch))))
 
 (defun fsvn-cmd-read-checkout-args ()
@@ -423,7 +420,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (fsvn-browse-commit-mode (list buffer-file-name) args)))
 
 (defcustom fsvn-vc-commit-non-query-message "*** empty log message ***"
-  "*Commit message when \\[fsvn-vc-commit-non-query]
+  "Commit message when \\[fsvn-vc-commit-non-query]
 Default value is same as vc.el"
   :group 'fsvn
   :type  'string

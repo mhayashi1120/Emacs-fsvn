@@ -90,12 +90,12 @@
           map)))
 
 (defcustom fsvn-process-list-mode-hook nil
-  "*Run at the very end of `fsvn-process-list-mode'."
+  "Run at the very end of `fsvn-process-list-mode'."
   :group 'fsvn
   :type 'hook)
 
 (defcustom fsvn-process-list-mode-prepared-hook nil
-  "*Run at the very end of `fsvn-process-list-mode' is prepared."
+  "Run at the very end of `fsvn-process-list-mode' is prepared."
   :group 'fsvn
   :type 'hook)
 
