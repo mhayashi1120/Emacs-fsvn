@@ -15,6 +15,8 @@
   '(
     ("day" "%y-%m-%d" "%m-%d")
     ("week" "%y-%W" "%y(%W)")
+    ("hour" "%H" "%H")
+    ("week-day" "%w" "%w(%a)") ;; TODO for sorting
     ))
 ;;TODO chart by date, commit-user
 
@@ -44,7 +46,11 @@
      'vertical "Fsvn Log Analyze"
      (mapcar (lambda (x) (nth 1 x)) alist) "Date"
      (mapcar (lambda (x) (nth 2 x)) alist) "Commit Count"
-     200)))
+     ;;TODO
+     200
+     (lambda (a b) (string-lessp (car a) (car b)))))
+  (setq buffer-read-only t)
+  (set-buffer-modified-p nil))
 
 
 

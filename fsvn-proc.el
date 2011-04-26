@@ -250,9 +250,11 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
 
 (defmacro fsvn-process-event-handler (proc event &rest form)
   (declare (indent 2))
-  `(with-current-buffer (process-buffer ,proc)
-     (save-excursion
-       ,@form)))
+  `(let ((BUFFER (process-buffer ,proc)))
+     (when (buffer-live-p BUFFER)
+       (with-current-buffer BUFFER
+         (save-excursion
+           ,@form)))))
 
 (defmacro fsvn-process-exit-handler (proc event &rest form)
   (declare (indent 2))

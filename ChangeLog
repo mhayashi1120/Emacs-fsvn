@@ -1,3 +1,7 @@
+2011-04-26  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: fsvn-log-list-fetch-all bound to `z F'
+
 2011-04-24  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Improvement: Use `libxml-parse-xml-region' if exists.
