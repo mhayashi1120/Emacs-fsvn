@@ -631,7 +631,7 @@ if dtd is list call this function recursively.
 
 (defun fsvn-xml-parse-lists-entries ()
   (let ((xml (fsvn-xml-parse-lists)))
-    (fsvn-xml-node-children xml)))
+    (fsvn-xml-node-children (car xml))))
 
 (defun fsvn-xml-parse-lists ()
   (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))

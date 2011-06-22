@@ -19,7 +19,9 @@ add updated date and time
 ** Bugreport
 
 ** about SVN_SSH
-** TODO Activate only magic name.
+** Activate only magic name.
+
+Disable all fsvn feature but only magic access.
 
 ** font-lock not works fine in some cases.
 consider `font-lock-fontify' call or not
@@ -57,6 +59,10 @@ C-c v N command when git repository duplicated... switch like vc??
 
 ** create vc new backend?
 fsvn-vc
+
+** svn-auto-commit-mode
+
+new minor mode commit when save-buffer
 
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals

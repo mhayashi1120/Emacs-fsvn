@@ -61,7 +61,7 @@
 
 (defconst fsvn-log-list-user-name-length 15)
 (defconst fsvn-log-list-message-length 50)
-(defconst fsvn-log-list-buffer-name-prefix "Log for ")
+(defconst fsvn-log-list-buffer-name-prefix "*Fsvn Log ")
 
 (defvar fsvn-log-list-target-path nil)
 (defvar fsvn-log-list-subwindow-settings nil)

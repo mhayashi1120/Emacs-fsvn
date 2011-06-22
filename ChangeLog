@@ -1,3 +1,11 @@
+2011-06-22  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: fix bug when modifing about `libxml-parse-xml-region'
+
+2011-06-16  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: log view buffer name.
+
 2011-04-26  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: fsvn-log-list-fetch-all bound to `z F'

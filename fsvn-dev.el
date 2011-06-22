@@ -29,7 +29,8 @@
                    fsvn-log-analyze-alist)))
      (list (nth 1 setting) (nth 2 setting))))
   (require 'chart)
-  (let (alist)
+  (let ((inhibit-read-only t)
+        alist)
     (mapcar
      (lambda (logentry)
        (let* ((date (fsvn-xml-log->logentry=>date$ logentry))
