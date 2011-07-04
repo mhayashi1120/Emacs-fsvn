@@ -37,7 +37,7 @@
 ;;  * Has svk support
 
 ;;  But following **disadvantage** has.
-;;  * Key bindings is not familiar for legacy user.
+;;  * Key bindings are not familiar for legacy user.
 ;;  * Dired like interface but not exactly equals dired functions.
 ;;  * A little user help.
 

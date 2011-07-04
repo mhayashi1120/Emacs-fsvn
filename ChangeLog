@@ -1,3 +1,7 @@
+2011-07-01  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Implements magic `directory-file-name' and `file-name-directory' at repository root.
+
 2011-06-22  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: fix bug when modifing about `libxml-parse-xml-region'

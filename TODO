@@ -67,6 +67,8 @@ new minor mode commit when save-buffer
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
+** async drawing in dired.
+
 
 * browse-mode
 ** Enable Move file (in a repository)
@@ -80,6 +82,7 @@ fsvn-browse.*move-in-repository
 
 from other repository
 
+** async drawing
 
 * select-file-mode
 ** TODO when commit file-select buffer has svn:external file.
