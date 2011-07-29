@@ -125,6 +125,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
              (buffer (process-buffer proc)))
         (while (not (memq (process-status proc) '(exit signal)))
           (sit-for 0.2))
+        ;;TOOD restrict to "^[+-]" ?
         ;;TODO log message too? sibling filename too?
         (when (buffer-live-p buffer)
           (with-current-buffer buffer

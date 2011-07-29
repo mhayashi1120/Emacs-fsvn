@@ -1,7 +1,13 @@
 * Question and Answer
 
-****** この説明は ["このキー設定" http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&root=fsvn] を行ったことを前提にしています。
+# General question
+{Q-general-0001
+? Q. なんのために作ったのか？
+! A. Windows + TortoiseSVN ユーザと協調して仕事する必要があったが、既存のクライアントは tsvn:* プロパティなどに対応していなかったため。
+}
 
+
+****** これ以降の説明は ["このキー設定" http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs.ja?view=markup&root=fsvn] を行ったことを前提にしています。
 
 # Authenticate question
 {Q-auth-0001
