@@ -59,8 +59,8 @@
 (defconst fsvn-browse-re-mark "^[^ \n]")
 (defconst fsvn-browse-re-dir "^..d ")
 (defconst fsvn-browse-re-symlink "^..l ")
-(defconst fsvn-browse-re-root "^ \\(Root\\): \\(.+\\)")
-(defconst fsvn-browse-re-revision "^ \\(Revision\\): \\(.+\\)")
+(defconst fsvn-browse-re-root "^ \\(Root\\): \\(.*\\)")
+(defconst fsvn-browse-re-revision "^ \\(Revision\\): \\(.*\\)")
 (defconst fsvn-browse-re-subdir "^ \\(Path\\): \\(.*\\)")
 (defconst fsvn-browse-re-format-subdir "^ Path: %s$")
 (defconst fsvn-browse-re-locked-user
@@ -90,7 +90,7 @@
 
 (defconst fsvn-browse-ls-comparator-alist
   '(
-    (repository fsvn-browse-ls-entry-name-comparer fsvn-browse-ls-entry-time-comparer)
+    (repository fsvn-browse-ls-entry-name-comparer)
     (working-copy fsvn-browse-ls-file-name-comparer fsvn-browse-ls-file-time-comparer)
     ))
 
@@ -967,7 +967,13 @@ PATH is each executed path."
       (let (buffer-read-only)
         (erase-buffer)
         (fsvn-browse-mode)
-        (setq fsvn-browse-ls-comparer (or comparer 'fsvn-browse-ls-entry-name-comparer))
+        (setq fsvn-browse-ls-comparer 
+              (or
+               (and comparer 
+                    (memq comparer 
+                          (cdr (assq 'repository fsvn-browse-ls-comparator-alist)))
+                    comparer)
+               'fsvn-browse-ls-entry-name-comparer))
         (fsvn-browse-set-repos-local-variables info)
         (fsvn-browse-draw-topmost-header info)
         (fsvn-browse-ls-insert-repos-directory info directory-urlrev)
@@ -1015,13 +1021,17 @@ PATH is each executed path."
 
 (defun fsvn-browse-draw-path (directory)
   (goto-char (point-min))
-  (if (re-search-forward (format fsvn-browse-re-format-subdir directory) nil t)
-      (progn
-        (replace-match "")
-        (delete-char 1)
-        (when (looking-at "^[ ]*\n")
-          (replace-match "")))
-    (goto-char (point-max)))
+  (cond
+   ((or (re-search-forward (format fsvn-browse-re-format-subdir directory) nil t)
+        ;; this is considering repository buffer
+        (re-search-forward (format fsvn-browse-re-format-subdir ".*") nil t))
+    (replace-match "")
+    ;;delete newline
+    (delete-char 1)
+    (when (looking-at "^[ ]*\n")
+      (replace-match "")))
+   (t
+    (goto-char (point-max))))
   (insert (format " Path: %s\n" (fsvn-url-decode-string directory)))
   (insert "\n"))
 
@@ -1815,6 +1825,7 @@ PATH is each executed path."
       (when fsvn-browse-cleanup-buffer
         (kill-buffer prev-buffer)))
      ((fsvn-browse-point-directory-p)
+      ;; next repository buffer
       (fsvn-browse-switch-directory-buffer urlrev)
       (when fsvn-browse-cleanup-buffer
         (kill-buffer prev-buffer)))
@@ -1876,7 +1887,9 @@ PATH is each executed path."
          (newrev (fsvn-completing-read-revision nil nil nil (fsvn-browse-current-path)))
          (urlrev (fsvn-url-urlrev (fsvn-xml-info->entry=>url$ info) newrev))
          (file (fsvn-current-filename)))
-    (fsvn-browse-switch-directory-buffer urlrev (unless (string= currev newrev) 'revert))
+    (fsvn-browse-switch-directory-buffer 
+     urlrev (and fsvn-browse-repos-p 
+                 (if (string= currev newrev) 'draw 'revert)))
     (when file
       (fsvn-browse-goto-file file))))
 
@@ -2336,12 +2349,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 (defun fsvn-browse-toggle-sort ()
   "Toggle sorting condition mod-time and file-name."
   (interactive)
-  (let ((key
-         (if fsvn-browse-repos-p 'repository 'working-copy)))
-    (setq fsvn-browse-ls-comparer
-          (fsvn-cycle-next
-           (cdr (assq key fsvn-browse-ls-comparator-alist))
-           fsvn-browse-ls-comparer))
+  (let* ((key
+          (if fsvn-browse-repos-p 'repository 'working-copy))
+         (next (fsvn-cycle-next
+                (cdr (assq key fsvn-browse-ls-comparator-alist))
+                fsvn-browse-ls-comparer)))
+    (when (eq next fsvn-browse-ls-comparer)
+      (error "Toggle sorting is disabled"))
+    (setq fsvn-browse-ls-comparer next)
     (revert-buffer)))
 
 (defun fsvn-browse-diff-this (file &optional args)

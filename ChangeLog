@@ -1,3 +1,19 @@
+2011-08-17  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: wrong buffer name when `fsvn-browse-open-repository'.
+
+	* Change: disable `fsvn-browse-toggle-sort' when in repository buffer.
+
+	* Fix: Check file is under versioned when opening log.
+
+	* Change: cleanup `file-name-history' after ediff.
+
+	* Fix: fsvn-svk.el `fsvn-svk-browse-draw-mirrored-url' suppress in remote directory.
+
+	* Fix: browse repository sorting problem.
+
+	* Fix: follow the svn trivial specification changing. (about exporting filename)
+
 2011-07-01  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Implements magic `directory-file-name' and `file-name-directory' at repository root.

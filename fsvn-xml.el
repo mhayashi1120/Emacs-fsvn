@@ -105,24 +105,27 @@
       (schedule nil . intern)
       (depth nil . intern)))))
 
+(defconst fsvn-xml-ls-entry-dtd-alist
+  `(entry
+    ((kind . intern))
+    (name nil . t)
+    (size nil . fsvn-string-force-number)
+    (commit
+     ((revision . string-to-number))
+     (date nil . fsvn-svn-parse-date)
+     (author nil . t))
+    (lock
+     nil
+     (token nil . t)
+     (owner nil . t)
+     (created nil . fsvn-svn-parse-date))))
+
 (defconst fsvn-xml-ls-dtd-alist
-  '(lists
+  `(lists
     nil
     (list
      nil
-     (entry
-      ((kind . intern))
-      (name nil . t)
-      (size nil . fsvn-string-force-number)
-      (commit
-       ((revision . string-to-number))
-       (date nil . fsvn-svn-parse-date)
-       (author nil . t))
-      (lock
-       nil
-       (token nil . t)
-       (owner nil . t)
-       (created nil . fsvn-svn-parse-date))))))
+     ,fsvn-xml-ls-entry-dtd-alist)))
 
 (defconst fsvn-xml-status-entry-dtd-alist
   '(entry
@@ -639,6 +642,10 @@ if dtd is list call this function recursively.
     (fsvn-xml-get-children
      (fsvn-xml-processor xml fsvn-xml-ls-dtd-alist)
      'list)))
+
+(defun fsvn-xml-parse-lists-entry (start end)
+  (let ((xml (fsvn-xml-parse-region start end)))
+    (fsvn-xml-processor xml fsvn-xml-ls-entry-dtd-alist)))
 
 (defun fsvn-xml-parse-status ()
   (let ((xml (fsvn-xml-parse-region (point-min) (point-max))))
