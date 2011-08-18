@@ -1,3 +1,7 @@
+2011-08-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Change: Open file with async from repository browser.
+
 2011-08-17  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: wrong buffer name when `fsvn-browse-open-repository'.

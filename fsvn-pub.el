@@ -582,7 +582,7 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
          (localp (fsvn-url-local-p urlrev))
          proc win-config)
     (when localp
-      (unless (fsvn-file-unversioned-p urlrev)
+      (unless (fsvn-get-info-entry urlrev)
         (error "Not a subversion working copy")))
     (unless info
       (setq info (fsvn-buffer-new-repos-info urlrev)))

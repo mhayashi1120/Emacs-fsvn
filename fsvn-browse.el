@@ -1813,14 +1813,12 @@ PATH is each executed path."
     ;;TODO symlink
     (cond
      ((fsvn-browse-point-file-p)
-      (let* ((file
-              (if fsvn-browse-repos-p
-                  (fsvn-magic-create-name urlrev)
-                urlrev))
-             (prev (current-buffer)))
-        (fsvn-view-buffer (fsvn-get-view-buffer file))))
-     ((and urlrev
-           (fsvn-url-local-p urlrev))
+      (cond
+       (fsvn-browse-repos-p
+        (fsvn-cat-async urlrev))
+       (t
+        (fsvn-view-buffer (fsvn-get-view-buffer urlrev)))))
+     ((fsvn-url-local-p urlrev)
       (dired urlrev)
       (when fsvn-browse-cleanup-buffer
         (kill-buffer prev-buffer)))

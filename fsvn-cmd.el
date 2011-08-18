@@ -254,6 +254,41 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
             (set-auto-mode)
             std-buf))))))
 
+(defun fsvn-cat-async (urlrev)
+  (let* ((magic (fsvn-magic-create-name urlrev))
+         (buf (fsvn-cat-get-buffer urlrev))
+         (args (list urlrev))
+         (proc (apply 'fsvn-start-command "cat" buf args)))
+    (with-current-buffer buf
+      (let (buffer-read-only)
+        (erase-buffer))
+      (setq buffer-read-only t)
+      (set-buffer-modified-p nil))
+    (set-process-filter
+     proc
+     (lambda (p e)
+       (fsvn-process-event-handler p e
+         (save-excursion
+           (goto-char (point-max))
+           (let (buffer-read-only)
+             (insert e))
+           (set-buffer-modified-p nil)))))
+    (set-process-sentinel 
+     proc
+     `(lambda (p e)
+        (fsvn-process-exit-handler p e
+          (set-visited-file-name ,magic)
+          (set-buffer-modified-p nil)
+          (set-auto-mode))))
+    (display-buffer buf)
+    proc))
+
+(defun fsvn-cat-get-buffer (urlrev)
+  (let ((magic (fsvn-magic-create-name urlrev)))
+    (or (get-file-buffer magic)
+        (generate-new-buffer (fsvn-urlrev-filename urlrev)))))
+
+
 
 
 ;; with side effect svn subcommand

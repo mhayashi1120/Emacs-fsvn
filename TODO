@@ -184,6 +184,12 @@ md5 is directory by directory-file-name.
 
 ~/.fsvn/stash/{md5 of directory name}/{yyyyMMddHHmmss}
 
+
+*** cherry pick
+
+pick patch and apply changes to any file.
+with log message?
+
 * svk
 
 ** Not familiar interface
@@ -200,4 +206,6 @@ not works on windows
 Currently buffer's point is not moved from (point-min)
 Sometime prompt stop process, so cannot notice the prompt without scrolling.
 Move to point-max? only update or merge (switch?)
+
+
 

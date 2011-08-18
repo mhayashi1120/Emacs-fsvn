@@ -716,14 +716,7 @@ local (non-wc) -> remote : svn add -> svn commit
   t)
 
 (defun fsvn-magic-get-file-buffer (filename)
-  (catch 'found
-    (mapc
-     (lambda (b)
-       (when (and buffer-file-name
-                  (string= buffer-file-name filename))
-         (throw 'found b)))
-     (buffer-list))
-    nil))
+  (fsvn-magic-file-call-underlying 'get-file-buffer filename))
 
 (defun fsvn-magic-file-name-sans-versions (name &optional keep-backup-version)
   ;; do nothing.
