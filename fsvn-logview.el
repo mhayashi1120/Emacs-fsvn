@@ -61,7 +61,7 @@
 
 (defconst fsvn-log-list-user-name-length 15)
 (defconst fsvn-log-list-message-length 50)
-(defconst fsvn-log-list-buffer-name-prefix "Log for ")
+(defconst fsvn-log-list-buffer-name-prefix "*Fsvn Log ")
 
 (defvar fsvn-log-list-target-path nil)
 (defvar fsvn-log-list-subwindow-settings nil)
@@ -130,8 +130,9 @@
           (define-key map "u" 'fsvn-log-list-mark-unmark)
           (define-key map "v" 'fsvn-log-list-toggle-details)
           (define-key map "w" 'fsvn-log-list-copy-urlrev)
+          (define-key map "zF" 'fsvn-log-list-fetch-all)
           (define-key map "zp" 'fsvn-log-list-propview-this)
-          
+
           (define-key map "g" 'revert-buffer)
 
           ;;todo not implement
@@ -551,10 +552,10 @@ from is marked point, to is current point."
     (setq deactivate-mark nil)
     fsvn-log-list-main-process))
 
-(defun fsvn-log-list-collect-past-log ()
+(defun fsvn-log-list-collect-past-log (&optional fetch-all)
   (let* ((range (fsvn-log-list-current-revision-range))
          (new-range (cons (1- (cdr range)) nil)))
-    (fsvn-log-list-collect-log-range new-range)))
+    (fsvn-log-list-collect-log-range new-range (and fetch-all t))))
 
 (defun fsvn-log-list-start-process (count range urlrev)
   (let* ((buffer (fsvn-make-temp-buffer))
@@ -972,6 +973,10 @@ LOCAL-FILE can be any file in local file system.
   (let ((urlrev (fsvn-log-list-point-urlrev)))
     (fsvn-ediff-between-urlrevs urlrev local-file args)))
 
+(defun fsvn-log-list-fetch-all ()
+  "Featch all logs current buffer."
+  (interactive)
+  (fsvn-log-list-collect-past-log t))
 
 
 (defconst fsvn-log-sibling-buffer-name "*Fsvn Sibling*")

@@ -39,11 +39,13 @@
     (copy-file                           .  fsvn-magic-copy-file)
     (delete-directory                    .  fsvn-magic-delete-directory)
     (delete-file                         .  fsvn-magic-delete-file)
+    (directory-file-name                 .  fsvn-magic-directory-file-name)
     (directory-files                     .  fsvn-magic-directory-files)
     (directory-files-and-attributes      .  fsvn-magic-directory-files-and-attributes)
     (expand-file-name                    .  fsvn-magic-expand-file-name)
     (file-attributes                     .  fsvn-magic-file-attributes)
     (file-directory-p                    .  fsvn-magic-file-directory-p)
+    (file-name-directory                 .  fsvn-magic-file-name-directory)
     (file-executable-p                   .  fsvn-magic-file-executable-p)
     (file-exists-p                       .  fsvn-magic-file-exists-p)
     (file-modes                          .  fsvn-magic-file-modes)
@@ -84,12 +86,10 @@
     (make-symbolic-link                  .  fsvn-magic-make-symbolic-link)
 
     ;; no need to implement
-    ;;     (file-name-directory                 .  fsvn-magic-file-name-directory)
     ;;     (substitute-in-file-name             .  fsvn-magic-substitute-in-file-name)
     ;;     (file-name-as-directory              .  fsvn-magic-file-name-as-directory)
     ;;     (byte-compiler-base-file-name        .  fsvn-magic-byte-compiler-base-file-name)
     ;;     (process-file                        .  fsvn-magic-process-file)
-    ;;     (directory-file-name                 .  fsvn-magic-directory-file-name)
     ;;     (dired-uncache                       .  fsvn-magic-dired-uncache)
     ;;     (shell-command                       .  fsvn-magic-shell-command)
     ;;     (vc-registered                       .  fsvn-magic-vc-registered)
@@ -157,6 +157,8 @@ FIXME Does Emacs have list like this? "
 
 (defvar fsvn-magic-disable-cache nil
   "When use asynchronous process.")
+
+(defvar fsvn-magic-repository-roots nil)
 
 ;; for `fsvn-browse-mode'
 (defun fsvn-magic-point-file ()
@@ -318,8 +320,11 @@ FIXME Does Emacs have list like this? "
            (ret (replace-match "" nil nil file))
            absolute-path segment-list)
       (setq segment-list (split-string ret "/"))
-      (setq absolute-path (fsvn-magic-parse-file-name-absolute-path (car segment-list) (cdr segment-list)))
-      (fsvn-url-urlrev (concat (fsvn-svn-url-scheme-segment (car segment-list)) absolute-path) rev)))
+      (setq absolute-path (fsvn-magic-parse-file-name-absolute-path 
+                           (car segment-list) (cdr segment-list)))
+      (fsvn-url-urlrev (concat 
+                        (fsvn-svn-url-scheme-segment (car segment-list))
+                        absolute-path) rev)))
    ((and (not (file-name-absolute-p file))
          default-directory
          (string-match fsvn-magic-file-name-regexp default-directory))
@@ -471,6 +476,30 @@ FIXME Does Emacs have list like this? "
 
 (defun fsvn-magic-file-truename (filename)
   filename)
+
+(defun fsvn-magic-directory-file-name (directory)
+  (let* ((urlrev (fsvn-magic-parse-file-name directory))
+         (roots fsvn-magic-repository-roots))
+    (cond
+     ((member (fsvn-urlrev-url urlrev) roots)
+      ;; when guessed root directory..
+      directory)
+     ((string-match "/$" directory)
+      (substring directory 0 -1))
+     (t
+      directory))))
+
+(defun fsvn-magic-file-name-directory (filename)
+  (let* ((urlrev (fsvn-magic-parse-file-name filename))
+         (roots fsvn-magic-repository-roots))
+    (cond
+     ((member (concat (fsvn-urlrev-url urlrev) "/") roots)
+      ;; when guessed root directory..
+      filename)
+     ((string-match "/$" filename)
+      filename)
+     (t
+      (fsvn-magic-create-name (fsvn-urlrev-dirname urlrev))))))
 
 (defun fsvn-magic-directory-files (directory &optional full match nosort)
   "NOSORT no effect (always sort)."
@@ -687,14 +716,7 @@ local (non-wc) -> remote : svn add -> svn commit
   t)
 
 (defun fsvn-magic-get-file-buffer (filename)
-  (catch 'found
-    (mapc
-     (lambda (b)
-       (when (and buffer-file-name
-                  (string= buffer-file-name filename))
-         (throw 'found b)))
-     (buffer-list))
-    nil))
+  (fsvn-magic-file-call-underlying 'get-file-buffer filename))
 
 (defun fsvn-magic-file-name-sans-versions (name &optional keep-backup-version)
   ;; do nothing.
@@ -769,6 +791,7 @@ local (non-wc) -> remote : svn add -> svn commit
   (when (= (recursion-depth) 0)
     (setq fsvn-magic-cache nil)))
 
+;;TODO hit -> get
 (defun fsvn-magic-hit-cache (key url)
   (cdr (fsvn-string-assoc (fsvn-urlrev-directory-file-name url) (cdr (assq key fsvn-magic-cache)))))
 
@@ -808,7 +831,14 @@ local (non-wc) -> remote : svn add -> svn commit
      entries)))
 
 (defun fsvn-magic-get-info-entry (url)
-  (fsvn-magic-use-cache-form fsvn-magic-get-info-entry fsvn-get-info-entry url))
+  (let ((info (fsvn-magic-use-cache-form fsvn-magic-get-info-entry fsvn-get-info-entry url)))
+    ;;FIXME patch work
+    (let ((root (fsvn-xml-info->entry=>repository=>root$ info)))
+      (when root
+        (unless (member root fsvn-magic-repository-roots)
+          (setq fsvn-magic-repository-roots
+                (cons root fsvn-magic-repository-roots)))))
+    info))
 
 (defun fsvn-magic-get-list/info-entry (url)
   "`fsvn-magic-get-ls-entry' faster than `fsvn-magic-get-info-entry' because of cache hit rate is high.

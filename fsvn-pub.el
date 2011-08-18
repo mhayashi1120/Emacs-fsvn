@@ -154,10 +154,22 @@ Optional argument NO-MSG suppress message.
 Optional argument REVISION means point of URLREV log chain."
   (with-temp-buffer
     (if (= (fsvn-call-command "export" (current-buffer)
-                              "--quiet"
                               urlrev (when revision (list "--revision" revision))
                               file) 0)
         (progn
+          ;; specification is changed after between 1.6.12 and 1.6.18.
+          ;; If exported FILE argument contains revision string, remove revision segment
+          ;; by svn command.
+          ;; (ex hoge.el@1020 -> hoge.el)
+          ;; TODO what should i do when EXPORTED FILE already exists???
+          ;;    => about current implementation
+          ;;      part of ediff implementation has revision segment.
+          (goto-char (point-min))
+          (unless (looking-at "^A[ \t]+\\(.+\\)")
+            (error "Parse error exported information"))
+          (let ((exported (match-string 1)))
+            (unless (fsvn-file= exported file)
+              (rename-file exported file t)))
           (unless no-msg
             (message "Save done."))
           ;; return
@@ -567,7 +579,11 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
   (let* ((buffer (fsvn-log-list-get-buffer urlrev))
          ;;FIXME if open log when any other repository..
          (info (fsvn-buffer-repos-info buffer))
-         root/uuid proc win-config)
+         (localp (fsvn-url-local-p urlrev))
+         proc win-config)
+    (when localp
+      (unless (fsvn-get-info-entry urlrev)
+        (error "Not a subversion working copy")))
     (unless info
       (setq info (fsvn-buffer-new-repos-info urlrev)))
     (unless info
@@ -582,7 +598,7 @@ Argument COUNT max count of log. If ommited use `fsvn-repository-alist' settings
         (setq fsvn-logview-target-urlrev urlrev)
         (setq fsvn-previous-window-configuration win-config)
         (setq fsvn-log-list-target-path
-              (if (fsvn-url-local-p urlrev)
+              (if localp
                   (fsvn-wc-file-repository-path urlrev)
                 (fsvn-repository-path (fsvn-buffer-repos-root info) urlrev))))
       (setq buffer-read-only t)

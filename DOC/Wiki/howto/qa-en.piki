@@ -1,6 +1,12 @@
 * Question and Answer
 
-****** This description based on ["sample key settings" http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn].
+# General question
+{Q-general-0001
+? Q. What purpose of this application?
+! A. To accomplish job with Windows + TortoiseSVN users, however existing clients are not support tsvn:* properties.
+}
+
+****** The following QA depend upon ["sample key settings" http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn].
 
 # Authenticate question
 {Q-auth-0001

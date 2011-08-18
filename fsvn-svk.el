@@ -179,13 +179,14 @@ If there is executing problem in windows/cygwin then set path to perl.exe."
   (fsvn-svk-server-start))
 
 (defun fsvn-svk-browse-draw-mirrored-url ()
-  (save-excursion
-    (let ((mirroered-url (fsvn-svk-mirrored-repository-url default-directory))
-          buffer-read-only)
-      (when mirroered-url
-        (goto-char (point-min))
-        (when (re-search-forward fsvn-browse-re-root nil t)
-          (replace-match mirroered-url t nil nil 2))))))
+  (when (fsvn-url-local-p default-directory)
+    (save-excursion
+      (let ((mirroered-url (fsvn-svk-mirrored-repository-url default-directory))
+            buffer-read-only)
+        (when mirroered-url
+          (goto-char (point-min))
+          (when (re-search-forward fsvn-browse-re-root nil t)
+            (replace-match mirroered-url t nil nil 2)))))))
 
 (defmacro fsvn-svk-process-environment (&rest form)
   `(fsvn-process-environment 

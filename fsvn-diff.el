@@ -36,7 +36,15 @@
            :file1 (cons file1 (get-file-buffer file1))
            :file2 (cons file2 (get-file-buffer file2))))
          (hook '(fsvn-ediff-startup-hooks)))
-    (ediff-files file1 file2 hook)))
+    (ediff-files file1 file2 hook)
+    (fsvn-ediff-cleanup-file-history)))
+
+(defun fsvn-ediff-cleanup-file-history ()
+  (setq file-name-history
+        (remove-if 
+         (lambda (x)
+           (fsvn-url-descendant-p (fsvn-ediff-directory) (expand-file-name x)))
+         file-name-history)))
 
 (defun fsvn-ediff-directories (dir1 dir2)
   (ediff-directories dir1 dir2 nil))
@@ -58,7 +66,8 @@
          (fsvn-struct-ediff-config-get-file2 prev-config))))
 
 (defun fsvn-ediff-hash-directory (urlrev)
-  (let ((dir (fsvn-expand-file (md5 (fsvn-urlrev-dirname urlrev)) (fsvn-ediff-directory))))
+  (let ((dir (fsvn-expand-file (md5 (fsvn-urlrev-dirname urlrev)) 
+                               (fsvn-ediff-directory))))
     (unless (file-directory-p dir)
       (make-directory dir t))
     dir))
