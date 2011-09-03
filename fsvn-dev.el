@@ -514,6 +514,8 @@ How to send a bug report:
 ;; fsvn-log-list-draw-details
 ;; fsvn-log-list-set-subwindow-config
 
+(defvar fsvn-log-list-diffs nil)
+
 (defun fsvn-log-diff-turn-on ()
   ;;TODO
   )
@@ -583,7 +585,14 @@ How to send a bug report:
     (let ((buffer (process-get proc 'fsvn-browse-repos-buffer)))
       (when (buffer-live-p buffer)
         (with-current-buffer buffer
-          (setq fsvn-browse-repos-main-process nil))))
+          (setq fsvn-browse-repos-main-process nil)
+          (let ((start (process-get proc 'fsvn-browse-start-seconds))
+                (goto-file (process-get proc 'fsvn-browse-goto-file)))
+            ;; goto a intuitive file as long as program can.
+            ;; Stay the cursor if async process spent too much seconds.
+            (when (< (float-time) (+ start fsvn-browse-user-waiting-threshold))
+              (or (and goto-file (fsvn-browse-goto-file goto-file))
+                  (fsvn-browse-goto-first-file)))))))
     (kill-buffer (current-buffer))))
 
 (defun fsvn-browse-repos-info-process-sentinel (proc event)
@@ -637,8 +646,9 @@ How to send a bug report:
 
 (defvar fsvn-browse-repos-main-process nil)
 (defvar fsvn-browse-repos-entries nil)
+(defvar fsvn-browse-user-waiting-threshold 2)
 
-(defun fsvn-browse-repos-start-process (urlrev)
+(defun fsvn-browse-repos-start-process (urlrev goto-file)
   (let* ((buffer (fsvn-make-temp-buffer))
          (proc (fsvn-start-command "list" buffer
                                    "--xml"
@@ -646,11 +656,14 @@ How to send a bug report:
     (set-process-filter proc 'fsvn-browse-repos-process-filter)
     (set-process-sentinel proc 'fsvn-browse-repos-process-sentinel)
     (process-put proc 'fsvn-browse-repos-buffer (current-buffer))
+    (process-put proc 'fsvn-browse-start-seconds (float-time))
+    (process-put proc 'fsvn-browse-goto-file goto-file)
     (set (make-variable-buffer-local 'fsvn-browse-repos-main-process) proc)
     (set (make-variable-buffer-local 'fsvn-browse-repos-entries) nil)
     proc))
 
-(defun fsvn-browse-draw-repos-directory2 (directory-urlrev &optional type)
+;;TODO goto-file
+(defun fsvn-browse-draw-repos-directory2 (directory-urlrev &optional type goto-file)
   (let (buffer comparer)
     (set-buffer
      (cond
@@ -678,7 +691,7 @@ How to send a bug report:
         (insert (format " Root: \n"))
         (insert (format " Path: \n"))
         (insert (format "\n"))
-        (fsvn-browse-repos-start-process directory-urlrev)
+        (fsvn-browse-repos-start-process directory-urlrev goto-file)
         (set-buffer-modified-p nil)))))
 
 (defun fsvn-browse-create-repos-buffer2 (urlrev)

@@ -1,5 +1,7 @@
 2011-08-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Fix: `fsvn-magic-get-file-buffer' problem
+
 	* Change: Open file with async from repository browser.
 
 2011-08-17  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
