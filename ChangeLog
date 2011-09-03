@@ -1,5 +1,9 @@
 2011-09-03  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
+	* Fix: `ignore-errors' -> condition-case
+
+	* Fix: remove `remove-if' warning
+
 	* Release: 0.9.12
 
 2011-08-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>

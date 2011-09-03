@@ -63,9 +63,7 @@
 
 
 (defalias 'fsvn-xml-parse-region
-  (if (fboundp 'libxml-parse-xml-region)
-      'libxml-parse-xml-region
-    'fsvn-xml-parse-region->libxml))
+  'fsvn-xml-parse-region->libxml)
 
 (defun fsvn-xml-parse-region->libxml (start end)
   (car (xml-parse-region start end)))

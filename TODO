@@ -109,6 +109,8 @@ from other repository
 
 ** fsvn-prop* code clean.
 
+** libxml-parse-xml-region
+
 
 * logview-mode
 ** fsvn-log-message-buffer-name, fsvn-log-sibling-buffer-name contains first space then fontify is not work.
