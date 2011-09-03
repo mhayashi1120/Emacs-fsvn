@@ -23,7 +23,7 @@
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-02-19 22:12<br/>
+Published: 2011-09-03 22:51<br/>
 <i>powered by piki</i><br/>
 </div>
 
@@ -38,7 +38,7 @@ Published: 2011-02-19 22:12<br/>
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-02-19 22:12<br/>
+Published: 2011-09-03 22:51<br/>
 <i>powered by piki</i><br/>
 </div>
 	<!-- Google Analytics -->
@@ -68,22 +68,14 @@ Published: 2011-02-19 22:12<br/>
 	  <!-- Google Adsense -->
 	  <script type="text/javascript">
 		<!--
-			google_ad_client="pub-8552692955110453";
-			google_ad_host="pub-9941151214016196";
-			google_alternate_color="FFFFFF";
-			google_ad_width=468;
-			google_ad_height=60;
-			google_ad_format="468x60_as";
-			google_ad_type="text_image";
-			google_color_border="003399";
-			google_color_bg="EEEEEE";
-			google_color_link="0000FF";
-			google_color_url="0000FF";
-			google_color_text="000000";
+			google_ad_client = "ca-pub-8552692955110453";
+			/* Emacs fsvn web page */
+			google_ad_slot = "5612233456";
+			google_ad_width = 468;
+			google_ad_height = 60;
 			//-->
 	  </script>
-	  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-	  </script>
+	  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
 	</div>
 
   </body>

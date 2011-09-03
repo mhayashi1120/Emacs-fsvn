@@ -23,7 +23,7 @@
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-02-19 22:12<br/>
+Published: 2011-09-03 22:51<br/>
 <i>powered by piki</i><br/>
 </div>
 
@@ -114,6 +114,14 @@ dired の操作に似せていますが、完全に同じ訳ではありませ�
 <td>C-c C-d</td>
 <td>`dired-mode' へ切り替える</td>
 </tr>
+<tr>
+<td>= =</td>
+<td>カーソル位置のファイルとコミットされたファイルと diff する (diff)</td>
+</tr>
+<tr>
+<td>= v</td>
+<td>カーソル位置のファイルとコミットされた HEAD - 1 revision と diff する (diff). [0.9.11 以降]</td>
+</tr>
 </table>
 <h3>詳細な使い方</h3>
 <p><a href="advanced-browse.html.ja">Browse Mode の詳しい使い方</a></p>
@@ -150,7 +158,11 @@ dired の操作に似せていますが、完全に同じ訳ではありませ�
 <table>
 <tr>
 <td>= =</td>
-<td>作業コピーとの diff, リージョンが活性のときは始点と終点のリビジョンを比較する</td>
+<td>作業コピーと diff するが、リージョンが活性のときは始点と終点のリビジョンを比較する</td>
+</tr>
+<tr>
+<td>= v</td>
+<td>カーソル位置のリビジョンとその前のリビジョンとを diff する [0.9.11 以降]</td>
 </tr>
 <tr>
 <td>= e</td>
@@ -277,7 +289,7 @@ dired の操作に似せていますが、完全に同じ訳ではありませ�
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-02-19 22:12<br/>
+Published: 2011-09-03 22:51<br/>
 <i>powered by piki</i><br/>
 </div>
 	<!-- Google Analytics -->
@@ -307,22 +319,14 @@ Published: 2011-02-19 22:12<br/>
 	  <!-- Google Adsense -->
 	  <script type="text/javascript">
 		<!--
-			google_ad_client="pub-8552692955110453";
-			google_ad_host="pub-9941151214016196";
-			google_alternate_color="FFFFFF";
-			google_ad_width=468;
-			google_ad_height=60;
-			google_ad_format="468x60_as";
-			google_ad_type="text_image";
-			google_color_border="003399";
-			google_color_bg="EEEEEE";
-			google_color_link="0000FF";
-			google_color_url="0000FF";
-			google_color_text="000000";
+			google_ad_client = "ca-pub-8552692955110453";
+			/* Emacs fsvn web page */
+			google_ad_slot = "5612233456";
+			google_ad_width = 468;
+			google_ad_height = 60;
 			//-->
 	  </script>
-	  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-	  </script>
+	  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
 	</div>
 
   </body>

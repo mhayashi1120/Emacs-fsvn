@@ -23,7 +23,7 @@
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-02-19 22:12<br/>
+Published: 2011-09-03 22:51<br/>
 <i>powered by piki</i><br/>
 </div>
 
@@ -114,6 +114,14 @@ Similar to `dired' but not exactly equals that one.</p>
 <td>C-c C-d</td>
 <td>Switch to `dired-mode'</td>
 </tr>
+<tr>
+<td>= =</td>
+<td>Execute diff between working copy and previous revision (diff)</td>
+</tr>
+<tr>
+<td>= v</td>
+<td>Execute diff between current revision and previous commited revision (diff). [After 0.9.11]</td>
+</tr>
 </table>
 <h3>Advanced use</h3>
 <p><a href="advanced-browse.html.en">Advanced use of Browse Mode</a></p>
@@ -152,7 +160,11 @@ Similar to `dired' but not exactly equals that one.</p>
 <table>
 <tr>
 <td>= =</td>
-<td>Execute diff working copy. When region activated, diff with region terminated point revision</td>
+<td>Execute diff with working copy. When region activated, diff with region terminated point revision</td>
+</tr>
+<tr>
+<td>= v</td>
+<td>Execute diff between point and previous revision. [After 0.9.11]</td>
 </tr>
 <tr>
 <td>= e</td>
@@ -277,7 +289,7 @@ On default settings, only showing the fsvn processes.</p>
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-02-19 22:12<br/>
+Published: 2011-09-03 22:51<br/>
 <i>powered by piki</i><br/>
 </div>
 	<!-- Google Analytics -->
@@ -307,22 +319,14 @@ Published: 2011-02-19 22:12<br/>
 	  <!-- Google Adsense -->
 	  <script type="text/javascript">
 		<!--
-			google_ad_client="pub-8552692955110453";
-			google_ad_host="pub-9941151214016196";
-			google_alternate_color="FFFFFF";
-			google_ad_width=468;
-			google_ad_height=60;
-			google_ad_format="468x60_as";
-			google_ad_type="text_image";
-			google_color_border="003399";
-			google_color_bg="EEEEEE";
-			google_color_link="0000FF";
-			google_color_url="0000FF";
-			google_color_text="000000";
+			google_ad_client = "ca-pub-8552692955110453";
+			/* Emacs fsvn web page */
+			google_ad_slot = "5612233456";
+			google_ad_width = 468;
+			google_ad_height = 60;
 			//-->
 	  </script>
-	  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-	  </script>
+	  <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
 	</div>
 
   </body>
