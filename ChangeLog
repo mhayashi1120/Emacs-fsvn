@@ -1,3 +1,7 @@
+2011-09-03  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Release: 0.9.12
+
 2011-08-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: `fsvn-magic-get-file-buffer' problem
