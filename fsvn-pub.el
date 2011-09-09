@@ -527,8 +527,9 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (cond
      ((fsvn-url-repository-p urlrev)
       (fsvn-each-browse-buffer
-       (let ((url (fsvn-urlrev-url urlrev)))
-         (when (string-match (concat "^" (regexp-quote (fsvn-buffer-repos-root)) "\\(.*\\)") url)
+       (let ((url (fsvn-urlrev-url urlrev))
+             (root (fsvn-buffer-repos-root)))
+         (when (and root (string-match (concat "^" (regexp-quote root) "\\(.*\\)") url))
            (let ((regexp (format fsvn-browse-re-format-subdir (match-string 1 url))))
              (save-excursion
                (goto-char (point-min))

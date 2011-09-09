@@ -4,6 +4,8 @@
 
 	* Fix: remove `remove-if' warning
 
+	* Improvement: async repository browser.
+
 	* Release: 0.9.12
 
 2011-08-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
