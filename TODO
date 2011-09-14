@@ -70,6 +70,7 @@ new minor mode commit when save-buffer
 ** async drawing in dired.
 
 
+
 * browse-mode
 ** Enable Move file (in a repository)
 
@@ -83,6 +84,11 @@ fsvn-browse.*move-in-repository
 from other repository
 
 ** async drawing
+
+** colorize filename
+
+modified status, conflict status
+
 
 * select-file-mode
 ** TODO when commit file-select buffer has svn:external file.

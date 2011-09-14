@@ -2454,19 +2454,19 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (revert-buffer)))
 
 (defun fsvn-browse-diff-this (file &optional args)
-  (interactive (fsvn-browse-cmd-read-diff-this))
   "Execute `diff' to point FILE.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
+  (interactive (fsvn-browse-cmd-read-diff-this))
   (fsvn-browse-wc-only
    (let ((diff-args (list file args)))
      (fsvn-diff-start-process diff-args))))
 
 (defun fsvn-browse-diff-path (&optional args)
-  (interactive (fsvn-browse-cmd-read-diff-path))
   "Execute `diff' for current directory.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
+  (interactive (fsvn-browse-cmd-read-diff-path))
   (fsvn-browse-wc-only
    (fsvn-diff-start-process (fsvn-browse-current-path) args)))
 

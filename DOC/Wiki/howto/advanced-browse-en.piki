@@ -8,8 +8,9 @@ There are two features about Repository browser.
 
 *** dired extension (Magic file name)
 
-You can browse, edit, adding file on the repository as if local file same as tramp. Generally editable file must have HEAD revision, but BE CAREFUL to edit!
+You can browse, edit, add file on the repository as if in a local file-system same as tramp. Generally editable file must have HEAD revision. BE CAREFUL to edit!
 
 *** fsvn feature
-Show svn logs that viewing revision as starting point.
+
+Show svn logs that viewing revision as basic point.
 
