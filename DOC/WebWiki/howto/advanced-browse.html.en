@@ -23,7 +23,7 @@
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-09-03 22:51<br/>
+Published: 2011-09-15 00:47<br/>
 <i>powered by piki</i><br/>
 </div>
 
@@ -32,13 +32,13 @@ Published: 2011-09-03 22:51<br/>
 <h2>Repository Browser</h2>
 <p>There are two features about Repository browser.</p>
 <h3>dired extension (Magic file name)</h3>
-<p>You can browse, edit, adding file on the repository as if local file same as tramp. Generally editable file must have HEAD revision, but BE CAREFUL to edit!</p>
+<p>You can browse, edit, add file on the repository as if in a local file-system same as tramp. Generally editable file must have HEAD revision. BE CAREFUL to edit!</p>
 <h3>fsvn feature</h3>
-<p>Show svn logs that viewing revision as starting point.</p>
+<p>Show svn logs that viewing revision as basic point.</p>
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-09-03 22:51<br/>
+Published: 2011-09-15 00:47<br/>
 <i>powered by piki</i><br/>
 </div>
 	<!-- Google Analytics -->

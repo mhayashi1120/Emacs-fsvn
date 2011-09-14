@@ -23,11 +23,12 @@
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-09-03 22:51<br/>
+Published: 2011-09-15 00:47<br/>
 <i>powered by piki</i><br/>
 </div>
 
 <h1>Install</h1>
+<div class="hanging">
 <h2>If you download archived file</h2>
 <h3>First of all, unpack archive file</h3>
 <pre>
@@ -42,11 +43,15 @@ make what-where
 </pre>
 <h4>Invoke the following command.</h4>
 <pre>
-make install
+sudo make install
 </pre>
 <h3>If you have no `make' command simply copy *.el files to `load-path' where you want.</h3>
+</div>
+<div class="hanging">
 <h2>If you download fsvn.el</h2>
 <h3>Copy the fsvn.el to load-path'ed directory.</h3>
+</div>
+<div class="hanging">
 <h2>If you download fsvn.el.gz, fsvn.el.bz2.</h2>
 <h3>Unpack the archive file</h3>
 <pre>
@@ -54,18 +59,25 @@ tar xzf fsvn.el.gz
 </pre>
 <h3>Copy the fsvn.el to load-path'ed directory.</h3>
 <h3>When to use on NTEmacs, read mw32cmp.el header to prepare.</h3>
+</div>
+<div class="hanging">
 <h2>Settings of .emacs</h2>
 <pre>
 (require 'fsvn)
 </pre>
+</div>
+<div class="hanging">
 <h2>Settings of .emacs (Option)</h2>
 <p><a href="http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn">dot.sample</a></p>
+</div>
+<div class="hanging">
 <h2>For more information.</h2>
 <p><a href="qa.html.en">Q and A</a></p>
+</div>
 
 <div class="right">
 Author: mhayashi1120<br/>
-Published: 2011-09-03 22:51<br/>
+Published: 2011-09-15 00:47<br/>
 <i>powered by piki</i><br/>
 </div>
 	<!-- Google Analytics -->
