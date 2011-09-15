@@ -56,6 +56,11 @@
      1))
 
 (defconst fsvn-browse-re-status-ignored "^....I")
+(defconst fsvn-browse-re-status-added "^....\\(A\\)")
+(defconst fsvn-browse-re-status-modified "^....\\([MDR]\\)")
+(defconst fsvn-browse-re-dirstatus-modified "^............\\([M]\\)")
+(defconst fsvn-browse-re-status-conflicted "^....\\([C!]\\)")
+(defconst fsvn-browse-re-status-other "^....\\([^.]\\)")
 (defconst fsvn-browse-re-mark "^[^ \n]")
 (defconst fsvn-browse-re-dir "^..d ")
 (defconst fsvn-browse-re-symlink "^..l ")
@@ -145,6 +150,12 @@
 
    (list fsvn-browse-re-status-ignored
          '(".+" (fsvn-move-to-filename) nil (0 fsvn-ignored-face)))
+
+   ;; colorize status
+   (list fsvn-browse-re-status-modified '(1 'fsvn-status-modified-face))
+   (list fsvn-browse-re-status-added '(1 'fsvn-status-added-face))
+   (list fsvn-browse-re-status-conflicted '(1 'fsvn-status-conflicted-face))
+   (list fsvn-browse-re-dirstatus-modified '(1 'fsvn-status-modified-face))
    ))
 
 (defvar fsvn-browse-diff-map nil)
@@ -1474,7 +1485,6 @@ PATH is each executed path."
 
 (defvar fsvn-browse-repos-main-process nil)
 (defvar fsvn-browse-repos-entries nil)
-(defvar fsvn-browse-user-waiting-threshold 2)
 
 (defun fsvn-browse-repos-process-filter (proc event)
   (fsvn-process-event-handler proc event
@@ -1505,11 +1515,11 @@ PATH is each executed path."
       (when (buffer-live-p buffer)
         (with-current-buffer buffer
           (setq fsvn-browse-repos-main-process nil)
-          (let ((start (process-get proc 'fsvn-browse-start-seconds))
+          (let ((start (process-get proc 'fsvn-browse-start-marker))
                 (goto-file (process-get proc 'fsvn-browse-goto-file)))
             ;; goto a intuitive file as long as program can.
             ;; Stay the cursor if async process spent too much seconds.
-            (when (< (float-time) (+ start fsvn-browse-user-waiting-threshold))
+            (when (= start (point-marker))
               (or (and goto-file (fsvn-browse-goto-file goto-file))
                   (fsvn-browse-goto-first-file)))))))
     (kill-buffer (current-buffer))))
@@ -1574,7 +1584,7 @@ PATH is each executed path."
     (set-process-filter proc 'fsvn-browse-repos-process-filter)
     (set-process-sentinel proc 'fsvn-browse-repos-process-sentinel)
     (process-put proc 'fsvn-browse-repos-buffer (current-buffer))
-    (process-put proc 'fsvn-browse-start-seconds (float-time))
+    (process-put proc 'fsvn-browse-start-marker (point-marker))
     (process-put proc 'fsvn-browse-goto-file goto-file)
     (set (make-local-variable 'fsvn-browse-repos-main-process) proc)
     (set (make-local-variable 'fsvn-browse-repos-entries) nil)

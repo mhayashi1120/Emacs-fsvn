@@ -143,7 +143,7 @@ This is what the do-commands look for, and what the mark-commands store.")
   '((((class color) (background light))
      :foreground "blue1")
     (((class color) (background dark))
-     :foreground "white"))
+     :foreground "cyan1"))
   "Face for lines in a diff that have been added."
   :group 'fsvn)
 
@@ -160,6 +160,18 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 (defvar fsvn-diff-delete-face 'fsvn-diff-delete-face
   "Face used for deleted line in diff-mode")
+
+(defun fsvn-face-status-create (face dark light)
+  (custom-declare-face
+   face
+   `((((class color) (background dark)) :foreground ,dark :weight bold)
+     (((class color) (background light)) :foreground ,light :weight bold)
+     (t :weight bold)) 
+   nil))
+
+(fsvn-face-status-create 'fsvn-status-modified-face "burlywood" "tomato")
+(fsvn-face-status-create 'fsvn-status-conflicted-face "orange red" "red4")
+(fsvn-face-status-create 'fsvn-status-added-face "yellow" "yellow4")
 
 
 

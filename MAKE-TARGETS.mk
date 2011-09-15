@@ -57,8 +57,9 @@ release: archive single-file package
 	gzip $(ARCHIVE_DIR_PREFIX)/fsvn.el
 
 archive: prepare
-	cd /tmp ; tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION)
-	cd /tmp ; tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
+	cd /tmp ; \
+	tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION) ; \
+	tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
 
 package: prepare
 	cd /tmp/fsvn-$(VERSION) ; \
