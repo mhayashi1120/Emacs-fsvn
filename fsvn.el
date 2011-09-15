@@ -1,4 +1,4 @@
-;;; fsvn.el --- Functional Subversion interface for emacs
+;;; fsvn.el --- Another frontend of subversion
 ;; Copyright (C) 2008-2011 by Masahiro Hayashi
 
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
