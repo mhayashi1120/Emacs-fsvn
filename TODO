@@ -64,6 +64,11 @@ fsvn-vc
 
 new minor mode commit when save-buffer
 
+** distribute with mw32script.el
+
+fix DOC/*
+fix INSTALL
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 

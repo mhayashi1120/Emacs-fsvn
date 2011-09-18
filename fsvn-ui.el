@@ -789,9 +789,10 @@ static char * data[] = {
 
 (defun fsvn-ui-fancy-uninstall-state-mark ()
   (remove-hook 'after-revert-hook 'fsvn-ui-fancy-redraw t)
-  (setq mode-line-format
-        (assq-delete-all 'fsvn-ui-fancy-modeline
-                         mode-line-format))
+  (when (listp mode-line-format)
+    (setq mode-line-format
+          (assq-delete-all 'fsvn-ui-fancy-modeline
+                           mode-line-format)))
   (force-mode-line-update t))
 
 (defun fsvn-ui-fancy-update-state-mark-tooltip (tooltip)
