@@ -61,12 +61,6 @@ archive: prepare
 	tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION) ; \
 	tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
 
-package: prepare
-	cd /tmp/fsvn-$(VERSION) ; \
-	rm -rf $(EXCLUDE_RELEASE) ; \
-	cd .. ; \
-	tar cf fsvn-$(VERSION).tar fsvn-$(VERSION)
-
 prepare:
 	rm -rf /tmp/fsvn-$(VERSION)
 	mkdir /tmp/fsvn-$(VERSION)
