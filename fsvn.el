@@ -25,7 +25,7 @@
 
 ;; fsvn supports
 ;;  * GNU Emacs 23.x or later.
-;;  * Subversion 1.5.x or later. (1.4.x works but some restrictions)
+;;  * Subversion from 1.5.x to 1.6.x. (1.4.x works but some restrictions)
 
 ;; fsvn has TortoiseSVN like user interface by using `svn' command.
 ;;  Have following advantages of other Emacs svn client.
@@ -42,9 +42,9 @@
 ;;  * A little user help.
 
 ;; This package is tested on following environment.
-;;      NTEmacs (based Emacs 23.1) on Windows.  svn 1.5.x - 1.7.x
-;;      Emacs (23.2) on GNU/Linux (Debian).  svn svn 1.5.x - 1.7.x
-;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.7.x
+;;      NTEmacs (based Emacs 23.1) on Windows.  svn 1.5.x - 1.6.x
+;;      Emacs (23.2) on GNU/Linux (Debian).  svn svn 1.5.x - 1.6.x
+;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.6.x
 
 ;;; Code:
 

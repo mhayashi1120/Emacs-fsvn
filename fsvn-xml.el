@@ -100,8 +100,11 @@
       (uuid nil . t))
      (wc-info
       nil
+      (wcroot-abspath nil . t)
       (schedule nil . intern)
-      (depth nil . intern)))))
+      (depth nil . intern)
+      (text-updated nil . fsvn-svn-parse-date)
+      (checksum nil . t)))))
 
 (defconst fsvn-xml-ls-entry-dtd-alist
   `(entry
