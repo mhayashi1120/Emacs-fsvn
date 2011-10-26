@@ -1922,6 +1922,7 @@ PATH is each executed path."
        (t
         (fsvn-view-buffer (fsvn-get-view-buffer urlrev)))))
      ((fsvn-url-local-p urlrev)
+      ;; fall back to fsvn when working-copy by `dired' advice
       (dired urlrev)
       (when fsvn-browse-cleanup-buffer
         (kill-buffer prev-buffer)))
