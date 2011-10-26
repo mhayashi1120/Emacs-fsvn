@@ -558,6 +558,22 @@ How to send a bug report:
 
 
 
+;; for 1.7.x
+
+(defun fsvn-directory-under-1.7.x-versioned-p (directory)
+  (let* ((dir (directory-file-name directory))
+         ;; dummy
+         (prev ""))
+    (catch 'found
+      (while (not (string= dir prev))
+        (when (file-exists-p (concat dir "/.svn"))
+          (throw 'found dir))
+        (setq prev dir)
+        (setq dir (fsvn-file-name-directory dir))))))
+
+
+
+
 (provide 'fsvn-dev)
 
 ;;; fsvn-dev.el ends here

@@ -58,7 +58,7 @@
 (defconst fsvn-browse-re-status-ignored "^....I")
 (defconst fsvn-browse-re-status-added "^....\\(A\\)")
 (defconst fsvn-browse-re-status-modified "^....\\([MDR]\\)")
-(defconst fsvn-browse-re-dirstatus-modified "^............\\([M]\\)")
+(defconst fsvn-browse-re-dirstatus-modified "^............\\([MC]\\)")
 (defconst fsvn-browse-re-status-conflicted "^....\\([C!]\\)")
 (defconst fsvn-browse-re-status-other "^....\\([^.]\\)")
 (defconst fsvn-browse-re-mark "^[^ \n]")
@@ -730,7 +730,7 @@ PATH is each executed path."
        (let ((src-name (fsvn-file-name-nondirectory src-file))
              dest-name)
          (unless (string-match regexp src-name)
-           (error "Assertion failed. File name is not matched"))
+           (error "File name `%s' is not matched" src-file))
          (setq dest-name (concat (cdr prefix) (match-string 1 src-name)))
          (cons src-file (fsvn-expand-file dest-name dest-dir))))
      src-files)))
@@ -977,7 +977,6 @@ PATH is each executed path."
         (fsvn-browse-repos-start-process directory-urlrev goto-file)
         (set-buffer-modified-p nil)))))
 
-;; todo when repos buffer open file then split window and async show file contents with coding-system
 (defun fsvn-browse-draw-local-directory (directory &optional type)
   (let ((parent-info (fsvn-working-copy-info directory))
         buffer comparer)
@@ -1006,7 +1005,6 @@ PATH is each executed path."
       (fsvn-browse-set-wc-directory (file-name-as-directory directory))
       (when (fsvn-directory-versioned-p directory)
         (fsvn-browse-status parent-info directory)
-        ;;TODO experimental
         (fsvn-run-recursive-status directory))
       (fsvn-browse-goto-first-file))
      ;;TODO not works fine

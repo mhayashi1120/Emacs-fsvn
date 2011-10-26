@@ -161,17 +161,19 @@ This is what the do-commands look for, and what the mark-commands store.")
 (defvar fsvn-diff-delete-face 'fsvn-diff-delete-face
   "Face used for deleted line in diff-mode")
 
-(defun fsvn-face-status-create (face dark light)
+(defun fsvn-face-status-create (face color)
   (custom-declare-face
    face
-   `((((class color) (background dark)) :foreground ,dark :weight bold)
-     (((class color) (background light)) :foreground ,light :weight bold)
-     (t :weight bold)) 
+   `(;; (((class color) (background dark)) :foreground ,color :background "black" :weight bold)
+     ;; (((class color) (background light)) :foreground ,light :background "white" :weight bold)
+     (t :foreground ,color :background "gray76" :weight bold))
    nil))
 
-(fsvn-face-status-create 'fsvn-status-modified-face "burlywood" "tomato")
-(fsvn-face-status-create 'fsvn-status-conflicted-face "orange red" "red4")
-(fsvn-face-status-create 'fsvn-status-added-face "yellow" "yellow4")
+(fsvn-face-status-create 'fsvn-status-replaced-face "blue")
+(fsvn-face-status-create 'fsvn-status-modified-face "tomato")
+(fsvn-face-status-create 'fsvn-status-conflicted-face "dark violet")
+(fsvn-face-status-create 'fsvn-status-added-face "yellow")
+(fsvn-face-status-create 'fsvn-status-deleted-face "red")
 
 
 
@@ -840,12 +842,17 @@ static char * data[] = {
 (defun fsvn-ui-fancy-interpret-state-mode-color (val)
   "Interpret vc-svn-state symbol to mode line color"
   (cond
-   ((memq val '(modified deleted replaced))
+   ((memq val '(deleted))
+    ;; consider --keep-local
+    "red")
+   ((memq val '(replaced))
+    "blue")
+   ((memq val '(modified))
     "tomato")
    ((memq val '(added))
     "yellow")
    ((memq val '(conflicted incomplete))
-    "red")
+    "violet")
    (t 
     "GreenYellow")))
 

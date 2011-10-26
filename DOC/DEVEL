@@ -19,6 +19,7 @@ Change version to release version in this working copy.
 Describe ChangeLog about this release.
 Execute `make release'.
 Create release file in project hosting service.
+Upload fsvn-(version).tar file to marmalade.
 Commit changed files in this working copy.
 Create tag to Release-0.m.n
 Check absolute path of release files in Web pages.
@@ -34,6 +35,7 @@ Change version to release version in this working copy.
 Describe ChangeLog about this release.
 Execute `make release'.
 Create release file in project hosting service.
+Upload fsvn-(version).tar file to marmalade.
 Commit changed files in this working copy.
 Create tag Release-m.n.o (ex Release-1.0.1) from BR-m.x (ex BR-1.x) HEAD
 Check absolute path of release files in Web pages.

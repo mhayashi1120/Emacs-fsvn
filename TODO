@@ -1,5 +1,9 @@
 # -*- mode: org; -*-
 * General
+** risky-local-variable problem
+
+check illegal eval.
+
 ** piki and html
 add updated date and time
 ** annoying fsvn-result buffer.
@@ -222,3 +226,16 @@ Move to point-max? only update or merge (switch?)
 
 
 
+* 1.7.x
+
+** new subcommand
+relocate
+upgrade
+patch
+
+** new command
+svnrdump
+
+** renew .svn position
+
+** renew .svn contents
