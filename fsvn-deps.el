@@ -552,7 +552,8 @@ Please call `fsvn-initialize-loading' function.
   ;;TODO make inner variable
   (cond
    ((version<= "1.7.0" fsvn-svn-version)
-    (let* ((dir (directory-file-name directory))
+    ;; TODO ignored status
+    (let* ((dir (directory-file-name (fsvn-expand-file directory)))
            ;; dummy
            (prev ""))
       (catch 'found

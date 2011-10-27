@@ -978,7 +978,7 @@ PATH is each executed path."
         (set-buffer-modified-p nil)))))
 
 (defun fsvn-browse-draw-local-directory (directory &optional type)
-  (let ((parent-info (fsvn-working-copy-info directory))
+  (let ((parent-info (fsvn-browse-working-copy-info directory))
         buffer comparer)
     (unless parent-info
       (error "Cannot draw `%s'" directory))
@@ -1013,6 +1013,16 @@ PATH is each executed path."
      ;;                (substitute-command-keys
      ;;                 "Directory has changed on disk; type \\[revert-buffer] to update Dired")))
      )))
+
+(defun fsvn-browse-working-copy-info (directory)
+  "Get svn info DIRECTORY or any parent versioned directory.
+This implements consider svn:ignored directory."
+  (let ((target
+         (if (fsvn-directory-versioned-p directory)
+             directory
+           (fsvn-find-parent-working-copy directory))))
+    (and target
+         (fsvn-get-info-entry target t))))
 
 (defun fsvn-browse-draw-path (directory)
   (goto-char (point-min))

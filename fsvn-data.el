@@ -372,17 +372,6 @@ This list sorted revision descending.
     (when (string-match (concat "^" (regexp-quote  root)) url)
       (replace-match "" nil nil url 0))))
 
-(defun fsvn-working-copy-info (directory)
-  "Get svn info DIRECTORY or any parent versioned directory.
-This implements consider svn:ignored directory."
-  (let (target info)
-    (setq target
-          (if (fsvn-directory-versioned-p directory)
-              directory
-            (fsvn-find-parent-working-copy directory)))
-    (when target
-      (setq info (fsvn-get-info-entry target)))))
-
 (defun fsvn-find-parent-working-copy (directory)
   (let ((prev directory)
         (curr directory))

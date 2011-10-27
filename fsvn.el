@@ -25,7 +25,7 @@
 
 ;; fsvn supports
 ;;  * GNU Emacs 23.x or later.
-;;  * Subversion from 1.5.x to 1.6.x. (1.4.x works but some restrictions)
+;;  * Subversion from 1.5.x to 1.6.x. (1.7.x is testing)
 
 ;; fsvn has TortoiseSVN like user interface by using `svn' command.
 ;;  Have following advantages of other Emacs svn client.
@@ -81,6 +81,7 @@
 ;; (global-set-key "\C-xvZ" 'fsvn-debug-toggle)
 ;; (global-set-key "\C-xv\ec" 'fsvn-global-cleanup-buffer)
 ;; (global-set-key "\C-xvN" 'fsvn-vc-commit-non-query)
+;; (global-set-key "\C-xv\eu" 'fsvn-upgrade)
 
 
 

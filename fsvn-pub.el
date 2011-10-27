@@ -108,10 +108,10 @@
         comparator)
     (if (null buffers)
         (message "No popup buffer.")
-      (if backward
-          ;; FIXME howto clean?
-          (setq comparator (lambda (x y) (not (string-lessp (buffer-name x) (buffer-name y)))))
-        (setq comparator (lambda (x y) (string-lessp (buffer-name x) (buffer-name y)))))
+      (setq comparator 
+            (if backward
+                (lambda (x y) (not (string-lessp (buffer-name x) (buffer-name y))))
+              (lambda (x y) (string-lessp (buffer-name x) (buffer-name y)))))
       (setq buffers (sort buffers comparator))
       (let (exists next window)
         (cond
@@ -138,7 +138,16 @@
           (setq window (cadr (window-list)))))
         (set-window-buffer window next)))))
 
+(defun fsvn-browse/dired-noselect (directory)
+  "Wrap `fsvn-browse-wc-noselect' with fallback to `dired'"
+  (condition-case err
+      (fsvn-browse-wc-noselect directory)
+    (error
+     (message "fsvn: %s" err)
+     (dired directory))))
+
 (defun fsvn-browse-wc-noselect (directory)
+  "Like `find-file-noselect'"
   (save-excursion
     (let ((dir (directory-file-name (fsvn-expand-file directory))))
       (when (fsvn-directory-versioned-p dir)
@@ -185,11 +194,11 @@ Optional argument REVISION means point of URLREV log chain."
   "Save URLREV as FILE in background.
 Optional argument REVISION means point of URLREV log chain."
   (let* ((buffer (fsvn-make-temp-buffer))
-         proc)
-    (setq proc (fsvn-start-command "export" buffer
-                                   "--quiet"
-                                   urlrev (when revision (list "--revision" revision))
-                                   file))
+         (proc
+          (fsvn-start-command "export" buffer
+                              "--quiet"
+                              urlrev (when revision (list "--revision" revision))
+                              file)))
     (process-put proc 'fsvn-save-file-name file)
     (set-process-sentinel proc 'fsvn-save-file-sentinel)
     proc))
@@ -301,6 +310,14 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (run-hooks 'fsvn-message-edit-mode-prepared-hook))
     (fsvn-parasite-setup-message-edit-window msgedit-buffer)))
 
+(defun fsvn-upgrade (directory &optional args)
+  "Execute `upgrade' to DIRECTORY.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
+  (interactive (fsvn-cmd-read-upgrade-args))
+  (let ((proc (fsvn-popup-start-process "upgrade" args)))
+    proc))
+
 (defun fsvn-open-repository (urlrev)
   "Open URLREV by repository browser."
   (interactive (list (fsvn-completing-read-urlrev)))
@@ -328,7 +345,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 \(fn ARG)"
   (interactive "P")
-  (let* ((featured (memq 'fsvn-browse-wc-noselect find-directory-functions))
+  (let* ((featured (memq 'fsvn-browse/dired-noselect find-directory-functions))
          (feature (fsvn-toggle-command-boolean arg featured))
          file-handler auto-mode ignore-buffers)
     (mapc
@@ -355,7 +372,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       ;; update status display
       (add-hook 'after-save-hook 'fsvn-after-save-hook)
       ;; for bookmark or else
-      (add-to-list 'find-directory-functions 'fsvn-browse-wc-noselect)
+      (add-to-list 'find-directory-functions 'fsvn-browse/dired-noselect)
       ;; for magic utility
       (unless file-handler
         (setq file-handler (cons fsvn-magic-file-name-regexp 'fsvn-magic-file-name-handler))
@@ -369,7 +386,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      (t
       (setq auto-mode-alist (delete auto-mode auto-mode-alist))
       (remove-hook 'after-save-hook 'fsvn-after-save-hook)
-      (setq find-directory-functions (delq 'fsvn-browse-wc-noselect find-directory-functions))
+      (setq find-directory-functions (delq 'fsvn-browse/dired-noselect find-directory-functions))
       (setq file-name-handler-alist (delq file-handler file-name-handler-alist))
       (remove-hook 'pre-command-hook 'fsvn-magic-clear-cache-if-toplevel)
       (mapc
@@ -406,6 +423,11 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
      (fsvn-brief-message-add-message (format "Import to: %s" url)))
     (setq args (fsvn-cmd-read-subcommand-args "import" fsvn-default-args-import))
     (list file url args)))
+
+(defun fsvn-cmd-read-upgrade-args ()
+  (let* ((dir (fsvn-read-directory-name "Upgrade directory: " nil nil t))
+         (args (fsvn-browse-cmd-read-wc-path-with-args "upgrade")))
+    (list dir args)))
 
 
 ;; * vc like global utility.

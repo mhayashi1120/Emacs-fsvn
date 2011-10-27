@@ -113,18 +113,30 @@
      (fsvn-urlrev-filename urlrev)
      entries)))
 
-(defun fsvn-get-info-entry (urlrev)
+(defun fsvn-get-info-entry (urlrev &optional with-error)
   "URLREV is string or list of string."
-  (car (fsvn-get-info-list (list urlrev))))
+  (car (fsvn-get-info-list (list urlrev) with-error)))
 
-(defun fsvn-get-info-list (urlrev-list)
+(defun fsvn-get-info-list (urlrev-list &optional with-error)
   "URLREV-LIST is string or list of string."
   (with-temp-buffer
-    (let (target args)
-      (setq target (fsvn-make-targets-file urlrev-list))
-      (setq args (list "--targets" target "--xml"))
-      (when (= (apply 'fsvn-call-command "info" t args) 0)
-        (fsvn-xml-parse-info)))))
+    (let* ((target (fsvn-make-targets-file urlrev-list))
+           (args (list "--targets" target "--xml")))
+      (cond
+       ((= (apply 'fsvn-call-command "info" t args) 0)
+        (fsvn-xml-parse-info))
+       (with-error
+        (let ((errs (fsvn-parse-error-result)))
+          (error "Unable get %s %s" urlrev-list errs)))
+       (t nil)))))
+
+(defun fsvn-parse-error-result ()
+  (save-excursion
+    (goto-char (point-min))
+    (let (res)
+      (while (re-search-forward "^svn: \\(E[0-9]+\\):.*$" nil t)
+        (setq res (cons (match-string 0) res)))
+      (mapconcat 'identity (nreverse res) " "))))
 
 (defun fsvn-get-directory-files-status (directory)
   (with-temp-buffer
