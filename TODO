@@ -230,8 +230,6 @@ Move to point-max? only update or merge (switch?)
 
 ** new subcommand
 relocate
-upgrade
-patch
 
 ** new command
 svnrdump
@@ -239,3 +237,5 @@ svnrdump
 ** renew .svn position
 
 ** renew .svn contents
+** --split
+new subcommand

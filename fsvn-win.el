@@ -28,6 +28,18 @@
 
 
 
+(defun fsvn-win-x64-p ()
+  ;;TODO more efficient way..
+  (fsvn-file-exact-directory-p 
+   (fsvn-expand-file "syswow64" (getenv "windir"))))
+
+(defun fsvn-win-wow64-p ()
+  (let ((windir (getenv "windir")))
+    (equal (nth 10 (file-attributes (fsvn-expand-file "system32" windir))) 
+           (nth 10 (file-attributes (fsvn-expand-file "syswow64" windir))))))
+
+
+
 (unless (featurep 'meadow)
   (require 'mw32cmp))
 
@@ -138,16 +150,33 @@
 
 ;; for cygwin
 
-(defconst fsvn-cygwin-registory-root-key
-  "HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions")
-
 (defvar fsvn-cygwin-drive-prefix-dir nil)
 (defun fsvn-cygwin-drive-prefix-dir ()
-  (car (fsvn-cygwin-registry-get "Cygwin\\mounts v2" "cygdrive prefix")))
+  (with-temp-buffer
+    (when (= (call-process "cygpath" nil (current-buffer) nil "-u" "c:/") 0)
+      (substring (buffer-string) 0 -3))))
 
 (defvar fsvn-cygwin-installed-folder nil)
 (defun fsvn-cygwin-installed-folder ()
-  (car (fsvn-cygwin-registry-get "Cygwin\\mounts v2\\/" "native")))
+  (or
+   (and (fsvn-win-wow64-p)
+        (condition-case nil
+            (car (mw32-registry-get 
+                  "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Cygwin\\setup"
+                  "rootdir"))
+          (error nil)))
+   (condition-case nil
+       ;; probably cygwin 1.7 or later
+       (car (mw32-registry-get 
+             "HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygwin\\setup"
+             "rootdir"))
+     (error nil))
+   (condition-case nil
+       ;; cygwin 1.6 or earlier
+       (car (mw32-registry-get
+             "HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions\\Cygwin\\mounts v2/" 
+             "native"))
+     (error nil))))
 
 (defvar fsvn-cygwin-installed-dir nil)
 (defun fsvn-cygwin-installed-dir ()
@@ -157,23 +186,7 @@
 
 (defvar fsvn-cygwin-guessed-installed nil)
 (defun fsvn-cygwin-guessed-installed ()
-  (condition-case err
-      (progn
-        (mw32-registry-get fsvn-cygwin-registory-root-key)
-        (and
-         (file-exists-p (fsvn-cygwin-installed-folder))
-         t))
-    (error nil)))
-
-(defun fsvn-cygwin-registry-get (key name)
-  (condition-case err
-      (let (form)
-        (setq form
-              (concat fsvn-cygwin-registory-root-key
-                      "\\"
-                      (and key (concat "\\" key))))
-        (mw32-registry-get form name))
-    (error nil)))
+  (fsvn-cygwin-installed-folder))
 
 (defvar fsvn-cygwin-svn-p nil)
 (defun fsvn-cygwin-svn-p ()

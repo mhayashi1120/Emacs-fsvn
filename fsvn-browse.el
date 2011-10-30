@@ -239,6 +239,7 @@
           (define-key map "\C-vR" 'fsvn-browse-revert-path)
           (define-key map "\C-vp" 'fsvn-browse-create-patch-selected)
           (define-key map "\C-vP" 'fsvn-browse-create-patch-path)
+          (define-key map "\C-v\C-p" 'fsvn-browse-patch-path)
           (define-key map "\C-va" 'fsvn-browse-add-selected)
           (define-key map "\C-v\C-c" 'fsvn-browse-copy-selected)
           (define-key map "\C-v\C-d" 'fsvn-browse-delete-selected)
@@ -2650,6 +2651,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      ["Revert" fsvn-browse-revert-path t]
      ["Switch" fsvn-browse-switch-path t]
      ["Update" fsvn-browse-update-path t]
+     ["Patch" fsvn-browse-patch-path t]
      ["Upgrade source tree" fsvn-browse-upgrade-source-tree t]
      )
     ("Selected Files"

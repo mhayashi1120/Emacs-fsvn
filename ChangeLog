@@ -1,3 +1,13 @@
+2011-10-30  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Windows7 reg.exe parsing problem.
+
+	* Fix: WOW64 cygwin(1.7).
+
+2011-10-28  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: `fsvn-browse-patch-path' bound to `C-c C-v C-p'
+
 2011-10-27  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: `fsvn-upgrade' (from svn 1.7.x)
