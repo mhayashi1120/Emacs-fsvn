@@ -1895,6 +1895,11 @@ This implements consider svn:ignored directory."
           (patch (car (fsvn-cmd-read-patch-file))))
     (list files patch))))
 
+(defun fsvn-browse-cmd-read-patch-args ()
+  (let* ((patch (fsvn-read-file-name "Patch file: " nil nil t))
+         (args (fsvn-cmd-read-subcommand-args "patch" fsvn-default-args-patch)))
+    (list patch args)))
+
 ;; * fsvn-browse-mode interactive commands
 
 (defun fsvn-browse-up-directory ()
@@ -2433,6 +2438,13 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (fsvn-popup-start-process "blame" file args))
+
+(defun fsvn-browse-patch-path (patch-file &optional args)
+  "Execute `patch' to current directory.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-patch-args))
+  (fsvn-popup-start-process "patch" patch-file args))
 
 (defun fsvn-browse-prop-add-svn:ignore-selected (files)
   "Ignore point FILE by using `svn:ignore' property."

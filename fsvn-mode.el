@@ -128,6 +128,11 @@
   :group 'fsvn
   :type '(list string))
 
+(defcustom fsvn-default-args-patch nil
+  "Default args for `patch'"
+  :group 'fsvn
+  :type '(list string))
+
 
 
 (defconst fsvn-global-buffer-local-variables
