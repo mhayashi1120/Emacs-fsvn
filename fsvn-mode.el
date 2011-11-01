@@ -128,6 +128,11 @@
   :group 'fsvn
   :type '(list string))
 
+(defcustom fsvn-default-args-patch nil
+  "Default args for `patch'"
+  :group 'fsvn
+  :type '(list string))
+
 
 
 (defconst fsvn-global-buffer-local-variables
@@ -177,11 +182,11 @@
 
 (defun fsvn-buffer-repos-uuid (&optional info)
   (let ((info (or info fsvn-buffer-repos-info)))
-    (aref info 0)))
+    (and info (aref info 0))))
 
 (defun fsvn-buffer-repos-root (&optional info)
   (let ((info (or info fsvn-buffer-repos-info)))
-    (aref info 1)))
+    (and info (aref info 1))))
 
 (defun fsvn-buffer-new-repos-info (url)
   (let ((info (fsvn-get-info-entry url)))

@@ -63,9 +63,7 @@
 
 
 (defalias 'fsvn-xml-parse-region
-  (if (fboundp 'libxml-parse-xml-region)
-      'libxml-parse-xml-region
-    'fsvn-xml-parse-region->libxml))
+  'fsvn-xml-parse-region->libxml)
 
 (defun fsvn-xml-parse-region->libxml (start end)
   (car (xml-parse-region start end)))
@@ -102,8 +100,11 @@
       (uuid nil . t))
      (wc-info
       nil
+      (wcroot-abspath nil . t)
       (schedule nil . intern)
-      (depth nil . intern)))))
+      (depth nil . intern)
+      (text-updated nil . fsvn-svn-parse-date)
+      (checksum nil . t)))))
 
 (defconst fsvn-xml-ls-entry-dtd-alist
   `(entry

@@ -56,6 +56,11 @@
      1))
 
 (defconst fsvn-browse-re-status-ignored "^....I")
+(defconst fsvn-browse-re-status-added "^....\\(A\\)")
+(defconst fsvn-browse-re-status-modified "^....\\([MDR]\\)")
+(defconst fsvn-browse-re-dirstatus-modified "^............\\([MC]\\)")
+(defconst fsvn-browse-re-status-conflicted "^....\\([C!]\\)")
+(defconst fsvn-browse-re-status-other "^....\\([^.]\\)")
 (defconst fsvn-browse-re-mark "^[^ \n]")
 (defconst fsvn-browse-re-dir "^..d ")
 (defconst fsvn-browse-re-symlink "^..l ")
@@ -145,6 +150,12 @@
 
    (list fsvn-browse-re-status-ignored
          '(".+" (fsvn-move-to-filename) nil (0 fsvn-ignored-face)))
+
+   ;; colorize status
+   (list fsvn-browse-re-status-modified '(1 'fsvn-status-modified-face))
+   (list fsvn-browse-re-status-added '(1 'fsvn-status-added-face))
+   (list fsvn-browse-re-status-conflicted '(1 'fsvn-status-conflicted-face))
+   (list fsvn-browse-re-dirstatus-modified '(1 'fsvn-status-modified-face))
    ))
 
 (defvar fsvn-browse-diff-map nil)
@@ -228,6 +239,7 @@
           (define-key map "\C-vR" 'fsvn-browse-revert-path)
           (define-key map "\C-vp" 'fsvn-browse-create-patch-selected)
           (define-key map "\C-vP" 'fsvn-browse-create-patch-path)
+          (define-key map "\C-v\C-p" 'fsvn-browse-patch-path)
           (define-key map "\C-va" 'fsvn-browse-add-selected)
           (define-key map "\C-v\C-c" 'fsvn-browse-copy-selected)
           (define-key map "\C-v\C-d" 'fsvn-browse-delete-selected)
@@ -391,16 +403,6 @@ Keybindings:
     (fsvn-debug event)
     (goto-char (point-max))
     (insert event)))
-
-(defun fsvn-browse-ls-insert-repos-directory (info directory-url)
-  (let* ((entries (fsvn-get-ls directory-url))
-         (path (fsvn-info-repos-path info)))
-    (setq entries (sort entries fsvn-browse-ls-comparer))
-    (fsvn-browse-draw-path path)
-    (mapc
-     (lambda (x)
-       (fsvn-browse-ls-insert-repos-entry x))
-     entries)))
 
 (defun fsvn-browse-ls-insert-wc-directory (directory)
   (let* (file-entries status-entries status-entry entries)
@@ -729,7 +731,7 @@ PATH is each executed path."
        (let ((src-name (fsvn-file-name-nondirectory src-file))
              dest-name)
          (unless (string-match regexp src-name)
-           (error "Assertion failed. File name is not matched"))
+           (error "File name `%s' is not matched" src-file))
          (setq dest-name (concat (cdr prefix) (match-string 1 src-name)))
          (cons src-file (fsvn-expand-file dest-name dest-dir))))
      src-files)))
@@ -936,37 +938,32 @@ PATH is each executed path."
    (t
     (error "Cannot put mark on this line."))))
 
-(defun fsvn-browse-switch-directory-buffer (directory-urlrev &optional revert)
+(defun fsvn-browse-switch-directory-buffer (directory-urlrev &optional revert goto-file)
   (if (fsvn-url-local-p directory-urlrev)
       (fsvn-browse-draw-local-directory directory-urlrev revert)
-    (fsvn-browse-draw-repos-directory directory-urlrev revert))
+    (fsvn-browse-draw-repos-directory directory-urlrev revert goto-file))
   (set-visited-file-modtime (current-time))
   (setq buffer-read-only t)
   (switch-to-buffer (current-buffer))
   (run-hooks 'fsvn-browse-mode-prepared-hook))
 
-(defun fsvn-browse-draw-repos-directory (directory-urlrev &optional type)
-  (let (buffer info comparer)
+(defun fsvn-browse-draw-repos-directory (directory-urlrev &optional type goto-file)
+  (let (buffer comparer)
     (set-buffer
      (cond
       ((eq type 'revert)
-       (setq info (fsvn-get-info-entry directory-urlrev))
-       (when (null info)
-         (error "%s is not a repository" directory-urlrev))
        (current-buffer))
       ((setq buffer (fsvn-get-exists-browse-buffer directory-urlrev))
        buffer)
       (t
        (setq type 'draw)
-       (setq info (fsvn-get-info-entry directory-urlrev))
-       (when (null info)
-         (error "%s is not a repository" directory-urlrev))
-       (fsvn-browse-create-repos-buffer info))))
+       (fsvn-browse-create-repos-buffer directory-urlrev))))
     (setq comparer fsvn-browse-ls-comparer)
     (when (memq type '(revert draw))
       (let (buffer-read-only)
         (erase-buffer)
         (fsvn-browse-mode)
+        (fsvn-browse-repos-start-info-process directory-urlrev)
         (setq fsvn-browse-ls-comparer 
               (or
                (and comparer 
@@ -974,15 +971,15 @@ PATH is each executed path."
                           (cdr (assq 'repository fsvn-browse-ls-comparator-alist)))
                     comparer)
                'fsvn-browse-ls-entry-name-comparer))
-        (fsvn-browse-set-repos-local-variables info)
-        (fsvn-browse-draw-topmost-header info)
-        (fsvn-browse-ls-insert-repos-directory info directory-urlrev)
-        (set-buffer-modified-p nil))
-      (fsvn-browse-set-repos-directory info)
-      (fsvn-browse-goto-first-file))))
+        (insert (format " Revision: \n"))
+        (insert (format " Root: \n"))
+        (insert (format " Path: \n"))
+        (insert (format "\n"))
+        (fsvn-browse-repos-start-process directory-urlrev goto-file)
+        (set-buffer-modified-p nil)))))
 
 (defun fsvn-browse-draw-local-directory (directory &optional type)
-  (let ((parent-info (fsvn-working-copy-info directory))
+  (let ((parent-info (fsvn-browse-working-copy-info directory))
         buffer comparer)
     (unless parent-info
       (error "Cannot draw `%s'" directory))
@@ -1009,7 +1006,6 @@ PATH is each executed path."
       (fsvn-browse-set-wc-directory (file-name-as-directory directory))
       (when (fsvn-directory-versioned-p directory)
         (fsvn-browse-status parent-info directory)
-        ;;TODO experimental
         (fsvn-run-recursive-status directory))
       (fsvn-browse-goto-first-file))
      ;;TODO not works fine
@@ -1018,6 +1014,16 @@ PATH is each executed path."
      ;;                (substitute-command-keys
      ;;                 "Directory has changed on disk; type \\[revert-buffer] to update Dired")))
      )))
+
+(defun fsvn-browse-working-copy-info (directory)
+  "Get svn info DIRECTORY or any parent versioned directory.
+This implements consider svn:ignored directory."
+  (let ((target
+         (if (fsvn-directory-versioned-p directory)
+             directory
+           (fsvn-find-parent-working-copy directory))))
+    (and target
+         (fsvn-get-info-entry target t))))
 
 (defun fsvn-browse-draw-path (directory)
   (goto-char (point-min))
@@ -1080,8 +1086,8 @@ PATH is each executed path."
   (let* ((subdir (fsvn-browse-subdir directory nil)))
     (fsvn-browse-subdir!info subdir info)))
 
-(defun fsvn-browse-create-repos-buffer (info)
-  (generate-new-buffer (fsvn-url-decode-string (fsvn-xml-info->entry=>url$ info))))
+(defun fsvn-browse-create-repos-buffer (urlrev)
+  (generate-new-buffer (fsvn-urlrev-url urlrev)))
 
 (defun fsvn-browse-create-local-buffer (directory)
   (generate-new-buffer (fsvn-file-name-nondirectory directory)))
@@ -1196,7 +1202,7 @@ PATH is each executed path."
        (let* ((dir (car subdir))
               (url (fsvn-browse-subdir-directory-url subdir)))
          (fsvn-browse-goto-directory dir)
-         (fsvn-browse-switch-directory-buffer url 'revert)
+         (fsvn-browse-switch-directory-buffer url 'revert file)
          (mapc
           (lambda (file)
             (fsvn-browse-put-mark fsvn-mark-mark-char file))
@@ -1483,6 +1489,115 @@ PATH is each executed path."
     (unless files
       (error "No file on this line"))
     files))
+
+;; async repository browser
+
+(defvar fsvn-browse-repos-main-process nil)
+(defvar fsvn-browse-repos-entries nil)
+
+(defun fsvn-browse-repos-process-filter (proc event)
+  (fsvn-process-event-handler proc event
+    (goto-char (process-mark proc))
+    (insert-before-markers event)
+    (goto-char (point-min))
+    (let (entries start end)
+      ;;FIXME if --xml output changed..
+      (while (and (re-search-forward "^[ \t]*<entry\\b" nil t)
+                  (setq start (match-beginning 0))
+                  (re-search-forward "^[ \t]*</entry>" nil t)
+                  (setq end (match-end 0)))
+        (setq entries
+              (cons (fsvn-xml-parse-lists-entry start end) entries))
+        (delete-region (point-min) end))
+      (setq entries (nreverse entries))
+      (let ((buffer (process-get proc 'fsvn-browse-repos-buffer)))
+        (when (buffer-live-p buffer)
+          (with-current-buffer buffer
+            ;; avoid when other process is running.
+            (when (eq fsvn-browse-repos-main-process proc)
+              (save-excursion
+                (fsvn-browse-repos-async-draw-entries entries)))))))))
+
+(defun fsvn-browse-repos-process-sentinel (proc event)
+  (fsvn-process-exit-handler proc event
+    (let ((buffer (process-get proc 'fsvn-browse-repos-buffer)))
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
+          (setq fsvn-browse-repos-main-process nil)
+          (let ((start (process-get proc 'fsvn-browse-start-marker))
+                (goto-file (process-get proc 'fsvn-browse-goto-file)))
+            ;; goto a intuitive file as long as program can.
+            ;; Stay the cursor if async process spent too much seconds.
+            (when (= start (point-marker))
+              (or (and goto-file (fsvn-browse-goto-file goto-file))
+                  (fsvn-browse-goto-first-file)))))))
+    (kill-buffer (current-buffer))))
+
+(defun fsvn-browse-repos-info-process-sentinel (proc event)
+  (fsvn-process-exit-handler proc event
+    (let ((info (car (fsvn-xml-parse-info)))
+          (buffer (process-get proc 'fsvn-browse-repos-buffer)))
+      (cond
+       ((null info)
+        (message "Not a repository"))
+       ((buffer-live-p buffer)
+        (with-current-buffer buffer
+          (let ((path (fsvn-info-repos-path info))
+                buffer-read-only)
+            (save-excursion
+              (fsvn-browse-set-repos-local-variables info)
+              (fsvn-browse-draw-topmost-header info)
+              (fsvn-browse-draw-path path)
+              (fsvn-browse-set-repos-directory info)))))))
+    (kill-buffer (current-buffer))))
+
+(defun fsvn-browse-repos-start-info-process (urlrev)
+  (let* ((buffer (fsvn-make-temp-buffer))
+        (proc (fsvn-start-command "info" buffer "--xml" urlrev)))
+    (set-process-sentinel proc 'fsvn-browse-repos-info-process-sentinel)
+    (process-put proc 'fsvn-browse-repos-buffer (current-buffer))
+    proc))
+
+(defun fsvn-browse-repos-point-entry ()
+  (let ((name (fsvn-current-filename)))
+    (when name
+      (catch 'found
+        (mapc
+         (lambda (x)
+           (when (string= (fsvn-xml-lists->list->entry=>name$ x) name)
+             (throw 'found x)))
+         fsvn-browse-repos-entries)
+        nil))))
+
+(defun fsvn-browse-repos-insert-entry (entry)
+  (fsvn-browse-ls-insert-repos-entry entry)
+  (setq fsvn-browse-repos-entries 
+        (cons entry fsvn-browse-repos-entries)))
+
+(defun fsvn-browse-repos-async-draw-entries (entries)
+  (let* ((proc fsvn-browse-repos-main-process)
+         buffer-read-only)
+    (save-excursion
+      (mapc
+       (lambda (entry)
+         (goto-char (point-max))
+         (fsvn-browse-repos-insert-entry entry))
+       entries))
+    (set-buffer-modified-p nil)))
+
+(defun fsvn-browse-repos-start-process (urlrev goto-file)
+  (let* ((buffer (fsvn-make-temp-buffer))
+         (proc (fsvn-start-command "list" buffer
+                                   "--xml"
+                                   urlrev)))
+    (set-process-filter proc 'fsvn-browse-repos-process-filter)
+    (set-process-sentinel proc 'fsvn-browse-repos-process-sentinel)
+    (process-put proc 'fsvn-browse-repos-buffer (current-buffer))
+    (process-put proc 'fsvn-browse-start-marker (point-marker))
+    (process-put proc 'fsvn-browse-goto-file goto-file)
+    (set (make-local-variable 'fsvn-browse-repos-main-process) proc)
+    (set (make-local-variable 'fsvn-browse-repos-entries) nil)
+    proc))
 
 
 
@@ -1781,6 +1896,11 @@ PATH is each executed path."
           (patch (car (fsvn-cmd-read-patch-file))))
     (list files patch))))
 
+(defun fsvn-browse-cmd-read-patch-args ()
+  (let* ((patch (fsvn-read-file-name "Patch file: " nil nil t))
+         (args (fsvn-cmd-read-subcommand-args "patch" fsvn-default-args-patch)))
+    (list patch args)))
+
 ;; * fsvn-browse-mode interactive commands
 
 (defun fsvn-browse-up-directory ()
@@ -1793,8 +1913,7 @@ PATH is each executed path."
     (cond
      (fsvn-browse-repos-p
       (let ((above (fsvn-urlrev-dirname (fsvn-browse-current-directory-urlrev))))
-        (fsvn-browse-switch-directory-buffer above))
-      (fsvn-browse-goto-file filename))
+        (fsvn-browse-switch-directory-buffer above nil filename)))
      ((not (fsvn-file-versioned-directory-p path))
       (dired paren-dir)
       (dired-goto-file path))
@@ -1819,6 +1938,7 @@ PATH is each executed path."
        (t
         (fsvn-view-buffer (fsvn-get-view-buffer urlrev)))))
      ((fsvn-url-local-p urlrev)
+      ;; fall back to fsvn when working-copy by `dired' advice
       (dired urlrev)
       (when fsvn-browse-cleanup-buffer
         (kill-buffer prev-buffer)))
@@ -1887,7 +2007,8 @@ PATH is each executed path."
          (file (fsvn-current-filename)))
     (fsvn-browse-switch-directory-buffer 
      urlrev (and fsvn-browse-repos-p 
-                 (if (string= currev newrev) 'draw 'revert)))
+                 (if (string= currev newrev) 'draw 'revert))
+     file)
     (when file
       (fsvn-browse-goto-file file))))
 
@@ -2319,6 +2440,13 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
   (fsvn-popup-start-process "blame" file args))
 
+(defun fsvn-browse-patch-path (patch-file &optional args)
+  "Execute `patch' to current directory.
+Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
+"
+  (interactive (fsvn-browse-cmd-read-patch-args))
+  (fsvn-popup-start-process "patch" patch-file args))
+
 (defun fsvn-browse-prop-add-svn:ignore-selected (files)
   "Ignore point FILE by using `svn:ignore' property."
   (interactive (fsvn-browse-cmd-read-wc-selected))
@@ -2358,19 +2486,19 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (revert-buffer)))
 
 (defun fsvn-browse-diff-this (file &optional args)
-  (interactive (fsvn-browse-cmd-read-diff-this))
   "Execute `diff' to point FILE.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
+  (interactive (fsvn-browse-cmd-read-diff-this))
   (fsvn-browse-wc-only
    (let ((diff-args (list file args)))
      (fsvn-diff-start-process diff-args))))
 
 (defun fsvn-browse-diff-path (&optional args)
-  (interactive (fsvn-browse-cmd-read-diff-path))
   "Execute `diff' for current directory.
 Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 "
+  (interactive (fsvn-browse-cmd-read-diff-path))
   (fsvn-browse-wc-only
    (fsvn-diff-start-process (fsvn-browse-current-path) args)))
 
@@ -2523,6 +2651,7 @@ FULL non-nil means DEST-FILE will have exactly same properties of SRC-FILE."
      ["Revert" fsvn-browse-revert-path t]
      ["Switch" fsvn-browse-switch-path t]
      ["Update" fsvn-browse-update-path t]
+     ["Patch" fsvn-browse-patch-path t]
      ["Upgrade source tree" fsvn-browse-upgrade-source-tree t]
      )
     ("Selected Files"

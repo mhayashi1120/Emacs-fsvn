@@ -1,4 +1,44 @@
+2011-10-30  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Windows7 reg.exe parsing problem.
+
+	* Fix: WOW64 cygwin(1.7).
+
+2011-10-28  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: `fsvn-browse-patch-path' bound to `C-c C-v C-p'
+
+2011-10-27  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: `fsvn-upgrade' (from svn 1.7.x)
+
+	* Fix: prepare to support svn 1.7.x
+
+2011-09-23  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: move to wrong filename when executing `move'.
+
+2011-09-16  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: crash when `mode-line-format' is not a list.
+
+2011-09-15  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Improve: colorize status.
+
+2011-09-03  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: `ignore-errors' -> condition-case
+
+	* Fix: remove `remove-if' warning
+
+	* Improvement: async repository browser.
+
+	* Release: 0.9.12
+
 2011-08-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: `fsvn-magic-get-file-buffer' problem
 
 	* Change: Open file with async from repository browser.
 

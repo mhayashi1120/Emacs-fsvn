@@ -262,19 +262,34 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
      (fsvn-process-event-handler ,proc ,event
        ,@form)))
 
-(defun fsvn-command-args-canonicalize (list)
+(defun fsvn-command-args-canonicalize (list &optional subcommand)
+  "
+
+\(fn LIST)"
   (let (ret)
     (mapc
      (lambda (x)
        (cond
         ((null x))
         ((listp x)
-         (setq ret (append (nreverse (fsvn-command-args-canonicalize x)) ret)))
+         (setq ret (append 
+                    (nreverse (fsvn-command-args-canonicalize x subcommand))
+                    ret)))
         ((stringp x)
+         ;; first item must be a subcommand.
+         (unless subcommand
+           (setq subcommand x))
          (when (fsvn-url-p x)
-           ;; ediff temp file has @ file name...
-           (unless (fsvn-url-descendant-p (fsvn-ediff-directory) x)
-             (setq x (fsvn-url-escape-revision-mark x))))
+           (cond
+            ((fsvn-url-descendant-p (fsvn-ediff-directory) x)
+             ;; ediff temp file has @ file name...
+             )
+            ((and (string= subcommand "move")
+                  (find-if (lambda (x) (fsvn-url-p x)) ret))
+             ;; `move' second url arg must unescape revision mark `@'
+             )
+            (t
+             (setq x (fsvn-url-escape-revision-mark x)))))
          (cond
           ((fsvn-url-repository-p x)
            (setq ret (cons (fsvn-url-encode-string x) ret)))
@@ -288,7 +303,7 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
         ((numberp x)
          (setq ret (cons (number-to-string x) ret)))
         (t
-         (error "Assertion fail"))))
+         (error "Unexpected type `%s'" x))))
      list)
     (nreverse ret)))
 

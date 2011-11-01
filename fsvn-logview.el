@@ -778,11 +778,13 @@ Optional prefix ARG says how many lines to move; default is one line."
       (goto-char p))))
 
 (defun fsvn-log-list-mark-put-mark ()
+  "Put mark on this line."
   (interactive)
   (fsvn-log-list-put-mark-this-line fsvn-mark-mark-char)
   (fsvn-log-list-next-line))
 
 (defun fsvn-log-list-mark-unmark ()
+  "Unmark on this line."
   (interactive)
   (fsvn-log-list-put-mark-this-line)
   (fsvn-log-list-next-line))

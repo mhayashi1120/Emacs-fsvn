@@ -12,7 +12,7 @@
 
   c. Invoke the following command:
 
-     make install
+     sudo make install
 
   ** On NTEmacs read the mw32cmp.el header and complete the installation. **
 

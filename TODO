@@ -1,5 +1,9 @@
 # -*- mode: org; -*-
 * General
+** risky-local-variable problem
+
+check illegal eval.
+
 ** piki and html
 add updated date and time
 ** annoying fsvn-result buffer.
@@ -64,10 +68,16 @@ fsvn-vc
 
 new minor mode commit when save-buffer
 
+** distribute with mw32script.el
+
+fix DOC/*
+fix INSTALL
+
 * magic
 ** `fsvn-magic-directory-files' accept svn:externals
 
 ** async drawing in dired.
+
 
 
 * browse-mode
@@ -83,6 +93,11 @@ fsvn-browse.*move-in-repository
 from other repository
 
 ** async drawing
+
+** colorize filename
+
+modified status, conflict status
+
 
 * select-file-mode
 ** TODO when commit file-select buffer has svn:external file.
@@ -108,6 +123,8 @@ from other repository
 ** fsvn-magic-* inspect how to implements.
 
 ** fsvn-prop* code clean.
+
+** libxml-parse-xml-region
 
 
 * logview-mode
@@ -209,3 +226,16 @@ Move to point-max? only update or merge (switch?)
 
 
 
+* 1.7.x
+
+** new subcommand
+relocate
+
+** new command
+svnrdump
+
+** renew .svn position
+
+** renew .svn contents
+** --split
+new subcommand

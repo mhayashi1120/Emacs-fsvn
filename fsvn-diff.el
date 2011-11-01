@@ -41,9 +41,10 @@
 
 (defun fsvn-ediff-cleanup-file-history ()
   (setq file-name-history
-        (remove-if 
+        (fsvn-mapitem
          (lambda (x)
-           (fsvn-url-descendant-p (fsvn-ediff-directory) (expand-file-name x)))
+           (and (fsvn-url-descendant-p (fsvn-ediff-directory) (expand-file-name x))
+                x))
          file-name-history)))
 
 (defun fsvn-ediff-directories (dir1 dir2)

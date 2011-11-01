@@ -143,7 +143,7 @@ This is what the do-commands look for, and what the mark-commands store.")
   '((((class color) (background light))
      :foreground "blue1")
     (((class color) (background dark))
-     :foreground "white"))
+     :foreground "cyan1"))
   "Face for lines in a diff that have been added."
   :group 'fsvn)
 
@@ -160,6 +160,20 @@ This is what the do-commands look for, and what the mark-commands store.")
 
 (defvar fsvn-diff-delete-face 'fsvn-diff-delete-face
   "Face used for deleted line in diff-mode")
+
+(defun fsvn-face-status-create (face color)
+  (custom-declare-face
+   face
+   `(;; (((class color) (background dark)) :foreground ,color :background "black" :weight bold)
+     ;; (((class color) (background light)) :foreground ,light :background "white" :weight bold)
+     (t :foreground ,color :background "gray76" :weight bold))
+   nil))
+
+(fsvn-face-status-create 'fsvn-status-replaced-face "blue")
+(fsvn-face-status-create 'fsvn-status-modified-face "tomato")
+(fsvn-face-status-create 'fsvn-status-conflicted-face "dark violet")
+(fsvn-face-status-create 'fsvn-status-added-face "yellow")
+(fsvn-face-status-create 'fsvn-status-deleted-face "red")
 
 
 
@@ -704,13 +718,14 @@ Elements of the alist are:
 (defvar fsvn-ui-fancy-modeline t) ; modeline mark display or not
 (defvar fsvn-ui-fancy-tooltip nil) ; modeline tooltip display
 (defvar fsvn-ui-image-directory
-  (ignore-errors
-    (let ((validator (lambda (file) (and (eq (car (file-attributes file)) t) file))))
-      (or
-       (funcall validator
-                (expand-file-name "images" (file-name-directory (locate-library "fsvn-ui"))))
-       (funcall validator
-                (expand-file-name "images/fsvn" data-directory))))))
+  (condition-case nil
+      (let ((validator (lambda (file) (and (eq (car (file-attributes file)) t) file))))
+        (or
+         (funcall validator
+                  (expand-file-name "images" (file-name-directory (locate-library "fsvn-ui"))))
+         (funcall validator
+                  (expand-file-name "images/fsvn" data-directory))))
+    (error nil)))
 
 (defcustom fsvn-ui-fancy-file-state-in-modeline t
   "Show a color dot in the modeline that describes the state of the current file."
@@ -776,9 +791,10 @@ static char * data[] = {
 
 (defun fsvn-ui-fancy-uninstall-state-mark ()
   (remove-hook 'after-revert-hook 'fsvn-ui-fancy-redraw t)
-  (setq mode-line-format
-        (assq-delete-all 'fsvn-ui-fancy-modeline
-                         mode-line-format))
+  (when (listp mode-line-format)
+    (setq mode-line-format
+          (assq-delete-all 'fsvn-ui-fancy-modeline
+                           mode-line-format)))
   (force-mode-line-update t))
 
 (defun fsvn-ui-fancy-update-state-mark-tooltip (tooltip)
@@ -826,12 +842,17 @@ static char * data[] = {
 (defun fsvn-ui-fancy-interpret-state-mode-color (val)
   "Interpret vc-svn-state symbol to mode line color"
   (cond
-   ((memq val '(modified deleted replaced))
+   ((memq val '(deleted))
+    ;; consider --keep-local
+    "red")
+   ((memq val '(replaced))
+    "blue")
+   ((memq val '(modified))
     "tomato")
    ((memq val '(added))
     "yellow")
    ((memq val '(conflicted incomplete))
-    "red")
+    "violet")
    (t 
     "GreenYellow")))
 

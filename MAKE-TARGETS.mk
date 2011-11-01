@@ -1,4 +1,4 @@
-VERSION = 0.9.11
+VERSION = 0.9.12
 
 RELEASE_FILES = \
 	fsvn-admin.el fsvn-blame.el fsvn-browse.el fsvn-cmd.el fsvn-config.el \
@@ -18,6 +18,9 @@ RELEASE_SAMPLES = \
 
 RELEASE_IMAGES = \
 	images/*.xpm
+
+EXCLUDE_RELEASE = \
+	Samples fsvn-make.el *-test.el Makefile MAKE-CFG.el MAKE-TARGETS.mk INSTALL
 
 ARCHIVE_DIR_PREFIX = ..
 
@@ -43,17 +46,28 @@ uninstall:
 clean:
 	-$(RM) $(GOMI)
 
-release: archive single-file
+release: archive single-file package
 	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.bz2 $(ARCHIVE_DIR_PREFIX)/fsvn-$(VERSION).tar.gz
 	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn.el
 	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn.el.bz2
 	$(RM) -f $(ARCHIVE_DIR_PREFIX)/fsvn.el.gz
-	mv /tmp/fsvn-$(VERSION).tar.bz2 /tmp/fsvn-$(VERSION).tar.gz $(ARCHIVE_DIR_PREFIX)/
+	mv /tmp/fsvn-$(VERSION).tar.bz2 /tmp/fsvn-$(VERSION).tar.gz /tmp/fsvn-$(VERSION).tar $(ARCHIVE_DIR_PREFIX)/
 	mv fsvn.el.tmp $(ARCHIVE_DIR_PREFIX)/fsvn.el
 	bzip2 --keep $(ARCHIVE_DIR_PREFIX)/fsvn.el
 	gzip $(ARCHIVE_DIR_PREFIX)/fsvn.el
 
-archive:
+archive: prepare
+	cd /tmp ; \
+	tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION) ; \
+	tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
+
+package: prepare
+	cd /tmp/fsvn-$(VERSION) ; \
+	rm -rf $(EXCLUDE_RELEASE) ; \
+	cd .. ; \
+	tar cf fsvn-$(VERSION).tar fsvn-$(VERSION)
+
+prepare:
 	rm -rf /tmp/fsvn-$(VERSION)
 	mkdir /tmp/fsvn-$(VERSION)
 	cp -pr $(RELEASE_FILES) /tmp/fsvn-$(VERSION)
@@ -63,8 +77,7 @@ archive:
 	mkdir /tmp/fsvn-$(VERSION)/images
 	cp -p $(RELEASE_IMAGES) /tmp/fsvn-$(VERSION)/images
 	chmod 744 /tmp/fsvn-$(VERSION)/Samples
-	cd /tmp ; tar cjf fsvn-$(VERSION).tar.bz2 fsvn-$(VERSION)
-	cd /tmp ; tar czf fsvn-$(VERSION).tar.gz fsvn-$(VERSION)
 
 single-file:
 	$(EMACS) $(FLAGS) -f make-fsvn $(CONFIG)
+

@@ -101,7 +101,7 @@
 ;;todo registry key and value contains space?
 ;;todo REG_SZ like string must be contains in this regexp.
 (defconst mw32cmp-pseudo-registry-value-regexp
-  "^ +\\([^\t]+\\)\t\\([^\t]+\\)\t\\(.*\\)")
+  "^[ \t]+\\([^ \t]+\\)[ \t]+\\([^ \t]+\\)[ \t]+\\(.*\\)")
 
 (defun mw32cmp-pseudo-registry-check ()
   (unless (executable-find "reg")

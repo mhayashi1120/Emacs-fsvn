@@ -514,6 +514,8 @@ How to send a bug report:
 ;; fsvn-log-list-draw-details
 ;; fsvn-log-list-set-subwindow-config
 
+(defvar fsvn-log-list-diffs nil)
+
 (defun fsvn-log-diff-turn-on ()
   ;;TODO
   )
@@ -553,140 +555,9 @@ How to send a bug report:
      )
    fsvn-gardian-registered-alist))
 
-
-
-(defun fsvn-browse-repos-process-filter (proc event)
-  (fsvn-process-event-handler proc event
-    (goto-char (process-mark proc))
-    (insert-before-markers event)
-    (goto-char (point-min))
-    (let (entries start end)
-      ;;FIXME if --xml output changed..
-      (while (and (re-search-forward "^[ \t]*<entry\\b" nil t)
-                  (setq start (match-beginning 0))
-                  (re-search-forward "^[ \t]*</entry>" nil t)
-                  (setq end (match-end 0)))
-        (setq entries
-              (cons (fsvn-xml-parse-lists-entry start end) entries))
-        (delete-region (point-min) end))
-      (setq entries (nreverse entries))
-      (let ((buffer (process-get proc 'fsvn-browse-repos-buffer)))
-        (when (buffer-live-p buffer)
-          (with-current-buffer buffer
-            ;; avoid when other process is running.
-            (when (eq fsvn-browse-repos-main-process proc)
-              (save-excursion
-                (fsvn-browse-repos-async-draw-entries entries)))))))))
-
-(defun fsvn-browse-repos-process-sentinel (proc event)
-  (fsvn-process-exit-handler proc event
-    (let ((buffer (process-get proc 'fsvn-browse-repos-buffer)))
-      (when (buffer-live-p buffer)
-        (with-current-buffer buffer
-          (setq fsvn-browse-repos-main-process nil))))
-    (kill-buffer (current-buffer))))
-
-(defun fsvn-browse-repos-info-process-sentinel (proc event)
-  (fsvn-process-exit-handler proc event
-    (let ((info (car (fsvn-xml-parse-info)))
-          (buffer (process-get proc 'fsvn-browse-repos-buffer)))
-      (when (buffer-live-p buffer)
-        (with-current-buffer buffer
-          (let ((path (fsvn-info-repos-path info))
-                buffer-read-only)
-            (save-excursion
-              (fsvn-browse-set-repos-local-variables info)
-              (fsvn-browse-draw-topmost-header info)
-              (fsvn-browse-draw-path path)
-              (fsvn-browse-set-repos-directory info))))))
-    (kill-buffer (current-buffer))))
-
-(defun fsvn-browse-repos-start-info-process (urlrev)
-  (let* ((buffer (fsvn-make-temp-buffer))
-        (proc (fsvn-start-command "info" buffer "--xml" urlrev)))
-    (set-process-sentinel proc 'fsvn-browse-repos-info-process-sentinel)
-    (process-put proc 'fsvn-browse-repos-buffer (current-buffer))
-    proc))
-
-(defun fsvn-browse-repos-point-entry ()
-  (let ((name (fsvn-current-filename)))
-    (when name
-      (catch 'found
-        (mapc
-         (lambda (x)
-           (when (string= (fsvn-xml-lists->list->entry=>name$ x) name)
-             (throw 'found x)))
-         fsvn-browse-repos-entries)
-        nil))))
-
-(defun fsvn-browse-repos-insert-entry (entry)
-  (fsvn-browse-ls-insert-repos-entry entry)
-  (setq fsvn-browse-repos-entries 
-        (cons entry fsvn-browse-repos-entries)))
-
-(defun fsvn-browse-repos-async-draw-entries (entries)
-  (let* ((proc fsvn-browse-repos-main-process)
-         buffer-read-only)
-    (save-excursion
-      (mapc
-       (lambda (entry)
-         (goto-char (point-max))
-         (fsvn-browse-repos-insert-entry entry))
-       entries))
-    (set-buffer-modified-p nil)))
-
-(defvar fsvn-browse-repos-main-process nil)
-(defvar fsvn-browse-repos-entries nil)
-
-(defun fsvn-browse-repos-start-process (urlrev)
-  (let* ((buffer (fsvn-make-temp-buffer))
-         (proc (fsvn-start-command "list" buffer
-                                   "--xml"
-                                   urlrev)))
-    (set-process-filter proc 'fsvn-browse-repos-process-filter)
-    (set-process-sentinel proc 'fsvn-browse-repos-process-sentinel)
-    (process-put proc 'fsvn-browse-repos-buffer (current-buffer))
-    (set (make-variable-buffer-local 'fsvn-browse-repos-main-process) proc)
-    (set (make-variable-buffer-local 'fsvn-browse-repos-entries) nil)
-    proc))
-
-(defun fsvn-browse-draw-repos-directory2 (directory-urlrev &optional type)
-  (let (buffer comparer)
-    (set-buffer
-     (cond
-      ((eq type 'revert)
-       (current-buffer))
-      ((setq buffer (fsvn-get-exists-browse-buffer directory-urlrev))
-       buffer)
-      (t
-       (setq type 'draw)
-       (fsvn-browse-create-repos-buffer2 directory-urlrev))))
-    (setq comparer fsvn-browse-ls-comparer)
-    (when (memq type '(revert draw))
-      (let (buffer-read-only)
-        (erase-buffer)
-        (fsvn-browse-mode)
-        (fsvn-browse-repos-start-info-process directory-urlrev)
-        (setq fsvn-browse-ls-comparer 
-              (or
-               (and comparer 
-                    (memq comparer 
-                          (cdr (assq 'repository fsvn-browse-ls-comparator-alist)))
-                    comparer)
-               'fsvn-browse-ls-entry-name-comparer))
-        (insert (format " Revision: \n"))
-        (insert (format " Root: \n"))
-        (insert (format " Path: \n"))
-        (insert (format "\n"))
-        (fsvn-browse-repos-start-process directory-urlrev)
-        (set-buffer-modified-p nil)))))
-
-(defun fsvn-browse-create-repos-buffer2 (urlrev)
-  (generate-new-buffer (fsvn-urlrev-url urlrev)))
-
-;; todo when repos buffer open file then split window and async show file contents with coding-system
 
 
+
 
 (provide 'fsvn-dev)
 

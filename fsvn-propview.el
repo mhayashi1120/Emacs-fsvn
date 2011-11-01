@@ -303,9 +303,7 @@ Keybindings:
       (let (buffer-read-only)
         (erase-buffer)
         (when propname
-          (setq value (if (fsvn-url-local-p file)
-                          (fsvn-meta-get-property propname file)
-                        (fsvn-get-propget file propname)))
+          (setq value (fsvn-get-propget file propname))
           (when value
             (insert value)))
         (set-buffer-modified-p nil))

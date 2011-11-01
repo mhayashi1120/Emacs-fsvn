@@ -1,5 +1,6 @@
 * Install
 
+{hanging
 ** If you download archived file
 
 *** First of all, unpack archive file
@@ -23,15 +24,19 @@ make what-where
 **** Invoke the following command.
 
 >|
-make install
+sudo make install
 |<
 
 *** If you have no `make' command simply copy *.el files to `load-path' where you want.
+}
 
+{hanging
 ** If you download fsvn.el
 
 *** Copy the fsvn.el to load-path'ed directory.
+}
 
+{hanging
 ** If you download fsvn.el.gz, fsvn.el.bz2.
 
 *** Unpack the archive file
@@ -43,17 +48,24 @@ tar xzf fsvn.el.gz
 *** Copy the fsvn.el to load-path'ed directory.
 
 *** When to use on NTEmacs, read mw32cmp.el header to prepare.
+}
 
+{hanging
 ** Settings of .emacs
 
 >|
 (require 'fsvn)
 |<
+}
 
+{hanging
 ** Settings of .emacs (Option)
 
 [dot.sample http://sourceforge.jp/projects/fsvn/svn/view/trunk/Samples/dot.emacs?view=markup&root=fsvn]
+}
 
+{hanging
 ** For more information.
 
 ["Q and A" qa.html.en]
+}
