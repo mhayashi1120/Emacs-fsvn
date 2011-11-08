@@ -549,9 +549,13 @@ Please call `fsvn-initialize-loading' function.
 
 (defun fsvn-directory-versioned-p (directory)
   "Return non-nil when DIRECTORY guessed under versioned."
-  ;;TODO make inner variable
+  ;;TODO make funcall inner variable
   (cond
-   ((version<= "1.7.0" fsvn-svn-version)
+   ((version< fsvn-svn-version "1.7.0")
+    (let ((control (fsvn-expand-file (fsvn-meta-dir-name) directory)))
+      (fsvn-file-exact-directory-p control)))
+   ((string-match "/\\.svn\\($\\|/\\)?" directory) nil)
+   (t
     ;; TODO ignored status
     (let* ((dir (directory-file-name (fsvn-expand-file directory)))
            ;; dummy
@@ -561,10 +565,7 @@ Please call `fsvn-initialize-loading' function.
           (when (file-exists-p (concat dir "/.svn"))
             (throw 'found dir))
           (setq prev dir)
-          (setq dir (fsvn-file-name-directory dir))))))
-   (t
-    (let ((control (fsvn-expand-file (fsvn-meta-dir-name) directory)))
-      (fsvn-file-exact-directory-p control)))))
+          (setq dir (fsvn-file-name-directory dir))))))))
 
 (defun fsvn-file-versioned-directory-p (file)
   (let* ((dir (fsvn-file-name-directory2 file)))
