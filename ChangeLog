@@ -1,3 +1,9 @@
+2011-11-23  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: for svn 1.7 after save hook.
+
+	* Fix: for svn 1.7 Magic dired problem.
+
 2011-10-30  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Windows7 reg.exe parsing problem.

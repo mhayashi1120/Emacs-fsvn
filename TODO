@@ -239,3 +239,5 @@ svnrdump
 ** renew .svn contents
 ** --split
 new subcommand
+
+** test tortoise property

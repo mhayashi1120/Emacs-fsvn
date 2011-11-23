@@ -163,7 +163,8 @@ Optional argument NO-MSG suppress message.
 Optional argument REVISION means point of URLREV log chain."
   (with-temp-buffer
     (if (= (fsvn-call-command "export" (current-buffer)
-                              urlrev (when revision (list "--revision" revision))
+                              urlrev "--force"
+                              (when revision (list "--revision" revision))
                               file) 0)
         (progn
           ;; specification is changed after between 1.6.12 and 1.6.18.
@@ -173,11 +174,18 @@ Optional argument REVISION means point of URLREV log chain."
           ;; TODO what should i do when EXPORTED FILE already exists???
           ;;    => about current implementation
           ;;      part of ediff implementation has revision segment.
+          ;; after svn 1.7.x specification changed again..
+          ;; exported message truncate directory segment from output.
           (goto-char (point-min))
           (unless (looking-at "^A[ \t]+\\(.+\\)")
             (error "Parse error exported information"))
-          (let ((exported (match-string 1)))
-            (unless (fsvn-file= exported file)
+          (let* ((exported (match-string 1))
+                 (exported-name
+                  (if (file-name-absolute-p exported)
+                      (file-name-nondirectory exported)
+                    exported)))
+            (unless (string= exported-name
+                             (file-name-nondirectory file))
               (rename-file exported file t)))
           (unless no-msg
             (message "Save done."))
@@ -525,24 +533,36 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 (defun fsvn-after-save-hook ()
   (condition-case err
-      (when (buffer-file-name)
-        (let* ((file (buffer-file-name))
-               (base (fsvn-meta-text-base-file file))
-               size1 size2)
-          (fsvn-save-browse-file-excursion file
-            (if (or (null base)
-                    (string= 
-                     (downcase (or (fsvn-meta-get-property "svn:eol-style" file) ""))
-                     "native"))
-                (fsvn-browse-draw-file-status file)
-              (setq size1 (fsvn-file-size file)
-                    size2 (fsvn-file-size base))
-              (if (and size1 size2 (/= size1 size2))
-                  ;; changed file size means certainly modified.
-                  (fsvn-browse-put-status-if-weak-internal file ?M 0)
-                ;; delegate to `status' subcommand.
-                (fsvn-browse-draw-file-status file))))))
+      (let ((file (buffer-file-name)))
+        (when (and file
+                   (fsvn-file-versioned-directory-p file))
+          (cond
+           ((version< fsvn-svn-version "1.7")
+            (fsvn-after-save-hook-1.7< file))
+           (t
+            (fsvn-after-save-hook-1.7>= file)))))
     (error nil)))
+
+(defun fsvn-after-save-hook-1.7>= (file)
+  (fsvn-save-browse-file-excursion file
+    (fsvn-browse-draw-file-status file)))
+
+(defun fsvn-after-save-hook-1.7< (file)
+  (let* ((base (fsvn-meta-text-base-file file))
+         size1 size2)
+    (fsvn-save-browse-file-excursion file
+      (if (or (null base)
+              (string= 
+               (downcase (or (fsvn-meta-get-property "svn:eol-style" file) ""))
+               "native"))
+          (fsvn-browse-draw-file-status file)
+        (setq size1 (fsvn-file-size file)
+              size2 (fsvn-file-size base))
+        (if (and size1 size2 (/= size1 size2))
+            ;; changed file size means certainly modified.
+            (fsvn-browse-put-status-if-weak-internal file ?M 0)
+          ;; delegate to `status' subcommand.
+          (fsvn-browse-draw-file-status file))))))
 
 (defun fsvn-get-exists-browse-buffer (urlrev)
   (catch 'found

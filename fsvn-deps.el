@@ -555,6 +555,7 @@ Please call `fsvn-initialize-loading' function.
     (let ((control (fsvn-expand-file (fsvn-meta-dir-name) directory)))
       (fsvn-file-exact-directory-p control)))
    ((string-match "/\\.svn\\($\\|/\\)?" directory) nil)
+   ((fsvn-magic-file-name-absolute-p directory) nil)
    (t
     ;; TODO ignored status
     (let* ((dir (directory-file-name (fsvn-expand-file directory)))

@@ -124,8 +124,9 @@
 
 (defun fsvn-url-dirname (url)
   (let ((tmp (directory-file-name url)))
-    (when (string-match "^\\(.*/\\)\\([^/]+\\)$" tmp)
-      (match-string 1 tmp))))
+    (if (string-match "^\\(.*/\\)\\([^/]+\\)$" tmp)
+        (match-string 1 tmp)
+      tmp)))
 
 (defun fsvn-url-filename (url)
   (let ((tmp (directory-file-name url)))
