@@ -1,4 +1,20 @@
+2011-12-02  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: `fsvn-log-list-save-this' cannot save file.
+
+2011-11-30  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: misunderstand for "/home/user/.svn-working-copy" like directory. (-;
+
+	* Change: hide all fsvn-meta-* functions.
+
+2011-11-26  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: wrong mode menu.
+
 2011-11-23  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: suppress cl warnings
 
 	* Fix: for svn 1.7 after save hook.
 

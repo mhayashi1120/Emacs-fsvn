@@ -14,6 +14,7 @@ function check ()
 	local direction=${4:-check}
 
 	if [ -z "${emacs_command}" ] ; then
+		echo "Skipping ${bin_dir}"
 		return;
 	fi
 
@@ -35,6 +36,8 @@ function check ()
 		return
 	fi
 
+	echo "Starting test for ${bin_dir} ${emacs_command}"
+
 	cat > ${cfgfile} <<EOF
 (setq fsvn-svn-command "${svn_command}")
 (setq fsvn-svnadmin-command "${svnadmin_command}")
@@ -55,17 +58,21 @@ EOF
 		fi
 	done < ${sample}
 
-	make -f ${makefile} ${direction} || exit 1
+	if ! make -f ${makefile} ${direction} ; then
+		echo "Error while ${bin_dir} ${emacs_command}" >&2
+		return 1;
+	fi
 }
 
 # for Unix (Linux)
 UNIX_SVN_1_4_BIN=~/src/subversion-dev/inst-1.4.x/bin
 UNIX_SVN_1_5_BIN=~/src/subversion-dev/inst-1.5.x/bin
 UNIX_SVN_1_6_BIN=~/src/subversion-dev/inst-1.6.x/bin
-UNIX_SVN_1_6_BIN=~/src/subversion-dev/inst-1.7.x/bin
+UNIX_SVN_1_7_BIN=~/src/subversion-dev/inst-1.7.x/bin
 # EMACS_22_BIN=emacs-22.3
 EMACS_23_BIN=emacs-23.3
 EMACS_CURRENT_BIN=emacs-current
+EMACS_BIN=emacs
 
 # for Windows
 # TODO not works
@@ -79,35 +86,35 @@ NTEMACS23_BIN="/cygdrive/c/usr/local/NTEmacs/23.1/bin/emacs.exe"
 if ! uname | grep -q -i cygwin ; then
 	check /usr/bin ${EMACS_BIN} Makefile
 
-	check ${UNIX_SVN_1_5_BIN} ${EMACS_22_BIN} Makefile
-	check ${UNIX_SVN_1_5_BIN} ${EMACS_23_BIN} Makefile
-	check ${UNIX_SVN_1_5_BIN} ${EMACS_CURRENT_BIN} Makefile
-	check ${UNIX_SVN_1_6_BIN} ${EMACS_22_BIN} Makefile
-	check ${UNIX_SVN_1_6_BIN} ${EMACS_23_BIN} Makefile
-	check ${UNIX_SVN_1_6_BIN} ${EMACS_CURRENT_BIN} Makefile
-	check ${UNIX_SVN_1_7_BIN} ${EMACS_22_BIN} Makefile
-	check ${UNIX_SVN_1_7_BIN} ${EMACS_23_BIN} Makefile
-	check ${UNIX_SVN_1_7_BIN} ${EMACS_CURRENT_BIN} Makefile
+	check "${UNIX_SVN_1_5_BIN}" "${EMACS_22_BIN}" Makefile
+	check "${UNIX_SVN_1_5_BIN}" "${EMACS_23_BIN}" Makefile
+	check "${UNIX_SVN_1_5_BIN}" "${EMACS_CURRENT_BIN}" Makefile
+	check "${UNIX_SVN_1_6_BIN}" "${EMACS_22_BIN}" Makefile
+	check "${UNIX_SVN_1_6_BIN}" "${EMACS_23_BIN}" Makefile
+	check "${UNIX_SVN_1_6_BIN}" "${EMACS_CURRENT_BIN}" Makefile
+	check "${UNIX_SVN_1_7_BIN}" "${EMACS_22_BIN}" Makefile
+	check "${UNIX_SVN_1_7_BIN}" "${EMACS_23_BIN}" Makefile
+	check "${UNIX_SVN_1_7_BIN}" "${EMACS_CURRENT_BIN}" Makefile
 else
-	check ${WIN_SVN_1_5_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32
-	check ${WIN_SVN_1_5_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt
-	check ${WIN_SVN_1_5_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23
-	check ${WIN_SVN_1_6_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32
-	check ${WIN_SVN_1_6_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt
-	check ${WIN_SVN_1_6_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23
-	check ${WIN_SVN_1_7_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32
-	check ${WIN_SVN_1_7_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt
-	check ${WIN_SVN_1_7_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23
+	check "${WIN_SVN_1_5_BIN}" "${MEADOW3_BIN}" Samples/Makefile.mw32
+	check "${WIN_SVN_1_5_BIN}" "${NTEMACS22_BIN}" Samples/Makefile.nt
+	check "${WIN_SVN_1_5_BIN}" "${NTEMACS23_BIN}" Samples/Makefile.nt23
+	check "${WIN_SVN_1_6_BIN}" "${MEADOW3_BIN}" Samples/Makefile.mw32
+	check "${WIN_SVN_1_6_BIN}" "${NTEMACS22_BIN}" Samples/Makefile.nt
+	check "${WIN_SVN_1_6_BIN}" "${NTEMACS23_BIN}" Samples/Makefile.nt23
+	check "${WIN_SVN_1_7_BIN}" "${MEADOW3_BIN}" Samples/Makefile.mw32
+	check "${WIN_SVN_1_7_BIN}" "${NTEMACS22_BIN}" Samples/Makefile.nt
+	check "${WIN_SVN_1_7_BIN}" "${NTEMACS23_BIN}" Samples/Makefile.nt23
 
-	check ${WIN_SVN_1_5_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32	check-in-console
-	check ${WIN_SVN_1_5_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt	check-in-console
-	check ${WIN_SVN_1_5_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23	check-in-console
-	check ${WIN_SVN_1_6_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32	check-in-console
-	check ${WIN_SVN_1_6_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt	check-in-console
-	check ${WIN_SVN_1_6_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23 check-in-console
-	check ${WIN_SVN_1_7_BIN} ${MEADOW3_BIN} Samples/Makefile.mw32	check-in-console
-	check ${WIN_SVN_1_7_BIN} ${NTEMACS22_BIN} Samples/Makefile.nt	check-in-console
-	check ${WIN_SVN_1_7_BIN} ${NTEMACS23_BIN} Samples/Makefile.nt23 check-in-console
+	check "${WIN_SVN_1_5_BIN}" "${MEADOW3_BIN}" Samples/Makefile.mw32	check-in-console
+	check "${WIN_SVN_1_5_BIN}" "${NTEMACS22_BIN}" Samples/Makefile.nt	check-in-console
+	check "${WIN_SVN_1_5_BIN}" "${NTEMACS23_BIN}" Samples/Makefile.nt23	check-in-console
+	check "${WIN_SVN_1_6_BIN}" "${MEADOW3_BIN}" Samples/Makefile.mw32	check-in-console
+	check "${WIN_SVN_1_6_BIN}" "${NTEMACS22_BIN}" Samples/Makefile.nt	check-in-console
+	check "${WIN_SVN_1_6_BIN}" "${NTEMACS23_BIN}" Samples/Makefile.nt23 check-in-console
+	check "${WIN_SVN_1_7_BIN}" "${MEADOW3_BIN}" Samples/Makefile.mw32	check-in-console
+	check "${WIN_SVN_1_7_BIN}" "${NTEMACS22_BIN}" Samples/Makefile.nt	check-in-console
+	check "${WIN_SVN_1_7_BIN}" "${NTEMACS23_BIN}" Samples/Makefile.nt23 check-in-console
 fi
 
 make clean -f ${makefile}

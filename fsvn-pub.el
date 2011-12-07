@@ -204,7 +204,7 @@ Optional argument REVISION means point of URLREV log chain."
   (let* ((buffer (fsvn-make-temp-buffer))
          (proc
           (fsvn-start-command "export" buffer
-                              "--quiet"
+                              "--quiet" "--force"
                               urlrev (when revision (list "--revision" revision))
                               file)))
     (process-put proc 'fsvn-save-file-name file)
@@ -445,7 +445,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (interactive)
   (unless buffer-file-name
     (error "Buffer is not associated with a file"))
-  (unless (fsvn-meta-file-registered-p buffer-file-name)
+  (unless (fsvn-deps-file-registered-p buffer-file-name)
     (error "Buffer file is not under versioned"))
   (fsvn-open-logview-mode buffer-file-name nil))
 
@@ -548,12 +548,12 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
     (fsvn-browse-draw-file-status file)))
 
 (defun fsvn-after-save-hook-1.7< (file)
-  (let* ((base (fsvn-meta-text-base-file file))
+  (let* ((base (fsvn-deps-text-base-file file))
          size1 size2)
     (fsvn-save-browse-file-excursion file
       (if (or (null base)
               (string= 
-               (downcase (or (fsvn-meta-get-property "svn:eol-style" file) ""))
+               (downcase (or (fsvn-deps-get-property "svn:eol-style" file) ""))
                "native"))
           (fsvn-browse-draw-file-status file)
         (setq size1 (fsvn-file-size file)

@@ -702,8 +702,8 @@ from is marked point, to is current point."
   (list (fsvn-log-list-cmd-revision)))
 
 (defun fsvn-log-list-cmd-read-save-this ()
-  (let* ((urlrev fsvn-logview-target-urlrev)
-         (rev (fsvn-log-list-point-revision))
+  (let* ((urlrev (fsvn-log-list-point-urlrev))
+         (rev (fsvn-urlrev-revision urlrev))
          (file (fsvn-log-read-save-file (fsvn-urlrev-url urlrev) rev)))
     (list urlrev file rev)))
 
@@ -1534,6 +1534,7 @@ Keybindings:
      ["Scroll Down" fsvn-log-list-scroll-message-down t]
      ["Scroll Up" fsvn-log-list-scroll-message-up t]
      ["Unmark" fsvn-log-list-mark-unmark t]
+     ["Copy url" fsvn-log-list-copy-urlrev t]
      )
     ("Log"
      ["Cycle Window" fsvn-log-switch-to-message t]
@@ -1556,7 +1557,6 @@ Keybindings:
      ["Search and Mark" fsvn-log-list-mark-regexp t]
      )
     ("Edit"
-     ["Copy to wc" fsvn-log-list-copy-urlrev t]
      ["Edit Revision Property" fsvn-log-list-edit-revprop t]
      ["Import with Merge" fsvn-log-list-merged-import t]
      ["Revert" fsvn-log-list-revert-to-revision t]

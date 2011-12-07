@@ -186,7 +186,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
   (let ((dir (fsvn-browse-file-name-parent-directory file fsvn-browse-guessed-moved-parent-threshold)))
     (fsvn-mapitem
      (lambda (f)
-       (let ((versioned (fsvn-meta-file-registered-p f)))
+       (let ((versioned (fsvn-deps-file-registered-p f)))
          (cond
           ((and file-versioned-p versioned))
           ((and (not file-versioned-p) (null versioned)))
@@ -201,7 +201,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
    (let ((target-file (fsvn-browse-cmd-this-wc-file))
          files src-file dest-file
          target-versioned-p alist)
-     (setq target-versioned-p (fsvn-meta-file-registered-p target-file))
+     (setq target-versioned-p (fsvn-deps-file-registered-p target-file))
      (if target-versioned-p
          (setq src-file target-file)
        (setq dest-file target-file))
@@ -558,6 +558,20 @@ How to send a bug report:
 
 
 
+(defvar fsvn-svn-commands nil)
+
+
+(defun fsvn-add-svn-command (svn admin)
+  ;;TODO local bind...
+  (let ((fsvn-svn-command svn)
+        (fsvn-svnadmin-command admin))
+    (fsvn-initialize-loading)
+    (setq fsvn-svn-commands
+          (cons
+           (list svn admin fsvn-svn-version)
+           fsvn-svn-commands))))
+
+
 
 (provide 'fsvn-dev)
 

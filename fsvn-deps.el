@@ -77,18 +77,18 @@ Please call `fsvn-initialize-loading' function.
 
 ;; http://svn.collab.net/repos/svn/trunk/subversion/libsvn_wc/adm_files.c
 ;;  more test and reverse engineering
-(defun fsvn-meta-get-property (propname file)
+(defun fsvn-meta--get-property (propname file)
   "Access to meta directory. (very fast)"
-  (fsvn-meta-get-properties file propname))
+  (fsvn-meta--get-properties file propname))
 
-(defun fsvn-meta-get-properties (file &optional propname)
+(defun fsvn-meta--get-properties (file &optional propname)
   "Access to meta directory. (very fast)
 
 \(fn FILE)"
   (let ((propfile
          (if (fsvn-file-exact-directory-p file)
-             (fsvn-meta-prop-directory-file file)
-           (fsvn-meta-prop-file file)))
+             (fsvn-meta--prop-directory-file file)
+           (fsvn-meta--prop-file file)))
         (prop-regex (format "^K \\([0-9]+\\)"))
         propname-length)
     (when propfile
@@ -114,40 +114,40 @@ Please call `fsvn-initialize-loading' function.
                 (forward-line 1)
                 (setq start (point))
                 (fsvn-forward-bytes val-length)
-                (setq value (fsvn-meta-prop-string-region start (point)))
+                (setq value (fsvn-meta--prop-string-region start (point)))
                 (when (and propname (string= propname name))
                   (throw 'done value))
                 (setq alist (cons (cons name value) alist))))
             (unless propname
               (nreverse alist))))))))
 
-(defun fsvn-meta-prop-string-region (start end)
+(defun fsvn-meta--prop-string-region (start end)
   ;;FIXME
   (replace-regexp-in-string "\r" "" (buffer-substring start end)))
 
-(defun fsvn-meta-dir-directory (dir)
+(defun fsvn-meta--dir-directory (dir)
   (fsvn-expand-file (fsvn-meta-dir-name) dir))
 
-(defun fsvn-meta-file-directory (file)
+(defun fsvn-meta--file-directory (file)
   (let* ((dir (fsvn-file-name-directory2 file)))
     (fsvn-expand-file (fsvn-meta-dir-name) dir)))
 
-(defun fsvn-meta-text-base-file-name (file)
-  (let* ((admindir (fsvn-meta-file-directory file))
+(defun fsvn-meta--text-base-file-name (file)
+  (let* ((admindir (fsvn-meta--file-directory file))
          (name (fsvn-file-name-nondirectory file))
          (metadir (fsvn-expand-file "text-base" admindir)))
     (concat (fsvn-expand-file name metadir) ".svn-base")))
 
-(defun fsvn-meta-text-base-file (file)
-  (let ((tmp (fsvn-meta-text-base-file-name file)))
+(defun fsvn-meta--text-base-file (file)
+  (let ((tmp (fsvn-meta--text-base-file-name file)))
     (when (file-exists-p tmp)
       tmp)))
 
-(defun fsvn-meta-file-registered-p (file)
-  (fsvn-meta-text-base-file file))
+(defun fsvn-meta--file-registered-p (file)
+  (fsvn-meta--text-base-file file))
 
-(defun fsvn-meta-prop-file (file)
-  (let* ((admindir (fsvn-meta-file-directory file))
+(defun fsvn-meta--prop-file (file)
+  (let* ((admindir (fsvn-meta--file-directory file))
          (name (fsvn-file-name-nondirectory file))
          metadir tmp)
     (setq metadir (fsvn-expand-file "props" admindir))
@@ -159,8 +159,8 @@ Please call `fsvn-initialize-loading' function.
       (when (file-exists-p tmp)
         tmp))))
 
-(defun fsvn-meta-prop-directory-file (dir)
-  (let* ((admindir (fsvn-meta-dir-directory (file-name-as-directory dir)))
+(defun fsvn-meta--prop-directory-file (dir)
+  (let* ((admindir (fsvn-meta--dir-directory (file-name-as-directory dir)))
          base wc)
     (cond
      ((file-exists-p (setq wc (fsvn-expand-file "dir-props" admindir)))
@@ -173,6 +173,28 @@ Please call `fsvn-initialize-loading' function.
   (if (and (eq system-type 'windows-nt)
            (getenv "SVN_ASP_DOT_NET_HACK"))
       "_svn" ".svn"))
+
+
+
+(defun fsvn-deps-get-property (propname file)
+  (if (version< fsvn-svn-version "1.7")
+      (fsvn-meta--get-properties file propname)
+    (fsvn-get-propget file propname)))
+
+(defun fsvn-deps-file-registered-p (file)
+  (if (version< fsvn-svn-version "1.7")
+      (fsvn-meta--text-base-file file)
+    (fsvn-get-info-entry file)))
+
+(defun fsvn-deps-text-base-file (file)
+  (if (version< fsvn-svn-version "1.7")
+      (fsvn-meta--text-base-file file)
+    (let* ((info (fsvn-get-info-entry file))
+           (checksum (fsvn-xml-info->entry=>wc-info=>checksum$ info))
+           (root (fsvn-xml-info->entry=>wc-info=>wcroot-abspath$ info)))
+      (expand-file-name 
+       (concat "pristine/" (substring checksum 0 2) "/" checksum ".svn-base")
+       (expand-file-name (fsvn-meta-dir-name) root)))))
 
 
 
@@ -549,28 +571,52 @@ Please call `fsvn-initialize-loading' function.
 
 (defun fsvn-directory-versioned-p (directory)
   "Return non-nil when DIRECTORY guessed under versioned."
-  ;;TODO make funcall inner variable
+  (not (not (fsvn-file-control-directory directory))))
+
+(defun fsvn-file-control-directory (file)
   (cond
    ((version< fsvn-svn-version "1.7.0")
-    (let ((control (fsvn-expand-file (fsvn-meta-dir-name) directory)))
-      (fsvn-file-exact-directory-p control)))
-   ((string-match "/\\.svn\\($\\|/\\)?" directory) nil)
-   ((fsvn-magic-file-name-absolute-p directory) nil)
+    (let ((control (fsvn-expand-file (fsvn-meta-dir-name) file)))
+      (and (fsvn-file-exact-directory-p control)
+           control)))
+   ((string-match "/\\.svn\\($\\|/\\)" file) nil)
+   ((fsvn-magic-file-name-absolute-p file) nil)
+   ;; TODO ignored status
    (t
-    ;; TODO ignored status
-    (let* ((dir (directory-file-name (fsvn-expand-file directory)))
+    (let* ((dir (directory-file-name (fsvn-expand-file file)))
            ;; dummy
            (prev ""))
       (catch 'found
         (while (not (string= dir prev))
-          (when (file-exists-p (concat dir "/.svn"))
-            (throw 'found dir))
+          (let ((control (concat dir "/.svn")))
+            (when (file-exists-p control)
+              (throw 'found control)))
           (setq prev dir)
           (setq dir (fsvn-file-name-directory dir))))))))
 
 (defun fsvn-file-versioned-directory-p (file)
   (let* ((dir (fsvn-file-name-directory2 file)))
     (fsvn-directory-versioned-p dir)))
+
+;; file: subversion/libsvn_wc/upgrade.c
+;; function: version_string_from_format
+(defun fsvn-file-wc-svn-version (file)
+  (let ((format (fsvn-file-wc-version file)))
+    (cond
+     ((eq format 4) "1.3")
+     ((eq format 8) "1.4")
+     ((eq format 9) "1.5")
+     ((eq format 10) "1.6")
+     ((eq format 12) "1.7")
+     (else (error "Not a supported format")))))
+
+(defun fsvn-file-wc-version (file)
+  (let ((ctl (fsvn-file-control-directory file)))
+    (when ctl
+      (with-temp-buffer
+        (insert-file-contents (fsvn-expand-file "entries" ctl) nil 0 16)
+        (and (looking-at "^\\([0-9]+\\)$")
+             (string-to-number (match-string 1)))))))
 
 
 

@@ -54,6 +54,15 @@ Argument SEQUENCE see `mapcar'."
      (setq ,val2 ,val1)
      (setq ,val1 TMP)))
 
+(defun fsvn-find-if (pred seq)
+  (catch 'found
+    (mapc
+     (lambda (x)
+       (when (funcall pred x)
+         (throw 'found x)))
+     seq)
+    nil))
+
 (defmacro fsvn-save-window-only (window &rest form)
   "Execute FORM just like `progn' in WINDOW.
 Save selected window, not contain point."

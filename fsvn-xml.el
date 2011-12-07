@@ -286,6 +286,14 @@
   (fsvn-xml-get-atom-child
    (fsvn-xml-info->entry=>wc-info node) 'depth))
 
+(defun fsvn-xml-info->entry=>wc-info=>checksum$ (node)
+  (fsvn-xml-get-atom-child
+   (fsvn-xml-info->entry=>wc-info node) 'checksum))
+
+(defun fsvn-xml-info->entry=>wc-info=>wcroot-abspath$ (node)
+  (fsvn-xml-get-atom-child
+   (fsvn-xml-info->entry=>wc-info node) 'wcroot-abspath))
+
 (defun fsvn-xml-info->entry=>commit (node)
   (fsvn-xml-get-child node 'commit))
 

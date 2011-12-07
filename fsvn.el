@@ -42,9 +42,9 @@
 ;;  * A little user help.
 
 ;; This package is tested on following environment.
-;;      NTEmacs (based Emacs 23.1) on Windows.  svn 1.5.x - 1.6.x
-;;      Emacs (23.2) on GNU/Linux (Debian).  svn svn 1.5.x - 1.6.x
-;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.6.x
+;;      NTEmacs (based Emacs 23.3) on Windows.  svn 1.5.x - 1.7.x
+;;      Emacs (23.3) on GNU/Linux (Debian).  svn svn 1.5.x - 1.7.x
+;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.7.x
 
 ;;; Code:
 
