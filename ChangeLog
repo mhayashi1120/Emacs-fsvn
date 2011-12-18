@@ -1,3 +1,7 @@
+2011-12-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Check file-system ignore the case or not.
+
 2011-12-02  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: `fsvn-log-list-save-this' cannot save file.

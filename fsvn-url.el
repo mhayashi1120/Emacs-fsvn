@@ -296,7 +296,7 @@
       (concat "file://" directory)
     (concat "file:///" directory)))
 
-(if (memq system-type '(windows-nt))
+(if (fsvn-system-path-ignore-case)
     (defun fsvn-file-absolute-name (file)
       (upcase (directory-file-name (fsvn-expand-file file))))
   (defun fsvn-file-absolute-name (file)

@@ -603,7 +603,7 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
       (mapc
        (lambda (b)
          (set-buffer b)
-         (when (equal (eval var) value)
+         (when (equal (symbol-value var) value)
            (throw 'found b)))
        (buffer-list))
       nil)))

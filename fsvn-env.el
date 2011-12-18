@@ -495,7 +495,7 @@ Use %% to put a single % into the output.
   (let ((temporary-file-directory (fsvn-temp-directory)))
     (make-temp-file "fsvn")))
 
-(defun fsvn-make-temp-directory (&optional prefix)
+(defun fsvn-make-temp-directory ()
   (let ((temporary-file-directory (fsvn-temp-directory)))
     (make-temp-file "fsvn" t)))
 
@@ -592,6 +592,15 @@ Use %% to put a single % into the output.
            (setq ret (cons buffer ret)))))
      (buffer-list))
     ret))
+
+
+
+(defun fsvn-system-path-ignore-case ()
+  (let* ((dir (fsvn-make-temp-directory))
+         (lfile (expand-file-name "a" dir))
+         (ufile (expand-file-name "A" dir)))
+    (write-region (point-min) (point-min) lfile)
+    (file-exists-p ufile)))
 
 
 ;; config directories
