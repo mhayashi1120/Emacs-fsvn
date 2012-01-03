@@ -1,3 +1,9 @@
+2012-01-03  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: new customize variables (immitate magit)
+		`fsvn-diff-highlight-trailing-whitespace',
+	        `fsvn-diff-highlight-added-whitespace'
+
 2011-12-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Check file-system ignore the case or not.

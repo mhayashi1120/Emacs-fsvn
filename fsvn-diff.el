@@ -26,6 +26,17 @@
 
 (defvar fsvn-ediff-previous-configuration nil)
 
+(defcustom fsvn-diff-highlight-trailing-whitespace t
+  "Specifies where to highlight whitespace errors.
+`t' means in all diffs, and `nil' means nowhere."
+  :group 'fsvn)
+
+(defcustom fsvn-diff-highlight-added-whitespace nil
+  "Specifies what to highlight whitespace errors.
+`t' means in only added trailing whitespace. See
+`fsvn-diff-highlight-trailing-whitespace'"
+  :group 'fsvn)
+
 (fsvn-defstruct ediff-config
   window file1 file2)
 
@@ -160,13 +171,20 @@
         (setq proc (fsvn-start-command-display "diff" buffer args))
       (fsvn-diff-setup-mode buffer args)
       (fsvn-buffer-popup-as-information buffer)
-      (set-process-sentinel proc (lambda (proc event))))))
+      (set-process-sentinel proc 'fsvn-diff-process-sentinel))))
 
 (defun fsvn-diff-start-files-process (new-file old-file &rest args)
   (let ((diff-args (list
                     (format "--new=%s" new-file)
                     (format "--old=%s" old-file))))
     (fsvn-diff-start-process diff-args args)))
+
+(defun fsvn-diff-process-sentinel (proc event)
+  (let ((buf (process-buffer proc)))
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (when fsvn-diff-highlight-trailing-whitespace
+          (fsvn-diff-highlight-hunk))))))
 
 (defun fsvn-diff-get-buffer (diff-args)
   (let ((args (fsvn-command-args-canonicalize diff-args))
@@ -193,6 +211,19 @@
       (set (make-local-variable 'fsvn-popup-result-buffer-p) t)
       (set (make-local-variable 'fsvn-diff-buffer-subcommand-args) real-args))
     (setq buffer-read-only t)))
+
+(defun fsvn-diff-highlight-hunk ()
+  (save-excursion
+    (goto-char (point-min))
+    (let ((regexp (concat
+                   "^"
+                   (if fsvn-diff-highlight-added-whitespace
+                       "[+]"
+                     "[-+]")
+                   ".*?\\([ \t]+\\)$")))
+      (while (re-search-forward regexp nil t)
+        (let ((ov (make-overlay (match-beginning 1) (match-end 1))))
+          (overlay-put ov 'face 'fsvn-diff-whitespace-warning-face))))))
 
 (defun fsvn-diff-buffer-key-name (args)
   (catch 'decide

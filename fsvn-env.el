@@ -599,7 +599,7 @@ Use %% to put a single % into the output.
   (let* ((dir (fsvn-make-temp-directory))
          (lfile (expand-file-name "a" dir))
          (ufile (expand-file-name "A" dir)))
-    (write-region (point-min) (point-min) lfile)
+    (write-region (point-min) (point-min) lfile nil 'no-msg)
     (file-exists-p ufile)))
 
 
