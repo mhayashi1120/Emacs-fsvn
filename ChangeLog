@@ -1,3 +1,7 @@
+2012-01-07  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Release: 0.9.13
+
 2012-01-04  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: emacs trunk elint error.
