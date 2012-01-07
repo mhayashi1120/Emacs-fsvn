@@ -161,6 +161,15 @@ This is what the do-commands look for, and what the mark-commands store.")
 (defvar fsvn-diff-delete-face 'fsvn-diff-delete-face
   "Face used for deleted line in diff-mode")
 
+(defface fsvn-diff-whitespace-warning-face
+  '((t :inherit trailing-whitespace))
+  "Face for highlighting whitespace errors in fsvn diffs."
+  :group 'fsvn)
+
+(defvar fsvn-diff-whitespace-warning-face
+  'fsvn-diff-whitespace-warning-face
+  "Face for highlighting whitespace errors in fsvn diffs.")
+
 (defun fsvn-face-status-create (face color)
   (custom-declare-face
    face

@@ -285,7 +285,7 @@ Like `let' binding, varlist bound while executing BODY. (sentinel and filter too
              ;; ediff temp file has @ file name...
              )
             ((and (string= subcommand "move")
-                  (find-if (lambda (x) (fsvn-url-p x)) ret))
+                  (fsvn-find-if (lambda (x) (fsvn-url-p x)) ret))
              ;; `move' second url arg must unescape revision mark `@'
              )
             (t

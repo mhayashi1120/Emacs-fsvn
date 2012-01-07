@@ -234,8 +234,7 @@ relocate
 ** new command
 svnrdump
 
-** renew .svn position
-
-** renew .svn contents
 ** --split
 new subcommand
+
+** test tortoise property

@@ -11,6 +11,7 @@
 
 
 
+(require 'minibuffer)
 (require 'fsvn-mode)
 (require 'fsvn-xml)
 (require 'fsvn-url)
@@ -702,8 +703,8 @@ from is marked point, to is current point."
   (list (fsvn-log-list-cmd-revision)))
 
 (defun fsvn-log-list-cmd-read-save-this ()
-  (let* ((urlrev fsvn-logview-target-urlrev)
-         (rev (fsvn-log-list-point-revision))
+  (let* ((urlrev (fsvn-log-list-point-urlrev))
+         (rev (fsvn-urlrev-revision urlrev))
          (file (fsvn-log-read-save-file (fsvn-urlrev-url urlrev) rev)))
     (list urlrev file rev)))
 
@@ -762,11 +763,13 @@ Optional prefix ARG says how many lines to move; default is one line."
   (fsvn-log-list-after-move-line))
 
 (defun fsvn-log-list-next-mark ()
+  "Next marked log entry."
   (interactive)
   (when (re-search-forward fsvn-log-list-re-mark nil t)
     (fsvn-log-list-after-move-line)))
 
 (defun fsvn-log-list-previous-mark ()
+  "Previous marked log entry."
   (interactive)
   (let ((p
          (save-excursion
@@ -871,14 +874,13 @@ Like `git show'
    ((fsvn-url-repository-p fsvn-logview-target-urlrev)
     (error "This buffer has non working copy"))
    (t
-    (fsvn-log-create-patch-wc patch-file))))
-
-(defun fsvn-log-create-patch-wc (patch-file)
-  (let ((rev (fsvn-log-list-point-revision))
-        (local-file (fsvn-file-relative fsvn-logview-target-urlrev default-directory)))
-    (fsvn-diff-create-patch patch-file (list "--revision" rev) local-file)))
+    (let ((rev (fsvn-log-list-point-revision))
+          (local-file (fsvn-file-relative
+                       fsvn-logview-target-urlrev default-directory)))
+      (fsvn-diff-create-patch patch-file (list "--revision" rev) local-file)))))
 
 (defun fsvn-log-list-toggle-details ()
+  "Show details about current log entry."
   (interactive)
   (if (fsvn-log-list-subwindow-display-p)
       (delete-other-windows)
@@ -1465,10 +1467,9 @@ Keybindings:
 (defvar fsvn-log-source-buffer nil)
 
 (defun fsvn-log-read-save-file (url rev)
-  (let (filename rev-name file)
-    (setq filename (fsvn-url-decode-string (fsvn-urlrev-filename url)))
-    (setq rev-name (fsvn-file-name-as-revisioned filename rev))
-    (setq file (read-file-name "Save as: " nil nil nil rev-name))
+  (let* ((filename (fsvn-url-decode-string (fsvn-urlrev-filename url)))
+         (rev-name (fsvn-file-name-as-revisioned filename rev))
+         (file (read-file-name "Save as: " nil nil nil rev-name)))
     (when (and (file-exists-p file)
                (not (y-or-n-p "File exists. overwrite? ")))
       (fsvn-quit))
@@ -1534,6 +1535,7 @@ Keybindings:
      ["Scroll Down" fsvn-log-list-scroll-message-down t]
      ["Scroll Up" fsvn-log-list-scroll-message-up t]
      ["Unmark" fsvn-log-list-mark-unmark t]
+     ["Copy url" fsvn-log-list-copy-urlrev t]
      )
     ("Log"
      ["Cycle Window" fsvn-log-switch-to-message t]
@@ -1556,7 +1558,6 @@ Keybindings:
      ["Search and Mark" fsvn-log-list-mark-regexp t]
      )
     ("Edit"
-     ["Copy to wc" fsvn-log-list-copy-urlrev t]
      ["Edit Revision Property" fsvn-log-list-edit-revprop t]
      ["Import with Merge" fsvn-log-list-merged-import t]
      ["Revert" fsvn-log-list-revert-to-revision t]

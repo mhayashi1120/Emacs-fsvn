@@ -31,12 +31,12 @@
 (defun fsvn-win-x64-p ()
   ;;TODO more efficient way..
   (fsvn-file-exact-directory-p 
-   (fsvn-expand-file "syswow64" (getenv "windir"))))
+   (expand-file-name "syswow64" (getenv "windir"))))
 
 (defun fsvn-win-wow64-p ()
   (let ((windir (getenv "windir")))
-    (equal (nth 10 (file-attributes (fsvn-expand-file "system32" windir))) 
-           (nth 10 (file-attributes (fsvn-expand-file "syswow64" windir))))))
+    (equal (nth 10 (file-attributes (expand-file-name "system32" windir))) 
+           (nth 10 (file-attributes (expand-file-name "syswow64" windir))))))
 
 
 
@@ -49,8 +49,9 @@
 
 (defcustom tortoise-interface-program
   "c:/Program Files/TortoiseSVN/bin/TortoiseProc.exe"
-  ""
-  :group 'tortoise)
+  "TortoiseSVN main program."
+  :group 'tortoise
+  :type 'file)
 
 (defun tortoise-call-program (command &optional path)
   (unless (and tortoise-interface-program
@@ -66,7 +67,7 @@
 
 (defcustom tortoise-merge-program
   "c:/Program Files/TortoiseSVN/bin/TortoiseMerge.exe"
-  ""
+  "TortoiseSVN visualized merge program."
   :group 'tortoise)
 
 (defun tortoise-diff-program (fromfile tofile &optional switches)

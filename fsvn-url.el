@@ -124,8 +124,9 @@
 
 (defun fsvn-url-dirname (url)
   (let ((tmp (directory-file-name url)))
-    (when (string-match "^\\(.*/\\)\\([^/]+\\)$" tmp)
-      (match-string 1 tmp))))
+    (if (string-match "^\\(.*/\\)\\([^/]+\\)$" tmp)
+        (match-string 1 tmp)
+      tmp)))
 
 (defun fsvn-url-filename (url)
   (let ((tmp (directory-file-name url)))
@@ -295,7 +296,7 @@
       (concat "file://" directory)
     (concat "file:///" directory)))
 
-(if (memq system-type '(windows-nt))
+(if (fsvn-system-path-ignore-case)
     (defun fsvn-file-absolute-name (file)
       (upcase (directory-file-name (fsvn-expand-file file))))
   (defun fsvn-file-absolute-name (file)

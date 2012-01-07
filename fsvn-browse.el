@@ -722,7 +722,7 @@ PATH is each executed path."
     (setq src-files 
           (fsvn-mapitem
            (lambda (file)
-             (when (fsvn-meta-file-registered-p file)
+             (when (fsvn-deps-file-registered-p file)
                file))
            (directory-files src-dir t (concat "^" (regexp-quote (car prefix))))))
     (setq regexp (concat "^" (regexp-quote (car prefix)) "\\(.*\\)$"))

@@ -23,6 +23,16 @@ a lot of process makes this error?
 
 ** switch with --relocate arg
 
+
+** wrong status
+when add executable file
+
+AM     script -> x
+A      script -> o
+
+property is changed(?) by `svn' command but `status' subcommand insist that 2nd column is NULL.
+
+
 * select-file-mode
 
 ** freezing several minutes when commit a lot of files.

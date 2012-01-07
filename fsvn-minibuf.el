@@ -11,6 +11,7 @@
 
 
 
+(require 'minibuffer)
 (require 'fsvn-deps)
 (require 'fsvn-url)
 

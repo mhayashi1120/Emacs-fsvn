@@ -85,7 +85,7 @@ IGNORE-DOT-SVN non-nil means do not copy subversion meta directory (Probablly .s
   (or file-name-coding-system default-file-name-coding-system))
 
 (defun fsvn-recursive-directory-files (directory)
-  ""
+  "List DIRECTORY files recursively ignoring `.svn' directory."
   (let (files)
     (mapc
      (lambda (file)
@@ -118,7 +118,8 @@ IGNORE-DOT-SVN non-nil means do not copy subversion meta directory (Probablly .s
   count)
 
 (defun fsvn-search-same-name-files (base-dir search-file threshold)
-  "THRESHOLD "
+  "Search files with SEARCH-FILE name in BASE-DIR.
+THRESHOLD controls recursive count."
   (let ((name (fsvn-file-name-nondirectory search-file))
         ret)
     (mapc
@@ -132,7 +133,8 @@ IGNORE-DOT-SVN non-nil means do not copy subversion meta directory (Probablly .s
           ((= threshold 0))
           ((string= (fsvn-meta-dir-name) name))
           ((fsvn-file-exact-directory-p file)
-           (setq ret (append ret (fsvn-search-same-name-files file search-file (1- threshold))))))))
+           (setq ret (append ret (fsvn-search-same-name-files
+                                  file search-file (1- threshold))))))))
      (directory-files base-dir t dired-re-no-dot))
     (nreverse ret)))
 

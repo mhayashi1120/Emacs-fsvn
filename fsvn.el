@@ -4,7 +4,7 @@
 ;; Author: Masahiro Hayashi <mhayashi1120@gmail.com>
 ;; URL: http://fsvn.sourceforge.jp/
 ;; Keywords: subversion, svn
-;; Version: 0.9.12
+;; Version: 0.9.13
 
 ;; fsvn.el is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@
 ;;  * A little user help.
 
 ;; This package is tested on following environment.
-;;      NTEmacs (based Emacs 23.1) on Windows.  svn 1.5.x - 1.6.x
-;;      Emacs (23.2) on GNU/Linux (Debian).  svn svn 1.5.x - 1.6.x
-;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.6.x
+;;      NTEmacs (based Emacs 23.3) on Windows.  svn 1.5.x - 1.7.x
+;;      Emacs (23.3) on GNU/Linux (Debian).  svn svn 1.5.x - 1.7.x
+;;      Emacs current (24.0.50) on GNU/Linux (Debian).  svn 1.5.x - 1.7.x
 
 ;;; Code:
 
@@ -55,7 +55,7 @@
   :group 'tools
   :prefix "fsvn-")
 
-(defconst fsvn-version "0.9.12"
+(defconst fsvn-version "0.9.13"
   "Version of fsvn.")
 
 

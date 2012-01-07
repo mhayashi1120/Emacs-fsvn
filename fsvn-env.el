@@ -54,6 +54,15 @@ Argument SEQUENCE see `mapcar'."
      (setq ,val2 ,val1)
      (setq ,val1 TMP)))
 
+(defun fsvn-find-if (pred seq)
+  (catch 'found
+    (mapc
+     (lambda (x)
+       (when (funcall pred x)
+         (throw 'found x)))
+     seq)
+    nil))
+
 (defmacro fsvn-save-window-only (window &rest form)
   "Execute FORM just like `progn' in WINDOW.
 Save selected window, not contain point."
@@ -486,7 +495,7 @@ Use %% to put a single % into the output.
   (let ((temporary-file-directory (fsvn-temp-directory)))
     (make-temp-file "fsvn")))
 
-(defun fsvn-make-temp-directory (&optional prefix)
+(defun fsvn-make-temp-directory ()
   (let ((temporary-file-directory (fsvn-temp-directory)))
     (make-temp-file "fsvn" t)))
 
@@ -583,6 +592,18 @@ Use %% to put a single % into the output.
            (setq ret (cons buffer ret)))))
      (buffer-list))
     ret))
+
+
+
+(defun fsvn-system-path-ignore-case ()
+  (let* ((dir (make-temp-file "fsvn-check" t))
+         (lfile (expand-file-name "a" dir))
+         (ufile (expand-file-name "A" dir)))
+    (write-region (point-min) (point-min) lfile nil 'no-msg)
+    (prog1
+        (file-exists-p ufile)
+      (delete-file lfile)
+      (delete-directory dir))))
 
 
 ;; config directories

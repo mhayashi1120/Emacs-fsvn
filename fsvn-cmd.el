@@ -185,7 +185,7 @@ WITH-DIR non-nil means return cell like (directory-name . property-value)."
       (while (and (fsvn-directory-versioned-p dir)
                   (not (fsvn-file-name-root-p dir)))
         (let (value)
-          (when (setq value (fsvn-meta-get-property propname dir))
+          (when (setq value (fsvn-deps-get-property propname dir))
             (if with-dir
                 (throw 'found (cons dir value))
               (throw 'found value))))

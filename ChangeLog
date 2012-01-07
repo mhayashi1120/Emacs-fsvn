@@ -1,3 +1,43 @@
+2012-01-07  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Release: 0.9.13
+
+2012-01-04  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: emacs trunk elint error.
+
+2012-01-03  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Add: new customize variables (immitate magit)
+		`fsvn-diff-highlight-trailing-whitespace',
+	        `fsvn-diff-highlight-added-whitespace'
+
+2011-12-18  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: Check file-system ignore the case or not.
+
+2011-12-02  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: `fsvn-log-list-save-this' cannot save file.
+
+2011-11-30  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: misunderstand for "/home/user/.svn-working-copy" like directory. (-;
+
+	* Change: hide all fsvn-meta-* functions.
+
+2011-11-26  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: wrong mode menu.
+
+2011-11-23  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: suppress cl warnings
+
+	* Fix: for svn 1.7 after save hook.
+
+	* Fix: for svn 1.7 Magic dired problem.
+
 2011-10-30  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Fix: Windows7 reg.exe parsing problem.
