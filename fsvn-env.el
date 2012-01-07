@@ -596,11 +596,14 @@ Use %% to put a single % into the output.
 
 
 (defun fsvn-system-path-ignore-case ()
-  (let* ((dir (fsvn-make-temp-directory))
+  (let* ((dir (make-temp-file "fsvn-check" t))
          (lfile (expand-file-name "a" dir))
          (ufile (expand-file-name "A" dir)))
     (write-region (point-min) (point-min) lfile nil 'no-msg)
-    (file-exists-p ufile)))
+    (prog1
+        (file-exists-p ufile)
+      (delete-file lfile)
+      (delete-directory dir))))
 
 
 ;; config directories

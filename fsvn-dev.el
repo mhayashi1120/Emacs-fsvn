@@ -141,13 +141,18 @@ Optional ARGS (with \\[universal-argument]) means read svn subcommand arguments.
 
 
 
-(defun fsvn-vc-diff ()
+(defun fsvn-vc-diff (&optional args)
   "Diff current file or current directory."
-  (interactive)
+  (interactive
+   (let ((args (fsvn-cmd-read-subcommand-args "diff" fsvn-default-args-diff)))
+     (list args)))
   (let ((file (or buffer-file-name
                   default-directory)))
+    (unless file
+      (error "Buffer is not associated with a file"))
+    (unless (fsvn-deps-file-registered-p file)
+      (error "Buffer file is not under versioned"))
     (fsvn-diff-start-process file)))
-
 
 
 

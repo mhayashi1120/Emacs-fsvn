@@ -11,7 +11,8 @@
 
 
 
-(defvar obarray)
+(with-no-warnings
+  (defvar obarray))
 
 
 

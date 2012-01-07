@@ -1,3 +1,7 @@
+2012-01-04  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
+
+	* Fix: emacs trunk elint error.
+
 2012-01-03  Masahiro Hayashi (林 雅博)  <mhayashi1120@gmail.com>
 
 	* Add: new customize variables (immitate magit)

@@ -15,6 +15,7 @@
 (require 'dired-aux)
 (require 'bytecomp)
 
+(require 'fsvn-env)
 (require 'fsvn-ui)
 (require 'fsvn-browse)
 
@@ -22,6 +23,9 @@
 
 (defvar transient-mark-mode)
 (defvar current-prefix-arg)
+
+(declare-function byte-compile-dest-file "bytecomp" (filename))
+(declare-function byte-compile-file "bytecomp" (filename &optional load))
 
 
 

@@ -608,7 +608,7 @@ Please call `fsvn-initialize-loading' function.
      ((eq format 9) "1.5")
      ((eq format 10) "1.6")
      ((eq format 12) "1.7")
-     (else (error "Not a supported format")))))
+     (t (error "Not a supported format")))))
 
 (defun fsvn-file-wc-version (file)
   (let ((ctl (fsvn-file-control-directory file)))
